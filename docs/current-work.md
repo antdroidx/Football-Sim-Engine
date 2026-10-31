@@ -424,3 +424,7 @@ College management shell now reacts to Window.SizeChanged and uses Window.Width,
 ## College visual cleanup
 
 Removed the duplicated school banner from Overview and Roster; roster counts now sit in the status line. Styled roster filter pickers with a panel background and the columns toggle as a bordered button so they read as controls. Responsive shell now follows Window.Width/SizeChanged (matching Pro).
+
+## Pro live GameCast parity with College
+
+Pro live screen now uses the College structure: scoreboard, three-column situation (clock / down-distance / ball), field, NEXT PLAY sheet with status and quick calls, primary next/pause row, quick actions for Call play/Call defense/Timeout/More, and a commentary strip. Extra actions moved into a grouped More sheet (Play & Personnel, Game Control, View & Audio, Game Flow). College layout itself is unchanged apart from the earlier preset removal.
