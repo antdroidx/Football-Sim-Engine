@@ -343,6 +343,8 @@ public sealed partial class FoundationPage
             foreach (var action in new[] { call, callDefense, punt, kick, extraPoint, twoPoint, kneel, spike, delegateOffense, delegateDefense, onside, skip })
                 action.IsEnabled = !animating;
             controls.IsEnabled = !skipPending && !finalizing && !closingViewer;
+            // During a live snap the field and commentary take the full screen; only replay keeps Skip reachable.
+            traySurface.IsVisible = !animating || replay is not null;
             boxScore.IsEnabled = !skipPending && !finalizing && !closingViewer && !boxScoreOpen;
             // Skip remains reachable during Watch animations; its handler waits for the current play.
             skip.IsEnabled = !skipPending && !finalizing && !session.IsComplete;

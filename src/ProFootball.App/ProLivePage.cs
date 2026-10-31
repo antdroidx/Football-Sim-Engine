@@ -12,6 +12,7 @@ public sealed partial class ProLivePage : ContentPage
     readonly Label awayScore = Hud(25, true), homeScore = Hud(25, true), awayTimeouts = Hud(11), homeTimeouts = Hud(11);
     readonly Label situation = Hud(13, true), possession = Hud(11), commentary = Hud(14);
     readonly Label clockLabel = Hud(13, true), downLabel = Hud(13, true), ballLabel = Hud(13, true);
+    VerticalStackLayout? playSheetRef; ActionRow? quickActionsRef; Border? liveSheetRef;
     readonly Grid field = new() { IsClippedToBounds = true, AutomationId = "pro-live-field" };
     readonly AbsoluteLayout players = new();
     readonly Dictionary<FootballSpriteView, DynastyPlayer?> spritePlayers = new();
@@ -48,7 +49,7 @@ public sealed partial class ProLivePage : ContentPage
         situationGrid.Add(clockLabel,0,0); situationGrid.Add(downLabel,1,0); situationGrid.Add(ballLabel,2,0);
         header.Add(scoreboard,0,0); header.Add(situationGrid,0,1); header.Add(possession,0,2);
         var fieldBorder=new Border { Padding = 5, Stroke = DynastyTheme.Muted, StrokeThickness = 1, StrokeShape = new RoundRectangle { CornerRadius = 8 }, BackgroundColor = DynastyTheme.Surface, Content = field };
-        var primary = new ActionRow(); var quickActions = new ActionRow();
+        var primary = new ActionRow(); var quickActions = new ActionRow(); quickActionsRef = quickActions;
         var advanced = new List<(Button Button, Func<Task> Action)>();
         void Style(Button button) { button.FontSize = 12; button.Padding = new Thickness(10, 6); button.MinimumHeightRequest = 44; button.CornerRadius = 10; }
         Button Make(string text, Func<Task> action, ActionRow host)
@@ -95,8 +96,9 @@ public sealed partial class ProLivePage : ContentPage
             if (action is not null) await Run(action);
         }, quickActions);
         var playHeading = new Label { Text = "NEXT PLAY", FontSize = 10, FontAttributes = FontAttributes.Bold, TextColor = DynastyTheme.Accent };
-        var tray = new VerticalStackLayout { Spacing = 6, Children = { playHeading, selected, quickCalls, primary, quickActions } };
-        var trayBorder = new Border { AutomationId = "pro-live-controls", StrokeThickness = 0, BackgroundColor = DynastyTheme.Surface, Padding = 8, Content = tray };
+        var playSheet = new VerticalStackLayout { Spacing = 6, Children = { playHeading, selected, quickCalls } }; playSheetRef = playSheet;
+        var tray = new VerticalStackLayout { Spacing = 6, Children = { playSheet, primary, quickActions } };
+        var trayBorder = new Border { AutomationId = "pro-live-controls", StrokeThickness = 0, BackgroundColor = DynastyTheme.Surface, Padding = 8, Content = new ScrollView { Content = tray } }; liveSheetRef = trayBorder;
         commentary.MaxLines=2;commentary.LineBreakMode=LineBreakMode.TailTruncation;
         var commentaryBorder=new Border { StrokeThickness = 0, Padding = new Thickness(10, 4), BackgroundColor = DynastyTheme.Panel, Content = commentary };
         var layout=new Grid{Padding=6,RowSpacing=5,RowDefinitions=new(){new(GridLength.Auto),new(GridLength.Star),new(GridLength.Auto),new(GridLength.Auto)}};
@@ -171,6 +173,7 @@ public sealed partial class ProLivePage : ContentPage
         downLabel.Text = session.IsComplete ? (saved ? "Saved" : "Save pending") : session.KickoffPending ? "Kickoff" : $"{session.Down} & {session.Distance}";
         ballLabel.Text = session.IsComplete ? "" : session.KickoffPending ? $"{Short(session.PossessionTeamName)} receives" : GameDayEngine.BallOn(session, Short);
         possession.Text = session.IsComplete ? "Final" : (session.Mode == GameDayMode.Watch ? "" : "Controlling " + Short(session.ControlledTeamName!) + " · ") + Short(session.PossessionTeamName) + " possession · " + (session.Mode == GameDayMode.Watch ? "Watching CPU vs CPU" : CoordinatorMode ? CpuUnit ? "CPU handling opposite unit" : "Your unit · choose calls" : "Coach mode");
+        var inPlay = working || pending || replaying; if (liveSheetRef is not null) liveSheetRef.IsVisible = !inPlay;
         var watch = session.Mode == GameDayMode.Watch;
         next.IsVisible = !watch && !session.IsComplete && (!CpuUnit || paused || session.KickoffPending); next.Text = session.KickoffPending ? "Kickoff" : "Next snap"; next.IsEnabled = !working && !pending;
         pause.IsVisible = (watch || CoordinatorMode) && !session.IsComplete; pause.Text = CoordinatorMode ? paused ? "Resume CPU unit" : "Pause CPU unit" : paused ? "Resume watch" : "Pause watch";

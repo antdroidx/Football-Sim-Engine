@@ -428,3 +428,7 @@ Removed the duplicated school banner from Overview and Roster; roster counts now
 ## Pro live GameCast parity with College
 
 Pro live screen now uses the College structure: scoreboard, three-column situation (clock / down-distance / ball), field, NEXT PLAY sheet with status and quick calls, primary next/pause row, quick actions for Call play/Call defense/Timeout/More, and a commentary strip. Extra actions moved into a grouped More sheet (Play & Personnel, Game Control, View & Audio, Game Flow). College layout itself is unchanged apart from the earlier preset removal.
+
+## Live game: field-first during snaps
+
+Both games now hide all interactive chrome during a live snap. Pro hides the entire control sheet; College hides the control tray (replay keeps Skip). The scoreboard, field and play-by-play remain. The control sheet with three quick-call recommendations returns between plays.
