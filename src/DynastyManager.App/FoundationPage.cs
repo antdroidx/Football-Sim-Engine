@@ -1601,7 +1601,7 @@ public sealed partial class FoundationPage : ContentPage
         else if (_currentDynasty.Phase == SeasonPhase.Preseason)
         {
             _rollingAutosaveStatus.Text =
-                $"Started {_currentDynasty.SeasonYear} preseason.";
+                $"Started {_currentDynasty.SeasonYear} season.";
         }
         else if (_currentDynasty.Phase == SeasonPhase.RegularSeason &&
                  _currentDynasty.Week == 0)
