@@ -58,8 +58,8 @@ public sealed partial class ProLivePage : ContentPage
         { var b = new Button { Text = text, IsVisible = false }; Style(b); b.Clicked += async (_, _) => await Run(action); advanced.Add((b, action)); return b; }
         Style(next); Style(pause); primary.Add(next); primary.Add(pause);
         next.Clicked += async (_, _) => await Snap(); pause.Clicked += (_, _) => { if (!pending) { paused = !paused; Update(); } };
-        offenseButton = Make("Call play", () => Playbook(false), quickActions);
-        defenseButton = Make("Call defense", () => Playbook(true), quickActions);
+        offenseButton = Make("Choose play", () => Playbook(false), quickActions);
+        defenseButton = Make("Choose defense", () => Playbook(true), quickActions);
         replayButton = Hidden("Instant replay", async () => { if (last is not null) await Replay(last); });
         Style(skipReplay); skipReplay.Clicked += (_, _) => players.AbortAnimation("snap-movement"); primary.Add(skipReplay);
         Hidden("Viewing options", ViewingOptions); Hidden("Speed", ChooseSpeed);
@@ -108,6 +108,16 @@ public sealed partial class ProLivePage : ContentPage
             var landscape=Width>Height;
             header.ColumnDefinitions[0].Width=new GridLength(landscape?2:1,GridUnitType.Star);
             header.ColumnDefinitions[1].Width=landscape?GridLength.Star:new GridLength(0);
+            // Keep the field near its real 1.76:1 playing-surface ratio instead of stretching to the row.
+            if(landscape){fieldBorder.HeightRequest=-1;fieldBorder.WidthRequest=-1;fieldBorder.HorizontalOptions=LayoutOptions.Fill;}
+            else
+            {
+                var ratioHeight=(Math.Max(0,Width-12))/1.76;
+                var fieldHeight=Math.Max(140,Math.Min(ratioHeight,Height*0.55));
+                fieldBorder.HeightRequest=fieldHeight;
+                fieldBorder.WidthRequest=fieldHeight*1.76;
+                fieldBorder.HorizontalOptions=LayoutOptions.Center;
+            }
             if(initialized&&!working&&!pending)UpdateQuickCalls();
             FrameCamera();
         };
@@ -175,7 +185,7 @@ public sealed partial class ProLivePage : ContentPage
         possession.Text = session.IsComplete ? "Final" : (session.Mode == GameDayMode.Watch ? "" : "Controlling " + Short(session.ControlledTeamName!) + " · ") + Short(session.PossessionTeamName) + " possession · " + (session.Mode == GameDayMode.Watch ? "Watching CPU vs CPU" : CoordinatorMode ? CpuUnit ? "CPU handling opposite unit" : "Your unit · choose calls" : "Coach mode");
         var inPlay = working || pending || replaying; if (liveSheetRef is not null) liveSheetRef.IsVisible = !inPlay;
         var watch = session.Mode == GameDayMode.Watch;
-        next.IsVisible = !watch && !session.IsComplete && (!CpuUnit || paused || session.KickoffPending); next.Text = session.KickoffPending ? "Kickoff" : "Next snap"; next.IsEnabled = !working && !pending;
+        next.IsVisible = !watch && !session.IsComplete && (!CpuUnit || paused || session.KickoffPending); next.Text = session.KickoffPending ? "Kickoff" : "Call play"; next.IsEnabled = !working && !pending;
         pause.IsVisible = (watch || CoordinatorMode) && !session.IsComplete; pause.Text = CoordinatorMode ? paused ? "Resume CPU unit" : "Pause CPU unit" : paused ? "Resume watch" : "Pause watch";
         takeoverButton.IsVisible = watch && !session.IsComplete; watchingButton.IsVisible = !watch && !session.IsComplete;
         offenseButton.IsVisible = ProLiveControl.CanCall(session, false);

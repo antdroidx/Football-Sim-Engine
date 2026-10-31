@@ -432,3 +432,7 @@ Pro live screen now uses the College structure: scoreboard, three-column situati
 ## Live game: field-first during snaps
 
 Both games now hide all interactive chrome during a live snap. Pro hides the entire control sheet; College hides the control tray (replay keeps Skip). The scoreboard, field and play-by-play remain. The control sheet with three quick-call recommendations returns between plays.
+
+## Pro live control labels and portrait field ratio
+
+Primary action between snaps is now "Call play"; the playbook opener is "Choose play" (or "Choose defense"). Kickoff stays contextual. In portrait, the field frame is constrained to the 1.76:1 playing-surface ratio and centred; landscape keeps the full-width field.
