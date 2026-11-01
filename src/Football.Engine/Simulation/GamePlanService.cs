@@ -28,13 +28,14 @@ public static class GamePlanService
     {
         var saved = state.TeamGamePlans.LastOrDefault(plan =>
             plan.TeamName.Equals(profile.TeamName, StringComparison.OrdinalIgnoreCase));
-        return saved is not null ? Normalize(saved) : new TeamGamePlan
-        {
-            TeamName = profile.TeamName,
-            Offense = profile.PassOffenseRating - profile.RushOffenseRating > 4 ? OffensivePlaybook.AirRaid
-                : profile.RushOffenseRating - profile.PassOffenseRating > 4 ? OffensivePlaybook.PowerRun
-                : OffensivePlaybook.Balanced
-        };
+        return saved is not null ? Normalize(saved) :
+            CollegeTeamStrategyCatalog.PlanFor(profile.TeamName) ?? new TeamGamePlan
+            {
+                TeamName = profile.TeamName,
+                Offense = profile.PassOffenseRating - profile.RushOffenseRating > 4 ? OffensivePlaybook.AirRaid
+                    : profile.RushOffenseRating - profile.PassOffenseRating > 4 ? OffensivePlaybook.PowerRun
+                    : OffensivePlaybook.Balanced
+            };
     }
 
     public static TeamSimulationProfile Attach(DynastyState state, Team team, TeamSimulationProfile? profile)
@@ -97,6 +98,7 @@ public static class GamePlanService
         var formations = plan.Offense switch
         {
             OffensivePlaybook.Spread => new[] { OffensiveFormation.ShotgunSpread, OffensiveFormation.Pistol, OffensiveFormation.Empty },
+            OffensivePlaybook.PlayAction => new[] { OffensiveFormation.Singleback, OffensiveFormation.IForm, OffensiveFormation.Pistol },
             OffensivePlaybook.AirRaid => new[] { OffensiveFormation.Empty, OffensiveFormation.ShotgunSpread, OffensiveFormation.Pistol },
             OffensivePlaybook.PowerRun => new[] { OffensiveFormation.IForm, OffensiveFormation.Singleback, OffensiveFormation.Pistol },
             OffensivePlaybook.Flexbone => new[] { OffensiveFormation.Flexbone, OffensiveFormation.IForm, OffensiveFormation.Pistol },
@@ -193,6 +195,7 @@ public static class GamePlanService
     private static OffensiveConcept[] PreferredConcepts(OffensivePlaybook playbook) => playbook switch
     {
         OffensivePlaybook.Spread => [OffensiveConcept.QuickPass, OffensiveConcept.OutsideRun, OffensiveConcept.DeepPass, OffensiveConcept.InsideRun],
+        OffensivePlaybook.PlayAction => [OffensiveConcept.PlayAction, OffensiveConcept.InsideRun, OffensiveConcept.QuickPass, OffensiveConcept.DeepPass],
         OffensivePlaybook.AirRaid => [OffensiveConcept.QuickPass, OffensiveConcept.DeepPass, OffensiveConcept.PlayAction, OffensiveConcept.InsideRun],
         OffensivePlaybook.PowerRun => [OffensiveConcept.InsideRun, OffensiveConcept.OutsideRun, OffensiveConcept.PlayAction, OffensiveConcept.QuickPass],
         OffensivePlaybook.Flexbone => [OffensiveConcept.OutsideRun, OffensiveConcept.InsideRun, OffensiveConcept.PlayAction, OffensiveConcept.QuickPass],
@@ -210,6 +213,7 @@ public static class GamePlanService
         OffensiveConcept[] pattern = plan.Offense switch
         {
             OffensivePlaybook.Spread => [OffensiveConcept.QuickPass, OffensiveConcept.OutsideRun, OffensiveConcept.QuickPass, OffensiveConcept.DeepPass, OffensiveConcept.InsideRun, OffensiveConcept.PlayAction],
+            OffensivePlaybook.PlayAction => [OffensiveConcept.PlayAction, OffensiveConcept.InsideRun, OffensiveConcept.QuickPass, OffensiveConcept.PlayAction, OffensiveConcept.OutsideRun, OffensiveConcept.DeepPass],
             OffensivePlaybook.AirRaid => [OffensiveConcept.QuickPass, OffensiveConcept.QuickPass, OffensiveConcept.DeepPass, OffensiveConcept.QuickPass, OffensiveConcept.InsideRun, OffensiveConcept.DeepPass],
             OffensivePlaybook.PowerRun => [OffensiveConcept.InsideRun, OffensiveConcept.InsideRun, OffensiveConcept.PlayAction, OffensiveConcept.OutsideRun, OffensiveConcept.InsideRun, OffensiveConcept.QuickPass],
             OffensivePlaybook.Flexbone => [OffensiveConcept.OutsideRun, OffensiveConcept.InsideRun, OffensiveConcept.OutsideRun, OffensiveConcept.PlayAction, OffensiveConcept.InsideRun, OffensiveConcept.QuickPass],
@@ -220,7 +224,7 @@ public static class GamePlanService
     }
 
     public static string Label(OffensivePlaybook book) => book switch
-    { OffensivePlaybook.AirRaid => "Air Raid", OffensivePlaybook.PowerRun => "Power Run", _ => book.ToString() };
+    { OffensivePlaybook.AirRaid => "Air Raid", OffensivePlaybook.PowerRun => "Power Run", OffensivePlaybook.PlayAction => "Play Action", _ => book.ToString() };
     public static string Label(DefensivePlaybook book) => book switch
     { DefensivePlaybook.FourThree => "4-3", DefensivePlaybook.ThreeFour => "3-4", _ => book.ToString() };
     public static string Label(DefensiveApproach approach) => approach switch
@@ -240,6 +244,7 @@ public static class GamePlanService
         OffensivePlaybook.Spread => "Space the defense with quick throws and outside runs. Best with strong passing personnel.",
         OffensivePlaybook.AirRaid => "Throw often. Deep concepts offer explosive gains with more turnover risk.",
         OffensivePlaybook.PowerRun => "Lean on the backs and line. Mix in play action to challenge coverage.",
+        OffensivePlaybook.PlayAction => "Build off a credible run threat with quick throws, play action and selective deep shots.",
         OffensivePlaybook.Custom => "Use exactly the calls selected in Playbook Editor. Custom selections replace the standard playbook.",
         OffensivePlaybook.Flexbone => "Under-center triple-option football with a fullback and two slotbacks, supported by play-action passes.",
         OffensivePlaybook.Option => "Run often and attack the perimeter. Strong rushing personnel matter.",

@@ -60,7 +60,7 @@ public static class StaffMarketService
 
             if ((staff.Role is StaffRole.OffensiveCoordinator or
                  StaffRole.DefensiveCoordinator) &&
-                staff.OverallRating >= 68)
+                staff.OverallRating >= 64)
             {
                 candidates.Add(new StaffMarketCandidate
                 {

@@ -118,6 +118,10 @@ public static class ScoutingDepartmentService
                 state.DynastyId,
                 $"scout-{departmentKey}-{index}"),
             FullName = name,
+            Age = 32 + Seed(state, index, $"{departmentKey}-age") % 30,
+            CareerYears = 2 + Seed(state, index, $"{departmentKey}-career") % 22,
+            TenureYears = Seed(state, index, $"{departmentKey}-tenure") % 8,
+            GrowthPotential = 1 + Seed(state, index, $"{departmentKey}-growth") % 5,
             TalentEvaluation = Math.Clamp(
                 talentBase - 8 +
                 Seed(state, index, $"{departmentKey}-talent") % 17,
@@ -139,6 +143,83 @@ public static class ScoutingDepartmentService
         return EnsureAssignments(
             state with { ScoutingStaff = scouts },
             userTeam);
+    }
+
+    public static DynastyState AdvanceSeason(DynastyState state, Team userTeam)
+    {
+        if (state.ScoutingStaff.Count == 0)
+            return EnsureDepartment(state, userTeam);
+        var chief = StaffManagementService.GetStaff(state, userTeam.Name, StaffRole.ChiefScout);
+        var targetCount = Math.Max(state.ScoutingStaff.Count,
+            chief is null ? 3 : Math.Clamp(2 + chief.StaffManagement / 24, 3, 5));
+        var surviving = new List<ScoutStaff>();
+        foreach (var scout in state.ScoutingStaff)
+        {
+            var attributes = ScoutAttributes.FromLegacy(scout);
+            var seed = SimulationSeed.Create(state.DynastyId, state.SeasonYear,
+                (BitConverter.ToInt32(scout.ScoutId.ToByteArray(),0)&int.MaxValue), userTeam.Name, "scout-lifecycle");
+            var age = scout.Age > 0 ? scout.Age + 1 : 36 + seed % 27;
+            var growthChance = Math.Clamp(12 + scout.GrowthPotential * 8 - Math.Max(0, age - 52), 4, 55);
+            var declineChance = Math.Clamp((age - 55) * 3, 0, 55);
+            int Shift(string key)
+            {
+                var roll = SimulationSeed.Create(state.DynastyId, state.SeasonYear,
+                    (BitConverter.ToInt32(scout.ScoutId.ToByteArray(),0)&int.MaxValue), userTeam.Name, $"scout-{key}-{age}") % 100;
+                return roll < growthChance ? 1 : roll >= 100 - declineChance ? -1 : 0;
+            }
+            attributes = new ScoutAttributes
+            {
+                Evaluation = Math.Clamp(attributes.Evaluation + Shift("evaluation"), 35, 96),
+                Communication = Math.Clamp(attributes.Communication + Shift("communication"), 35, 96),
+                RegionalKnowledge = Math.Clamp(attributes.RegionalKnowledge + Shift("regional"), 35, 96),
+                NationalKnowledge = Math.Clamp(attributes.NationalKnowledge + Math.Clamp(Shift("national"),-1,1), 35, 96)
+            };
+            var updated = scout with
+            {
+                Age = age, CareerYears = scout.CareerYears + 1, TenureYears = scout.TenureYears + 1,
+                Attributes = attributes, TalentEvaluation = attributes.Evaluation,
+                PotentialEvaluation = attributes.NationalKnowledge,
+                RegionalKnowledge = attributes.RegionalKnowledge, WorkRate = attributes.Communication
+            };
+            var retirementChance = Math.Clamp((age - 60) * 4, 0, 80);
+            var retire = age >= 80 || age >= 60 &&
+                SimulationSeed.Create(state.DynastyId, state.SeasonYear, 0,
+                    scout.ScoutId.ToString("N"), "scout-retirement") % 100 < retirementChance;
+            if (!retire) surviving.Add(updated);
+        }
+        var ids = surviving.Select(item => item.ScoutId).ToHashSet();
+        state = state with
+        {
+            ScoutingStaff = surviving,
+            ScoutAssignments = state.ScoutAssignments.Where(item => ids.Contains(item.ScoutId)).ToArray()
+        };
+        var used = surviving.Select(item => item.FullName).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        for (var attempt = 0; surviving.Count < targetCount; attempt++)
+        {
+            var name = ScoutNames.FirstOrDefault(candidate => !used.Contains(candidate)) ??
+                $"{ScoutNames[attempt % ScoutNames.Length]} {attempt / ScoutNames.Length + 2}";
+            used.Add(name);
+            var seed = SimulationSeed.Create(state.DynastyId, state.SeasonYear,
+                userTeam.LegacyRegionId, userTeam.Name, $"scout-replacement-{name}-{attempt}");
+            var baseline = chief?.TalentEvaluation ?? 66;
+            var attributes = new ScoutAttributes
+            {
+                Evaluation = Math.Clamp(baseline - 6 + seed % 13, 42, 88),
+                Communication = Math.Clamp(baseline - 8 + seed / 7 % 15, 42, 88),
+                RegionalKnowledge = Math.Clamp(baseline - 7 + seed / 13 % 15, 42, 88),
+                NationalKnowledge = Math.Clamp(baseline - 7 + seed / 19 % 15, 42, 88)
+            };
+            var replacement = new ScoutStaff
+            {
+                ScoutId = StableId(state.DynastyId, $"scout-replacement-{state.SeasonYear}-{userTeam.Name}-{attempt}"),
+                FullName = name, Age = 30 + seed % 28, CareerYears = 1 + seed / 3 % 15,
+                TenureYears = 0, GrowthPotential = 2 + seed / 5 % 4, Attributes = attributes,
+                TalentEvaluation = attributes.Evaluation, PotentialEvaluation = attributes.NationalKnowledge,
+                RegionalKnowledge = attributes.RegionalKnowledge, WorkRate = attributes.Communication
+            };
+            surviving.Add(replacement);
+        }
+        return EnsureAssignments(state with { ScoutingStaff = surviving }, userTeam);
     }
 
     public static DynastyState SetAssignment(

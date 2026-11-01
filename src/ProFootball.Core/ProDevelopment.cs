@@ -37,7 +37,11 @@ public static class ProDevelopment
         var old = PlayerSkillService.EnsureInitialized(player.Football);
         var peak = PeakAge(old.Position);
         var pastPrime = Math.Max(0, age - peak);
-        var growth = age <= peak ? Math.Min(Headroom(player), random.Next(0, 3) + (coachDevelopment >= 80 && random.NextDouble() < .35 ? 1 : 0) + (coachDevelopment >= 90 && random.NextDouble() < .2 ? 1 : 0)) : 0;
+        var primeYears = Math.Max(0, peak - age);
+        var growthChance = Math.Clamp(18 + primeYears * 5 + (coachDevelopment - 60) / 3, 10, 70);
+        var growth = age <= peak && Headroom(player) > 0 && random.Next(100) < growthChance ? 1 : 0;
+        if (growth > 0 && coachDevelopment >= 82 && random.Next(100) < Math.Clamp((coachDevelopment - 80) * 2, 0, 35))
+            growth = Math.Min(Headroom(player), growth + 1);
         var physicalLoss = pastPrime == 0 ? 0 : random.Next(1, 3) + (pastPrime >= 4 ? 1 : 0);
         var techniqueLoss = pastPrime <= 2 ? 0 : random.Next(1, 3);
         var mentalLoss = pastPrime <= 5 ? 0 : 1;

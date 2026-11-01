@@ -172,7 +172,13 @@ public static class StaffManagementService
             var decline = item.Age >= 64 && growthSeed % 100 < Math.Min(35, item.Age - 58)
                 ? 1
                 : 0;
-            var netChange = growth - decline;
+            var latest = state.TeamSeasonHistory
+                .Where(record => record.SeasonYear == state.SeasonYear && record.TeamName.Equals(item.TeamName, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(record => record.SeasonYear).FirstOrDefault();
+            var performanceChange = latest is null || latest.Wins + latest.Losses == 0 ? 0 :
+                latest.Wins / (double)(latest.Wins + latest.Losses) >= .68 ? 1 :
+                latest.Wins / (double)(latest.Wins + latest.Losses) <= .32 ? -1 : 0;
+            var netChange = Math.Clamp(growth - decline + performanceChange, -1, 1);
 
             return item with
             {
@@ -199,11 +205,14 @@ public static class StaffManagementService
             };
         }).ToArray();
 
-        return CoachSuccessionService.ResolveRetirements(state with
+        var advanced = CoachSuccessionService.ResolveRetirements(state with
         {
             Staff = staff,
             StaffLastAdvancedSeasonYear = state.SeasonYear
         });
+        var userTeam = advanced.LeagueTeams.FirstOrDefault(team =>
+            team.Name.Equals(advanced.UserTeamName, StringComparison.OrdinalIgnoreCase));
+        return userTeam is null ? advanced : ScoutingDepartmentService.AdvanceSeason(advanced, userTeam);
     }
 
     public static DynastyState EnsureUserHeadCoach(
@@ -329,39 +338,71 @@ public static class StaffManagementService
             "staff");
         var name = $"{FirstNames[seed % FirstNames.Length]} " +
                    $"{LastNames[(seed / 17) % LastNames.Length]}";
-        var baseRating = Math.Clamp(42 + prestige / 2 + seed % 15, 45, 94);
 
-        int Attribute(string key, int adjustment = 0)
+        // New dynasties target about 65 overall in College. Prestige raises the center and the dynasty seed
+        // creates a new but stable staff distribution for each save.
+        var programBase = Math.Clamp(
+            (int)Math.Round(61 + (prestige - 65) * .20, MidpointRounding.AwayFromZero),
+            52, 74);
+        int Rating(string key, int adjustment = 0) => Clamp(
+            programBase + adjustment +
+            SimulationSeed.Create(
+                state.DynastyId,
+                state.SeasonYear,
+                salt + (int)role,
+                team.Name,
+                $"staff-{key}") % 7 - 3);
+
+        var coaching = new CoachingAttributes
         {
-            var value = baseRating + adjustment +
-                SimulationSeed.Create(
-                    state.DynastyId,
-                    state.SeasonYear,
-                    salt + (int)role,
-                    team.Name,
-                    $"staff-{key}") % 13 - 6;
-            return Clamp(value);
-        }
+            Leadership = Rating("lead", role == StaffRole.HeadCoach ? 4 : role is StaffRole.OffensiveCoordinator or StaffRole.DefensiveCoordinator ? 1 : -2),
+            Development = Rating("develop", role is StaffRole.HeadCoach or StaffRole.OffensiveCoordinator or StaffRole.DefensiveCoordinator ? 2 : -1),
+            OffensePlaycalling = Rating("offense", role == StaffRole.OffensiveCoordinator ? 5 : role == StaffRole.HeadCoach ? 1 : -4),
+            OffenseDevelopment = Rating("offense-development", role is StaffRole.HeadCoach or StaffRole.OffensiveCoordinator ? 4 : -3),
+            DefenseScheme = Rating("defense", role == StaffRole.DefensiveCoordinator ? 5 : role == StaffRole.HeadCoach ? 1 : -4),
+            DefenseDevelopment = Rating("defense-development", role is StaffRole.HeadCoach or StaffRole.DefensiveCoordinator ? 4 : -3),
+            SpecialTeams = Rating("special-teams", role == StaffRole.SpecialTeamsCoordinator ? 7 : -3),
+            TalentEvaluation = Rating("talent", role is StaffRole.HeadCoach or StaffRole.ChiefScout ? 2 : -1)
+        };
+        var medical = role == StaffRole.MedicalTrainingDirector
+            ? new MedicalAttributes
+            {
+                Medical = Rating("medical", 5), Training = Rating("training", 1),
+                Conditioning = Rating("conditioning", -1), Prevention = Rating("prevention", 4),
+                Nutrition = Rating("nutrition", 1)
+            }
+            : new MedicalAttributes
+            {
+                Medical = Rating("medical", -2), Training = Rating("training", 3),
+                Conditioning = Rating("conditioning", 5), Prevention = Rating("prevention", 1),
+                Nutrition = Rating("nutrition", 3)
+            };
+        var scouting = new ScoutAttributes
+        {
+            Evaluation = Rating("evaluation", 3), Communication = Rating("communication", 1),
+            RegionalKnowledge = Rating("regional", 2), NationalKnowledge = Rating("national", 1)
+        };
+        var recruiting = Rating("recruiting", role == StaffRole.HeadCoach ? 3 : role is StaffRole.OffensiveCoordinator or StaffRole.DefensiveCoordinator ? 1 : -3);
 
-        return new StaffMember
+        var member = new StaffMember
         {
             StaffId = StableId(state.DynastyId, $"{team.Name}|{role}|{salt}"),
             FullName = name,
             TeamName = team.Name,
             Role = role,
-            Reputation = Attribute("rep"),
-            Leadership = Attribute("lead", role == StaffRole.HeadCoach ? 5 : 0),
-            Recruiting = Attribute("recruit", role is StaffRole.HeadCoach or StaffRole.OffensiveCoordinator or StaffRole.DefensiveCoordinator ? 3 : 0),
-            PlayerDevelopment = Attribute("develop", role is StaffRole.StrengthConditioningDirector or StaffRole.OffensiveCoordinator or StaffRole.DefensiveCoordinator ? 4 : 0),
-            GameManagement = Attribute("game", role == StaffRole.HeadCoach ? 5 : 0),
-            Scheme = Attribute("scheme", role is StaffRole.OffensiveCoordinator or StaffRole.DefensiveCoordinator ? 6 : 0),
-            SpecialTeams = Attribute("st", role == StaffRole.SpecialTeamsCoordinator ? 8 : -5),
-            Medical = Attribute("medical", role == StaffRole.MedicalTrainingDirector ? 9 : -5),
-            Conditioning = Attribute("conditioning", role == StaffRole.StrengthConditioningDirector ? 9 : -5),
-            TalentEvaluation = Attribute("talent", role == StaffRole.ChiefScout ? 8 : -4),
-            PotentialEvaluation = Attribute("potential", role == StaffRole.ChiefScout ? 8 : -4),
-            RegionalKnowledge = Attribute("region", role == StaffRole.ChiefScout ? 7 : -4),
-            StaffManagement = Attribute("management", role == StaffRole.ChiefScout ? 7 : 0),
+            Reputation = Rating("rep"),
+            Leadership = coaching.Leadership,
+            Recruiting = recruiting,
+            PlayerDevelopment = coaching.Development,
+            GameManagement = coaching.OffensePlaycalling,
+            Scheme = role == StaffRole.OffensiveCoordinator ? coaching.OffensePlaycalling : coaching.DefenseScheme,
+            SpecialTeams = coaching.SpecialTeams,
+            Medical = medical.Medical,
+            Conditioning = medical.Conditioning,
+            TalentEvaluation = scouting.Evaluation,
+            PotentialEvaluation = scouting.NationalKnowledge,
+            RegionalKnowledge = scouting.RegionalKnowledge,
+            StaffManagement = scouting.Communication,
             Age = 34 + seed % 27,
             CareerYears = seed % 18,
             GrowthPotential = Math.Clamp(
@@ -376,6 +417,14 @@ public static class StaffManagementService
                 5),
             ContractYearsRemaining = 2 + seed % 4
         };
+
+        if (StaffAttributeService.IsFootballCoach(role))
+            member = StaffAttributeService.Apply(member, coaching, recruiting);
+        else if (StaffAttributeService.IsMedical(role))
+            member = StaffAttributeService.Apply(member, medical);
+        else if (role == StaffRole.ChiefScout)
+            member = StaffAttributeService.ApplyScout(member, scouting);
+        return member;
     }
 
     private static int Clamp(int value) => Math.Clamp(value, 35, 99);

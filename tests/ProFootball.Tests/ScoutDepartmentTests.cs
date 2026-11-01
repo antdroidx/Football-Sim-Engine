@@ -14,7 +14,7 @@ public class ScoutDepartmentTests
         Assert.Same(once,ProScoutDepartment.Ensure(once));
         Assert.Equal(s.Scouting,once.Scouting);Assert.Equal(s.Players,once.Players);
         var scout=once.Scouts.First();
-        once=once with{Scouts=once.Scouts.Select(c=>c==scout?c with{Staff=c.Staff with{Attributes=new(){Evaluation=55,Communication=83,RegionalKnowledge=94,NationalKnowledge=38}}}:c).ToList()};
+        once=ProScoutDepartment.Ensure(once with{Scouts=once.Scouts.Select(c=>c==scout?c with{Staff=c.Staff with{Attributes=new(){Evaluation=55,Communication=83,RegionalKnowledge=94,NationalKnowledge=38}}}:c).ToList()});
         var coach=once.Coaches.First();
         once=once with{Coaches=once.Coaches.Select(c=>c==coach?ProStaff.Apply(c,new(){OffensePlaycalling=55,DefenseScheme=97,OffenseDevelopment=91,DefenseDevelopment=32}):c).ToList()};
         var dir=Path.Combine(Path.GetTempPath(),"scout-department-"+Guid.NewGuid());

@@ -158,6 +158,7 @@ public sealed partial class FoundationPage
                 OffensivePlaybook.PowerRun => OffensiveFormation.IForm,
                 OffensivePlaybook.Option => OffensiveFormation.Pistol,
                 OffensivePlaybook.AirRaid => OffensiveFormation.Empty,
+                    OffensivePlaybook.PlayAction => OffensiveFormation.Singleback,
                 _ => OffensiveFormation.ShotgunSpread
             };
             if (book != OffensivePlaybook.Custom) offensiveFormation.SelectedIndex = Array.IndexOf(offensiveFormationValues, preferred);

@@ -87,7 +87,7 @@ public static class DepthChartService
         {
             var count = role switch
             {
-                3 => plan.Offense is OffensivePlaybook.Spread or OffensivePlaybook.AirRaid ? 4 : plan.Offense == OffensivePlaybook.Flexbone ? 2 : 3,
+                3 => plan.Offense is OffensivePlaybook.Spread or OffensivePlaybook.AirRaid ? 4 : plan.Offense == OffensivePlaybook.Flexbone ? 2 : plan.Offense == OffensivePlaybook.PlayAction ? 4 : 3,
                 12 => plan.Defense == DefensivePlaybook.ThreeFour ? 1 : 2,
                 14 => plan.Defense == DefensivePlaybook.ThreeFour ? 2 : 1,
                 16 => plan.Defense == DefensivePlaybook.Nickel ? 3 : 2,

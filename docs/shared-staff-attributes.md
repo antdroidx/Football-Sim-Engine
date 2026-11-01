@@ -19,3 +19,23 @@ Legacy scouts map TalentEvaluation to Evaluation, WorkRate to Communication, Pot
 `ProScoutDepartment.Ensure` supplies deterministic missing departments on new franchise creation and load; existing scouts/reports/targets are retained. Scouts are persisted separately from coaches. Edits write canonical coach/medical/chief-scout objects and mirror legacy fields for existing consumers. Annual College staff progression updates canonical objects as well.
 
 Regression coverage: `StaffAttributeTests`, `ScoutDepartmentTests`, existing `ScoutingDepthTests`, `ScoutingDepartmentTests`, and `CoachAbilityImpactTests` cover labels, migration/roundtrip, unit-specific development, estimate quality, determinism, true-rating preservation and existing target limits.
+
+
+## Team strategy and staff-generation sources
+
+- College offense/defense identities: [Playbook Gamer College Football 27 playbooks](https://playbookgamer.com/college-football-27-playbooks/), retrieved 2026-11-01. All 138 packaged programs have a deterministic source entry. The raw source labels remain in `CollegeTeamStrategyCatalog`; enum mappings intentionally approximate the current engine's smaller playbook vocabulary.
+- College staff ratings: generated from current program prestige with a dynasty, team and role seed. The mid-prestige target is about 65. Schemes do not reroll after dynasty creation.
+- Pro identities and coach names: packaged official team-site coach snapshot. Scheme labels are best-effort 2026 coaching profiles. Staff quality is a curated identity index centered around 70, not a historical grade.
+- Pro scouting quality: a per-club best-effort drafting index centered around 69, used as the scout attribute baseline. It is explicitly replaceable when a reviewed historical draft metric is added.
+- Pro medical and scout names are generated. Their ratings use franchise, team and role seeds, so new saves vary while reloading remains stable.
+
+These are simulation design inputs, not claims of exact current coaching expertise. Schemes describe intended identity; staff-quality values create initial differentiation that subsequently evolves through the existing staff, player and simulation systems.
+
+
+## Staff lifecycle rules
+
+College coaches and medical staff retain their existing age-based growth/decline and retirement flow. Team performance now adds a small upward/downward chance, and College scouts age annually with growth, decline, retirement and replacement. Graduated players with strong leadership/awareness can replace retiring College coaches when the role fits.
+
+Pro coaches, medical staff and scouts age once each offseason. Attributes use independent deterministic rolls around growth potential, age, performance and decline. User-controlled coaching roles do not retire automatically. Retiring Pro staff are recorded, vacancies pass through existing hiring, and new scouts/medical staff are generated when departments are below strength. Retired Pro players who meet the leadership threshold are added to the coaching candidate pool with a retired-player source label.
+
+All random rolls are stable for a franchise, season, staff member and attribute, so reloading does not reroll careers. Legacy records receive a first age from stable staff/franchise data, then advance normally.

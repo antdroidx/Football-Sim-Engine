@@ -9,7 +9,9 @@ public static class ProScouting
 
     public static int StaffRating(ProFranchise s,string team,Position position=Position.QB)
     {
-        return ProScoutDepartment.Rating(s,team);
+        var scouts=ProScoutDepartment.Rating(s,team);
+        var coaches=ProTeamStrategyCatalog.CoachingTalentEvaluation(s,team);
+        return (int)Math.Round(scouts*.75+coaches*.25,MidpointRounding.AwayFromZero);
     }
 
     public static int Confidence(int staff,ScoutDepth depth,bool combine=false)=>depth switch
@@ -27,8 +29,20 @@ public static class ProScouting
         var error=Math.Max(2,(100-confidence)/4);
         var random=new Random(BitConverter.ToInt32(player.Football.PlayerId.ToByteArray(),0)^s.Year^(int)depth);
         var grade=Math.Clamp(player.Football.OverallRating+random.Next(-error,error+1),40,99);
-        return new(player.Football.PlayerId,team,s.Year,grade,confidence){Depth=depth,Source=source};
+        var potentialConfidence=PotentialConfidence(staff,depth,combine);
+        var potentialError=Math.Max(2,(100-potentialConfidence)/4);
+        var potentialCenter=Math.Clamp(player.Football.PotentialRating+random.Next(-potentialError,potentialError+1),40,99);
+        return new(player.Football.PlayerId,team,s.Year,grade,confidence){Depth=depth,Source=source,
+            PotentialLow=Math.Max(40,potentialCenter-potentialError),PotentialHigh=Math.Min(99,potentialCenter+potentialError),
+            PotentialConfidence=potentialConfidence};
     }
+
+    public static int PotentialConfidence(int staff,ScoutDepth depth,bool combine=false)=>depth switch
+    {
+        ScoutDepth.Priority=>(int)Math.Clamp(42+(staff-50)*.7+(combine?2:0),40,70),
+        ScoutDepth.Visit=>(int)Math.Clamp(68+(staff-50)*.6+(combine?3:0),65,92),
+        _=>(int)Math.Clamp(12+(staff-50)*.5+(combine?2:0),8,43)
+    };
 
     public static ProFranchise Migrate(ProFranchise s)
     {

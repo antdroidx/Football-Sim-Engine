@@ -1,3 +1,5 @@
+using DynastyManager.Core.Models;
+using DynastyManager.Core.Simulation;
 using System.Reflection;
 using System.Text.Json;
 namespace ProFootball.Core;
@@ -43,8 +45,50 @@ public static class ProReserve
     public static ProFranchise AfterGame(ProFranchise s,ProGame completed)
     {
         if(completed.Phase!=ProPhase.RegularSeason)return s;
-        return s with{Players=s.Players.Select(p=>completed.Football.InvolvesTeam(p.Football.TeamName)&&p.Football.CurrentInjury is {} injury
-            ?p with{Football=p.Football with{CurrentInjury=injury.WeeksRemaining<=1?null:injury with{WeeksRemaining=injury.WeeksRemaining-1}}}:p).ToList()};
+        var players=s.Players.ToList();
+        foreach(var team in new[]{completed.Football.HomeTeamName,completed.Football.AwayTeamName})
+        {
+            var recovery=ProSportsMedicine.RecoveryBonus(s,team);
+            for(var i=0;i<players.Count;i++)
+            {
+                var p=players[i];
+                if(p.Football.TeamName!=team||p.Football.CurrentInjury is not {} injury)continue;
+                var roll=MedicalRoll(s,completed,p,"recovery");
+                var decrement=recovery>0&&roll<recovery*20?2:recovery<0&&roll<25?0:1;
+                var remaining=Math.Max(0,injury.WeeksRemaining-decrement);
+                players[i]=p with{Football=p.Football with{CurrentInjury=remaining<=0?null:injury with{WeeksRemaining=remaining}}};
+            }
+
+            // Prevention is intentionally rare per team-game. It mirrors College by reducing the chance from the
+            // medical staff overall while individual medical attributes shape that overall.
+            var prevention=ProSportsMedicine.PreventionAdjustment(s,team);
+            var injuryChance=Math.Clamp(400-prevention,250,550); // basis points, 2.5% to 5.5%
+            if(MedicalRoll(s,completed,null,"injury",team)%10000>=injuryChance)continue;
+            var candidate=players.Where(p=>p.Football.TeamName==team&&!p.Retired&&!p.PracticeSquad&&!p.Reserve&&
+                    p.Football.CurrentInjury is null&&completed.Football.PlayerStats.Any(stat=>stat.PlayerId==p.Football.PlayerId))
+                .OrderBy(p=>MedicalRoll(s,completed,p,"candidate"))
+                .FirstOrDefault();
+            if(candidate is null)continue;
+            var severityRoll=MedicalRoll(s,completed,candidate,"severity");
+            var severity=(severityRoll%100) switch{<70=>InjurySeverity.Minor,<92=>InjurySeverity.Moderate,_=>InjurySeverity.Major};
+            var rawDuration=severity switch{InjurySeverity.Minor=>1+severityRoll%2,InjurySeverity.Moderate=>2+severityRoll%4,_=>4+severityRoll%5};
+            var duration=Math.Max(1,rawDuration-Math.Max(0,ProSportsMedicine.RecoveryBonus(s,team)));
+            var body=(InjuryBodyArea)(MedicalRoll(s,completed,candidate,"body")%Enum.GetValues<InjuryBodyArea>().Length);
+            var injuryId=new Guid(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(
+                $"{s.Id:N}|{completed.Football.GameId:N}|{candidate.Football.PlayerId:N}|injury")).AsSpan(0,16));
+            var index=players.FindIndex(p=>p.Football.PlayerId==candidate.Football.PlayerId);
+            players[index]=candidate with{Football=candidate.Football with{CurrentInjury=new PlayerInjury{
+                InjuryId=injuryId,SeasonYear=s.Year,StartWeek=s.Week,BodyArea=body,Severity=severity,
+                InitialWeeks=duration,WeeksRemaining=duration,IsMedicalRedshirt=false}}};
+        }
+        return s with{Players=players};
+    }
+
+    static int MedicalRoll(ProFranchise state,ProGame game,ProPlayer? player,string purpose,string? team=null)
+    {
+        var key=$"{state.Id:N}|{game.Football.GameId:N}|{player?.Football.PlayerId:N}|{team}|{state.Week}|{purpose}";
+        var bytes=System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(key));
+        return BitConverter.ToInt32(bytes,0)&int.MaxValue;
     }
     public static string? ActivationReason(ProFranchise s,string team,Guid id)
     {

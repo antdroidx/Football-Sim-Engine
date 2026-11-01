@@ -512,3 +512,29 @@ Both final CI APKs pass all five strengthened field/role head-coach device group
 753 Core tests passed with extended DynastyHealthTests/OvrCalibrationDynastyTests excluded;381 Pro tests passed with TwentySeasons/SourcedFiveSeasons excluded. The narrower69 Core and13 Pro staff/control/scouting checks are included in those totals. Existing save skills, report/target limits and true player ratings are covered. Both apps compiled locally before the final footer adjustment; final shared presentation compiles cleanly and both final APK packages are verified by GitHub builds. No new physical-device, extended multi-season or final-build full-game-finish run is claimed. Prior complete menu/finish acceptance remains documented above; this follow-up covers the changed field/control/staff behavior.
 
 Exact CI APK SHA256: Pro `8ac79df643ce962f0ff21afd3f67e75d1346872ea2816827fbbf63d9f6ea6e7d`; College `22226da9633ee0d9a7504e8bc6ad74c7f6e39b49718b6683e4bdcd5079479480`. Local evidence, downloaded APKs and validation-manifest.json are under the original attached checkout's `.artifacts/live-field-followup`. The original working checkout and user saves were preserved; emulator tests used a temporary read-only clone plus a disposable new coordinator career. Shared staff integration/migration is documented in `docs/shared-staff-attributes.md`. No PR, main merge or release created.
+
+
+## Team identities, staff quality and Pro medicine — November 1, 2026
+
+College season-zero team strategies now come from the 138-team Playbook Gamer College Football 27 reference supplied by the user and retrieved 2026-11-01. The shared catalog preserves the source offense/defense labels while mapping them onto the engine's existing playbooks, formations, tempo and defensive approaches. Schemes remain fixed at dynasty creation; custom user plans are preserved. Existing dynasties without a saved team plan receive the catalog plan when their game profile is attached.
+
+College generated staff now targets roughly 65 overall for a mid-prestige program. Program prestige raises the attribute center, while a dynasty/team/role seed creates stable per-save variation. Coach, medical and chief-scout attributes are stored in canonical shared objects. Coordinator promotion eligibility was lowered to 64 to match the intentional College distribution. Real-coach import continues to change identities only and retains game ratings.
+
+Pro now hydrates every sourced coach with the shared eight coaching attributes. Franchise identities cover all 32 clubs, with best-effort 2026 scheme labels and an organization-quality index centered at about 70.3. The Seahawks specifically use play-action balanced offense and 4-3 defense. An explicit Play Action playbook was added to the core. New franchises and legacy loads receive missing scheme plans without replacing edited plans.
+
+Pro now contains two persisted medical staff roles per club. Medical and Prevention contribute through the medical overall used for prevention/recovery; Training, Conditioning and Nutrition contribute to player development and the medical overall. Post-game recovery and a rare, bounded injury-prevention roll use the same mapping. Pro development combines head coach, relevant coordinator and strength/conditioning quality. Player growth now uses bounded probability instead of guaranteed annual gains, preventing both universal growth and staff-driven star inflation.
+
+Coaching Talent Evaluation contributes 25% of Pro draft prediction quality; scouts contribute 75%. Draft reports now persist overall confidence plus low/high potential projections and potential confidence. The draft list and prospect page display these estimates. Scouting never changes a prospect's true potential.
+
+Validation: 755 standard College tests and 388 standard Pro tests passed. Focused tests verify 138-team College strategy coverage, prestige and per-save variation, unique staff vectors, Pro averages in the 65–75 staff band, coach Talent Evaluation effects on potential estimates, medical development/prevention/recovery, legacy migration, and five-year growth bounds. Both Android apps build; Pro retains its two pre-existing nullable warnings in franchise navigation.
+
+
+## Staff ages, aging and succession — November 1, 2026
+
+College already had coach/medical ages, annual development/decline, retirement, movement history and retired-player succession. This pass adds ages and annual lifecycle to College scouts, includes last-season team performance in coach/medical staff change, and replenishes retiring scouts while retaining assignment framework.
+
+Pro coaches now have age, career years, tenure and growth potential. Pro medical staff already used StaffMember ages. Pro scouts now carry the same age/career metadata. An annual Pro staff lifecycle runs once per year: age advances, attribute changes use growth potential, age, team performance and deterministic random rolls, and eligible staff retire. CPU coaching vacancies are filled through the existing hiring flow. Medical and scouting departments generate replacements. A yearly generated candidate pool includes retired Pro players with strong leadership/awareness and generic position-coach coordinator prospects.
+
+Ages and career context are visible in College scout cards and Pro coach, scout and medical screens. Pro Staff also shows recent retirements. User-controlled coaching roles are protected from automatic retirement. Save migration initializes missing ages without changing existing names, contracts, schemes, reports or assignments.
+
+Standard results after this pass: 756 College and 390 Pro tests. The existing 20-season Pro integrity test passed after the final lifecycle changes (1 test, 6m21s).

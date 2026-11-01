@@ -1,6 +1,6 @@
 namespace DynastyManager.Core.Models;
 
-public enum OffensivePlaybook { Balanced, Spread, AirRaid, PowerRun, Option, Flexbone, Custom }
+public enum OffensivePlaybook { Balanced, PlayAction, Spread, AirRaid, PowerRun, Option, Flexbone, Custom }
 public enum DefensivePlaybook { Balanced, FourThree, ThreeFour, Nickel, Custom }
 public enum DefensiveApproach { Balanced, StopRun, ProtectPass, Pressure }
 public enum OffensiveConcept { Automatic, InsideRun, OutsideRun, QuickPass, PlayAction, DeepPass }

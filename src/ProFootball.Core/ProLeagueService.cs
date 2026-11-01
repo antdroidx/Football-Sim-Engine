@@ -47,10 +47,10 @@ public static class ProLeagueService
         franchise = ProCapInitialization.Initialize(franchise);
         franchise = ProCareer.Initialize(franchise, role, firingEnabled, coachName);
         var initialized = ProMorale.NormalizeContracts(sourcedContracts ? ProReviewedOpeningRoster.InitializeNew(ProOpeningLedger.InitializeNew(ProContractData.Apply(franchise))) : ProContractData.CompleteRookieTerms(franchise));
-        if(generatedPlayers)return ProScoutDepartment.Ensure(ProPracticeRetirement.Apply(ProReserve.InitializeOpening(initialized)));
+        if(generatedPlayers)return ProFootballSetup.Ensure(ProPracticeRetirement.Apply(ProReserve.InitializeOpening(initialized)));
         initialized = ProCompensatoryDraft.InitializeNew(applyOpeningTrades ? ProOpeningTransactions.InitializeNew(initialized) : initialized);
         var opening = applyOpeningTrades ? ProRoster.TrimOversizedPractice(ProReserve.InitializeOpening(ProFutureDraftOwnership.InitializeNew(initialized))) : initialized;
-        return ProScoutDepartment.Ensure(preserveLegacyPracticeForAudit ? opening : ProPracticeRetirement.Apply(opening));
+        return ProFootballSetup.Ensure(preserveLegacyPracticeForAudit ? opening : ProPracticeRetirement.Apply(opening));
     }
     public static List<ProPlayer> GeneratePlayers(ProLeague league)
     {
@@ -101,8 +101,7 @@ public static class ProLeagueService
         var clubId = state.League.Teams.Single(t => t.Name == team).Id;
         ProCoach? Staff(StaffRole role) => state.Coaches.FirstOrDefault(c => c.TeamId == clubId && c.Role == role && !c.Vacant)
             ?? (role == StaffRole.DefensiveCoordinator ? state.Coaches.FirstOrDefault(c => c.TeamId == clubId && c.Role == StaffRole.HeadCoach && !c.Vacant) : null);
-        int Coach(StaffRole role) => Staff(role)?.Rating ?? 55;
-        int Ability(StaffRole role, Func<ProStaff.CoachAbilities, int> select) { var c = Staff(role); return c is null ? 55 : select(ProStaff.Profile(c)); }
+        int Ability(StaffRole role, Func<ProStaff.CoachAbilities, int> select) { var c = Staff(role); return c is null ? 65 : select(ProStaff.Profile(c)); }
         static double Blend(double roster, int ability) => Math.Clamp(roster + (ability - 65) * 0.15, 1, 99);
         return new()
         {
@@ -113,10 +112,11 @@ public static class ProLeagueService
             RushDefenseRating = Blend(Rating(Position.DE, Position.DT, Position.MLB, Position.OLB), Ability(StaffRole.DefensiveCoordinator, p => p.Defense)),
             SpecialTeamsRating = Blend(Rating(Position.K, Position.P), Ability(StaffRole.SpecialTeamsCoordinator, p => p.SpecialTeams)),
             RosterSize = 53,
-            GamePlan = state.GamePlans.FirstOrDefault(p => p.TeamName == team) ?? new() { TeamName = team },
+            GamePlan = state.GamePlans.FirstOrDefault(p => p.TeamName == team) ??
+                (ProTeamStrategyCatalog.TryGet(clubId, out var identity) ? identity.GamePlan : new TeamGamePlan { TeamName = team }),
             Morale = (int)state.Players.Where(p => p.Football.TeamName == team && !p.Retired).Select(p => (double)p.Morale).DefaultIfEmpty(60).Average(),
             HeadCoachLeadership = Ability(StaffRole.HeadCoach, p => p.Leadership),
-            HeadCoachGameManagement = Coach(StaffRole.HeadCoach),
+            HeadCoachGameManagement = Ability(StaffRole.HeadCoach, p => p.Attributes.OffensePlaycalling),
             OffensiveCoordinatorScheme = Ability(StaffRole.OffensiveCoordinator, p => p.Offense),
             DefensiveCoordinatorScheme = Ability(StaffRole.DefensiveCoordinator, p => p.Defense)
         };

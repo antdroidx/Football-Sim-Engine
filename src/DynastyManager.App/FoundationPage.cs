@@ -1125,6 +1125,8 @@ public sealed partial class FoundationPage : ContentPage
                         _legacyRosterRows)
             };
 
+            _currentDynasty = CollegeTeamStrategyCatalog.InitializePlans(
+                _currentDynasty, _newDynastyTeams);
             _currentDynasty = PlayerRatingService
                 .EnsureProfiles(_currentDynasty);
             await ShowAdvanceProgressAsync("Setting depth charts...", 0.68);
@@ -3223,6 +3225,12 @@ public sealed partial class FoundationPage : ContentPage
                             Text = scout.FullName,
                             FontAttributes = FontAttributes.Bold,
                             FontSize = 14
+                        },
+                        new Label
+                        {
+                            Text = scout.Age > 0 ? $"Age {scout.Age} · {scout.CareerYears} career years · {scout.TenureYears} with this program" : "Age pending migration",
+                            FontSize = 11,
+                            TextColor = DynastyTheme.Muted
                         },
                         new Label
                         {

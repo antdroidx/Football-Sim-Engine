@@ -328,3 +328,15 @@ Both final CI APKs pass all five strengthened field/role head-coach device group
 753 Core tests passed with extended DynastyHealthTests/OvrCalibrationDynastyTests excluded;381 Pro tests passed with TwentySeasons/SourcedFiveSeasons excluded. The narrower69 Core and13 Pro staff/control/scouting checks are included in those totals. Existing save skills, report/target limits and true player ratings are covered. Both apps compiled locally before the final footer adjustment; final shared presentation compiles cleanly and both final APK packages are verified by GitHub builds. No new physical-device, extended multi-season or final-build full-game-finish run is claimed. Prior complete menu/finish acceptance remains documented above; this follow-up covers the changed field/control/staff behavior.
 
 Exact CI APK SHA256: Pro `8ac79df643ce962f0ff21afd3f67e75d1346872ea2816827fbbf63d9f6ea6e7d`; College `22226da9633ee0d9a7504e8bc6ad74c7f6e39b49718b6683e4bdcd5079479480`. Local evidence, downloaded APKs and validation-manifest.json are under the original attached checkout's `.artifacts/live-field-followup`. The original working checkout and user saves were preserved; emulator tests used a temporary read-only clone plus a disposable new coordinator career. Shared staff integration/migration is documented in `docs/shared-staff-attributes.md`. No PR, main merge or release created.
+
+
+## Staff, strategy and Pro medicine scope — November 1, 2026
+
+Standard regression results are 755 College and 388 Pro tests. The five-year Pro development stress case uses 300 young players under 40 versus 95 development quality and asserts 40–99 overalls, ceiling preservation, no low-quality collapse, and fewer than 20% at 90+ in the high-quality scenario. It is a bounded system test, not a claim that every roster permutation has been simulated for twenty seasons.
+
+The standard Pro run excludes `TwentySeasons` and `SourcedFiveSeasons`; the standard College run excludes `DynastyHealthTests` and `OvrCalibrationDynastyTests`. Their focused results are recorded separately when run. Android builds are Debug net10.0-android only unless a later section records CI artifacts.
+
+
+## Staff lifecycle scope — November 1, 2026
+
+Standard suites now pass at 756 College and 390 Pro tests. New focused checks force senior staff retirement, verify age/career advancement, replacement generation, protected user roles, College scout replenishment, and retired-Pro-player entry into the Pro candidate pool. Existing five-year development balance and save-roundtrip cases remain green. The standard exclusions remain the extended dynasty-health/rating-calibration simulations and the two named long Pro careers; the 20-season Pro integrity case also passed separately (1 test, 6m21s).

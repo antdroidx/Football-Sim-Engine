@@ -66,6 +66,9 @@ public sealed record ProFranchise
     public List<ProCareerSeason> CoachingHistory { get; init; } = [];
     public List<ProGmDecision> GmDecisions { get; init; } = [];
     public List<ProScout> Scouts { get; init; } = [];
+    public List<ProMedicalStaff> MedicalStaff { get; init; } = [];
+    public List<ProStaffRetirement> StaffRetirements { get; init; } = [];
+    public int StaffLifecycleYear { get; init; }
     public List<ProCoach> Coaches { get; init; } = [];
     public List<CoachCandidate> CoachCandidates { get; init; } = [];
     public List<ProContract> Contracts { get; init; } = [];
@@ -115,6 +118,10 @@ public enum OffseasonStep { Retention, FreeAgency, Draft, RosterCuts }
 public sealed record ProCoach(string TeamId, StaffRole Role, string Name, string Title, string Source)
 {
     public CoachingAttributes? Coaching { get; init; }
+    public int Age { get; init; }
+    public int CareerYears { get; init; }
+    public int TenureYears { get; init; }
+    public int GrowthPotential { get; init; } = 3;
     public int LastDevelopmentYear {get;init;} public bool Vacant { get; init; } public int Rating { get; init; } = 70; public int Development { get; init; } = 65;
     // Franchise-specific coaching abilities. Existing saves see these as defaulted values; a hire refreshes them.
     public int OffenseRating { get; init; } = 55; public int DefenseRating { get; init; } = 55; public int SpecialTeamsRating { get; init; } = 55;
@@ -133,12 +140,19 @@ public enum ScoutDepth { Basic, Priority, Visit }
 public enum ScoutSource { Cpu, User }
 public sealed record ScoutTarget(string Team, Guid PlayerId, int Year, ScoutDepth Depth, ScoutSource Source);
 public sealed record ScoutReport(Guid PlayerId, string Team, int Year, int Grade, int Confidence)
-{ public ScoutDepth Depth { get; init; } = ScoutDepth.Basic; public ScoutSource Source { get; init; } = ScoutSource.Cpu; }
+{
+    public ScoutDepth Depth { get; init; } = ScoutDepth.Basic;
+    public ScoutSource Source { get; init; } = ScoutSource.Cpu;
+    public int PotentialLow { get; init; }
+    public int PotentialHigh { get; init; }
+    public int PotentialConfidence { get; init; }
+}
 public sealed record WaiverEntry(Guid PlayerId, int ExpiresAfterWeek, List<string> Claims)
 { public Guid? ReleaseId {get;init;} public List<ProContract>? OriginalContracts {get;init;} public double ReleasedFraction {get;init;} public int ReleasedYear {get;init;} }
 public sealed record OwnerExpectation(string Team, int TargetWins, int Security, bool Fired = false);
 
 public sealed record CoachCandidate(string Name, string SourceTeam, string Title, string Source);
+public sealed record ProStaffRetirement(int Year, string Team, StaffRole Role, string Name, int Age, string Department, string Reason);
 
 public sealed record ProUserCareer(string Name, StaffRole Role, bool FiringEnabled)
 { public int Reputation { get; init; } = 50; public int Security { get; init; } = 65; public bool Unemployed { get; init; } public int LastReviewedYear { get; init; } }

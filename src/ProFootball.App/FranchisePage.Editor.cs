@@ -1,5 +1,6 @@
 using DynastyManager.App;
 using DynastyManager.Core.Models;
+using DynastyManager.Core.Simulation;
 using Microsoft.Maui.Controls;
 using ProFootball.Core;
 namespace ProFootball.App;
@@ -13,8 +14,10 @@ public sealed partial class FranchisePage
         var club = s.League.Teams.Single(t => t.Name == s.UserTeam);
         var players = s.Players.Where(p => p.Football.TeamName == s.UserTeam && !p.Retired).OrderBy(p => p.Football.FullName).ToArray();
         var coaches = s.Coaches.Where(c => c.TeamId == club.Id).OrderBy(c => c.Role).ToArray();
+        var medical = s.MedicalStaff.Where(c => c.Team == s.UserTeam).OrderBy(c => c.Staff.Role).ToArray();
         var options = players.Select(p => "Player · " + p.Football.FullName)
-            .Concat(coaches.Select(c => "Staff · " + RoleName(c.Role) + " · " + c.Name)).ToArray();
+            .Concat(coaches.Select(c => "Staff · " + RoleName(c.Role) + " · " + c.Name))
+            .Concat(medical.Select(c => "Medical · " + RoleName(c.Staff.Role) + " · " + c.Staff.FullName)).ToArray();
         if (!options.Contains(editorEntity)) editorEntity = options.FirstOrDefault() ?? "";
         var entity = new Picker { Title = "Player or staff", ItemsSource = options, SelectedIndex = Math.Max(0, Array.IndexOf(options, editorEntity)), AutomationId = "pro-editor-entity" };
         var host = new VerticalStackLayout { Spacing = 10 };
@@ -60,6 +63,28 @@ public sealed partial class FranchisePage
                     await Save(); await Editor();
                 }, "pro-editor-apply-player");
                 host.Add(SectionCard("Player", f.FullName, name, position, StatRow(ovr, potential, morale), apply));
+            }
+            else if (selected.StartsWith("Medical · "))
+            {
+                var member = medical.First(c => "Medical · " + RoleName(c.Staff.Role) + " · " + c.Staff.FullName == selected);
+                var medicalAttributes = StaffAttributeService.Medical(member.Staff);
+                var name = Field("Name", member.Staff.FullName, out var nameEntry);
+                var attributes = new CoachAttributeEditor(medicalAttributes);
+                var apply = Action("Apply medical staff changes", async () =>
+                {
+                    state = state! with
+                    {
+                        MedicalStaff = state.MedicalStaff.Select(c => c != member ? c : c with
+                        {
+                            Staff = StaffAttributeService.Apply(c.Staff, attributes.ReadMedical()) with
+                            {
+                                FullName = string.IsNullOrWhiteSpace(nameEntry.Text) ? c.Staff.FullName : nameEntry.Text.Trim()
+                            }
+                        }).ToList()
+                    };
+                    await Save(); await Editor();
+                }, "pro-editor-apply-medical");
+                host.Add(SectionCard("Medical staff", RoleName(member.Staff.Role), name, attributes, Text(MedicalMappings,12), apply));
             }
             else if (selected.StartsWith("Staff · "))
             {

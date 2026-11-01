@@ -25,7 +25,7 @@ public sealed partial class FranchisePage
     {
         if(c.Vacant)return Text("Vacant",22,true);
         var portrait=ProCoachPortraits.Find(c.Name);
-        return new HorizontalStackLayout { Spacing = 12, Children = { PersonPortrait.Create(CoachId(c), c.Name, Color.FromArgb(team.Primary), Color.FromArgb(team.Secondary), 70, staff: true, age: 48, appearance:portrait?.Appearance,glasses:portrait?.Glasses,moustache:portrait?.Moustache??false), Text(c.Name.Replace("\uFFFD","’"), 22, true) } };
+        return new HorizontalStackLayout { Spacing = 12, Children = { PersonPortrait.Create(CoachId(c), c.Name, Color.FromArgb(team.Primary), Color.FromArgb(team.Secondary), 70, staff: true, age: c.Age > 0 ? c.Age : 48, appearance:portrait?.Appearance,glasses:portrait?.Glasses,moustache:portrait?.Moustache??false), Text(c.Name.Replace("\uFFFD","’"), 22, true) } };
     }
     async Task ShowPage(string title, params View[] views)
     {
@@ -125,7 +125,7 @@ public sealed partial class FranchisePage
         var hero = new HorizontalStackLayout { Spacing = 12, Children = { new TeamBadgeView(team, 52), new VerticalStackLayout { Spacing = 2, Children = {
             Text(coach.Name, 21, true),
             new HorizontalStackLayout { Spacing = 8, Children = { Text(RoleName(coach.Role), 13, true), Text(coach.Vacant ? "Vacant" : "Employed", 12) } },
-            Text(coach.Title, 12) } } } };
+            Text(coach.Title, 12), Text($"Age {coach.Age} · {coach.CareerYears} career years · {coach.TenureYears} with this club · growth {coach.GrowthPotential}/5", 11) } } } };
         var tiles = new Grid { ColumnSpacing = 8, RowSpacing = 8,
             ColumnDefinitions = { new(GridLength.Star), new(GridLength.Star), new(GridLength.Star) },
             RowDefinitions = { new(GridLength.Auto), new(GridLength.Auto) } };

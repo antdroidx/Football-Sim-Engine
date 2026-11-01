@@ -14,9 +14,13 @@ public class CoachAbilityImpactTests
         {
             Coaches = s.Coaches.Select(c => c.TeamId != club.Id ? c : c.Role switch
             {
-                StaffRole.OffensiveCoordinator => c with { OffenseRating = offense, Development = development },
-                StaffRole.DefensiveCoordinator => c with { DefenseRating = defense, Development = development },
-                StaffRole.HeadCoach => c with { Leadership = leadership, Development = development },
+                StaffRole.OffensiveCoordinator => ProStaff.Apply(c, ProStaff.Profile(c).Attributes with {
+                    OffensePlaycalling = offense, Development = development, OffenseDevelopment = development }),
+                StaffRole.DefensiveCoordinator => ProStaff.Apply(c, ProStaff.Profile(c).Attributes with {
+                    DefenseScheme = defense, Development = development, DefenseDevelopment = development }),
+                StaffRole.HeadCoach => ProStaff.Apply(c, ProStaff.Profile(c).Attributes with {
+                    Leadership = leadership, Development = development, OffenseDevelopment = development,
+                    DefenseDevelopment = development }),
                 _ => c
             }).ToList()
         };
