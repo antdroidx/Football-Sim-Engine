@@ -564,3 +564,10 @@ Pro coach history now stores each observed record as dated team tenures, separat
 Focused `StaffBalanceTests`: 16 passed, 0 failed. Regression cases cover current-versus-historical club separation, Saleh's exact cutoff, Vrabel's two employers and the existing Mike Macdonald high-coach band.
 
 Standard Pro regression rerun after the focused correction: 397 passed, 0 failed, 0 skipped (2m24s), excluding the two existing long career cases. Pro Android Debug build succeeded with 0 errors and the two pre-existing nullable warnings. Local signed APK: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, SHA-256 `234684e1e2c90405ca2c67c0ea63d34484cb4e2ec010ca9b268f3b9e8acbe12b`.
+
+
+## Independent Pro coach-rating verification — November 1, 2026
+
+Verified all 816 regular-season games from 2023–2025, all 32 team rows, all 26 observed head-coach histories and all 127 runtime starting-rating formulas: zero final discrepancies. Corrected Schottenheimer/LaFleur ties counted as losses, made tied percentiles equal, regenerated Saleh's 22-game unit percentiles and clarified missing-history/club-proxy labels. Individual coordinator tenures and six head coaches without an observed HC sample remain unverified estimates, explicitly disclosed. Existing saved abilities are preserved.
+
+Actual final checks: 3 Python cases, 24 focused staff cases, 401 standard Pro cases (0 failures/skips, 2m37s; TwentySeasons/SourcedFiveSeasons excluded), 192 paired games with zero personnel/rating violations, and a 906-player five-year development cohort under three staff qualities. Pro Debug Android build passed with zero errors and two existing nullable warnings. No fresh College, extended-career or native-device run. Reproducible commands, intermediate failures, source hash, detailed limits and machine-readable evidence: [pro-coach-rating-verification.md](pro-coach-rating-verification.md).

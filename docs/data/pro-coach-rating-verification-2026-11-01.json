@@ -1,0 +1,749 @@
+{
+  "Date": "2026-11-01",
+  "Scope": "Pro initial coach history; local validation",
+  "SourceVerification": {
+    "Source": "https://github.com/nflverse/nfldata/blob/master/data/games.csv",
+    "SourceSha256": "77fb7279e764cbd1c431a41b1a3da4250695f3e7257487af008e3671fe05fc59",
+    "CatalogSha256": "c5dcd9d9a9f9bcf70f90fdd57e359336a3abedd16deb0701577cc475f8d40987",
+    "RegularSeasonGames": 816,
+    "TeamRows": 32,
+    "ObservedHeadCoaches": 26,
+    "RuntimeRatingsChecked": 127,
+    "HeadCoachesWithoutObservedSample": {
+      "Jesse Minter": "BAL",
+      "Klint Kubiak": "LV",
+      "Jeff Hafley": "MIA",
+      "Mike LaFleur": "ARI",
+      "Joe Brady": "BUF",
+      "Todd Monken": "CLE"
+    },
+    "CoordinatorLimit": "Club proxies; this dataset does not identify coordinator tenures.",
+    "Method": "20-80 season scoring percentile with average tied ranks; club weights .2/.3/.5; coach weights by games actually coached; ties count as half a win.",
+    "Updated": false,
+    "Differences": [],
+    "Coaches": {
+      "Kevin Stefanski": {
+        "CurrentTeam": "ATL",
+        "Units": [
+          34.5,
+          46.5
+        ],
+        "Tenures": [
+          {
+            "TeamId": "CLE",
+            "Games": 51,
+            "Wins": 19,
+            "Losses": 32,
+            "PointsForPerGame": 18.3,
+            "PointsAgainstPerGame": 23.1,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Kevin O'Connell": {
+        "CurrentTeam": "MIN",
+        "Units": [
+          45.2,
+          65.5
+        ],
+        "Tenures": [
+          {
+            "TeamId": "MIN",
+            "Games": 51,
+            "Wins": 30,
+            "Losses": 21,
+            "PointsForPerGame": 22.0,
+            "PointsAgainstPerGame": 20.1,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Nick Sirianni": {
+        "CurrentTeam": "PHI",
+        "Units": [
+          60.6,
+          58.1
+        ],
+        "Tenures": [
+          {
+            "TeamId": "PHI",
+            "Games": 51,
+            "Wins": 36,
+            "Losses": 15,
+            "PointsForPerGame": 25.0,
+            "PointsAgainstPerGame": 20.7,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Mike Macdonald": {
+        "CurrentTeam": "SEA",
+        "Units": [
+          61.6,
+          69.8
+        ],
+        "Tenures": [
+          {
+            "TeamId": "SEA",
+            "Games": 34,
+            "Wins": 24,
+            "Losses": 10,
+            "PointsForPerGame": 25.2,
+            "PointsAgainstPerGame": 19.4,
+            "FirstSeason": 2024,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Robert Saleh": {
+        "CurrentTeam": "TEN",
+        "Units": [
+          27.1,
+          63.5
+        ],
+        "Tenures": [
+          {
+            "TeamId": "NYJ",
+            "Games": 22,
+            "Wins": 9,
+            "Losses": 13,
+            "PointsForPerGame": 16.4,
+            "PointsAgainstPerGame": 20.0,
+            "FirstSeason": 2023,
+            "LastSeason": 2024
+          }
+        ]
+      },
+      "Dan Quinn": {
+        "CurrentTeam": "WAS",
+        "Units": [
+          55.8,
+          38.4
+        ],
+        "Tenures": [
+          {
+            "TeamId": "WAS",
+            "Games": 34,
+            "Wins": 17,
+            "Losses": 17,
+            "PointsForPerGame": 24.7,
+            "PointsAgainstPerGame": 24.8,
+            "FirstSeason": 2024,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Dave Canales": {
+        "CurrentTeam": "CAR",
+        "Units": [
+          33.5,
+          36.5
+        ],
+        "Tenures": [
+          {
+            "TeamId": "CAR",
+            "Games": 34,
+            "Wins": 13,
+            "Losses": 21,
+            "PointsForPerGame": 19.2,
+            "PointsAgainstPerGame": 26.9,
+            "FirstSeason": 2024,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Ben Johnson": {
+        "CurrentTeam": "CHI",
+        "Units": [
+          64.5,
+          37.4
+        ],
+        "Tenures": [
+          {
+            "TeamId": "CHI",
+            "Games": 17,
+            "Wins": 11,
+            "Losses": 6,
+            "PointsForPerGame": 25.9,
+            "PointsAgainstPerGame": 24.4,
+            "FirstSeason": 2025,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Zac Taylor": {
+        "CurrentTeam": "CIN",
+        "Units": [
+          60.0,
+          32.6
+        ],
+        "Tenures": [
+          {
+            "TeamId": "CIN",
+            "Games": 51,
+            "Wins": 24,
+            "Losses": 27,
+            "PointsForPerGame": 24.5,
+            "PointsAgainstPerGame": 25.7,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Brian Schottenheimer": {
+        "CurrentTeam": "DAL",
+        "Units": [
+          68.4,
+          20.0
+        ],
+        "Tenures": [
+          {
+            "TeamId": "DAL",
+            "Games": 17,
+            "Wins": 7,
+            "Losses": 9,
+            "PointsForPerGame": 27.7,
+            "PointsAgainstPerGame": 30.1,
+            "FirstSeason": 2025,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Sean Payton": {
+        "CurrentTeam": "DEN",
+        "Units": [
+          54.2,
+          60.6
+        ],
+        "Tenures": [
+          {
+            "TeamId": "DEN",
+            "Games": 51,
+            "Wins": 32,
+            "Losses": 19,
+            "PointsForPerGame": 23.2,
+            "PointsAgainstPerGame": 20.3,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Dan Campbell": {
+        "CurrentTeam": "DET",
+        "Units": [
+          75.2,
+          48.4
+        ],
+        "Tenures": [
+          {
+            "TeamId": "DET",
+            "Games": 51,
+            "Wins": 36,
+            "Losses": 15,
+            "PointsForPerGame": 29.5,
+            "PointsAgainstPerGame": 22.5,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Matt LaFleur": {
+        "CurrentTeam": "GB",
+        "Units": [
+          58.7,
+          64.5
+        ],
+        "Tenures": [
+          {
+            "TeamId": "GB",
+            "Games": 51,
+            "Wins": 29,
+            "Losses": 21,
+            "PointsForPerGame": 24.2,
+            "PointsAgainstPerGame": 20.5,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "DeMeco Ryans": {
+        "CurrentTeam": "HOU",
+        "Units": [
+          52.6,
+          64.5
+        ],
+        "Tenures": [
+          {
+            "TeamId": "HOU",
+            "Games": 51,
+            "Wins": 32,
+            "Losses": 19,
+            "PointsForPerGame": 22.6,
+            "PointsAgainstPerGame": 20.0,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Shane Steichen": {
+        "CurrentTeam": "IND",
+        "Units": [
+          59.0,
+          34.8
+        ],
+        "Tenures": [
+          {
+            "TeamId": "IND",
+            "Games": 51,
+            "Wins": 25,
+            "Losses": 26,
+            "PointsForPerGame": 24.3,
+            "PointsAgainstPerGame": 24.6,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Liam Coen": {
+        "CurrentTeam": "JAX",
+        "Units": [
+          70.3,
+          66.5
+        ],
+        "Tenures": [
+          {
+            "TeamId": "JAX",
+            "Games": 17,
+            "Wins": 13,
+            "Losses": 4,
+            "PointsForPerGame": 27.9,
+            "PointsAgainstPerGame": 19.8,
+            "FirstSeason": 2025,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Andy Reid": {
+        "CurrentTeam": "KC",
+        "Units": [
+          49.0,
+          74.2
+        ],
+        "Tenures": [
+          {
+            "TeamId": "KC",
+            "Games": 51,
+            "Wins": 32,
+            "Losses": 19,
+            "PointsForPerGame": 21.9,
+            "PointsAgainstPerGame": 18.6,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Jim Harbaugh": {
+        "CurrentTeam": "LAC",
+        "Units": [
+          51.9,
+          72.3
+        ],
+        "Tenures": [
+          {
+            "TeamId": "LAC",
+            "Games": 34,
+            "Wins": 22,
+            "Losses": 12,
+            "PointsForPerGame": 22.6,
+            "PointsAgainstPerGame": 18.9,
+            "FirstSeason": 2024,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Sean McVay": {
+        "CurrentTeam": "LAR",
+        "Units": [
+          63.2,
+          52.3
+        ],
+        "Tenures": [
+          {
+            "TeamId": "LA",
+            "Games": 51,
+            "Wins": 32,
+            "Losses": 19,
+            "PointsForPerGame": 25.3,
+            "PointsAgainstPerGame": 21.7,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Mike Vrabel": {
+        "CurrentTeam": "NE",
+        "Units": [
+          53.9,
+          62.6
+        ],
+        "Tenures": [
+          {
+            "TeamId": "TEN",
+            "Games": 17,
+            "Wins": 6,
+            "Losses": 11,
+            "PointsForPerGame": 17.9,
+            "PointsAgainstPerGame": 21.6,
+            "FirstSeason": 2023,
+            "LastSeason": 2023
+          },
+          {
+            "TeamId": "NE",
+            "Games": 17,
+            "Wins": 14,
+            "Losses": 3,
+            "PointsForPerGame": 28.8,
+            "PointsAgainstPerGame": 18.8,
+            "FirstSeason": 2025,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Kellen Moore": {
+        "CurrentTeam": "NO",
+        "Units": [
+          27.7,
+          51.0
+        ],
+        "Tenures": [
+          {
+            "TeamId": "NO",
+            "Games": 17,
+            "Wins": 6,
+            "Losses": 11,
+            "PointsForPerGame": 18.0,
+            "PointsAgainstPerGame": 22.5,
+            "FirstSeason": 2025,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "John Harbaugh": {
+        "CurrentTeam": "NYG",
+        "Units": [
+          70.3,
+          63.9
+        ],
+        "Tenures": [
+          {
+            "TeamId": "BAL",
+            "Games": 51,
+            "Wins": 33,
+            "Losses": 18,
+            "PointsForPerGame": 27.9,
+            "PointsAgainstPerGame": 20.4,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Aaron Glenn": {
+        "CurrentTeam": "NYJ",
+        "Units": [
+          25.8,
+          21.9
+        ],
+        "Tenures": [
+          {
+            "TeamId": "NYJ",
+            "Games": 17,
+            "Wins": 3,
+            "Losses": 14,
+            "PointsForPerGame": 17.6,
+            "PointsAgainstPerGame": 29.6,
+            "FirstSeason": 2025,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Mike McCarthy": {
+        "CurrentTeam": "PIT",
+        "Units": [
+          60.6,
+          47.1
+        ],
+        "Tenures": [
+          {
+            "TeamId": "DAL",
+            "Games": 34,
+            "Wins": 19,
+            "Losses": 15,
+            "PointsForPerGame": 25.3,
+            "PointsAgainstPerGame": 23.0,
+            "FirstSeason": 2023,
+            "LastSeason": 2024
+          }
+        ]
+      },
+      "Kyle Shanahan": {
+        "CurrentTeam": "SF",
+        "Units": [
+          64.8,
+          52.9
+        ],
+        "Tenures": [
+          {
+            "TeamId": "SF",
+            "Games": 51,
+            "Wins": 30,
+            "Losses": 21,
+            "PointsForPerGame": 25.8,
+            "PointsAgainstPerGame": 21.7,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      },
+      "Todd Bowles": {
+        "CurrentTeam": "TB",
+        "Units": [
+          54.8,
+          54.2
+        ],
+        "Tenures": [
+          {
+            "TeamId": "TB",
+            "Games": 51,
+            "Wins": 27,
+            "Losses": 24,
+            "PointsForPerGame": 24.1,
+            "PointsAgainstPerGame": 22.0,
+            "FirstSeason": 2023,
+            "LastSeason": 2025
+          }
+        ]
+      }
+    }
+  },
+  "StaffSensitivity": {
+    "Mode": "staff-sensitivity",
+    "MatchupsPerArm": 64,
+    "Games": 192,
+    "InvalidPersonnelSnaps": 0,
+    "RatingViolations": 0,
+    "GameArms": [
+      {
+        "Arm": "current",
+        "Games": 64,
+        "Points": 24.4609375,
+        "Yards": 366.3671875,
+        "CompletionPct": 59.49579831932773,
+        "FavoredMargin": 1.171875,
+        "FavoredWinPct": 53.125
+      },
+      {
+        "Arm": "neutral65",
+        "Games": 64,
+        "Points": 24.7109375,
+        "Yards": 370.109375,
+        "CompletionPct": 60.21936300358574,
+        "FavoredMargin": -2.984375,
+        "FavoredWinPct": 48.4375
+      },
+      {
+        "Arm": "favored95-v-opponent35",
+        "Games": 64,
+        "Points": 24.09375,
+        "Yards": 356.5703125,
+        "CompletionPct": 60.64078081901125,
+        "FavoredMargin": 9.96875,
+        "FavoredWinPct": 68.75
+      }
+    ],
+    "FiveYearDevelopment": [
+      {
+        "StaffQuality": 40,
+        "Year": 0,
+        "Players": 906,
+        "Mean": 71.8289183222958,
+        "ElitePct": 2.4282560706401766,
+        "Min": 51,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 40,
+        "Year": 1,
+        "Players": 906,
+        "Mean": 72.3896247240618,
+        "ElitePct": 2.5386313465783665,
+        "Min": 51,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 40,
+        "Year": 2,
+        "Players": 906,
+        "Mean": 72.81236203090508,
+        "ElitePct": 2.759381898454746,
+        "Min": 51,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 40,
+        "Year": 3,
+        "Players": 906,
+        "Mean": 73.10706401766005,
+        "ElitePct": 3.0905077262693155,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 40,
+        "Year": 4,
+        "Players": 906,
+        "Mean": 73.17991169977925,
+        "ElitePct": 3.2008830022075054,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 40,
+        "Year": 5,
+        "Players": 906,
+        "Mean": 72.8543046357616,
+        "ElitePct": 2.869757174392936,
+        "Min": 52,
+        "Max": 94
+      },
+      {
+        "StaffQuality": 65,
+        "Year": 0,
+        "Players": 906,
+        "Mean": 71.8289183222958,
+        "ElitePct": 2.4282560706401766,
+        "Min": 51,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 65,
+        "Year": 1,
+        "Players": 906,
+        "Mean": 72.50331125827815,
+        "ElitePct": 2.6490066225165565,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 65,
+        "Year": 2,
+        "Players": 906,
+        "Mean": 73.01986754966887,
+        "ElitePct": 2.869757174392936,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 65,
+        "Year": 3,
+        "Players": 906,
+        "Mean": 73.42604856512142,
+        "ElitePct": 3.2008830022075054,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 65,
+        "Year": 4,
+        "Players": 906,
+        "Mean": 73.5728476821192,
+        "ElitePct": 3.532008830022075,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 65,
+        "Year": 5,
+        "Players": 906,
+        "Mean": 73.32008830022075,
+        "ElitePct": 3.3112582781456954,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 95,
+        "Year": 0,
+        "Players": 906,
+        "Mean": 71.8289183222958,
+        "ElitePct": 2.4282560706401766,
+        "Min": 51,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 95,
+        "Year": 1,
+        "Players": 906,
+        "Mean": 72.88520971302428,
+        "ElitePct": 3.752759381898455,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 95,
+        "Year": 2,
+        "Players": 906,
+        "Mean": 73.7560706401766,
+        "ElitePct": 4.415011037527594,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 95,
+        "Year": 3,
+        "Players": 906,
+        "Mean": 74.30573951434879,
+        "ElitePct": 4.304635761589404,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 95,
+        "Year": 4,
+        "Players": 906,
+        "Mean": 74.52097130242825,
+        "ElitePct": 4.635761589403973,
+        "Min": 52,
+        "Max": 95
+      },
+      {
+        "StaffQuality": 95,
+        "Year": 5,
+        "Players": 906,
+        "Mean": 74.30794701986756,
+        "ElitePct": 4.635761589403973,
+        "Min": 52,
+        "Max": 95
+      }
+    ],
+    "Findings": [],
+    "Limit": "Engineering smoke bands, not a fitted NFL forecast. Initial franchise staff metadata varies; arms share the same roster and seeds. Growth cohort ages without replacement; full-career runs cover roster replenishment."
+  },
+  "Tests": {
+    "PythonChecks": 3,
+    "FocusedProCases": 24,
+    "StandardProCases": 401,
+    "Excluded": [
+      "TwentySeasons",
+      "SourcedFiveSeasons"
+    ]
+  },
+  "AndroidBuild": {
+    "Configuration": "Debug",
+    "Errors": 0,
+    "ExistingWarnings": 2,
+    "ApkPath": "src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk",
+    "ApkSha256": "b375e91b9548d0b34b50f92a86c33853cde764a904bd156cf339d100ce509ba5"
+  }
+}

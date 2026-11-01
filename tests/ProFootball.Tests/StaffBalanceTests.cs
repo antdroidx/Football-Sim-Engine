@@ -101,6 +101,43 @@ public class StaffBalanceTests
         Assert.Contains("NYJ 2023–2024: 9–13 in 22",ProCoachHistoryCatalog.Basis(coach));
     }
 
+    [Theory]
+    [InlineData("Brian Schottenheimer", 17, 7, 9, "DAL 2025: 7–9–1")]
+    [InlineData("Matt LaFleur", 51, 29, 21, "GB 2023–2025: 29–21–1")]
+    public void HistoricalTiesArePreservedInsteadOfCountedAsLosses(
+        string name,int games,int wins,int losses,string basis)
+    {
+        var coach=New().Coaches.Single(c=>c.Name==name&&c.Role==StaffRole.HeadCoach);
+        Assert.True(ProCoachHistoryCatalog.TryCoach(name,out var history));
+        Assert.Equal(games,history.Games);Assert.Equal(wins,history.Wins);
+        Assert.Equal(losses,history.Losses);Assert.Equal(1,history.Ties);
+        Assert.Equal(history.Games,history.Wins+history.Losses+history.Ties);
+        Assert.Contains(basis,ProCoachHistoryCatalog.Basis(coach));
+    }
+
+    [Fact] public void ObservedCoachRatingFollowsThePersonAcrossEmployers()
+    {
+        var s=New();
+        foreach(var coach in s.Coaches.Where(c=>c.Role==StaffRole.HeadCoach&&
+                    ProCoachHistoryCatalog.TryCoach(c.Name,out _)))
+        {
+            var moved=coach with{TeamId=coach.TeamId=="KC"?"CAR":"KC",Coaching=null};
+            Assert.Equal(ProCoachHistoryCatalog.Rating(coach),ProCoachHistoryCatalog.Rating(moved));
+            Assert.Equal(ProCoachHistoryCatalog.Basis(coach),ProCoachHistoryCatalog.Basis(moved));
+        }
+    }
+
+    [Fact] public void MissingIndividualHistoryIsExplicitlyLabeledAsAClubProxy()
+    {
+        var s=New();
+        var newHead=s.Coaches.Single(c=>c.Name=="Jesse Minter"&&c.Role==StaffRole.HeadCoach);
+        var coordinator=s.Coaches.First(c=>c.Role==StaffRole.OffensiveCoordinator&&!c.Vacant);
+        Assert.Contains("Club proxy BAL",ProCoachHistoryCatalog.Basis(newHead));
+        Assert.Contains("no observed head-coach sample",ProCoachHistoryCatalog.Basis(newHead));
+        Assert.Contains("not an individual tenure",ProCoachHistoryCatalog.Basis(coordinator));
+        Assert.Contains("coordinator not named in source",ProCoachHistoryCatalog.Basis(coordinator));
+    }
+
     [Fact] public void MikeVrabelHistoryPreservesBothEmployers()
     {
         var coach=New().Coaches.Single(c=>
