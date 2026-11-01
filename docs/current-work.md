@@ -450,3 +450,7 @@ College portrait field frame now uses the same 1.76:1 ratio and height cap as Pr
 Pro watch mode keeps the Pause control visible while a CPU snap animates; Take over stays hidden until paused. More is now a flat logical list without category headers: Depth chart, Second unit, Coach talk, Instant replay, Viewing options, Watch CPU/Take over, Finish game, Return to franchise. Removed duplicated Speed and Box score entries (both live inside Viewing options).
 
 College watch mode keeps only Pause reachable during CPU snaps. Options remains the single menu; redundant More is gone, and Options contains all previously buried actions.
+
+## Live menu parity
+
+Both live menus now expose depth chart, box score, weather, view/camera/speed/replay/name options, coaching controls, watch/pause/takeover, timeout, instant replay and exit actions. Pro gains explicit Box score and Weather entries; College gains player markers/style, depth-chart/substitution, offensive/defensive control and watch/takeover entries in its Options sheet. No category headers.

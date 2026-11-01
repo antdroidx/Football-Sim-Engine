@@ -72,7 +72,7 @@ public sealed partial class ProLivePage : ContentPage
         Hidden("Box score", ShowBox);
         finishButton = Hidden("Finish game", async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); });
         var more = Make("More", async () => {
-            var menu = new List<string> { "Depth chart", "Second unit", "Coach talk" };
+            var menu = new List<string> { "Depth chart", "Box score", "Weather", "Second unit", "Coach talk" };
             if (last is not null) menu.Add("Instant replay");
             menu.Add("Viewing options");
             menu.Add(session.Mode == GameDayMode.Watch ? "Take over" : "Watch CPU");
@@ -81,6 +81,8 @@ public sealed partial class ProLivePage : ContentPage
             var pick = await GameDialogs.ActionSheetAsync(this, "Game menu", "Cancel", null, menu.ToArray());
             Func<Task>? action = pick switch {
                 "Depth chart" => DepthChart,
+                "Box score" => ShowBox,
+                "Weather" => () => GameDialogs.AlertAsync(this, "Game conditions", session.Weather.Summary, "Close"),
                 "Second unit" => () => { second = !second; GameDayCoachingService.UseSecondUnit(session, session.ControlledTeamName!, second); selected.Text = second ? "Second team on field" : "Starters on field"; return Task.CompletedTask; },
                 "Coach talk" => CoachTalk,
                 "Instant replay" => async () => { if (last is not null) await Replay(last); },

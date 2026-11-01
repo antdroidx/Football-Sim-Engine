@@ -1040,9 +1040,8 @@ public sealed partial class FoundationPage
             try
             {
                 if (team) { await currentSnapFinished; await ShowTeamAsync(); return; }
-                var menu = new List<string> { "Camera", "Game speed", "Replay speed", "Automatic replays", "Player labels" };
-                if (!session.IsComplete) menu.AddRange(new[] { "Timeout", "Instant replay", "Watch CPU vs CPU", "Take over", "Skip to end" });
-                menu.AddRange(new[] { "Box score", "Weather", "Team & substitutions" });
+                var menu = new List<string> { "Camera", "Game speed", "Replay speed", "Automatic replays", "Player labels", "Player markers", "Player style", "Depth chart & substitutions", "Box score", "Weather" };
+                if (!session.IsComplete) menu.AddRange(new[] { "Offensive control", "Defensive control", "Watch CPU / Take over", "Timeout", "Instant replay", "Skip to end" });
                 var selected = await GameDialogs.ActionSheetAsync(page, "GameCast options", "Close", null, menu.ToArray());
                 if (selected == "Camera")
                 {
@@ -1071,6 +1070,12 @@ public sealed partial class FoundationPage
                 else if (selected == "Watch CPU vs CPU") (watch as IButtonController)?.SendClicked();
                 else if (selected == "Take over") (takeover as IButtonController)?.SendClicked();
                 else if (selected == "Skip to end") (skip as IButtonController)?.SendClicked();
+                else if (selected == "Player markers") (numbers as IButtonController)?.SendClicked();
+                else if (selected == "Player style") (spriteMode as IButtonController)?.SendClicked();
+                else if (selected == "Depth chart & substitutions") (teamControl as IButtonController)?.SendClicked();
+                else if (selected == "Offensive control") (delegateOffense as IButtonController)?.SendClicked();
+                else if (selected == "Defensive control") (delegateDefense as IButtonController)?.SendClicked();
+                else if (selected == "Watch CPU / Take over") (watch as IButtonController)?.SendClicked();
             }
             finally
             {
