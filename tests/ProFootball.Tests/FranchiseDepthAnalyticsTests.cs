@@ -15,9 +15,9 @@ public class FranchiseDepthAnalyticsTests
     }
     [Fact] public void ScoutingQualityUsesStaffAndRemainsUncertain()
     {
-        var s=ProDraft.Generate(New() with{Phase=ProPhase.Offseason,OffseasonStep=OffseasonStep.Draft});var player=s.Prospects[0];var id=s.League.Teams.Single(t=>t.Name==s.UserTeam).Id;
-        var weak=s with{Coaches=s.Coaches.Select(c=>c.TeamId==id?c with{Development=40}:c).ToList()};
-        var strong=s with{Coaches=s.Coaches.Select(c=>c.TeamId==id?c with{Development=95}:c).ToList()};
+        var s=ProDraft.Generate(New() with{Phase=ProPhase.Offseason,OffseasonStep=OffseasonStep.Draft});var player=s.Prospects[0];
+        var weak=s with{Scouts=s.Scouts.Select(c=>c.Team==s.UserTeam?c with{Staff=c.Staff with{Attributes=ScoutAttributes.FromValues(new[]{40,40,40,40})}}:c).ToList()};
+        var strong=s with{Scouts=s.Scouts.Select(c=>c.Team==s.UserTeam?c with{Staff=c.Staff with{Attributes=ScoutAttributes.FromValues(new[]{95,95,95,95})}}:c).ToList()};
         Assert.True(ProScouting.Evaluate(strong,s.UserTeam,player,ScoutDepth.Priority,ScoutSource.User).Confidence>ProScouting.Evaluate(weak,s.UserTeam,player,ScoutDepth.Priority,ScoutSource.User).Confidence);
         Assert.Equal(ProScouting.Evaluate(strong,s.UserTeam,player,ScoutDepth.Priority,ScoutSource.User),ProScouting.Evaluate(strong,s.UserTeam,player,ScoutDepth.Priority,ScoutSource.User));
     }
