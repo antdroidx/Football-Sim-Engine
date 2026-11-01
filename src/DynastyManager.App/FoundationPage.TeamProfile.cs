@@ -19,14 +19,16 @@ public sealed partial class FoundationPage
             foreach(var view in views) stack.Children.Add(view);
             return ManagementPanel(title,stack);
         }
+        View RatingBar(string label,int rating)=>new VerticalStackLayout{Spacing=4,Children={
+            T($"{label} {rating}",true),new ProgressBar{Progress=Math.Clamp(rating/99d,0,1),ProgressColor=DynastyTheme.Accent,HeightRequest=8,AutomationId="college-"+label.ToLowerInvariant()+"-bar"}}};
         var close=new Button{Text="Close"};
         close.Clicked+=async(_,_)=>await Navigation.PopModalAsync();
         var content=new VerticalStackLayout{Padding=16,Spacing=12,Children={
-            close, SchoolBanner(team.Name,$"{team.ConferenceName} · Prestige {prestige}/99 · Academics {academics}/99"),
+            close, SchoolBanner(team.Name,team.ConferenceName),
             Box("Program identity",
-                T($"Prestige {prestige}/99 · Academics {academics}/99",true),
+                RatingBar("Prestige",prestige), RatingBar("Academics",academics),
                 T("Prestige changes with results and recruiting. Academic quality is a stable institutional measure and matters most to recruits with a strong education preference."),
-                T($"{GamePlanService.Label(plan.Offense)} offense · {plan.Defense} defense · {plan.Approach} approach",true)),
+                T($"{GamePlanService.Label(plan.Offense)} offense · {GamePlanService.Label(plan.Defense)} defense · {GamePlanService.Label(plan.Approach)} approach",true)),
             Box("Staff",staff.Length==0?T("No staff records are available."):DataTable([("Role",170),("Name",210),("Age",55),("Overall",75)],staff.Select(item=>new View[]{
                 TableText(FormatStaffRole(item.Role)),TableText(item.FullName),TableText(item.Age.ToString()),TableText(item.OverallRating.ToString(),true)}))),
             Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true))

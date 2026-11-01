@@ -580,3 +580,8 @@ Both workflows succeeded from runtime source `a230948f372be61181bc6f4a9b74942d26
 Both exact APKs were downloaded, manifest-checked and successfully verified with apksigner (v2/v3; same stable development certificate). Pro is `antdroid.profootball.franchise` version0.1.148/code148; College is `antdroid.cfbcoach.dev` version0.20.438/code838. College includes the branch's staff aging,138-team strategies,directories and academic-quality updates. Existing coach identities/skills remain preserved; no new individual College performance-history calibration is claimed. Source, artifact IDs and APK SHA-256 values: [build manifest](data/staff-coach-ci-builds-2026-11-01.json). Local APKs/logs are under `.artifacts/coach-ci`.
 
 These are GitHub Actions build/test artifacts, not a release or new device acceptance. Pro TwentySeasons/SourcedFiveSeasons and College DynastyHealthTests/OvrCalibrationDynastyTests remain excluded in these standard scopes. Both native/device jobs were intentionally disabled; no PR or main merge was created.
+
+
+## Team profile presentation corrections
+
+College prestige and academics now use labeled progress bars without /99; the team browser banner also drops the denominator. College and Pro team profiles use shared numeric 3-4/4-3 labels. Pro team-directory coaching, medical and scout names link to profiles, including opposing teams. Both Android Compile targets pass; College zero warnings/errors, Pro zero errors and two existing nullable warnings. Full packaging was stopped to keep this presentation check scoped; no new APK or native visual acceptance is claimed.
