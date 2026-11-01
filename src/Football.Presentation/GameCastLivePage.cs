@@ -19,7 +19,9 @@ public class GameCastLivePage : ContentPage
     readonly Dictionary<string, Label> teamNames = new();
     readonly Grid header = new();
     readonly Grid footer = new();
-    readonly ActionRow toolbar = new();
+    readonly ContentView toolbar = new();
+    readonly ActionRow standardToolbar = new();
+    readonly HorizontalStackLayout compactToolbar = new() { Spacing = 8, VerticalOptions = LayoutOptions.Center };
     bool? compactFooter;
     readonly VerticalStackLayout headerInfo = new() { Spacing = 2, VerticalOptions = LayoutOptions.Center };
     readonly Label callHeading = TextHeading("NEXT CALL");
@@ -109,7 +111,8 @@ public class GameCastLivePage : ContentPage
         recap = new() { Content = new ScrollView { Content = recent }, Padding = 12, StrokeThickness = 0,
             BackgroundColor = DynastyTheme.Surface, AutomationId = "live-recent-plays" };
         body.Add(fieldFrame); body.Add(sheet); body.Add(recap);
-        toolbar.Add(pause); toolbar.Add(takeOver); toolbar.Add(team); toolbar.Add(options); toolbar.Add(replaySkip);
+        standardToolbar.Add(pause); standardToolbar.Add(takeOver); standardToolbar.Add(team); standardToolbar.Add(options); standardToolbar.Add(replaySkip);
+        toolbar.Content = standardToolbar;
         footer.Add(commentary); footer.Add(toolbar);
         var status = new Grid { ColumnSpacing = 8, ColumnDefinitions = new() { new(GridLength.Star), new(GridLength.Auto) } };
         status.Add(ownership, 0, 0); status.Add(state, 1, 0);
@@ -203,6 +206,11 @@ public class GameCastLivePage : ContentPage
         if (compactFooter != fieldOnly)
         {
             compactFooter = fieldOnly;
+            toolbar.Content = null;
+            standardToolbar.Children.Clear(); compactToolbar.Children.Clear();
+            Layout target = fieldOnly ? compactToolbar : standardToolbar;
+            foreach (var button in new[] { pause, takeOver, team, options, replaySkip }) target.Add(button);
+            toolbar.Content = target;
             footer.RowDefinitions.Clear(); footer.ColumnDefinitions.Clear();
             footer.RowDefinitions.Add(new(GridLength.Auto)); footer.ColumnDefinitions.Add(new(GridLength.Star));
             if (fieldOnly) footer.ColumnDefinitions.Add(new(GridLength.Auto)); else footer.RowDefinitions.Add(new(GridLength.Auto));

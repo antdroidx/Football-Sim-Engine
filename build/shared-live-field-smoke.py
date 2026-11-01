@@ -62,6 +62,10 @@ try:
         menu();click('Watch both sides');r=pause()
         wide=box(r,'live-field')
         assert wide[2]-wide[0] > (manual[2]-manual[0])*1.35,(manual,wide)
+        page=box(r,'live-game-page')
+        assert wide[3]-wide[1] >= (manual[3]-manual[1])*.95,(manual,wide)
+        assert wide[3]-wide[1] >= (page[3]-page[1])*.35,(page,wide)
+        assert (page[3]-box(r,'live-pause')[1]) < (page[3]-page[1])*.25,(page,box(r,'live-pause'))
         assert not has(r,'live-call-sheet') and not has(r,'live-recent-plays')
         assert has(r,'game-day-score') and box(r,'live-pause')[1]>=wide[3]
         s.capture(prefix+'full-field-paused');check('full-field-with-scorebug-and-pause-below')
