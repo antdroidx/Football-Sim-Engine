@@ -12,6 +12,7 @@ public sealed partial class ProLivePage : ContentPage
     readonly Label awayScore = Hud(25, true), homeScore = Hud(25, true), awayTimeouts = Hud(11), homeTimeouts = Hud(11);
     readonly Label situation = Hud(13, true), possession = Hud(11), commentary = Hud(14);
     readonly Label clockLabel = Hud(13, true), downLabel = Hud(13, true), ballLabel = Hud(13, true);
+    readonly Border highlight; readonly Label highlightText;
     VerticalStackLayout? playSheetRef; ActionRow? quickActionsRef; Border? liveSheetRef;
     readonly Grid field = new() { IsClippedToBounds = true, AutomationId = "pro-live-field" };
     readonly AbsoluteLayout players = new();
@@ -39,7 +40,7 @@ public sealed partial class ProLivePage : ContentPage
         speed = Math.Clamp(speed, .5, 2); replaySpeed = Math.Clamp(replaySpeed, .5, 2);
         var home = league.Teams.Single(t => t.Name == session.Game.HomeTeamName); var away = league.Teams.Single(t => t.Name == session.Game.AwayTeamName);
         art = new() { HomeName = home.City.ToUpperInvariant(), HomeInitial = home.Abbreviation, HomeColor = Color.FromArgb(home.Primary), HomeSecondaryColor = Color.FromArgb(home.Secondary), HashMarkFraction = .30, Weather = session.Weather };
-        turf = new() { Drawable = art, InputTransparent = true }; field.Add(turf); field.Add(players); field.Add(replayChip);
+        turf = new() { Drawable = art, InputTransparent = true }; highlight = GameCastHighlight.Create(out highlightText); field.Add(turf); field.Add(players); field.Add(highlight); field.Add(replayChip);
         var header = new Grid { ColumnSpacing=6, ColumnDefinitions=new(){new(GridLength.Star),new(new GridLength(0))}, RowDefinitions=new(){new(GridLength.Auto),new(GridLength.Auto),new(GridLength.Auto)} };
         var scoreboard=GameCastScoreboard.Create(
             GameCastScoreboard.Team(new TeamBadgeView(away, 30), new Label { Text = away.Abbreviation, FontSize = 13, FontAttributes = FontAttributes.Bold }, awayScore, awayTimeouts),
@@ -111,15 +112,7 @@ public sealed partial class ProLivePage : ContentPage
             header.ColumnDefinitions[0].Width=new GridLength(landscape?2:1,GridUnitType.Star);
             header.ColumnDefinitions[1].Width=landscape?GridLength.Star:new GridLength(0);
             // Keep the field near its real 1.76:1 playing-surface ratio instead of stretching to the row.
-            if(landscape){fieldBorder.HeightRequest=-1;fieldBorder.WidthRequest=-1;fieldBorder.HorizontalOptions=LayoutOptions.Fill;}
-            else
-            {
-                var ratioHeight=(Math.Max(0,Width-12))/1.76;
-                var fieldHeight=Math.Max(140,Math.Min(ratioHeight,Height*0.55));
-                fieldBorder.HeightRequest=fieldHeight;
-                fieldBorder.WidthRequest=fieldHeight*1.76;
-                fieldBorder.HorizontalOptions=LayoutOptions.Center;
-            }
+            GameCastFieldLayout.Apply(fieldBorder, Width, Height, landscape, .55);
             if(initialized&&!working&&!pending)UpdateQuickCalls();
             FrameCamera();
         };
@@ -160,7 +153,11 @@ public sealed partial class ProLivePage : ContentPage
             last = ProLiveControl.Step(session, offense, defense);
             offense = defense = null;
             await Animate(last, false);
+            await GameCastHighlight.ShowAsync(highlight, highlightText, session, last, team => Color.FromArgb(league.Teams.Single(t => t.Name == team).Primary));
             if (autoReplays && !pending && GameDayLivePresentation.InstantReplay(last)) await Replay(last);
+            var period = GameDayAnimationPlanner.PeriodHeadline(last.Quarter, session.Quarter, session.IsComplete);
+            if (period is not null) await GameCastHighlight.ShowAsync(highlight, highlightText, session, last, team => Color.FromArgb(league.Teams.Single(t => t.Name == team).Primary), period);
+            if ((last.Quarter < session.Quarter || last.TimeoutTeamName is not null) && session.Mode == GameDayMode.Watch) paused = true;
             if (session.Mode == GameDayMode.Play && !session.IsComplete) selected.Text = "Coach mode · choose plays, then Next snap";
             commentary.Text = GameDayCommentaryService.Describe(last, session.PlayersById);
             if (session.IsComplete) await Commit();

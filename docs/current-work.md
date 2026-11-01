@@ -458,3 +458,7 @@ Both live menus now expose depth chart, box score, weather, view/camera/speed/re
 ## Live control parity
 
 Pro gains offensive/defensive delegation and a depth-chart/substitution entry. GameDaySession carries DelegateOffense/DelegateDefense; ProLiveControl respects both. College removes sprite/circle and position/number toggles: sprites and jersey numbers are always on. Live menus now share depth chart/substitutions, box score, weather, offensive/defensive control, replay, watch/takeover and exit actions.
+
+## Shared live presentation core
+
+Added GameCastHighlight and GameCastFieldLayout in Football.Presentation. Both live viewers now use the same touchdown/timeout/period banners and the same portrait field aspect policy. Pro gains the College highlight choreography and halftime timeout pause in watch mode.

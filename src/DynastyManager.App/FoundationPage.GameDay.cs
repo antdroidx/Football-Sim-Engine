@@ -464,13 +464,7 @@ public sealed partial class FoundationPage
             if (quickCalls.Parent is Layout oldQuick) oldQuick.Children.Remove(quickCalls);
             tray.Children.Clear(); tray.Children.Add(quickCalls); tray.Children.Add(controls);
             var body = new Grid { RowDefinitions = new RowDefinitionCollection { new(GridLength.Star), new(GridLength.Auto) } };
-            if (!compact)
-            {
-                var ratioHeight = Math.Max(140, Math.Min(Math.Max(0, page.Width - 8) / 1.76, page.Height * 0.52));
-                fieldFrame.HeightRequest = ratioHeight; fieldFrame.WidthRequest = ratioHeight * 1.76;
-                fieldFrame.HorizontalOptions = LayoutOptions.Center;
-            }
-            else { fieldFrame.HeightRequest = -1; fieldFrame.WidthRequest = -1; fieldFrame.HorizontalOptions = LayoutOptions.Fill; }
+            GameCastFieldLayout.Apply(fieldFrame, page.Width, page.Height, compact, .52);
             body.Add(fieldFrame, 0, 0); body.Add(traySurface, 0, 1); body.Add(pickerLayer, 0, 0);
             Grid.SetRowSpan(pickerLayer, 2);
             var root = new Grid { Padding = 4, RowSpacing = 3, RowDefinitions =
@@ -574,33 +568,7 @@ public sealed partial class FoundationPage
             UseSprites = () => useSprites, ShowCarrierNames = () => showCarrierNames, CameraMode = () => cameraMode,
             FrameCamera = FrameCamera, GameSpeed = gameSpeed, ReplaySpeed = replaySpeed
         }, snap, instantReplay);
-        async Task ShowHighlightAsync(GameSnapEvent snap, string? period = null)
-        {
-            if (viewerClosed) return;
-            var headline = period ?? (snap.IsTouchback ? $"TOUCHBACK\nBall at {(snap.Outcome == SnapOutcome.Kickoff ? 25 : 20)}" : snap.Points >= 6 ? "TOUCHDOWN" : snap.Outcome == SnapOutcome.ClockStoppage
-                ? snap.TimeoutTeamName is not null ? "TIMEOUT" : snap.Description?.Contains("Two-minute", StringComparison.OrdinalIgnoreCase) == true ? "TWO-MINUTE TIMEOUT" : null
-                : GameDayAnimationPlanner.OutcomeHeadline(snap.Outcome));
-            if (headline is null) return;
-            var penalty = GameDayCommentaryService.Penalty(snap);
-            var team = snap.TimeoutTeamName ?? penalty?.TeamName ?? LiveFootballChoreography.NotificationTeam(snap);
-            highlightText.Text = snap.TimeoutTeamName is not null && period is null
-                ? $"TIMEOUT\n{snap.TimeoutTeamName}\n{(team == game.HomeTeamName ? snap.HomeTimeoutsRemaining : snap.AwayTimeoutsRemaining)} remaining" : period is null ? penalty?.Banner ?? $"{headline}\n{team}" : $"{headline}\n{game.AwayTeamName} {session.AwayScore} - {session.HomeScore} {game.HomeTeamName}";
-            highlight.BackgroundColor = TeamColor(team);
-            var color = TeamColor(team);
-            highlightText.TextColor = color.Red * .2126 + color.Green * .7152 + color.Blue * .0722 > .55 ? Colors.Black : Colors.White;
-            highlight.Opacity = 0;
-            highlight.Scale = .72;
-            highlight.IsVisible = true;
-            var completion = new TaskCompletionSource();
-            new Animation(progress =>
-            {
-                highlight.Opacity = progress < .25 ? progress / .25 : progress > .82 ? (1 - progress) / .18 : 1;
-                highlight.Scale = .72 + Math.Min(1, progress / .30) * .28 + Math.Sin(progress * Math.PI * 2) * .025;
-            }).Commit(highlight, "game-highlight", 16, penalty is not null && period is null ? 2100u : 1250u, Easing.CubicOut,
-                (_, _) => completion.TrySetResult());
-            await completion.Task;
-            highlight.IsVisible = false;
-        }
+        async Task ShowHighlightAsync(GameSnapEvent snap, string? period = null) => await GameCastHighlight.ShowAsync(highlight, highlightText, session, snap, TeamColor, period);
         bool ControlledOnOffense() => session.PossessionTeamName.Equals(controlledTeamName, StringComparison.OrdinalIgnoreCase);
         bool NeedsUserCall() => session.Mode == GameDayMode.Play && !session.IsComplete && !session.KickoffPending &&
             (ControlledOnOffense() ? !coachCallsOffense : !coachCallsDefense);
