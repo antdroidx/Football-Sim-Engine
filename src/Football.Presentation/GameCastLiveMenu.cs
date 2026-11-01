@@ -13,6 +13,8 @@ public static class GameCastLiveMenu
         Func<Task>? weather = null,
         Func<Task>? offenseControl = null,
         Func<Task>? defenseControl = null,
+        string offenseControlLabel = "Offense control",
+        string defenseControlLabel = "Defense control",
         Func<Task>? coachTalk = null,
         Func<Task>? instantReplay = null,
         Func<Task>? viewingOptions = null,
@@ -26,8 +28,8 @@ public static class GameCastLiveMenu
         Add("Depth chart & substitutions", depthChart);
         Add("Box score", boxScore);
         Add("Weather", weather);
-        Add("Offense control", offenseControl);
-        Add("Defense control", defenseControl);
+        Add(offenseControlLabel, offenseControl);
+        Add(defenseControlLabel, defenseControl);
         Add("Coach talk", coachTalk);
         Add("Instant replay", instantReplay);
         Add("Viewing options", viewingOptions);

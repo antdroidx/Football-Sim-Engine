@@ -67,18 +67,21 @@ public sealed partial class ProLivePage : ContentPage
         takeoverButton = Make("Take over", TakeOver, primary);
         watchingButton = Hidden("Watch CPU vs CPU", () => { session.Mode = GameDayMode.Watch; pauseAfterAction = false; selected.Text = "CPU recommended calls"; return Task.CompletedTask; });
         Hidden("Depth chart", DepthChart);
+        var teamButton = Make("Team", DepthChart, quickActions);
         timeoutButton = Make("Timeout", () => { if (!GameDayEngine.TryCallTimeout(session, session.ControlledTeamName!)) selected.Text = "Timeout unavailable"; return Task.CompletedTask; }, quickActions);
         secondButton = Hidden("Team · second unit", () => { second = !second; GameDayCoachingService.UseSecondUnit(session, session.ControlledTeamName!, second); selected.Text = second ? "Second team on field" : "Starters on field"; return Task.CompletedTask; });
         talkButton = Hidden("Coach talk", CoachTalk);
         Hidden("Box score", ShowBox);
         finishButton = Hidden("Finish game", async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); });
-        var more = Make("More", async () => {
+        var more = Make("Options", async () => {
             var actions = GameCastLiveMenu.Build(
                 depthChart: DepthChart,
                 boxScore: ShowBox,
                 weather: () => GameDialogs.AlertAsync(this, "Game conditions", session.Weather.Summary, "Close"),
-                offenseControl: () => { session.DelegateOffense = !session.DelegateOffense; selected.Text = session.DelegateOffense ? "Offense delegated to coordinator" : "You call the offense"; Update(); return Task.CompletedTask; },
-                defenseControl: () => { session.DelegateDefense = !session.DelegateDefense; selected.Text = session.DelegateDefense ? "Defense delegated to coordinator" : "You call the defense"; Update(); return Task.CompletedTask; },
+                offenseControl: () => { session.DelegateOffense = !session.DelegateOffense; var message = session.DelegateOffense ? "Offense is now called by your coordinator" : "You now call the offense"; selected.Text = message; commentary.Text = message; Update(); return Task.CompletedTask; },
+                defenseControl: () => { session.DelegateDefense = !session.DelegateDefense; var message = session.DelegateDefense ? "Defense is now called by your coordinator" : "You now call the defense"; selected.Text = message; commentary.Text = message; Update(); return Task.CompletedTask; },
+                offenseControlLabel: "Offense control: " + (session.DelegateOffense ? "Coordinator" : "You"),
+                defenseControlLabel: "Defense control: " + (session.DelegateDefense ? "Coordinator" : "You"),
                 coachTalk: CoachTalk,
                 instantReplay: last is null ? null : () => Replay(last),
                 viewingOptions: ViewingOptions,

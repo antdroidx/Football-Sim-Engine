@@ -873,12 +873,14 @@ public sealed partial class FoundationPage
         {
             if (!controlsOffense) return;
             coachCallsOffense = !coachCallsOffense; Refresh();
+            result.Text = coachCallsOffense ? "Offense is now called by your coordinator." : "You now call the offense.";
             if (coachCallsOffense) await RunCpuUntilUserDecision();
         };
         delegateDefense.Clicked += async (_, _) =>
         {
             if (!controlsDefense) return;
             coachCallsDefense = !coachCallsDefense; Refresh();
+            result.Text = coachCallsDefense ? "Defense is now called by your coordinator." : "You now call the defense.";
             if (coachCallsDefense) await RunCpuUntilUserDecision();
         };
         watch.Clicked += async (_, _) =>

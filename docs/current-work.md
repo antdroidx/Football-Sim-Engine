@@ -466,3 +466,7 @@ Added GameCastHighlight and GameCastFieldLayout in Football.Presentation. Both l
 ## Shared live menu and snap presentation
 
 Football.Presentation now owns GameCastLiveMenu (canonical action ordering) and GameCastSnapPresentation (animate → highlight → auto replay → period break). Pro uses both directly; College already uses GameCastHighlight and GameCastFieldLayout. This is the first structural step toward a common live-view shell while app adapters continue to supply data, coaches, playbooks and save/return behavior.
+
+## Live control feedback and row parity
+
+Pro live menu now shows Offense/Defense control state (You vs Coordinator), confirms delegation in status and commentary, and exposes a Team shortcut alongside Choose play, Timeout and Options. College shows the same delegation confirmations in its play-by-play strip. Shared menu supports dynamic control labels.
