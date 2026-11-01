@@ -81,6 +81,8 @@ public sealed class GameDaySession
 {
     public FootballRules Rules { get; init; } = FootballRules.College;
     public StaffRole UserCoachRole { get; set; } = StaffRole.HeadCoach;
+    public bool DelegateOffense { get; set; }
+    public bool DelegateDefense { get; set; }
     public Dictionary<string, int> LineupResetAt { get; } = new();
     public HashSet<string> SecondUnits { get; } = new(StringComparer.Ordinal);
     public Dictionary<(string Team, Position Position), Guid> ManualStarters { get; } = new();

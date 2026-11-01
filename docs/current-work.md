@@ -454,3 +454,7 @@ College watch mode keeps only Pause reachable during CPU snaps. Options remains 
 ## Live menu parity
 
 Both live menus now expose depth chart, box score, weather, view/camera/speed/replay/name options, coaching controls, watch/pause/takeover, timeout, instant replay and exit actions. Pro gains explicit Box score and Weather entries; College gains player markers/style, depth-chart/substitution, offensive/defensive control and watch/takeover entries in its Options sheet. No category headers.
+
+## Live control parity
+
+Pro gains offensive/defensive delegation and a depth-chart/substitution entry. GameDaySession carries DelegateOffense/DelegateDefense; ProLiveControl respects both. College removes sprite/circle and position/number toggles: sprites and jersey numbers are always on. Live menus now share depth chart/substitutions, box score, weather, offensive/defensive control, replay, watch/takeover and exit actions.

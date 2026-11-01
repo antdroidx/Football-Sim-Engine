@@ -233,11 +233,11 @@ public sealed partial class FoundationPage
         carrierToggle.Clicked += (_, _) => { showCarrierNames = !showCarrierNames;
             Microsoft.Maui.Storage.Preferences.Default.Set("live-player-labels", showCarrierNames);
             carrierToggle.Text = showCarrierNames ? "Player names: On" : "Player names: Off"; };
-        var showNumbers = Microsoft.Maui.Storage.Preferences.Default.Get("live-jersey-numbers", false);
+        var showNumbers = true;
         var markerLabels = new Dictionary<Label, DynastyPlayer?>();
         var spritePlayers = new Dictionary<FootballSpriteView, DynastyPlayer?>();
         var activeBallOwners = new HashSet<Guid>();
-        var useSprites = Microsoft.Maui.Storage.Preferences.Default.Get("live-football-sprites", true);
+        var useSprites = true;
         var spriteMode = new Button { Text = useSprites ? "Players: Sprites" : "Players: Circles" };
         var markerHosts = new Dictionary<Border, (DynastyPlayer? Player, Color Primary, Color Secondary, bool Away)>();
         var numbers = new Button { Text = showNumbers ? "Markers: Numbers" : "Markers: Positions" };
@@ -1040,7 +1040,7 @@ public sealed partial class FoundationPage
             try
             {
                 if (team) { await currentSnapFinished; await ShowTeamAsync(); return; }
-                var menu = new List<string> { "Camera", "Game speed", "Replay speed", "Automatic replays", "Player labels", "Player markers", "Player style", "Depth chart & substitutions", "Box score", "Weather" };
+                var menu = new List<string> { "Camera", "Game speed", "Replay speed", "Automatic replays", "Player labels", "Depth chart & substitutions", "Box score", "Weather" };
                 if (!session.IsComplete) menu.AddRange(new[] { "Offensive control", "Defensive control", "Watch CPU / Take over", "Timeout", "Instant replay", "Skip to end" });
                 var selected = await GameDialogs.ActionSheetAsync(page, "GameCast options", "Close", null, menu.ToArray());
                 if (selected == "Camera")
@@ -1070,8 +1070,6 @@ public sealed partial class FoundationPage
                 else if (selected == "Watch CPU vs CPU") (watch as IButtonController)?.SendClicked();
                 else if (selected == "Take over") (takeover as IButtonController)?.SendClicked();
                 else if (selected == "Skip to end") (skip as IButtonController)?.SendClicked();
-                else if (selected == "Player markers") (numbers as IButtonController)?.SendClicked();
-                else if (selected == "Player style") (spriteMode as IButtonController)?.SendClicked();
                 else if (selected == "Depth chart & substitutions") (teamControl as IButtonController)?.SendClicked();
                 else if (selected == "Offensive control") (delegateOffense as IButtonController)?.SendClicked();
                 else if (selected == "Defensive control") (delegateDefense as IButtonController)?.SendClicked();

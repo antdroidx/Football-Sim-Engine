@@ -72,15 +72,19 @@ public sealed partial class ProLivePage : ContentPage
         Hidden("Box score", ShowBox);
         finishButton = Hidden("Finish game", async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); });
         var more = Make("More", async () => {
-            var menu = new List<string> { "Depth chart", "Box score", "Weather", "Second unit", "Coach talk" };
+            var menu = new List<string> { "Depth chart & substitutions", "Box score", "Weather", "Second unit", "Coach talk",
+                "Offense control: " + (session.DelegateOffense ? "Coordinator" : "You"),
+                "Defense control: " + (session.DelegateDefense ? "Coordinator" : "You") };
             if (last is not null) menu.Add("Instant replay");
             menu.Add("Viewing options");
             menu.Add(session.Mode == GameDayMode.Watch ? "Take over" : "Watch CPU");
             if (!session.IsComplete) menu.Add("Finish game");
             menu.Add("Return to franchise");
             var pick = await GameDialogs.ActionSheetAsync(this, "Game menu", "Cancel", null, menu.ToArray());
+            if (pick?.StartsWith("Offense control", StringComparison.Ordinal) == true) { session.DelegateOffense = !session.DelegateOffense; selected.Text = session.DelegateOffense ? "Offense delegated to coordinator" : "You call the offense"; Update(); return; }
+            if (pick?.StartsWith("Defense control", StringComparison.Ordinal) == true) { session.DelegateDefense = !session.DelegateDefense; selected.Text = session.DelegateDefense ? "Defense delegated to coordinator" : "You call the defense"; Update(); return; }
             Func<Task>? action = pick switch {
-                "Depth chart" => DepthChart,
+                "Depth chart & substitutions" => DepthChart,
                 "Box score" => ShowBox,
                 "Weather" => () => GameDialogs.AlertAsync(this, "Game conditions", session.Weather.Summary, "Close"),
                 "Second unit" => () => { second = !second; GameDayCoachingService.UseSecondUnit(session, session.ControlledTeamName!, second); selected.Text = second ? "Second team on field" : "Starters on field"; return Task.CompletedTask; },
