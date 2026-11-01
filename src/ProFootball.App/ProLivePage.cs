@@ -71,27 +71,23 @@ public sealed partial class ProLivePage : ContentPage
         talkButton = Hidden("Coach talk", CoachTalk);
         Hidden("Box score", ShowBox);
         finishButton = Hidden("Finish game", async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); });
-        Hidden("Return to franchise", CloseCore);
         var more = Make("More", async () => {
-            var groups = new List<string> { "PLAY & PERSONNEL" };
-            if (offenseButton.IsVisible) groups.Add("Call a different play");
-            if (defenseButton.IsVisible) groups.Add("Call a different defense");
-            groups.Add("Depth chart"); groups.Add("Team · second unit"); groups.Add("Coach talk");
-            groups.Add("GAME CONTROL"); groups.Add("Timeout"); groups.Add("Instant replay"); groups.Add("Watch CPU vs CPU"); groups.Add("Take over");
-            groups.Add("VIEW & AUDIO"); groups.Add("Viewing options"); groups.Add("Speed"); groups.Add("Box score");
-            groups.Add("GAME FLOW"); groups.Add("Finish game"); groups.Add("Return to franchise");
-            var pick = await GameDialogs.ActionSheetAsync(this, "Game menu", "Cancel", null, groups.ToArray());
+            var menu = new List<string> { "Depth chart", "Second unit", "Coach talk" };
+            if (last is not null) menu.Add("Instant replay");
+            menu.Add("Viewing options");
+            menu.Add(session.Mode == GameDayMode.Watch ? "Take over" : "Watch CPU");
+            if (!session.IsComplete) menu.Add("Finish game");
+            menu.Add("Return to franchise");
+            var pick = await GameDialogs.ActionSheetAsync(this, "Game menu", "Cancel", null, menu.ToArray());
             Func<Task>? action = pick switch {
-                "Call a different play" => () => Playbook(false),
-                "Call a different defense" => () => Playbook(true),
                 "Depth chart" => DepthChart,
-                "Team · second unit" => () => { second = !second; GameDayCoachingService.UseSecondUnit(session, session.ControlledTeamName!, second); selected.Text = second ? "Second team on field" : "Starters on field"; return Task.CompletedTask; },
+                "Second unit" => () => { second = !second; GameDayCoachingService.UseSecondUnit(session, session.ControlledTeamName!, second); selected.Text = second ? "Second team on field" : "Starters on field"; return Task.CompletedTask; },
                 "Coach talk" => CoachTalk,
-                "Timeout" => () => { if (!GameDayEngine.TryCallTimeout(session, session.ControlledTeamName!)) selected.Text = "Timeout unavailable"; return Task.CompletedTask; },
                 "Instant replay" => async () => { if (last is not null) await Replay(last); },
-                "Watch CPU vs CPU" => () => { session.Mode = GameDayMode.Watch; pauseAfterAction = false; return Task.CompletedTask; },
-                "Take over" => TakeOver, "Viewing options" => ViewingOptions, "Speed" => ChooseSpeed,
-                "Box score" => ShowBox, "Finish game" => async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); },
+                "Viewing options" => ViewingOptions,
+                "Watch CPU" => () => { session.Mode = GameDayMode.Watch; pauseAfterAction = false; return Task.CompletedTask; },
+                "Take over" => TakeOver,
+                "Finish game" => async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); },
                 "Return to franchise" => CloseCore, _ => null };
             if (action is not null) await action();
         }, quickActions);
@@ -184,11 +180,15 @@ public sealed partial class ProLivePage : ContentPage
         downLabel.Text = session.IsComplete ? (saved ? "Saved" : "Save pending") : session.KickoffPending ? "Kickoff" : $"{session.Down} & {session.Distance}";
         ballLabel.Text = session.IsComplete ? "" : session.KickoffPending ? $"{Short(session.PossessionTeamName)} receives" : GameDayEngine.BallOn(session, Short);
         possession.Text = session.IsComplete ? "Final" : (session.Mode == GameDayMode.Watch ? "" : "Controlling " + Short(session.ControlledTeamName!) + " · ") + Short(session.PossessionTeamName) + " possession · " + (session.Mode == GameDayMode.Watch ? "Watching CPU vs CPU" : CoordinatorMode ? CpuUnit ? "CPU handling opposite unit" : "Your unit · choose calls" : "Coach mode");
-        var inPlay = working || pending || replaying; if (liveSheetRef is not null) liveSheetRef.IsVisible = !inPlay;
+        var inPlay = working || pending || replaying;
         var watch = session.Mode == GameDayMode.Watch;
+        // CPU watch keeps its Pause control reachable even while a snap animates.
+        if (liveSheetRef is not null) liveSheetRef.IsVisible = !inPlay || watch || CpuUnit;
+        if (playSheetRef is not null) playSheetRef.IsVisible = !inPlay;
+        if (quickActionsRef is not null) quickActionsRef.IsVisible = !inPlay;
         next.IsVisible = !watch && !session.IsComplete && (!CpuUnit || paused || session.KickoffPending); next.Text = session.KickoffPending ? "Kickoff" : "Call play"; next.IsEnabled = !working && !pending;
         pause.IsVisible = (watch || CoordinatorMode) && !session.IsComplete; pause.Text = CoordinatorMode ? paused ? "Resume CPU unit" : "Pause CPU unit" : paused ? "Resume watch" : "Pause watch";
-        takeoverButton.IsVisible = watch && !session.IsComplete; watchingButton.IsVisible = !watch && !session.IsComplete;
+        takeoverButton.IsVisible = watch && !session.IsComplete && !inPlay; watchingButton.IsVisible = !watch && !session.IsComplete;
         offenseButton.IsVisible = ProLiveControl.CanCall(session, false);
         defenseButton.IsVisible = ProLiveControl.CanCall(session, true);
         var availability = GameDayCoachingService.TalkAvailability(session, session.ControlledTeamName!);

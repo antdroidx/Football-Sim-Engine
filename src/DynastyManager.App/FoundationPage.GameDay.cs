@@ -343,14 +343,17 @@ public sealed partial class FoundationPage
                 action.IsEnabled = !animating;
             controls.IsEnabled = !skipPending && !finalizing && !closingViewer;
             // During a live snap the field and commentary take the full screen; only replay keeps Skip reachable.
-            traySurface.IsVisible = !animating || replay is not null;
+            traySurface.IsVisible = !animating || replay is not null || session.Mode == GameDayMode.Watch;
             boxScore.IsEnabled = !skipPending && !finalizing && !closingViewer && !boxScoreOpen;
             // Skip remains reachable during Watch animations; its handler waits for the current play.
             skip.IsEnabled = !skipPending && !finalizing && !session.IsComplete;
             skip.Text = skipPending ? "Please wait…" : "Skip to end";
             close.Text = session.IsComplete && !completion.IsSaved && !finalizing ? "Retry save" : "Close";
             close.IsEnabled = !skipPending && !finalizing && !animating && !closingViewer;
-            if (animating) { quickCalls.IsVisible = false; playCard.IsVisible = defenseCard.IsVisible = false; moreOpen = false; ClosePicker(); }
+            if (animating) { quickCalls.IsVisible = false; playCard.IsVisible = defenseCard.IsVisible = false; moreOpen = false; ClosePicker();
+                // CPU watch keeps only Pause reachable while the snap animates.
+                watch.IsVisible = session.Mode == GameDayMode.Watch;
+                options.IsVisible = teamControl.IsVisible = replayLast.IsVisible = false; }
         }
         more.Clicked += (_, _) => { moreOpen = !moreOpen; UpdateOverlay(); };
         void UpdateQuickCalls()

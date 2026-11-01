@@ -444,3 +444,9 @@ Timeout counters now render as College-style dots. More-menu actions execute dir
 ## College live viewer parity
 
 College portrait field frame now uses the same 1.76:1 ratio and height cap as Pro. The redundant More button was removed; its actions are merged into the working Options sheet: Timeout, Instant replay, Watch CPU, Take over, Skip to end, plus existing camera/speed/labels/box score/weather/team entries. Options no longer waits for the current snap before opening.
+
+## Live watch pause and menu cleanup
+
+Pro watch mode keeps the Pause control visible while a CPU snap animates; Take over stays hidden until paused. More is now a flat logical list without category headers: Depth chart, Second unit, Coach talk, Instant replay, Viewing options, Watch CPU/Take over, Finish game, Return to franchise. Removed duplicated Speed and Box score entries (both live inside Viewing options).
+
+College watch mode keeps only Pause reachable during CPU snaps. Options remains the single menu; redundant More is gone, and Options contains all previously buried actions.
