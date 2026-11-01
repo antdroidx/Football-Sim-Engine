@@ -40,3 +40,8 @@ dotnet build src/ProFootball.App/ProFootball.App.csproj -c Debug -f net10.0-andr
 ```
 
 The verifier normally only reads the catalog and fails on discrepancies. The explicit `--update-catalog` option regenerates its two tables after review. The public games file may change later; compare its SHA-256 with the recorded source before interpreting new differences. Staff metadata varies between new franchises, so repeated current-staff simulation summaries can differ; each audit's three arms share one roster and fixed game seeds.
+
+
+## GitHub Actions APKs
+
+Source `a230948` is now packaged and tested in successful Pro148 run41357049271 and College438 run41357140126. Their401 Pro /760 Core-College cases pass. Both downloaded APK manifests and v2/v3 signatures verify. Exact artifact links, application versions and SHA-256 values are in the [CI build manifest](data/staff-coach-ci-builds-2026-11-01.json). No new device or extended-career result is claimed.
