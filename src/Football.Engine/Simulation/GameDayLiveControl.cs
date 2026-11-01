@@ -18,6 +18,10 @@ public sealed class GameDayLiveControl(GameDaySession session)
     public bool NeedsCall => CanCall(false) || CanCall(true);
     public bool ShouldAdvance => !Session.IsComplete && !IsPaused && !IsBusy && !IsSuspended && !NeedsCall;
     public string Ownership(bool defense) => !Permitted(defense) ? "CPU · role locked" : Manual(defense) ? "You" : "CPU";
+    public string CallerLabel(bool defense) => (defense ? "Defense: " : "Offense: ") + Ownership(defense);
+    public string? Restriction(bool defense) => Permitted(defense) ? null : !HasTeam
+        ? "Choose a participating team before changing play callers."
+        : $"Your career role is {UserCoachControlService.Label(Session.UserCoachRole)}. You call {(defense ? "offense" : "defense")}; the CPU coordinator calls {(defense ? "defense" : "offense")}. Head-coach careers can call both units.";
     public string Status => Session.IsComplete ? "Final" : IsBusy ? IsPaused ? "Pausing after this play" : "Play in progress"
         : IsSuspended ? "Menu open · game held" : IsPaused ? "Paused" : NeedsCall ? "Waiting for your call" : "CPU playing";
     public void Pause() => IsPaused = true;

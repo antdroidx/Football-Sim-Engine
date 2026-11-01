@@ -96,6 +96,29 @@ public class GameDayLiveControlTests
             Outcome = SnapOutcome.Kickoff, IsTouchback = true, BallEndYardLine = yardLine };
         Assert.Contains($"{yardLine}-yard line", GameDayCommentaryService.Describe(snap, c.Session.PlayersById));
     }
+    [Theory]
+    [InlineData(StaffRole.HeadCoach, false, true)]
+    [InlineData(StaffRole.HeadCoach, true, true)]
+    [InlineData(StaffRole.OffensiveCoordinator, true, false)]
+    [InlineData(StaffRole.DefensiveCoordinator, false, false)]
+    public void BothCallerEntriesRemainNamedAndLocksExplainTheCareerRole(StaffRole role, bool defending, bool permitted)
+    {
+        var c = Create(); c.Session.UserCoachRole = role;
+        Assert.StartsWith("Offense: ", c.CallerLabel(false));
+        Assert.StartsWith("Defense: ", c.CallerLabel(true));
+        Assert.Equal(permitted, c.Permitted(defending));
+        if (permitted) Assert.Null(c.Restriction(defending));
+        else { Assert.Contains("role locked", c.CallerLabel(defending)); Assert.Contains(UserCoachControlService.Label(role), c.Restriction(defending)!); }
+    }
+    [Fact] public void HeadCoachDefenseSelectionActuallyReachesTheEngine()
+    {
+        var c = Create(); c.Session.PossessionTeamName = c.Session.Game.AwayTeamName;
+        Assert.True(c.CanCall(true));
+        var choice = PlaybookCatalog.DefensivePlays.First().Id;
+        var snap = c.Step(null, choice);
+        Assert.Equal(choice, snap.DefensivePlayId);
+        Assert.Equal(PlayCallSource.User, snap.DefensiveCallSource);
+    }
     [Fact] public void BusyAndSuspendedStateRejectDuplicateManualSnaps()
     {
         var c = Create(); using(c.Suspend()) Assert.False(c.TryBegin(true));

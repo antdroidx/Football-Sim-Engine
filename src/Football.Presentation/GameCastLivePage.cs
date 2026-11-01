@@ -18,6 +18,9 @@ public class GameCastLivePage : ContentPage
     readonly Label situation = Text(13, true), ownership = Text(11), state = Text(12, true), commentary = Text(13), selection = Text(12, true);
     readonly Dictionary<string, Label> teamNames = new();
     readonly Grid header = new();
+    readonly Grid footer = new();
+    readonly ActionRow toolbar = new();
+    bool? compactFooter;
     readonly VerticalStackLayout headerInfo = new() { Spacing = 2, VerticalOptions = LayoutOptions.Center };
     readonly Label callHeading = TextHeading("NEXT CALL");
     readonly Button pause, call, choose, team, options, takeOver, replaySkip;
@@ -106,16 +109,16 @@ public class GameCastLivePage : ContentPage
         recap = new() { Content = new ScrollView { Content = recent }, Padding = 12, StrokeThickness = 0,
             BackgroundColor = DynastyTheme.Surface, AutomationId = "live-recent-plays" };
         body.Add(fieldFrame); body.Add(sheet); body.Add(recap);
-        var toolbar = new ActionRow { Children = { pause, takeOver, team, options, replaySkip } };
+        toolbar.Add(pause); toolbar.Add(takeOver); toolbar.Add(team); toolbar.Add(options); toolbar.Add(replaySkip);
+        footer.Add(commentary); footer.Add(toolbar);
         var status = new Grid { ColumnSpacing = 8, ColumnDefinitions = new() { new(GridLength.Star), new(GridLength.Auto) } };
         status.Add(ownership, 0, 0); status.Add(state, 1, 0);
         headerInfo.Add(situation); headerInfo.Add(status);
         header.Add(scoreboard); header.Add(headerInfo);
         commentary.MaxLines = 2; commentary.LineBreakMode = LineBreakMode.TailTruncation;
         var layout = new Grid { Padding = 6, RowSpacing = 4, RowDefinitions = new()
-            { new(GridLength.Auto), new(GridLength.Star), new(GridLength.Auto), new(GridLength.Auto) } };
-        layout.Add(header, 0, 0); layout.Add(body, 0, 1);
-        layout.Add(commentary, 0, 2); layout.Add(toolbar, 0, 3);
+            { new(GridLength.Auto), new(GridLength.Star), new(GridLength.Auto) } };
+        layout.Add(header, 0, 0); layout.Add(body, 0, 1); layout.Add(footer, 0, 2);
         var root = new Grid(); root.Add(layout); root.Add(picker); Content = root;
         SizeChanged += (_, _) => Arrange(); body.SizeChanged += (_, _) => FitField(); field.SizeChanged += (_, _) => FrameCamera();
         Loaded += (_, _) => { if (started) return; started = true; art.HomeLogo = host.Logo(session.Game.HomeTeamName); Update(); _ = Pump(); };
@@ -195,13 +198,26 @@ public class GameCastLivePage : ContentPage
             body.RowDefinitions.Add(new(!landscape ? GridLength.Auto : GridLength.Star)); body.ColumnDefinitions.Add(new(GridLength.Star));
             if (landscape) body.ColumnDefinitions.Add(new(new GridLength(0))); else body.RowDefinitions.Add(new(GridLength.Star));
         }
-        if (landscape) body.ColumnDefinitions[1].Width = new GridLength(SidebarWidth);
+        var fieldOnly = landscape && !sheet.IsVisible;
+        if (landscape) body.ColumnDefinitions[1].Width = fieldOnly ? new GridLength(0) : new GridLength(SidebarWidth);
+        if (compactFooter != fieldOnly)
+        {
+            compactFooter = fieldOnly;
+            footer.RowDefinitions.Clear(); footer.ColumnDefinitions.Clear();
+            footer.RowDefinitions.Add(new(GridLength.Auto)); footer.ColumnDefinitions.Add(new(GridLength.Star));
+            if (fieldOnly) footer.ColumnDefinitions.Add(new(GridLength.Auto)); else footer.RowDefinitions.Add(new(GridLength.Auto));
+            Grid.SetColumn(toolbar, fieldOnly ? 1 : 0); Grid.SetRow(toolbar, fieldOnly ? 0 : 1);
+        }
+        var controlsVisible = !fieldOnly || control.IsPaused && !control.IsBusy;
+        team.IsVisible = options.IsVisible = controlsVisible;
+        takeOver.IsVisible = controlsVisible && !session.IsComplete && !control.Manual(false) && !control.Manual(true);
         callHeading.IsVisible = selection.IsVisible = !landscape;
         commentary.MaxLines = landscape ? 1 : 2;
         Grid.SetColumn(sheet, landscape ? 1 : 0); Grid.SetRow(sheet, landscape ? 0 : 1);
         Grid.SetColumn(recap, landscape ? 1 : 0); Grid.SetRow(recap, landscape ? 0 : 1);
-        recap.IsVisible = !sheet.IsVisible;
-        fieldFrame.VerticalOptions = landscape ? LayoutOptions.Center : LayoutOptions.Start;
+        recap.IsVisible = !landscape && !sheet.IsVisible;
+        fieldFrame.VerticalOptions = fieldOnly ? LayoutOptions.Fill : landscape ? LayoutOptions.Center : LayoutOptions.Start;
+        fieldFrame.HorizontalOptions = fieldOnly ? LayoutOptions.Fill : LayoutOptions.Center;
         sheet.MaximumHeightRequest = double.PositiveInfinity;
         if (sheet.IsVisible && control.NeedsCall && !control.IsBusy && !menuOpen) UpdateCalls();
         FitField();
@@ -211,6 +227,12 @@ public class GameCastLivePage : ContentPage
     void FitField()
     {
         if (body.Width <= 0 || body.Height <= 0) return;
+        if (landscape && !sheet.IsVisible)
+        {
+            // Live action uses the entire available viewport; no recap/sidebar reserves field space.
+            fieldFrame.WidthRequest = fieldFrame.HeightRequest = -1;
+            return;
+        }
         var width = Math.Max(80, body.Width - (landscape ? SidebarWidth + 8 : 0));
         var height = !landscape ? width / FieldRatio : Math.Max(70, body.Height);
         var fitWidth = Math.Min(width, height * FieldRatio);
@@ -337,8 +359,8 @@ public class GameCastLivePage : ContentPage
     async Task PlayCalling()
     {
         var choices = new List<string>();
-        if (control.Permitted(false)) choices.Add("Offense: " + control.Ownership(false));
-        if (control.Permitted(true)) choices.Add("Defense: " + control.Ownership(true));
+        choices.Add(control.CallerLabel(false));
+        choices.Add(control.CallerLabel(true));
         choices.Add("Watch both sides"); choices.Add("Take over");
         var selected = await GameDialogs.ActionSheetAsync(this, "Play calling · changes apply before the next snap", "Cancel", null, choices.ToArray());
         if (selected == "Watch both sides") { control.Watch(); offense = defense = null; }
@@ -346,6 +368,11 @@ public class GameCastLivePage : ContentPage
         else if (selected?.StartsWith("Offense:", StringComparison.Ordinal) == true || selected?.StartsWith("Defense:", StringComparison.Ordinal) == true)
         {
             var defending = selected.StartsWith("Defense:", StringComparison.Ordinal);
+            if (control.Restriction(defending) is { } restriction)
+            {
+                await GameDialogs.AlertAsync(this, defending ? "Defense play calling" : "Offense play calling", restriction, "Close");
+                return;
+            }
             var value = await GameDialogs.ActionSheetAsync(this, defending ? "Defense play caller" : "Offense play caller", "Cancel", null, "You", "CPU");
             if (value is "You" or "CPU")
             {
