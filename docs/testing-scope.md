@@ -288,3 +288,12 @@ Result: 57 passed, 0 failed (47 s). CI run 41175520041 success, artifact pro-foo
 
 Pro: dotnet build src/ProFootball.App/ProFootball.App.csproj /p:TargetFramework=net10.0-android (0 errors); dotnet test tests/ProFootball.Tests --filter "...ScoutingDepth|FranchiseDepthAnalytics|ManagementRefinement|SharedRatings|Staff|DepthChart" (64 passed).
 College: dotnet build src/DynastyManager.App/DynastyManager.App.csproj /p:TargetFramework=net10.0-android (0 errors); dotnet test tests/DynastyManager.Core.Tests --filter "CoachCareer|CoachSuccession" (34 passed).
+
+
+## Common live-game screen — November 1, 2026
+
+College and Pro now launch Football.Presentation.GameCastLivePage through small data/save adapters. Football.Engine.GameDayLiveControl owns effective unit ownership, role locks, pause, modal holds and snap guards; ProLiveControl forwards to it. Removed Pro's separate UI/options/quick-call implementation. College's former viewer is guarded for recorded highlights only. Both live apps share the call picker, Team/Options commands, confirmations, save retry and snap/replay pipeline. Added the host contract and integration guide in docs/shared-live-experience.md.
+
+Landscape is the primary layout: compact combined scoreboard/status header, side call sheet with fixed actions, and full-width field while plays run. Portrait keeps an anchored field and switches the lower region between calls and recent plays. Pause/Resume remains reachable in every automatic mode; You/CPU ownership and playback state are distinct. Special plays and conversion restrictions use league rules. Shared touchback commentary/banner now uses the recorded/rules-based spot instead of always saying25.
+
+Focused validation:72 combined common-control/coaching/clock/completion/presentation/commentary cases pass;7 Pro current-unit/coordinator compatibility cases pass;16 UI-helper cases and packaged-resource validation pass. Both Android apps have compiled and packaged locally; final landscape refinements and the common device harness are still being checked. Pro has two pre-existing nullable warnings in franchise navigation. The first College harness attempt passed menu/state checks but missed the transient animation because uiautomator waits for idle; the harness now records animation frames directly. Do not treat that attempt as full device acceptance. Final results/artifact identity will be appended after validation completes. No main merge or release authorized.

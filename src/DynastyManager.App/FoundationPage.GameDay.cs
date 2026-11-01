@@ -11,8 +11,10 @@ namespace DynastyManager.App;
 
 public sealed partial class FoundationPage
 {
-    private async Task OpenGameDayAsync(ScheduledGame game, GameDayMode mode, string? controlledTeamName = null, IReadOnlyList<GameSnapEvent>? replay = null, bool autoReplay = false)
+    private async Task OpenLegacyHighlightsAsync(ScheduledGame game, GameDayMode mode, string? controlledTeamName = null, IReadOnlyList<GameSnapEvent>? replay = null, bool autoReplay = false)
     {
+        // Retained only for archived highlight shows; live games use GameCastLivePage.
+        if (replay is null) return;
         if (_currentDynasty is null || replay is null && !GameDayEngine.IsAvailable(game, _currentDynasty.SeasonYear, _currentDynasty.Week, _currentDynasty.Phase)) return;
         if (controlledTeamName is null && mode == GameDayMode.Play && replay is null && !game.InvolvesTeam(_currentDynasty.UserTeamName))
         {
