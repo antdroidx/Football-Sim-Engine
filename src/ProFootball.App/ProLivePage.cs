@@ -93,7 +93,7 @@ public sealed partial class ProLivePage : ContentPage
                 "Take over" => TakeOver, "Viewing options" => ViewingOptions, "Speed" => ChooseSpeed,
                 "Box score" => ShowBox, "Finish game" => async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); },
                 "Return to franchise" => CloseCore, _ => null };
-            if (action is not null) await Run(action);
+            if (action is not null) await action();
         }, quickActions);
         var playHeading = new Label { Text = "NEXT PLAY", FontSize = 10, FontAttributes = FontAttributes.Bold, TextColor = DynastyTheme.Accent };
         var playSheet = new VerticalStackLayout { Spacing = 6, Children = { playHeading, selected, quickCalls } }; playSheetRef = playSheet;
@@ -178,7 +178,8 @@ public sealed partial class ProLivePage : ContentPage
     {
         string Short(string team) => league.Teams.Single(t => t.Name == team).Abbreviation;
         awayScore.Text = session.AwayScore.ToString(); homeScore.Text = session.HomeScore.ToString();
-        awayTimeouts.Text = $"TO {session.AwayTimeouts}"; homeTimeouts.Text = $"TO {session.HomeTimeouts}";
+        string Dots(int count) => new string('●', count) + new string('○', Math.Max(0, 3 - count));
+        awayTimeouts.Text = Dots(session.AwayTimeouts); homeTimeouts.Text = Dots(session.HomeTimeouts);
         clockLabel.Text = session.IsComplete ? "FINAL" : $"{(session.Quarter > 4 ? "OT" : "Q" + session.Quarter)}  {session.ClockSeconds / 60}:{session.ClockSeconds % 60:00}";
         downLabel.Text = session.IsComplete ? (saved ? "Saved" : "Save pending") : session.KickoffPending ? "Kickoff" : $"{session.Down} & {session.Distance}";
         ballLabel.Text = session.IsComplete ? "" : session.KickoffPending ? $"{Short(session.PossessionTeamName)} receives" : GameDayEngine.BallOn(session, Short);

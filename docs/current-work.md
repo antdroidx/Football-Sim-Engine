@@ -436,3 +436,7 @@ Both games now hide all interactive chrome during a live snap. Pro hides the ent
 ## Pro live control labels and portrait field ratio
 
 Primary action between snaps is now "Call play"; the playbook opener is "Choose play" (or "Choose defense"). Kickoff stays contextual. In portrait, the field frame is constrained to the 1.76:1 playing-surface ratio and centred; landscape keeps the full-width field.
+
+## Pro live scoreboard/menu fixes
+
+Timeout counters now render as College-style dots. More-menu actions execute directly inside the open menu guard instead of re-entering Run, fixing menu choices that previously did nothing.
