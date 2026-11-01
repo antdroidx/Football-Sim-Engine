@@ -440,3 +440,7 @@ Primary action between snaps is now "Call play"; the playbook opener is "Choose 
 ## Pro live scoreboard/menu fixes
 
 Timeout counters now render as College-style dots. More-menu actions execute directly inside the open menu guard instead of re-entering Run, fixing menu choices that previously did nothing.
+
+## College live viewer parity
+
+College portrait field frame now uses the same 1.76:1 ratio and height cap as Pro. The redundant More button was removed; its actions are merged into the working Options sheet: Timeout, Instant replay, Watch CPU, Take over, Skip to end, plus existing camera/speed/labels/box score/weather/team entries. Options no longer waits for the current snap before opening.

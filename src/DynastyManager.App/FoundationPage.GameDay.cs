@@ -291,7 +291,6 @@ public sealed partial class FoundationPage
         var expand = new Button { Text = "Choose play" };
         controls.Children.Insert(1, expand);
         var more = new Button { Text = "More", AutomationId = "game-day-more" };
-        controls.Children.Add(more);
         var tray = new VerticalStackLayout { Spacing = 8, Children = { quickCalls, controls } };
         var trayScroll = new ScrollView { Content = tray, MaximumHeightRequest = 260 };
         var traySurface = new Border { AutomationId = "game-day-controls", StrokeThickness = 0, Padding = 7,
@@ -462,6 +461,13 @@ public sealed partial class FoundationPage
             if (quickCalls.Parent is Layout oldQuick) oldQuick.Children.Remove(quickCalls);
             tray.Children.Clear(); tray.Children.Add(quickCalls); tray.Children.Add(controls);
             var body = new Grid { RowDefinitions = new RowDefinitionCollection { new(GridLength.Star), new(GridLength.Auto) } };
+            if (!compact)
+            {
+                var ratioHeight = Math.Max(140, Math.Min(Math.Max(0, page.Width - 8) / 1.76, page.Height * 0.52));
+                fieldFrame.HeightRequest = ratioHeight; fieldFrame.WidthRequest = ratioHeight * 1.76;
+                fieldFrame.HorizontalOptions = LayoutOptions.Center;
+            }
+            else { fieldFrame.HeightRequest = -1; fieldFrame.WidthRequest = -1; fieldFrame.HorizontalOptions = LayoutOptions.Fill; }
             body.Add(fieldFrame, 0, 0); body.Add(traySurface, 0, 1); body.Add(pickerLayer, 0, 0);
             Grid.SetRowSpan(pickerLayer, 2);
             var root = new Grid { Padding = 4, RowSpacing = 3, RowDefinitions =
@@ -1030,10 +1036,11 @@ public sealed partial class FoundationPage
             boxScoreOpen = true;
             try
             {
-                await currentSnapFinished;
-                if (team) { await ShowTeamAsync(); return; }
-                var selected = await GameDialogs.ActionSheetAsync(page, "GameCast options", "Close", null,
-                    "Camera", "Game speed", "Replay speed", "Automatic replays", "Player labels", "Box score", "Weather", "Team & substitutions");
+                if (team) { await currentSnapFinished; await ShowTeamAsync(); return; }
+                var menu = new List<string> { "Camera", "Game speed", "Replay speed", "Automatic replays", "Player labels" };
+                if (!session.IsComplete) menu.AddRange(new[] { "Timeout", "Instant replay", "Watch CPU vs CPU", "Take over", "Skip to end" });
+                menu.AddRange(new[] { "Box score", "Weather", "Team & substitutions" });
+                var selected = await GameDialogs.ActionSheetAsync(page, "GameCast options", "Close", null, menu.ToArray());
                 if (selected == "Camera")
                 {
                     var choice = await GameDialogs.ActionSheetAsync(page, "Camera", "Cancel", null, "Full field", "Broadcast", "Follow ball");
@@ -1056,6 +1063,11 @@ public sealed partial class FoundationPage
                 else if (selected == "Box score") await ShowLiveBoxScoreAsync(GameDayEngine.BoxScore(session));
                 else if (selected == "Weather") await GameDialogs.AlertAsync(page, "Conditions", session.Weather.Summary, "OK");
                 else if (selected == "Team & substitutions") await ShowTeamAsync();
+                else if (selected == "Timeout") (timeout as IButtonController)?.SendClicked();
+                else if (selected == "Instant replay") (replayLast as IButtonController)?.SendClicked();
+                else if (selected == "Watch CPU vs CPU") (watch as IButtonController)?.SendClicked();
+                else if (selected == "Take over") (takeover as IButtonController)?.SendClicked();
+                else if (selected == "Skip to end") (skip as IButtonController)?.SendClicked();
             }
             finally
             {
