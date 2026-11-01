@@ -73,30 +73,20 @@ public sealed partial class ProLivePage : ContentPage
         Hidden("Box score", ShowBox);
         finishButton = Hidden("Finish game", async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); });
         var more = Make("More", async () => {
-            var menu = new List<string> { "Depth chart & substitutions", "Box score", "Weather", "Second unit", "Coach talk",
-                "Offense control: " + (session.DelegateOffense ? "Coordinator" : "You"),
-                "Defense control: " + (session.DelegateDefense ? "Coordinator" : "You") };
-            if (last is not null) menu.Add("Instant replay");
-            menu.Add("Viewing options");
-            menu.Add(session.Mode == GameDayMode.Watch ? "Take over" : "Watch CPU");
-            if (!session.IsComplete) menu.Add("Finish game");
-            menu.Add("Return to franchise");
-            var pick = await GameDialogs.ActionSheetAsync(this, "Game menu", "Cancel", null, menu.ToArray());
-            if (pick?.StartsWith("Offense control", StringComparison.Ordinal) == true) { session.DelegateOffense = !session.DelegateOffense; selected.Text = session.DelegateOffense ? "Offense delegated to coordinator" : "You call the offense"; Update(); return; }
-            if (pick?.StartsWith("Defense control", StringComparison.Ordinal) == true) { session.DelegateDefense = !session.DelegateDefense; selected.Text = session.DelegateDefense ? "Defense delegated to coordinator" : "You call the defense"; Update(); return; }
-            Func<Task>? action = pick switch {
-                "Depth chart & substitutions" => DepthChart,
-                "Box score" => ShowBox,
-                "Weather" => () => GameDialogs.AlertAsync(this, "Game conditions", session.Weather.Summary, "Close"),
-                "Second unit" => () => { second = !second; GameDayCoachingService.UseSecondUnit(session, session.ControlledTeamName!, second); selected.Text = second ? "Second team on field" : "Starters on field"; return Task.CompletedTask; },
-                "Coach talk" => CoachTalk,
-                "Instant replay" => async () => { if (last is not null) await Replay(last); },
-                "Viewing options" => ViewingOptions,
-                "Watch CPU" => () => { session.Mode = GameDayMode.Watch; pauseAfterAction = false; return Task.CompletedTask; },
-                "Take over" => TakeOver,
-                "Finish game" => async () => { if (!session.IsComplete) await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); },
-                "Return to franchise" => CloseCore, _ => null };
-            if (action is not null) await action();
+            var actions = GameCastLiveMenu.Build(
+                depthChart: DepthChart,
+                boxScore: ShowBox,
+                weather: () => GameDialogs.AlertAsync(this, "Game conditions", session.Weather.Summary, "Close"),
+                offenseControl: () => { session.DelegateOffense = !session.DelegateOffense; selected.Text = session.DelegateOffense ? "Offense delegated to coordinator" : "You call the offense"; Update(); return Task.CompletedTask; },
+                defenseControl: () => { session.DelegateDefense = !session.DelegateDefense; selected.Text = session.DelegateDefense ? "Defense delegated to coordinator" : "You call the defense"; Update(); return Task.CompletedTask; },
+                coachTalk: CoachTalk,
+                instantReplay: last is null ? null : () => Replay(last),
+                viewingOptions: ViewingOptions,
+                modeActionLabel: session.Mode == GameDayMode.Watch ? "Take over" : "Watch CPU",
+                modeAction: session.Mode == GameDayMode.Watch ? TakeOver : () => { session.Mode = GameDayMode.Watch; pauseAfterAction = false; return Task.CompletedTask; },
+                finish: session.IsComplete ? null : async () => { await Task.Run(() => GameDayEngine.SimulateToEnd(session)); await Commit(); },
+                exit: CloseCore);
+            await GameCastLiveMenu.InvokeAsync(this, "Game menu", actions);
         }, quickActions);
         var playHeading = new Label { Text = "NEXT PLAY", FontSize = 10, FontAttributes = FontAttributes.Bold, TextColor = DynastyTheme.Accent };
         var playSheet = new VerticalStackLayout { Spacing = 6, Children = { playHeading, selected, quickCalls } }; playSheetRef = playSheet;
@@ -152,12 +142,13 @@ public sealed partial class ProLivePage : ContentPage
         {
             last = ProLiveControl.Step(session, offense, defense);
             offense = defense = null;
-            await Animate(last, false);
-            await GameCastHighlight.ShowAsync(highlight, highlightText, session, last, team => Color.FromArgb(league.Teams.Single(t => t.Name == team).Primary));
-            if (autoReplays && !pending && GameDayLivePresentation.InstantReplay(last)) await Replay(last);
-            var period = GameDayAnimationPlanner.PeriodHeadline(last.Quarter, session.Quarter, session.IsComplete);
-            if (period is not null) await GameCastHighlight.ShowAsync(highlight, highlightText, session, last, team => Color.FromArgb(league.Teams.Single(t => t.Name == team).Primary), period);
-            if ((last.Quarter < session.Quarter || last.TimeoutTeamName is not null) && session.Mode == GameDayMode.Watch) paused = true;
+            var breakReached = await GameCastSnapPresentation.PresentAsync(new()
+            {
+                Session = session, Snap = last, Highlight = highlight, HighlightText = highlightText,
+                TeamColor = team => Color.FromArgb(league.Teams.Single(t => t.Name == team).Primary),
+                Animate = Animate, Replay = Replay, AutoReplay = autoReplays && !pending
+            });
+            if (breakReached && session.Mode == GameDayMode.Watch) paused = true;
             if (session.Mode == GameDayMode.Play && !session.IsComplete) selected.Text = "Coach mode · choose plays, then Next snap";
             commentary.Text = GameDayCommentaryService.Describe(last, session.PlayersById);
             if (session.IsComplete) await Commit();

@@ -462,3 +462,7 @@ Pro gains offensive/defensive delegation and a depth-chart/substitution entry. G
 ## Shared live presentation core
 
 Added GameCastHighlight and GameCastFieldLayout in Football.Presentation. Both live viewers now use the same touchdown/timeout/period banners and the same portrait field aspect policy. Pro gains the College highlight choreography and halftime timeout pause in watch mode.
+
+## Shared live menu and snap presentation
+
+Football.Presentation now owns GameCastLiveMenu (canonical action ordering) and GameCastSnapPresentation (animate → highlight → auto replay → period break). Pro uses both directly; College already uses GameCastHighlight and GameCastFieldLayout. This is the first structural step toward a common live-view shell while app adapters continue to supply data, coaches, playbooks and save/return behavior.
