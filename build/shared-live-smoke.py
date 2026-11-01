@@ -31,6 +31,10 @@ def ready(name, condition):
     return s.wait_for(prefix + name, safe, timeout=150)
 def click(label):
     root = ready('before-' + re.sub(r'\W+', '-', label), lambda r: label in s.texts(r))
+    node = next(n for n in root.iter('node') if n.get('text') == label)
+    left,top,right,bottom = map(int,re.findall(r'\d+',node.get('bounds')))
+    if right <= left or bottom <= top:
+        root = s.scroll_to_text(prefix+'scroll-'+re.sub(r'\W+','-',label),label,max_swipes=8)
     s.tap(root, label)
 def action(suffix):
     root = ready('before-' + suffix, lambda r: has(r, suffix))
@@ -117,11 +121,16 @@ try:
     checks.append('all-four-ownership-combinations-through-menu')
     options('Play calling'); click('Take over'); manual()
 
-    for rotation, name in [('1','landscape'),('0','portrait')]:
+    for rotation, name in [('0','portrait'),('1','landscape')]:
         s.adb('shell','settings','put','system','accelerometer_rotation','0')
         s.adb('shell','settings','put','system','user_rotation',rotation); time.sleep(2)
         root = manual(); root = s.capture(prefix+name)
         for suffix in ('live-call','live-pause','live-options','live-field'): fit(root,suffix)
+        if name == 'landscape':
+            before = text(root,'live-situation'); action('live-call')
+            time.sleep(.5); Path(prefix+'landscape-active.png').write_bytes(s.adb('exec-out','screencap','-p'))
+            ready('landscape-after-snap',lambda r:has(r,'live-call-sheet') and text(r,'live-situation')!=before)
+            action('live-options'); s.capture(prefix+'landscape-menu'); click('Cancel')
     checks.append('portrait-landscape-actions-fit')
 finally:
     Path(prefix+'result.json').write_text(json.dumps({'checks':checks},indent=2),encoding='utf-8')

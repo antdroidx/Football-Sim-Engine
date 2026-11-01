@@ -195,25 +195,26 @@ public class GameCastLivePage : ContentPage
             body.RowDefinitions.Add(new(!landscape ? GridLength.Auto : GridLength.Star)); body.ColumnDefinitions.Add(new(GridLength.Star));
             if (landscape) body.ColumnDefinitions.Add(new(new GridLength(0))); else body.RowDefinitions.Add(new(GridLength.Star));
         }
-        if (landscape) body.ColumnDefinitions[1].Width = sheet.IsVisible ? new GridLength(SidebarWidth) : new GridLength(0);
+        if (landscape) body.ColumnDefinitions[1].Width = new GridLength(SidebarWidth);
         callHeading.IsVisible = selection.IsVisible = !landscape;
         commentary.MaxLines = landscape ? 1 : 2;
         Grid.SetColumn(sheet, landscape ? 1 : 0); Grid.SetRow(sheet, landscape ? 0 : 1);
-        Grid.SetColumn(recap, 0); Grid.SetRow(recap, 1);
-        recap.IsVisible = !landscape && !sheet.IsVisible;
+        Grid.SetColumn(recap, landscape ? 1 : 0); Grid.SetRow(recap, landscape ? 0 : 1);
+        recap.IsVisible = !sheet.IsVisible;
         fieldFrame.VerticalOptions = landscape ? LayoutOptions.Center : LayoutOptions.Start;
         sheet.MaximumHeightRequest = double.PositiveInfinity;
         if (sheet.IsVisible && control.NeedsCall && !control.IsBusy && !menuOpen) UpdateCalls();
         FitField();
     }
     double SidebarWidth => Math.Clamp(Width * .34, 260, 340);
+    double FieldRatio => 120 / session.Rules.FieldWidthYards;
     void FitField()
     {
         if (body.Width <= 0 || body.Height <= 0) return;
-        var width = Math.Max(80, body.Width - (landscape && sheet.IsVisible ? SidebarWidth + 8 : 0));
-        var height = !landscape ? width / 1.76 : Math.Max(70, body.Height);
-        var fitWidth = Math.Min(width, height * 1.76);
-        fieldFrame.WidthRequest = fitWidth; fieldFrame.HeightRequest = fitWidth / 1.76;
+        var width = Math.Max(80, body.Width - (landscape ? SidebarWidth + 8 : 0));
+        var height = !landscape ? width / FieldRatio : Math.Max(70, body.Height);
+        var fitWidth = Math.Min(width, height * FieldRatio);
+        fieldFrame.WidthRequest = fitWidth; fieldFrame.HeightRequest = fitWidth / FieldRatio;
     }
     void Update()
     {
