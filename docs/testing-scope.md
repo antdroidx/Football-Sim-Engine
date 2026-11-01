@@ -376,3 +376,8 @@ These are GitHub Actions build/test artifacts, not a release or new device accep
 ## Team profile presentation corrections
 
 College prestige and academics now use labeled progress bars without /99; the team browser banner also drops the denominator. College and Pro team profiles use shared numeric 3-4/4-3 labels. Pro team-directory coaching, medical and scout names link to profiles, including opposing teams. Both Android Compile targets pass; College zero warnings/errors, Pro zero errors and two existing nullable warnings. Full packaging was stopped to keep this presentation check scoped; no new APK or native visual acceptance is claimed.
+
+
+## Team-profile presentation APKs
+
+Runtime source0bf0989: removed redundant Pro History column, linked staff profiles, numeric defensive formation labels in both team profiles and College prestige/academics bars without denominators. Pro149 run41360960044 succeeds:401 tests,0 build errors,2 existing warnings; artifact13105995227 (pro-football-apk-149). College439 run41360962102 succeeds:760 tests,0 build warnings/errors; artifact13105261974 (dynasty-manager-build-439). Existing standard long-career exclusions apply; no new device acceptance claimed.
