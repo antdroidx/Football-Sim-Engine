@@ -554,3 +554,13 @@ College AcademicQuality is now a persisted 0–99 Team field. Selective institut
 Pro and College team pages now expose every opposing team's coaching, medical and scouting staff. College team profiles also show current schemes, team ratings, prestige and academic quality. Pro coach initial ratings use nflverse 2023–2025 regular-season scoring and observed head-coach records where available; coordinators weight their primary unit most. Academic quality is a stable 0–99 institutional value and the Academics pitch now uses it directly. Prestige is dynamic on the same 0–99 scale.
 
 Standard validation after these changes: 760 College tests and 391 Pro tests passed. Both Android debug apps built successfully; College has zero warnings and Pro retains two pre-existing nullable warnings. The final 20-season Pro stress rerun passed separately (1 test, 4m43s).
+
+## Coach history attribution correction — November 1, 2026
+
+Pro coach history now stores each observed record as dated team tenures, separate from the coach's current employer. This corrects profiles that previously attached a Cleveland record to Kevin Stefanski's Atlanta entry, a Baltimore record to John Harbaugh's Giants entry, a Dallas record to Mike McCarthy's Pittsburgh entry, and a Jets record to Robert Saleh's Tennessee entry. Mike Vrabel retains separate Tennessee 2023 and New England 2025 spans.
+
+`nflverse games.csv` assigns every 2024 Jets game to Robert Saleh even though he was dismissed after five games. The catalog follows the NFL transaction record for that interruption and uses Saleh's 22-game Jets sample: 9–13, 16.4 points scored and 20.0 allowed. His normalized unit ratings now produce an initial head-coach history rating of 65 instead of the earlier 60. The other historical samples and ratings remain unchanged.
+
+Focused `StaffBalanceTests`: 16 passed, 0 failed. Regression cases cover current-versus-historical club separation, Saleh's exact cutoff, Vrabel's two employers and the existing Mike Macdonald high-coach band.
+
+Standard Pro regression rerun after the focused correction: 397 passed, 0 failed, 0 skipped (2m24s), excluding the two existing long career cases. Pro Android Debug build succeeded with 0 errors and the two pre-existing nullable warnings. Local signed APK: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, SHA-256 `234684e1e2c90405ca2c67c0ea63d34484cb4e2ec010ca9b268f3b9e8acbe12b`.

@@ -347,3 +347,11 @@ Standard suites now pass at 756 College and 390 Pro tests. New focused checks fo
 Standard suites: 760 College and 391 Pro tests passed. Pro history calibration uses observed 2023–2025 nflverse game records for 26 current head coaches and club unit history for coordinators. Mike Macdonald's 24–10 sample is covered by a focused test. College academic quality, 0–99 prestige behavior, modern-league persistence, and Academics pitch use are covered by focused tests.
 
 Both debug Android apps built successfully. The two standard exclusions and the separately run 20-season Pro integrity case remain as documented above; the final 20-season Pro stress rerun passed separately (1 test, 4m43s).
+
+## Coach attribution correction — November 1, 2026
+
+Run `dotnet test tests/ProFootball.Tests/ProFootball.Tests.csproj --filter "FullyQualifiedName~StaffBalanceTests"`: 16 passed, 0 failed. The focused checks cover historical team IDs versus current employers, Saleh's 22-game Jets sample after the 2024 dismissal, Vrabel's separate Tennessee and New England tenures, and the existing Macdonald rating band.
+
+`nflverse games.csv` is not sufficient alone for midseason coaching changes. The catalog's Saleh correction is source-backed by the NFL transaction record. Coordinator ratings remain explicitly labeled club proxies because game rows identify head coaches only.
+
+Standard Pro regression rerun: 397 passed, 0 failed, 0 skipped (2m24s), excluding `TwentySeasons` and `SourcedFiveSeasons`. An initial full-suite run exposed one staff-fixture scout count of 63; that test passed in isolation and on the full rerun, so it is recorded as intermittent rather than suppressed or changed. Pro Android Debug build succeeded with 0 errors and the two known nullable warnings. Local APK SHA-256: `234684e1e2c90405ca2c67c0ea63d34484cb4e2ec010ca9b268f3b9e8acbe12b`.

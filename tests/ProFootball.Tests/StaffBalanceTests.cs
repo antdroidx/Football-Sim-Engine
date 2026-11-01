@@ -69,7 +69,48 @@ public class StaffBalanceTests
         var profile=ProStaff.Profile(coach).Coaching;
         Assert.True(initial>=76,$"history rating {initial}");
         Assert.True(profile>=76,$"coach profile {profile}");
-        Assert.Contains("Observed 2024",ProCoachHistoryCatalog.Basis(coach));
+        Assert.Contains("SEA 2024–2025",ProCoachHistoryCatalog.Basis(coach));
+    }
+
+    [Theory]
+    [InlineData("Kevin Stefanski","ATL","CLE")]
+    [InlineData("John Harbaugh","NYG","BAL")]
+    [InlineData("Mike McCarthy","PIT","DAL")]
+    [InlineData("Robert Saleh","TEN","NYJ")]
+    public void CoachHistoryKeepsTheObservedEmployerSeparateFromTheCurrentOne(
+        string name,string currentTeam,string observedTeam)
+    {
+        var coach=New().Coaches.Single(c=>
+            c.Name==name&&c.Role==StaffRole.HeadCoach);
+        Assert.Equal(currentTeam,coach.TeamId);
+        Assert.True(ProCoachHistoryCatalog.TryCoach(name,out var history));
+        Assert.Equal(observedTeam,Assert.Single(history.Tenures).TeamId);
+        Assert.Contains($"{observedTeam} ",ProCoachHistoryCatalog.Basis(coach));
+    }
+
+    [Fact] public void RobertSalehHistoryStopsWhenTheJetsDismissedHim()
+    {
+        var coach=New().Coaches.Single(c=>
+            c.Name=="Robert Saleh"&&c.Role==StaffRole.HeadCoach);
+        Assert.Equal("TEN",coach.TeamId);
+        Assert.True(ProCoachHistoryCatalog.TryCoach(coach.Name,out var history));
+        Assert.Equal(22,history.Games);Assert.Equal(9,history.Wins);Assert.Equal(13,history.Losses);
+        Assert.Equal(16.4,history.PointsForPerGame);Assert.Equal(20.0,history.PointsAgainstPerGame);
+        Assert.Equal(2023,history.FirstSeason);Assert.Equal(2024,history.LastSeason);
+        Assert.Equal(65,ProCoachHistoryCatalog.Rating(coach));
+        Assert.Contains("NYJ 2023–2024: 9–13 in 22",ProCoachHistoryCatalog.Basis(coach));
+    }
+
+    [Fact] public void MikeVrabelHistoryPreservesBothEmployers()
+    {
+        var coach=New().Coaches.Single(c=>
+            c.Name=="Mike Vrabel"&&c.Role==StaffRole.HeadCoach);
+        Assert.True(ProCoachHistoryCatalog.TryCoach(coach.Name,out var history));
+        Assert.Equal(new[]{"TEN","NE"},history.Tenures.Select(tenure=>tenure.TeamId));
+        Assert.Equal(34,history.Games);Assert.Equal(20,history.Wins);Assert.Equal(14,history.Losses);
+        var basis=ProCoachHistoryCatalog.Basis(coach);
+        Assert.Contains("TEN 2023: 6–11 in 17",basis);
+        Assert.Contains("NE 2025: 14–3 in 17",basis);
     }
 
     [Fact] public void CoachingTalentEvaluationDirectlyImprovesPotentialEstimates()
