@@ -9,9 +9,7 @@ public static class ProScouting
 
     public static int StaffRating(ProFranchise s,string team,Position position=Position.QB)
     {
-        var club=s.League.Teams.Single(t=>t.Name==team);
-        var role=position is Position.QB or Position.RB or Position.FB or Position.WR or Position.TE or Position.OL?StaffRole.OffensiveCoordinator:position is Position.K or Position.P?StaffRole.SpecialTeamsCoordinator:StaffRole.DefensiveCoordinator;
-        return (int)Math.Round(s.Coaches.Where(c=>c.TeamId==club.Id&&!c.Vacant&&(c.Role==role||c.Role==StaffRole.HeadCoach)).Select(c=>c.Development).DefaultIfEmpty(65).Average(),MidpointRounding.AwayFromZero);
+        return ProScoutDepartment.Rating(s,team);
     }
 
     public static int Confidence(int staff,ScoutDepth depth,bool combine=false)=>depth switch

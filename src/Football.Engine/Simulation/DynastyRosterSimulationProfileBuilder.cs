@@ -102,21 +102,21 @@ public static class DynastyRosterSimulationProfileBuilder
             var offensiveCoordinator = StaffManagementService.GetStaff(state, team.Name, StaffRole.OffensiveCoordinator);
             var defensiveCoordinator = StaffManagementService.GetStaff(state, team.Name, StaffRole.DefensiveCoordinator);
             var specialTeamsCoordinator = StaffManagementService.GetStaff(state, team.Name, StaffRole.SpecialTeamsCoordinator);
-            var headCoachModifier = Math.Clamp(((headCoach?.Leadership ?? 60) - 60) * .025 +
-                ((headCoach?.GameManagement ?? 60) - 60) * .015, -1.5, 1.5);
-            var offenseModifier = Math.Clamp(((offensiveCoordinator?.Scheme ?? 60) - 60) * .075, -3.0, 3.0) + headCoachModifier;
-            var defenseModifier = Math.Clamp(((defensiveCoordinator?.Scheme ?? 60) - 60) * .075, -3.0, 3.0) + headCoachModifier;
-            var specialTeamsModifier = Math.Clamp(((specialTeamsCoordinator?.SpecialTeams ?? 60) - 60) * .085, -3.0, 3.0) + headCoachModifier * .5;
+            var headCoachModifier = Math.Clamp(((StaffAttributeService.Coaching(headCoach).Leadership) - 60) * .025 +
+                ((StaffAttributeService.Coaching(headCoach).OffensePlaycalling) - 60) * .015, -1.5, 1.5);
+            var offenseModifier = Math.Clamp(((StaffAttributeService.Coaching(offensiveCoordinator).OffensePlaycalling) - 60) * .075, -3.0, 3.0) + headCoachModifier;
+            var defenseModifier = Math.Clamp(((StaffAttributeService.Coaching(defensiveCoordinator).DefenseScheme) - 60) * .075, -3.0, 3.0) + headCoachModifier;
+            var specialTeamsModifier = Math.Clamp(((StaffAttributeService.Coaching(specialTeamsCoordinator).SpecialTeams) - 60) * .085, -3.0, 3.0) + headCoachModifier * .5;
 
             profiles[team.Name] = new TeamSimulationProfile
             {
                 TeamName = team.Name,
-                HeadCoachLeadership = headCoach?.Leadership ?? 60,
-                HeadCoachGameManagement = headCoach?.GameManagement ?? 60,
-                OffensiveCoordinatorScheme = offensiveCoordinator?.Scheme ?? 60,
-                OffensiveCoordinatorGameManagement = offensiveCoordinator?.GameManagement ?? 60,
-                DefensiveCoordinatorScheme = defensiveCoordinator?.Scheme ?? 60,
-                DefensiveCoordinatorGameManagement = defensiveCoordinator?.GameManagement ?? 60,
+                HeadCoachLeadership = StaffAttributeService.Coaching(headCoach).Leadership,
+                HeadCoachGameManagement = StaffAttributeService.Coaching(headCoach).OffensePlaycalling,
+                OffensiveCoordinatorScheme = StaffAttributeService.Coaching(offensiveCoordinator).OffensePlaycalling,
+                OffensiveCoordinatorGameManagement = StaffAttributeService.Coaching(offensiveCoordinator).OffensePlaycalling,
+                DefensiveCoordinatorScheme = StaffAttributeService.Coaching(defensiveCoordinator).DefenseScheme,
+                DefensiveCoordinatorGameManagement = StaffAttributeService.Coaching(defensiveCoordinator).DefenseScheme,
                 PassOffenseRating =
                     qb * .30 +
                     wr * .25 +

@@ -3,7 +3,18 @@ namespace ProFootball.Core;
 
 public static class ProStaff
 {
-    public sealed record CoachAbilities(int Offense, int Defense, int SpecialTeams, int Development, int Leadership, int Coaching, string OffenseScheme, string DefenseScheme);
+    public sealed record CoachAbilities(CoachingAttributes Attributes, StaffRole Role, string OffenseScheme, string DefenseScheme)
+    {
+        public int Offense => Attributes.OffensePlaycalling;
+        public int Defense => Attributes.DefenseScheme;
+        public int SpecialTeams => Attributes.SpecialTeams;
+        public int Development => Attributes.Development;
+        public int Leadership => Attributes.Leadership;
+        public int Coaching => Attributes.Overall(Role);
+    }
+    public static ProCoach Apply(ProCoach coach, CoachingAttributes a) => coach with
+    { Coaching=a,Leadership=a.Leadership,Development=a.Development,OffenseRating=a.OffensePlaycalling,
+      DefenseRating=a.DefenseScheme,SpecialTeamsRating=a.SpecialTeams,Rating=a.Overall(coach.Role) };
 
     // Existing saves only carry the defaults (55 / Balanced). Derive a stable, name-keyed profile so
     // every coach reads differently without rewriting save records.
@@ -15,7 +26,10 @@ public static class ProStaff
         var defense = c.DefenseRating != 55 ? c.DefenseRating : Pick(45, 92, 2);
         var specials = c.SpecialTeamsRating != 55 ? c.SpecialTeamsRating : Pick(45, 90, 3);
         var leadership = c.Leadership != 55 ? c.Leadership : Pick(48, 94, 4);
-        return new CoachAbilities(offense, defense, specials, c.Development, leadership, c.Rating,
+        var attributes = c.Coaching ?? new CoachingAttributes { Leadership=leadership,Development=c.Development,
+            OffensePlaycalling=offense,OffenseDevelopment=c.Development,DefenseScheme=defense,DefenseDevelopment=c.Development,
+            SpecialTeams=specials,TalentEvaluation=c.Development };
+        return new CoachAbilities(attributes, c.Role,
             string.IsNullOrWhiteSpace(c.PreferredOffense) || c.PreferredOffense == "Balanced" ? OffenseSchemes[Pick(0, OffenseSchemes.Length - 1, 5)] : c.PreferredOffense,
             string.IsNullOrWhiteSpace(c.PreferredDefense) || c.PreferredDefense == "Balanced" ? DefenseSchemes[Pick(0, DefenseSchemes.Length - 1, 6)] : c.PreferredDefense);
     }
@@ -42,7 +56,7 @@ public static class ProStaff
             _ => StaffRole.HeadCoach
         };
         var coaches = s.Coaches.Where(c => c.TeamId == club.Id && !c.Vacant && (c.Role == role || c.Role == StaffRole.HeadCoach)).ToList();
-        return coaches.Count == 0 ? 65 : (int)Math.Round(coaches.Average(c => c.Development), MidpointRounding.AwayFromZero);
+        return coaches.Count == 0 ? 65 : (int)Math.Round(coaches.Average(c => Profile(c).Attributes.DevelopmentFor(position)), MidpointRounding.AwayFromZero);
     }
     public static ProFranchise DevelopSeason(ProFranchise s)
     {
@@ -52,7 +66,11 @@ public static class ProStaff
             var target=s.Owners.FirstOrDefault(o=>o.Team==row.Team.Name)?.TargetWins??8;
             var change=Math.Clamp((row.Wins-target)/3,-1,2);
             var learners=s.Players.Where(p=>p.Football.TeamName==row.Team.Name&&!p.Retired&&p.Age<=26&&DynastyManager.Core.Simulation.UserCoachControlService.ControlsPosition(c.Role,p.Football.Position)).Where(p=>ProDevelopment.Delta(p)>0).Count();
-            return c with {Rating=Math.Clamp(c.Rating+change,40,95),Development=Math.Clamp(c.Development+(learners>=3?1:0),40,95),LastDevelopmentYear=s.Year};
+            var a=Profile(c).Attributes;
+            var growth=learners>=3?1:0;
+            return Apply(c,a with {Leadership=Math.Clamp(a.Leadership+change,0,100),Development=Math.Clamp(a.Development+growth,0,100),
+                OffenseDevelopment=Math.Clamp(a.OffenseDevelopment+(c.Role is StaffRole.HeadCoach or StaffRole.OffensiveCoordinator?growth:0),0,100),
+                DefenseDevelopment=Math.Clamp(a.DefenseDevelopment+(c.Role is StaffRole.HeadCoach or StaffRole.DefensiveCoordinator?growth:0),0,100)}) with {LastDevelopmentYear=s.Year};
         }).ToList()};
     }
     public static ProFranchise ManageCpu(ProFranchise s)

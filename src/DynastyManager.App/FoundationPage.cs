@@ -3226,8 +3226,7 @@ public sealed partial class FoundationPage : ContentPage
                         },
                         new Label
                         {
-                            Text = $"Talent {scout.TalentEvaluation} • Potential {scout.PotentialEvaluation} • " +
-                                   $"Regional {scout.RegionalKnowledge} • Capacity {scout.WorkRate}",
+                            Text = string.Join(" • ",ScoutAttributes.FromLegacy(scout).Values().Select(a=>$"{a.Name} {a.Rating}")),
                             FontSize = 11
                         },
                         picker
@@ -3974,8 +3973,7 @@ public sealed partial class FoundationPage : ContentPage
         staff.Role switch
         {
             StaffRole.ChiefScout =>
-                $"EVAL {staff.TalentEvaluation}/{staff.PotentialEvaluation} • " +
-                $"REG {staff.RegionalKnowledge} • MGMT {staff.StaffManagement}",
+                string.Join(" • ",ScoutAttributes.FromLegacy(staff).Values().Select(a=>$"{a.Name} {a.Rating}")),
             StaffRole.MedicalTrainingDirector =>
                 $"MED {staff.Medical} • LEAD {staff.Leadership}",
             StaffRole.StrengthConditioningDirector =>
@@ -4119,8 +4117,7 @@ public sealed partial class FoundationPage : ContentPage
                 $"Conditioning {staff.Conditioning} • Development {staff.PlayerDevelopment} • " +
                 $"Leadership {staff.Leadership}",
             StaffRole.ChiefScout =>
-                $"Talent Eval {staff.TalentEvaluation} • Potential Eval {staff.PotentialEvaluation} • " +
-                $"Regional {staff.RegionalKnowledge} • Management {staff.StaffManagement}",
+                string.Join(" • ",ScoutAttributes.FromLegacy(staff).Values().Select(a=>$"{a.Name} {a.Rating}")),
             _ => $"OVR {staff.OverallRating}"
         };
 

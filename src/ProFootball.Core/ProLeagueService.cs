@@ -47,10 +47,10 @@ public static class ProLeagueService
         franchise = ProCapInitialization.Initialize(franchise);
         franchise = ProCareer.Initialize(franchise, role, firingEnabled, coachName);
         var initialized = ProMorale.NormalizeContracts(sourcedContracts ? ProReviewedOpeningRoster.InitializeNew(ProOpeningLedger.InitializeNew(ProContractData.Apply(franchise))) : ProContractData.CompleteRookieTerms(franchise));
-        if(generatedPlayers)return ProPracticeRetirement.Apply(ProReserve.InitializeOpening(initialized));
+        if(generatedPlayers)return ProScoutDepartment.Ensure(ProPracticeRetirement.Apply(ProReserve.InitializeOpening(initialized)));
         initialized = ProCompensatoryDraft.InitializeNew(applyOpeningTrades ? ProOpeningTransactions.InitializeNew(initialized) : initialized);
         var opening = applyOpeningTrades ? ProRoster.TrimOversizedPractice(ProReserve.InitializeOpening(ProFutureDraftOwnership.InitializeNew(initialized))) : initialized;
-        return preserveLegacyPracticeForAudit ? opening : ProPracticeRetirement.Apply(opening);
+        return ProScoutDepartment.Ensure(preserveLegacyPracticeForAudit ? opening : ProPracticeRetirement.Apply(opening));
     }
     public static List<ProPlayer> GeneratePlayers(ProLeague league)
     {

@@ -26,6 +26,9 @@ public sealed record StaffMember
     public string? PublishedTitle { get; init; }
     public IReadOnlyList<SharedCoachRole> SharedRoleCoaches { get; init; } = [];
     public StaffRole Role { get; init; }
+    public ScoutAttributes? ScoutingRatings { get; init; }
+    public CoachingAttributes? Coaching { get; init; }
+    public MedicalAttributes? MedicalRatings { get; init; }
     public int Reputation { get; init; }
     public int Leadership { get; init; }
     public int Recruiting { get; init; }
@@ -45,17 +48,7 @@ public sealed record StaffMember
     public int TenureYears { get; init; }
     public int ContractYearsRemaining { get; init; } = 3;
 
-    public int OverallRating => Role switch
-    {
-        StaffRole.HeadCoach => Average(Leadership, Recruiting, PlayerDevelopment, GameManagement),
-        StaffRole.OffensiveCoordinator => Average(Scheme, PlayerDevelopment, Recruiting, GameManagement),
-        StaffRole.DefensiveCoordinator => Average(Scheme, PlayerDevelopment, Recruiting, GameManagement),
-        StaffRole.SpecialTeamsCoordinator => Average(SpecialTeams, PlayerDevelopment, GameManagement),
-        StaffRole.MedicalTrainingDirector => Average(Medical, Leadership, PlayerDevelopment),
-        StaffRole.StrengthConditioningDirector => Average(Conditioning, PlayerDevelopment, Leadership),
-        StaffRole.ChiefScout => Average(TalentEvaluation, PotentialEvaluation, RegionalKnowledge, StaffManagement),
-        _ => Reputation
-    };
+    public int OverallRating => DynastyManager.Core.Simulation.StaffAttributeService.Overall(this);
 
     private static int Average(params int[] values) =>
         values.Length == 0 ? 0 : (int)Math.Round(values.Average());

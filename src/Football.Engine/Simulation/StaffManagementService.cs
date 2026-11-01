@@ -176,6 +176,9 @@ public static class StaffManagementService
 
             return item with
             {
+                Coaching = StaffAttributeService.IsFootballCoach(item.Role) ? StaffAttributeService.Coaching(item).Improve(netChange) : item.Coaching,
+                MedicalRatings = StaffAttributeService.IsMedical(item.Role) ? StaffAttributeService.Medical(item).Improve(netChange) : item.MedicalRatings,
+                ScoutingRatings = item.Role == StaffRole.ChiefScout ? ScoutAttributes.FromLegacy(item).Improve(netChange) : item.ScoutingRatings,
                 Reputation = Clamp(item.Reputation + netChange),
                 Leadership = Clamp(item.Leadership + netChange),
                 Recruiting = Clamp(item.Recruiting + netChange),

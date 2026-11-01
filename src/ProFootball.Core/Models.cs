@@ -65,6 +65,7 @@ public sealed record ProFranchise
     public List<ProJobOffer> JobOffers { get; init; } = [];
     public List<ProCareerSeason> CoachingHistory { get; init; } = [];
     public List<ProGmDecision> GmDecisions { get; init; } = [];
+    public List<ProScout> Scouts { get; init; } = [];
     public List<ProCoach> Coaches { get; init; } = [];
     public List<CoachCandidate> CoachCandidates { get; init; } = [];
     public List<ProContract> Contracts { get; init; } = [];
@@ -113,6 +114,7 @@ public sealed record ProStanding(ProTeam Team, int Wins, int Losses, int Ties, d
 public enum OffseasonStep { Retention, FreeAgency, Draft, RosterCuts }
 public sealed record ProCoach(string TeamId, StaffRole Role, string Name, string Title, string Source)
 {
+    public CoachingAttributes? Coaching { get; init; }
     public int LastDevelopmentYear {get;init;} public bool Vacant { get; init; } public int Rating { get; init; } = 70; public int Development { get; init; } = 65;
     // Franchise-specific coaching abilities. Existing saves see these as defaulted values; a hire refreshes them.
     public int OffenseRating { get; init; } = 55; public int DefenseRating { get; init; } = 55; public int SpecialTeamsRating { get; init; } = 55;

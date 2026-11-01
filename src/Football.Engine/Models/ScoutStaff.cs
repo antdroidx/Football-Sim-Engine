@@ -2,6 +2,7 @@ namespace DynastyManager.Core.Models;
 
 public sealed record ScoutStaff
 {
+    public ScoutAttributes? Attributes { get; init; }
     public Guid ScoutId { get; init; } = Guid.NewGuid();
     public required string FullName { get; init; }
     public int TalentEvaluation { get; init; }

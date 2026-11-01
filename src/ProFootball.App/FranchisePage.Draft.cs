@@ -23,7 +23,7 @@ public sealed partial class FranchisePage
         chips.Add(new Border{Padding=new Thickness(8,3),StrokeShape=new Microsoft.Maui.Controls.Shapes.RoundRectangle{CornerRadius=10},BackgroundColor=DynastyTheme.Accent,Content=new Label{Text=ProScouting.DepthSummary(s),FontSize=11,TextColor=DynastyTheme.IsLight?Colors.White:Color.FromArgb("#0B1726")}});
         body.Add(chips);
         body.Add(Panel(headline,Text($"{s.DraftHistory.Count(h=>h.Year==s.Year)} selections made · {s.Prospects.Count} available · "+(next is null?"No team picks remaining":$"Your next pick: R{next.Round} · #{ProDraft.Overall(s,next)}"),13)));
-        var tools=new ActionRow();if(active)tools.Add(Action("Delegate remaining picks",async()=>{state=await Task.Run(()=>ProDraft.AutoUntilUser(state!,true));await Save();await Draft();},"pro-draft-auto"));
+        var tools=new ActionRow();tools.Add(Action("Scouting staff",ScoutingStaff));if(active)tools.Add(Action("Delegate remaining picks",async()=>{state=await Task.Run(()=>ProDraft.AutoUntilUser(state!,true));await Save();await Draft();},"pro-draft-auto"));
         if(s.DraftIndex==0)tools.Add(CollegeClassImportButton());tools.Add(Action("Free agents",FreeAgents));body.Add(tools);
         var views=new ActionRow();foreach(var name in new[]{"Prospects","My board","Draft results","Order"}){var n=name;var button=Action(name,()=>{draftView=n;return Draft();},"pro-draft-view-"+name.Replace(" ","-").ToLowerInvariant());button.BackgroundColor=draftView==name?DynastyTheme.Selected:Colors.Transparent;views.Add(button);}body.Add(views);
         if(draftView=="Draft results")

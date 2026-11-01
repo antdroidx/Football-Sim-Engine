@@ -6,6 +6,16 @@ namespace DynastyManager.Core.Simulation;
 
 public static class ScoutingDepartmentService
 {
+    public static int PredictionRating(DynastyState state, RecruitingSource source, Guid prospectId)
+    {
+        var recruit=source==RecruitingSource.HighSchool?state.HighSchoolRecruitingPool.FirstOrDefault(r=>r.RecruitId==prospectId):null;
+        return (int)Math.Round(state.ScoutingStaff.Select(scout=>
+        {
+            var assignment=state.ScoutAssignments.FirstOrDefault(a=>a.ScoutId==scout.ScoutId);
+            var regional=recruit is not null && assignment is not null && MatchesGeography(assignment,recruit);
+            return (double)ScoutAttributes.FromLegacy(scout).PredictionQuality(regional);
+        }).DefaultIfEmpty(65).Average());
+    }
     private static readonly string[] ScoutNames =
     {
         "Blake Hart", "Trevor Mercer", "Isaiah Wallace", "Nolan Pierce",

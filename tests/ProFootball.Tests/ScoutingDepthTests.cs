@@ -58,8 +58,8 @@ public class ScoutingDepthTests
     {
         var s=Draft();
         var player=s.Prospects[0];
-        var weak=s with{Coaches=s.Coaches.Select(c=>c with{Development=40}).ToList()};
-        var strong=s with{Coaches=s.Coaches.Select(c=>c with{Development=95}).ToList()};
+        var weak=s with{Scouts=s.Scouts.Select(c=>c with{Staff=c.Staff with{Attributes=new(){Evaluation=40,Communication=40,RegionalKnowledge=40,NationalKnowledge=40}}}).ToList()};
+        var strong=s with{Scouts=s.Scouts.Select(c=>c with{Staff=c.Staff with{Attributes=new(){Evaluation=95,Communication=95,RegionalKnowledge=95,NationalKnowledge=95}}}).ToList()};
         Assert.InRange(ProScouting.Evaluate(weak,s.UserTeam,player,ScoutDepth.Basic).Confidence,1,49);
         Assert.InRange(ProScouting.Evaluate(strong,s.UserTeam,player,ScoutDepth.Basic).Confidence,1,49);
         Assert.InRange(ProScouting.Evaluate(weak,s.UserTeam,player,ScoutDepth.Priority).Confidence,50,75);

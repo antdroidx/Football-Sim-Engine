@@ -149,8 +149,16 @@ public static class UserCoachCareerService
             0,
             coach.ContractYearsRemaining - 1);
 
+        var previousAttributes = StaffAttributeService.Coaching(coach);
         var updatedCoach = coach with
         {
+            Coaching = previousAttributes with {
+                Leadership=Clamp(previousAttributes.Leadership+leadershipChange),
+                Development=Clamp(previousAttributes.Development+playerDevelopmentChange),
+                OffenseDevelopment=Clamp(previousAttributes.OffenseDevelopment+playerDevelopmentChange),
+                DefenseDevelopment=Clamp(previousAttributes.DefenseDevelopment+playerDevelopmentChange),
+                OffensePlaycalling=Clamp(previousAttributes.OffensePlaycalling+gameManagementChange),
+                DefenseScheme=Clamp(previousAttributes.DefenseScheme+gameManagementChange) },
             Reputation = Clamp(coach.Reputation + reputationChange),
             Leadership = Clamp(coach.Leadership + leadershipChange),
             Recruiting = Clamp(coach.Recruiting + recruitingChange),

@@ -66,35 +66,23 @@ public sealed partial class FranchisePage
                 var coach = coaches.First(c => "Staff · " + RoleName(c.Role) + " · " + c.Name == selected);
                 var p = ProStaff.Profile(coach);
                 var name = Field("Name", coach.Name, out var nameEntry);
-                var rating = Number("Overall", p.Coaching, out var ratingEntry);
-                var development = Number("Development", p.Development, out var developmentEntry);
-                var offense = Number("Offense", p.Offense, out var offenseEntry);
-                var defense = Number("Defense", p.Defense, out var defenseEntry);
-                var specials = Number("Special teams", p.SpecialTeams, out var specialsEntry);
-                var leadership = Number("Leadership", p.Leadership, out var leadershipEntry);
+                var attributes = new CoachAttributeEditor(p.Attributes);
                 var offScheme = Field("Preferred offense", p.OffenseScheme, out var offEntry);
                 var defScheme = Field("Preferred defense", p.DefenseScheme, out var defEntry);
                 var apply = Action("Apply staff changes", async () =>
                 {
                     state = state! with
                     {
-                        Coaches = state.Coaches.Select(c => c != coach ? c : c with
+                        Coaches = state.Coaches.Select(c => c != coach ? c : ProStaff.Apply(c,attributes.ReadCoaching()) with
                         {
                             Name = string.IsNullOrWhiteSpace(nameEntry.Text) ? c.Name : nameEntry.Text.Trim(),
-                            Rating = Clamp(ratingEntry.Text, p.Coaching),
-                            Development = Clamp(developmentEntry.Text, p.Development),
-                            OffenseRating = Clamp(offenseEntry.Text, p.Offense),
-                            DefenseRating = Clamp(defenseEntry.Text, p.Defense),
-                            SpecialTeamsRating = Clamp(specialsEntry.Text, p.SpecialTeams),
-                            Leadership = Clamp(leadershipEntry.Text, p.Leadership),
                             PreferredOffense = string.IsNullOrWhiteSpace(offEntry.Text) ? p.OffenseScheme : offEntry.Text.Trim(),
                             PreferredDefense = string.IsNullOrWhiteSpace(defEntry.Text) ? p.DefenseScheme : defEntry.Text.Trim()
                         }).ToList()
                     };
                     await Save(); await Editor();
                 }, "pro-editor-apply-staff");
-                host.Add(SectionCard("Staff", coach.Title, name, StatRow(rating, development, leadership),
-                    offense, defense, specials, offScheme, defScheme, apply));
+                host.Add(SectionCard("Staff", coach.Title, name, attributes, offScheme, defScheme, apply));
             }
         }
         entity.SelectedIndexChanged += (_, _) => { if (entity.SelectedIndex >= 0) { editorEntity = options[entity.SelectedIndex]; Draw(); } };

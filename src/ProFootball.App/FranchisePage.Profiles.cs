@@ -129,14 +129,9 @@ public sealed partial class FranchisePage
         var tiles = new Grid { ColumnSpacing = 8, RowSpacing = 8,
             ColumnDefinitions = { new(GridLength.Star), new(GridLength.Star), new(GridLength.Star) },
             RowDefinitions = { new(GridLength.Auto), new(GridLength.Auto) } };
-        View[] stats = { StatTile("Coaching", p.Coaching.ToString(), "Overall rating"), StatTile("Development", p.Development.ToString(), "Player growth"), StatTile("Leadership", p.Leadership.ToString(), "Morale & focus"), StatTile("Offense", p.Offense.ToString(), "Scheme execution"), StatTile("Defense", p.Defense.ToString(), "Scheme execution"), StatTile("Special teams", p.SpecialTeams.ToString(), "Units") };
+        View[] stats = { StatTile("Overall", p.Coaching.ToString(), "Derived from coaching attributes"), StatTile("Development", p.Development.ToString(), "Player growth"), StatTile("Leadership", p.Leadership.ToString(), "Morale & focus"), StatTile("Offense Playcalling", p.Offense.ToString(), "Play calls"), StatTile("Defense Scheme", p.Defense.ToString(), "Scheme execution"), StatTile("Special teams", p.SpecialTeams.ToString(), "Units") };
         for (var i = 0; i < stats.Length; i++) tiles.Add(SectionCard("", null, stats[i]), i % 3, i / 3);
-        var abilities = SectionCard("Coaching abilities", "Ratings drive scheme execution, player development and team morale.",
-            AbilityBar("Offense coaching", p.Offense, Color.FromArgb("#2980B9")),
-            AbilityBar("Defense coaching", p.Defense, Color.FromArgb("#16A085")),
-            AbilityBar("Special teams coaching", p.SpecialTeams, Color.FromArgb("#D4A017")),
-            AbilityBar("Player development", p.Development, DynastyTheme.Accent),
-            AbilityBar("Leadership", p.Leadership, Color.FromArgb("#8E44AD")));
+        var abilities = CoachAttributeViews.Coaching(p.Attributes);
         var schemes = SectionCard("Preferred schemes", "Hired coaches bring a philosophy; balance it against your roster.",
             SchemePair(p.OffenseScheme, p.DefenseScheme));
         var role = SectionCard("Role & contract", "", Text($"Role · {RoleName(coach.Role)}"), Text($"Club · {team.Name}"), Text(coach.Vacant ? "Position currently vacant. Hire a replacement from Staff." : "Reports to the head coach. Managed through Staff."));

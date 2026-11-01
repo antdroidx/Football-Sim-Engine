@@ -389,14 +389,12 @@ public static class InteractiveRecruitingService
                 _ => 10
             };
 
-        var evaluator = state.ScoutingStaff.Count == 0
-            ? 65
-            : (int)state.ScoutingStaff.Average(item => item.TalentEvaluation);
+        var evaluator = ScoutingDepartmentService.PredictionRating(state,source,prospectId);
         var minimumUncertainty =
             source == RecruitingSource.TransferPortal ? 0 : 1;
         uncertainty = Math.Max(
             minimumUncertainty,
-            uncertainty - Math.Max(0, evaluator - 70) / 15);
+            uncertainty == 0 ? 0 : uncertainty - (evaluator - 65) / 15);
         var errorSpan = Math.Max(1, uncertainty);
         var estimate = overall +
             SimulationSeed.Create(state.DynastyId, state.SeasonYear,
@@ -421,9 +419,7 @@ public static class InteractiveRecruitingService
                 item.RecruitId == prospectId).PotentialRating
             : state.TransferPortalEntries.First(item =>
                 item.Player.PlayerId == prospectId).Player.PotentialRating;
-        var evaluator = state.ScoutingStaff.Count == 0
-            ? 65
-            : (int)state.ScoutingStaff.Average(item => item.PotentialEvaluation);
+        var evaluator = ScoutingDepartmentService.PredictionRating(state,source,prospectId);
         var uncertainty = source == RecruitingSource.TransferPortal
             ? interaction.ScoutingPercent switch
             {
@@ -443,7 +439,7 @@ public static class InteractiveRecruitingService
             };
         uncertainty = Math.Max(
             source == RecruitingSource.TransferPortal ? 1 : 2,
-            uncertainty - Math.Max(0, evaluator - 70) / 12);
+            uncertainty - (evaluator - 65) / 12);
         var estimate = potential +
             SimulationSeed.Create(state.DynastyId, state.SeasonYear,
                 interaction.ScoutingPercent, prospectId.ToString("N"),

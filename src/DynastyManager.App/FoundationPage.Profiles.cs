@@ -149,6 +149,9 @@ public sealed partial class FoundationPage
 
     private View CoachRatingGrid(StaffMember coach)
     {
+        if (coach.Role == StaffRole.ChiefScout) return CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(coach));
+        if (StaffAttributeService.IsMedical(coach.Role))
+            return CoachAttributeViews.Medical(StaffAttributeService.Medical(coach));
         var tiles = new View[] {
             CoachStatTile("Overall", coach.OverallRating, FormatStaffRole(coach.Role)),
             CoachStatTile("Leadership", coach.Leadership, "Program culture"),
@@ -202,11 +205,10 @@ public sealed partial class FoundationPage
         if (coach.FormerPlayerId is not null) overview.Add(new Label { Text = $"Former {coach.AlmaMater} player · Class of {coach.GraduationYear} · entered coaching after apprenticeship", TextColor = DynastyTheme.Accent });
         if (coach.SharedRoleCoaches.Count > 0) overview.Add(new Label { Text = "Shared coordinator role: " + string.Join(" · ", coach.SharedRoleCoaches.Select(c => $"{c.FullName} ({c.PublishedTitle})")), TextColor = DynastyTheme.Muted });
         if (coach.DataSeason is int dataSeason) overview.Add(new Label { Text = $"{dataSeason} staff · {coach.PublishedTitle} · age and coaching ratings are game estimates", TextColor = DynastyTheme.Muted });
-        var traits = AttributeGroup("Coaching traits", "Leadership, strategy, development and program management",
-            ("Leadership", coach.Leadership), ("Recruiting", coach.Recruiting), ("Player development", coach.PlayerDevelopment),
-            ("Game management", coach.GameManagement), ("Scheme", coach.Scheme), ("Special teams", coach.SpecialTeams),
-            ("Medical", coach.Medical), ("Conditioning", coach.Conditioning), ("Talent evaluation", coach.TalentEvaluation),
-            ("Potential evaluation", coach.PotentialEvaluation), ("Regional knowledge", coach.RegionalKnowledge), ("Staff management", coach.StaffManagement));
+        var traits = StaffAttributeService.IsMedical(coach.Role)
+            ? CoachAttributeViews.Medical(StaffAttributeService.Medical(coach))
+            : coach.Role==StaffRole.ChiefScout ? CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(coach))
+            : CoachAttributeViews.Coaching(StaffAttributeService.Coaching(coach),coach.Recruiting);
         var history = new VerticalStackLayout { Spacing = 10, Children = {
             SectionTitle("Head-coaching career", $"{summary.HeadCoachWins}–{summary.HeadCoachLosses} · {summary.HeadCoachSeasons} seasons · {summary.ConferenceTitles} conference titles · {summary.NationalTitles} national titles")
         } };

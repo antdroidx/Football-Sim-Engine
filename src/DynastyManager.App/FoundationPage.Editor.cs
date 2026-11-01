@@ -89,29 +89,25 @@ public sealed partial class FoundationPage
                 var member = staff.First(s => "Staff · " + FormatStaffRole(s.Role) + " · " + s.FullName == selected);
                 var name = Input("Name", member.FullName, out var nameEntry);
                 var ovr = new Label { Text = $"Overall {member.OverallRating} · derived from traits", FontSize = 12, TextColor = DynastyTheme.Muted };
-                var leadership = Input("Leadership", member.Leadership.ToString(), out var leadershipEntry);
-                var development = Input("Development", member.PlayerDevelopment.ToString(), out var developmentEntry);
-                var recruiting = Input("Recruiting", member.Recruiting.ToString(), out var recruitingEntry);
-                var scheme = Input("Scheme", member.Scheme.ToString(), out var schemeEntry);
+                var medical = StaffAttributeService.IsMedical(member.Role);
+                var scout = member.Role == StaffRole.ChiefScout;
+                var attributes = scout ? new CoachAttributeEditor(ScoutAttributes.FromLegacy(member)) : medical ? new CoachAttributeEditor(StaffAttributeService.Medical(member))
+                    : new CoachAttributeEditor(StaffAttributeService.Coaching(member),member.Recruiting);
                 var apply = new Button { Text = "Apply staff changes" };
                 apply.Clicked += async (_, _) =>
                 {
                     if (_currentDynasty is null) return;
                     _currentDynasty = _currentDynasty with
                     {
-                        Staff = _currentDynasty.Staff.Select(s => s.StaffId != member.StaffId ? s : s with
-                        {
-                            FullName = string.IsNullOrWhiteSpace(nameEntry.Text) ? s.FullName : nameEntry.Text.Trim(),
-                            Leadership = Math.Clamp(ParseEditor(leadershipEntry.Text, s.Leadership), 1, 99),
-                            PlayerDevelopment = Math.Clamp(ParseEditor(developmentEntry.Text, s.PlayerDevelopment), 1, 99),
-                            Recruiting = Math.Clamp(ParseEditor(recruitingEntry.Text, s.Recruiting), 1, 99),
-                            Scheme = Math.Clamp(ParseEditor(schemeEntry.Text, s.Scheme), 1, 99)
+                        Staff = _currentDynasty.Staff.Select(s => s.StaffId != member.StaffId ? s :
+                            (scout ? StaffAttributeService.ApplyScout(s,attributes.ReadScouting()) : medical ? StaffAttributeService.Apply(s,attributes.ReadMedical()) : StaffAttributeService.Apply(s,attributes.ReadCoaching(),attributes.ReadRecruiting())) with
+                        { FullName = string.IsNullOrWhiteSpace(nameEntry.Text) ? s.FullName : nameEntry.Text.Trim()
                         }).ToArray()
                     };
                     await SaveCurrentAsync(SaveKind.AutosaveCurrent);
                     RenderCurrentDynasty();
                 };
-                body.Children.Add(CoachingCard("STAFF", name, ovr, leadership, development, recruiting, scheme, apply));
+                body.Children.Add(CoachingCard("STAFF", name, ovr, attributes, apply));
             }
         }
         entity.SelectedIndexChanged += (_, _) => Draw();
