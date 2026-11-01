@@ -43,9 +43,9 @@ public class StaffBalanceTests
         Assert.InRange(coach.Average(),65,75);
         Assert.InRange(medical.Average(),65,75);
         Assert.InRange(scouts.Average(),65,75);
-        Assert.All(coach,rating=>Assert.InRange(rating,40,90));
-        Assert.All(medical,rating=>Assert.InRange(rating,40,90));
-        Assert.All(scouts,rating=>Assert.InRange(rating,40,90));
+        Assert.All(coach,rating=>Assert.InRange(rating,0,99));
+        Assert.All(medical,rating=>Assert.InRange(rating,0,99));
+        Assert.All(scouts,rating=>Assert.InRange(rating,0,99));
         Assert.True(ProTeamStrategyCatalog.All.Average(team=>team.CoachingQuality) is >=69 and <=72);
         Assert.True(ProTeamStrategyCatalog.All.Average(team=>team.ScoutingQuality) is >=68 and <=71);
     }
@@ -56,6 +56,20 @@ public class StaffBalanceTests
         var first=ProTeamStrategyCatalog.Attributes(team,Guid.Parse("11111111-1111-1111-1111-111111111111"));
         var second=ProTeamStrategyCatalog.Attributes(team,Guid.Parse("22222222-2222-2222-2222-222222222222"));
         Assert.NotEqual(first,second);
+    }
+
+    [Fact] public void ObservedHistoryPlacesMikeMacdonaldInTheHighCoachBand()
+    {
+        var s=New();
+        var coach=s.Coaches.Single(c=>c.TeamId=="SEA"&&c.Role==StaffRole.HeadCoach);
+        Assert.True(ProCoachHistoryCatalog.TryCoach(coach.Name,out var history));
+        Assert.Equal(34,history.Games);Assert.Equal(24,history.Wins);Assert.Equal(10,history.Losses);
+        Assert.InRange(history.PointsForPerGame,25,26);Assert.InRange(history.PointsAgainstPerGame,19,20);
+        var initial=ProCoachHistoryCatalog.Rating(coach);
+        var profile=ProStaff.Profile(coach).Coaching;
+        Assert.True(initial>=76,$"history rating {initial}");
+        Assert.True(profile>=76,$"coach profile {profile}");
+        Assert.Contains("Observed 2024",ProCoachHistoryCatalog.Basis(coach));
     }
 
     [Fact] public void CoachingTalentEvaluationDirectlyImprovesPotentialEstimates()

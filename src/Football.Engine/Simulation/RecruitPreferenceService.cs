@@ -96,7 +96,7 @@ public static class RecruitPreferenceService
         var prestige = ProgramPrestigeService.GetCurrentPrestige(state, team);
         var recruitingPrestige = Math.Clamp(
             prestige + GetRecentSuccessBonus(state, team),
-            35,
+            0,
             99);
 
         return pitchType switch
@@ -144,12 +144,7 @@ public static class RecruitPreferenceService
                     99),
 
             RecruitPitchType.Academics =>
-                52 + SimulationSeed.Create(
-                    state.DynastyId,
-                    0,
-                    team.LegacyRegionId,
-                    team.Name,
-                    "academics") % 44,
+                TeamAcademicQualityCatalog.Get(team),
 
             _ => 60
         };
@@ -211,7 +206,7 @@ public static class RecruitPreferenceService
             GetRecentSuccessBonus(
                 state,
                 team),
-            35,
+            0,
             99);
 
         var affinity =
@@ -317,7 +312,7 @@ public static class RecruitPreferenceService
             GetRecentSuccessBonus(
                 state,
                 team),
-            35,
+            0,
             99);
         var interaction = InteractiveRecruitingService.GetInteraction(
             state,
@@ -383,7 +378,7 @@ public static class RecruitPreferenceService
             GetRecentSuccessBonus(
                 state,
                 team),
-            35,
+            0,
             99);
 
         var qualityFloor = recruit.StarRating switch
@@ -452,7 +447,7 @@ public static class RecruitPreferenceService
                     recruit.Position),
 
             RecruitPitchType.ProgramPrestige =>
-                Math.Clamp(prestige, 35, 99),
+                Math.Clamp(prestige, 0, 99),
 
             RecruitPitchType.ProPotential =>
                 Math.Clamp(
@@ -487,12 +482,7 @@ public static class RecruitPreferenceService
                     99),
 
             RecruitPitchType.Academics =>
-                52 + SimulationSeed.Create(
-                    state.DynastyId,
-                    0,
-                    team.LegacyRegionId,
-                    team.Name,
-                    "academics") % 44,
+                TeamAcademicQualityCatalog.Get(team),
 
             _ => 60
         };
@@ -708,6 +698,8 @@ public static class RecruitPreferenceService
                 RecruitPitchType.ProPotential => 8,
                 RecruitPitchType.Development => 7,
                 RecruitPitchType.ProgramPrestige => 5,
+                RecruitPitchType.Academics when SimulationSeed.Create(
+                    state.DynastyId,state.SeasonYear,(int)type,prospectId.ToString("N"),"education-focused") % 100 < 30 => 20,
                 _ => 0
             };
         }

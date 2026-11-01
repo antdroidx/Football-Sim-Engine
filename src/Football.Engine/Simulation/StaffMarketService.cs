@@ -77,7 +77,7 @@ public static class StaffMarketService
                     SourceRole = staff.Role,
                     GrowthPotential = staff.GrowthPotential,
                     MinimumProgramPrestige =
-                        Math.Clamp(sourcePrestige - 14, 35, 88),
+                        Math.Clamp(sourcePrestige - 14, 0, 88),
                     StyleLabel = "Rising Coordinator"
                 });
             }
@@ -101,7 +101,7 @@ public static class StaffMarketService
                     SourceRole = staff.Role,
                     GrowthPotential = staff.GrowthPotential,
                     MinimumProgramPrestige =
-                        Math.Clamp(sourcePrestige + 2, 40, 92),
+                        Math.Clamp(sourcePrestige + 2, 0, 92),
                     StyleLabel = "Established Head Coach"
                 });
             }
@@ -124,7 +124,7 @@ public static class StaffMarketService
                     SourceRole = staff.Role,
                     GrowthPotential = staff.GrowthPotential,
                     MinimumProgramPrestige =
-                        Math.Clamp(sourcePrestige + 1, 40, 92),
+                        Math.Clamp(sourcePrestige + 1, 0, 92),
                     StyleLabel = GetStyleLabel(staff, staff.Role)
                 });
             }
@@ -965,7 +965,7 @@ public static class StaffMarketService
             SourceRole = member.Role,
             GrowthPotential = member.GrowthPotential,
             MinimumProgramPrestige =
-                Math.Clamp(sourcePrestige - 12, 35, 85),
+                Math.Clamp(sourcePrestige - 12, 0, 85),
             StyleLabel = GetStyleLabel(member, member.Role)
         });
 
@@ -989,7 +989,7 @@ public static class StaffMarketService
                 SourceRole = member.Role,
                 GrowthPotential = member.GrowthPotential,
                 MinimumProgramPrestige =
-                    Math.Clamp(sourcePrestige - 16, 35, 82),
+                    Math.Clamp(sourcePrestige - 16, 0, 82),
                 StyleLabel = "Coordinator HC Candidate"
             });
         }

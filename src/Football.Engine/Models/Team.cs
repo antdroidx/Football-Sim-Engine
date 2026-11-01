@@ -9,5 +9,6 @@ public sealed record Team
     public string? DivisionName { get; init; }
     public int? ConferenceGamesPerSeason { get; init; }
     public int Prestige { get; init; }
+    public int AcademicQuality { get; init; } = -1;
     public int LegacyRegionId { get; init; }
 }

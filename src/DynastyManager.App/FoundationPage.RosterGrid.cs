@@ -39,6 +39,8 @@ public sealed partial class FoundationPage
         var filters=CompactFilters.Create((_rosterTeamPicker,200),(_rosterSearch,190),(_rosterPosition,115),(_rosterStatus,115));
         var stats = new Button { Text = "Player statistics", TextColor = DynastyTheme.Accent, BackgroundColor = Colors.Transparent };
         stats.Clicked += (_, _) => ShowSection(AppSection.Stats);
+        var teamProfile = new Button { Text = "Team profile & staff", TextColor = DynastyTheme.Accent, BackgroundColor = Colors.Transparent, AutomationId = "college-team-profile" };
+        teamProfile.Clicked += async (_, _) => await ShowCollegeTeamProfileAsync(_rosterTeamName ?? _currentDynasty?.UserTeamName ?? "");
         _depthChartOrganizerButton.Clicked += (_, _) =>
         {
             _showDepthChartOrganizer = !_showDepthChartOrganizer;
@@ -47,7 +49,7 @@ public sealed partial class FoundationPage
         return new VerticalStackLayout { Spacing = 10, Children =
         {
             filters,
-            new ActionRow {Children={_rosterSort,_depthChartOrganizerButton,stats}}, _offseasonRosterStatus,
+            new ActionRow {Children={_rosterSort,_depthChartOrganizerButton,stats,teamProfile}}, _offseasonRosterStatus,
             _depthChartOrganizer, BuildRosterWorkspace()
         } };
     }

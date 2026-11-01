@@ -538,3 +538,19 @@ Pro coaches now have age, career years, tenure and growth potential. Pro medical
 Ages and career context are visible in College scout cards and Pro coach, scout and medical screens. Pro Staff also shows recent retirements. User-controlled coaching roles are protected from automatic retirement. Save migration initializes missing ages without changing existing names, contracts, schemes, reports or assignments.
 
 Standard results after this pass: 756 College and 390 Pro tests. The existing 20-season Pro integrity test passed after the final lifecycle changes (1 test, 6m21s).
+
+
+## Team directories, performance history and academics — November 1, 2026
+
+Every Pro team profile now includes coaching, medical and scouting departments plus identity, team ratings, roster and schedule. College roster views now offer a Team profile & staff screen for any school, with the same staff directory concept, current scheme, team ratings, 0–99 prestige and 0–99 academic quality.
+
+Pro initial coach quality now uses nflverse `games.csv` regular-season evidence from 2023–2025. Head coaches use their own observed record and scoring for/against percentiles when available; coordinators use their club's relevant unit, with the primary side weighted most heavily. Twenty-six current head coaches have observed samples. Mike Macdonald's observed 24–10 record, 25.2 points scored and 19.4 allowed produces a high-70s/low-80s initial profile. The Coach profile displays the observed/estimated basis. Teams without a head-coach sample fall back to the club's weighted offense, defense and win history.
+
+College AcademicQuality is now a persisted 0–99 Team field. Selective institutions have explicit estimates; other programs use a prestige-informed fallback. Academic quality is stable and does not follow season results. The Academics recruiting pitch uses it directly, and a deterministic 30% subset of recruits values education more strongly. Prestige remains dynamic and all clamps now preserve the full 0–99 scale. Custom league editing exposes both values.
+
+
+## Team history, directories and academic recruiting — November 1, 2026
+
+Pro and College team pages now expose every opposing team's coaching, medical and scouting staff. College team profiles also show current schemes, team ratings, prestige and academic quality. Pro coach initial ratings use nflverse 2023–2025 regular-season scoring and observed head-coach records where available; coordinators weight their primary unit most. Academic quality is a stable 0–99 institutional value and the Academics pitch now uses it directly. Prestige is dynamic on the same 0–99 scale.
+
+Standard validation after these changes: 760 College tests and 391 Pro tests passed. Both Android debug apps built successfully; College has zero warnings and Pro retains two pre-existing nullable warnings. The final 20-season Pro stress rerun passed separately (1 test, 4m43s).

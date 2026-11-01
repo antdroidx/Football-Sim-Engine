@@ -51,8 +51,9 @@ public static class ProTeamStrategyCatalog
     {
         if (coach.Coaching is not null) return coach.Coaching;
         var team = Get(coach.TeamId);
+        var historyQuality = ProCoachHistoryCatalog.Rating(coach);
         int Rating(string key, int adjustment = 0) => Math.Clamp(
-            team.CoachingQuality + adjustment + Noise($"{franchiseId:N}|{coach.TeamId}", coach.Role, key, 4), 50, 88);
+            historyQuality + adjustment + Noise($"{franchiseId:N}|{coach.TeamId}", coach.Role, key, 3), 45, 92);
         var generated=coach.Role switch
         {
             StaffRole.HeadCoach => new CoachingAttributes

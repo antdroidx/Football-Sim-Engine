@@ -78,12 +78,16 @@ public static class LegacyUniverseCsvImporter
                     if (!int.TryParse(values[6], out var target) || target is < 0 or > 12) throw new FormatException($"Invalid conference games for {values[0]}.");
                     conferenceGames = target;
                 }
+                var academicQuality = -1;
+                if (values.Count > 7 && !string.IsNullOrWhiteSpace(values[7]) &&
+                    (!int.TryParse(values[7], out academicQuality) || academicQuality is < 0 or > 100))
+                    throw new FormatException($"Invalid academic quality for {values[0]}.");
                 teams.Add(new Team
                 {
                     Name = values[0],
                     Abbreviation = values[1],
                     ConferenceName = values[2],
-                    Prestige = prestige,
+                    Prestige = prestige, AcademicQuality = academicQuality,
                     DivisionName = BlankToNull(values[4]),
                     LegacyRegionId = region, ConferenceGamesPerSeason = conferenceGames
                 });

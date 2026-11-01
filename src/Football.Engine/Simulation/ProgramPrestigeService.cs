@@ -14,7 +14,7 @@ public static class ProgramPrestigeService
             .GroupBy(item => item.TeamName, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(group => group.Key, group => group.OrderByDescending(item => item.SeasonYear)
                 .First().EndingPrestige, StringComparer.OrdinalIgnoreCase))
-            .GetValueOrDefault(team.Name, Math.Clamp(team.Prestige, 35, 99));
+            .GetValueOrDefault(team.Name, Math.Clamp(team.Prestige, 0, 99));
     }
 
     public static DynastyState EnsureInitialPrestige(
@@ -28,8 +28,8 @@ public static class ProgramPrestigeService
         {
             SeasonYear = state.SeasonYear - 1,
             TeamName = team.Name,
-            StartingPrestige = Math.Clamp(team.Prestige, 35, 99),
-            EndingPrestige = Math.Clamp(team.Prestige, 35, 99),
+            StartingPrestige = Math.Clamp(team.Prestige, 0, 99),
+            EndingPrestige = Math.Clamp(team.Prestige, 0, 99),
             Reasons = new[] { "Initial program reputation" }
         }).ToArray();
 
@@ -104,7 +104,7 @@ public static class ProgramPrestigeService
             else if (madePlayoff)
                 change = Math.Max(change, 1);
 
-            var ending = Math.Clamp(starting + change, 35, 99);
+            var ending = Math.Clamp(starting + change, 0, 99);
             var reasons = BuildReasons(
                 wins, losses, finalRank, wonConference,
                 madePlayoff, nationalChampion, recruitingScore);
@@ -153,7 +153,7 @@ public static class ProgramPrestigeService
 
         return Math.Clamp(
             (int)Math.Round(starting * 0.55 + performance * 0.45),
-            35,
+            0,
             99);
     }
 

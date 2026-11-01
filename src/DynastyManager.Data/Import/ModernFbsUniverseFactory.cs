@@ -1,4 +1,5 @@
 using DynastyManager.Core.Models;
+using DynastyManager.Core.Simulation;
 
 namespace DynastyManager.Data.Import;
 
@@ -16,7 +17,7 @@ public static class ModernFbsUniverseFactory
             ("North Dakota State", "NDSU", 55, 1), ("Sacramento State", "SAC", 40, 0)
         })
             teams[name] = new Team { Name = name, Abbreviation = abbreviation, Prestige = prestige,
-                ConferenceName = "", LegacyRegionId = region };
+                AcademicQuality = TeamAcademicQualityCatalog.For(name, prestige), ConferenceName = "", LegacyRegionId = region };
 
         var membership = new Dictionary<string, string[]>
         {
@@ -34,6 +35,7 @@ public static class ModernFbsUniverseFactory
         };
         return membership.SelectMany(conference => conference.Value.Select(name =>
             teams[name] with { ConferenceName = conference.Key,
+                AcademicQuality = TeamAcademicQualityCatalog.Get(teams[name]),
                 ConferenceGamesPerSeason = conference.Key switch
                 {
                     "Independent" => 0, "Pac-12" => 7,

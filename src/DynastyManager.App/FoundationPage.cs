@@ -4945,7 +4945,7 @@ public sealed partial class FoundationPage : ContentPage
             $"{roster.Length}/{DynastyRosterRules.MaximumRosterSize} players • " +
             $"{commitments.Length} current recruiting commits";
 
-        _teamBrowserList.Children.Add(SchoolBanner(team.Name, $"{team.ConferenceName} · {wins}-{losses} · Prestige {prestige}"));
+        _teamBrowserList.Children.Add(SchoolBanner(team.Name, $"{team.ConferenceName} · {wins}-{losses} · Prestige {prestige}/99 · Academics {TeamAcademicQualityCatalog.Get(team)}/99"));
         if (profile is not null)
         {
             _teamBrowserList.Children.Add(

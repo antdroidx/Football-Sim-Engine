@@ -340,3 +340,10 @@ The standard Pro run excludes `TwentySeasons` and `SourcedFiveSeasons`; the stan
 ## Staff lifecycle scope — November 1, 2026
 
 Standard suites now pass at 756 College and 390 Pro tests. New focused checks force senior staff retirement, verify age/career advancement, replacement generation, protected user roles, College scout replenishment, and retired-Pro-player entry into the Pro candidate pool. Existing five-year development balance and save-roundtrip cases remain green. The standard exclusions remain the extended dynasty-health/rating-calibration simulations and the two named long Pro careers; the 20-season Pro integrity case also passed separately (1 test, 6m21s).
+
+
+## Team history and academic-quality scope — November 1, 2026
+
+Standard suites: 760 College and 391 Pro tests passed. Pro history calibration uses observed 2023–2025 nflverse game records for 26 current head coaches and club unit history for coordinators. Mike Macdonald's 24–10 sample is covered by a focused test. College academic quality, 0–99 prestige behavior, modern-league persistence, and Academics pitch use are covered by focused tests.
+
+Both debug Android apps built successfully. The two standard exclusions and the separately run 20-season Pro integrity case remain as documented above; the final 20-season Pro stress rerun passed separately (1 test, 4m43s).

@@ -39,3 +39,10 @@ College coaches and medical staff retain their existing age-based growth/decline
 Pro coaches, medical staff and scouts age once each offseason. Attributes use independent deterministic rolls around growth potential, age, performance and decline. User-controlled coaching roles do not retire automatically. Retiring Pro staff are recorded, vacancies pass through existing hiring, and new scouts/medical staff are generated when departments are below strength. Retired Pro players who meet the leadership threshold are added to the coaching candidate pool with a retired-player source label.
 
 All random rolls are stable for a franchise, season, staff member and attribute, so reloading does not reroll careers. Legacy records receive a first age from stable staff/franchise data, then advance normally.
+
+
+## Performance-history and academic sources
+
+Pro coach calibration uses `nflverse/nfldata` `games.csv`, regular seasons 2023–2025, retrieved 2026-11-01: https://github.com/nflverse/nfldata/blob/master/data/games.csv. Offense and defense are weighted scoring percentiles with season weights 20% / 30% / 50%. Head-coach samples require actual games; coordinator unit history is a club-level estimate because nflverse game rows name head coaches only. The profile labels whether the basis is observed or estimated.
+
+College academic quality is an estimated institutional index, not an official NCAA metric. Highly selective schools use explicit values; other schools use a prestige-informed fallback. It remains static through season progression to avoid pretending institutional academics change annually. Prestige and academics both use 0–99 scales. Academic pitch importance is boosted for a deterministic subset of recruits so education is a meaningful but selective preference.

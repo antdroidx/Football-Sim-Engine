@@ -34,7 +34,7 @@ public sealed partial class FoundationPage
                 remove.Clicked += (_, _) => { teams.Remove(team); Render(); };
                 list.Children.Add(new Border { StrokeThickness = 0, Padding = 8, BackgroundColor = DynastyTheme.Palette("#1B2B37"), Content = new VerticalStackLayout { Spacing = 3, Children =
                 { new Label { Text = $"{team.Name} ({team.Abbreviation})", FontAttributes = FontAttributes.Bold },
-                    new Label { Text = $"{team.ConferenceName}{(team.DivisionName is null ? "" : " · " + team.DivisionName)} · Prestige {team.Prestige}", FontSize = 11 },
+                    new Label { Text = $"{team.ConferenceName}{(team.DivisionName is null ? "" : " · " + team.DivisionName)} · Prestige {team.Prestige} · Academics {TeamAcademicQualityCatalog.Get(team)}", FontSize = 11 },
                     new ActionRow { Children = { edit, remove } } } } });
             }
         }
@@ -46,6 +46,7 @@ public sealed partial class FoundationPage
             var conference = new Entry { Text = existing?.ConferenceName ?? "Independent", Placeholder = "Conference" };
             var division = new Entry { Text = existing?.DivisionName, Placeholder = "Division (optional)" };
             var prestige = new Entry { Text = (existing?.Prestige ?? 50).ToString(), Keyboard = Keyboard.Numeric };
+            var academics = new Entry { Text = (existing is null ? 60 : TeamAcademicQualityCatalog.Get(existing)).ToString(), Keyboard = Keyboard.Numeric };
             var region = new Picker { ItemsSource = RecruitGeography.RegionNames.ToArray(), SelectedIndex = Math.Clamp(existing?.LegacyRegionId ?? 0, 0, 4) };
             var conferenceGames = new Entry { Text = existing?.ConferenceGamesPerSeason?.ToString(), Placeholder = "Automatic", Keyboard = Keyboard.Numeric };
             var message = new Label { TextColor = DynastyTheme.Accent }; var done = new Button { Text = "Save team" }; var back = new Button { Text = "Cancel" };
@@ -53,20 +54,21 @@ public sealed partial class FoundationPage
             done.Clicked += async (_, _) =>
             {
                 if (string.IsNullOrWhiteSpace(teamName.Text) || string.IsNullOrWhiteSpace(abbreviation.Text) || string.IsNullOrWhiteSpace(conference.Text) ||
-                    !int.TryParse(prestige.Text, out var value) || value is < 0 or > 100)
-                { message.Text = "Enter school, abbreviation, conference, prestige 0–100 and a recruiting region."; return; }
+                    !int.TryParse(prestige.Text, out var value) || value is < 0 or > 99 ||
+                    !int.TryParse(academics.Text, out var academicValue) || academicValue is < 0 or > 99)
+                { message.Text = "Enter school, abbreviation, conference, prestige and academics 0–99, and a recruiting region."; return; }
                 int? target = null;
                 if (!string.IsNullOrWhiteSpace(conferenceGames.Text))
                 { if (!int.TryParse(conferenceGames.Text, out var n) || n is < 0 or > 12) { message.Text = "Conference games must be automatic or 0–12."; return; } target = n; }
                 if (teams.Any(t => t != existing && t.Name.Equals(teamName.Text.Trim(), StringComparison.OrdinalIgnoreCase))) { message.Text = "That school name already exists."; return; }
                 var updated = new Team { Id = existing?.Id ?? Guid.NewGuid(), Name = teamName.Text.Trim(), Abbreviation = abbreviation.Text.Trim(), ConferenceName = conference.Text.Trim(),
-                    DivisionName = string.IsNullOrWhiteSpace(division.Text) ? null : division.Text.Trim(), Prestige = value, LegacyRegionId = Math.Max(0, region.SelectedIndex), ConferenceGamesPerSeason = target };
+                    DivisionName = string.IsNullOrWhiteSpace(division.Text) ? null : division.Text.Trim(), Prestige = value, AcademicQuality = academicValue, LegacyRegionId = Math.Max(0, region.SelectedIndex), ConferenceGamesPerSeason = target };
                 if (existing is not null) teams.Remove(existing); teams.Add(updated);
                 await Navigation.PopModalAsync(); Render();
             };
             editor.Content = new ScrollView { Content = new VerticalStackLayout { Padding = 14, Spacing = 8, Children =
             { back, new Label { Text = "School" }, teamName, new Label { Text = "Abbreviation" }, abbreviation, new Label { Text = "Conference" }, conference,
-                new Label { Text = "Division" }, division, new Label { Text = "Prestige" }, prestige, new Label { Text = "Recruiting region" }, region,
+                new Label { Text = "Division" }, division, new Label { Text = "Prestige (0–99)" }, prestige, new Label { Text = "Academic quality (0–99)" }, academics, new Label { Text = "Recruiting region" }, region,
                 new Label { Text = "Conference games per season" }, conferenceGames, done, message } } };
             await Navigation.PushModalAsync(editor);
         }
