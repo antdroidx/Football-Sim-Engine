@@ -15,6 +15,7 @@ from pathlib import Path
 parser = argparse.ArgumentParser()
 parser.add_argument('--label', required=True)
 parser.add_argument('--serial')
+parser.add_argument('--finish-only', action='store_true', help='Verify final save/return on an already open game')
 args = parser.parse_args()
 if args.serial: os.environ['ANDROID_SERIAL'] = args.serial
 spec = importlib.util.spec_from_file_location('android_ui_helpers', Path(__file__).with_name('android-ui-smoke.py'))
@@ -24,16 +25,24 @@ checks = []
 
 def has(root, suffix): return any(n.get('resource-id', '').endswith(suffix) for n in root.iter('node'))
 def text(root, suffix): return next(n.get('text') for n in root.iter('node') if n.get('resource-id', '').endswith(suffix))
+def selected_call(root):
+    card = next(n for n in root.iter('node') if n.get('resource-id','').endswith('live-quick-call-0'))
+    return next(n.get('text') for n in card.iter('node') if n.get('text'))
 def ready(name, condition):
     def safe(root):
         assert 'Game paused' not in s.texts(root), 'Unexpected application exception'
         return condition(root)
     return s.wait_for(prefix + name, safe, timeout=150)
 def click(label):
-    root = ready('before-' + re.sub(r'\W+', '-', label), lambda r: label in s.texts(r))
-    node = next(n for n in root.iter('node') if n.get('text') == label)
-    left,top,right,bottom = map(int,re.findall(r'\d+',node.get('bounds')))
-    if right <= left or bottom <= top:
+    name = prefix+'before-'+re.sub(r'\W+','-',label)
+    for attempt in range(3):
+        root = s.capture(name)
+        assert 'Game paused' not in s.texts(root), 'Unexpected application exception'
+        if label in s.texts(root): break
+        time.sleep(.5)
+    node = next((n for n in root.iter('node') if n.get('text') == label), None)
+    bounds = list(map(int,re.findall(r'\d+',node.get('bounds')))) if node is not None else []
+    if not bounds or bounds[2] <= bounds[0] or bounds[3] <= bounds[1]:
         root = s.scroll_to_text(prefix+'scroll-'+re.sub(r'\W+','-',label),label,max_swipes=8)
     s.tap(root, label)
 def action(suffix):
@@ -48,6 +57,20 @@ def fit(root, suffix):
     maxy = max(int(re.findall(r'\d+', n.get('bounds'))[3]) for n in root.iter('node'))
     assert 0 <= x1 < x2 <= maxx and 0 <= y1 < y2 <= maxy, suffix + ' is clipped'
 
+def finish_and_return():
+    options('Finish game'); click('Simulate remainder')
+    ready('final-saved', lambda r: has(r,'live-situation') and text(r,'live-situation') == 'FINAL · Saved')
+    options('Exit game')
+    root = ready('saved-return', lambda r:not has(r,'live-game-page') and 'Overview' in s.texts(r))
+    assert 'Play game' not in s.texts(root) and 'Play' not in s.texts(root)
+    checks.append('finish-save-and-return-to-host')
+
+if args.finish_only:
+    finish_and_return()
+    Path(prefix+'finish-result.json').write_text(json.dumps({'checks':checks},indent=2),encoding='utf-8')
+    print(json.dumps({'checks':checks}))
+    raise SystemExit(0)
+
 try:
     ready('entry', lambda r: has(r, 'live-game-page'))
     options('Play calling'); click('Take over')
@@ -56,14 +79,14 @@ try:
     assert 'Defense: You' in text(root,'live-ownership')
     checks.append('takeover-ownership')
 
-    initial = text(root, 'live-selection')
+    initial = selected_call(root)
     s.tap_id(root, 'live-quick-call-1')
-    root = ready('alternate-selected', lambda r: has(r,'live-selection') and text(r,'live-selection') != initial)
-    selected = text(root,'live-selection'); clock = text(root,'live-situation')
+    root = ready('alternate-selected', lambda r: has(r,'live-quick-call-0') and selected_call(r) != initial)
+    selected = selected_call(root); clock = text(root,'live-situation')
     options('Weather'); click('Close'); root = manual()
-    assert text(root,'live-selection') == selected and text(root,'live-situation') == clock
+    assert selected_call(root) == selected and text(root,'live-situation') == clock
     options('Viewing options'); click('Camera'); click('Broadcast'); root = manual()
-    assert text(root,'live-selection') == selected and text(root,'live-situation') == clock
+    assert selected_call(root) == selected and text(root,'live-situation') == clock
     checks.append('selection-and-clock-preserved-by-menus')
 
     action('live-playbook')
@@ -80,7 +103,7 @@ try:
 
     options('Box score'); ready('box', lambda r: 'Live box score' in s.texts(r))
     click('Player statistics'); click('Return to game'); root = manual()
-    assert text(root,'live-selection') == selected and text(root,'live-situation') == clock
+    assert selected_call(root) == selected and text(root,'live-situation') == clock
     checks.append('box-return-with-state-preserved')
     options('Finish game'); click('Keep playing'); root = manual()
     assert text(root,'live-situation') == clock
@@ -132,6 +155,7 @@ try:
             ready('landscape-after-snap',lambda r:has(r,'live-call-sheet') and text(r,'live-situation')!=before)
             action('live-options'); s.capture(prefix+'landscape-menu'); click('Cancel')
     checks.append('portrait-landscape-actions-fit')
+    finish_and_return()
 finally:
     Path(prefix+'result.json').write_text(json.dumps({'checks':checks},indent=2),encoding='utf-8')
     Path(prefix+'logcat.txt').write_bytes(s.adb('logcat','-d'))
