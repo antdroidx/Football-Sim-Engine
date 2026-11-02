@@ -27,7 +27,7 @@ public sealed partial class FoundationPage
         var academics=TeamAcademicQualityCatalog.Get(team);
         var profile=DynastyRosterSimulationProfileBuilder.Build(state,[team])[team.Name];
         var plan=GamePlanService.GetPlan(state,profile);
-        var staff=state.Staff.Where(item=>item.TeamName.Equals(team.Name,StringComparison.OrdinalIgnoreCase)).OrderBy(item=>item.Role).ToArray();
+        var staff=CollegeStaffDirectory.Team(state,team.Name).ToArray();
         Label T(string value,bool bold=false)=>new(){Text=value,FontSize=bold?14:12,FontAttributes=bold?FontAttributes.Bold:FontAttributes.None,TextColor=bold?DynastyTheme.Text:DynastyTheme.Muted};
         View Box(string title,params View[] views)
         {

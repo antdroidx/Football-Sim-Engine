@@ -31,7 +31,7 @@ public sealed partial class FoundationPage
     private View PlayerLink(Guid id, string name) => PersonLink(name, () => ShowPlayerProfileAsync(id));
 
     private View CoachLink(StaffMember coach) => Football.Presentation.StaffDirectoryComponents.Name(coach.StaffId, coach.FullName,
-        (name, open) => PersonLink(name, open, true), id => ShowCoachProfileAsync(_currentDynasty?.Staff.FirstOrDefault(c => c.StaffId == id) ?? coach));
+        (name, open) => PersonLink(name, open, true), id => ShowCoachProfileAsync(_currentDynasty?.Staff.FirstOrDefault(c => c.StaffId == id && c.Role == coach.Role) ?? coach));
 
     private static View PersonLink(string name, Func<Task> open, bool staff = false)
     {
@@ -232,8 +232,7 @@ public sealed partial class FoundationPage
 
     private View TeamStaffTable(string school) => DataTable(
         [("Role", 160), ("Coach", 210), ("OVR", 55), ("Age", 45), ("Recruit", 65), ("Develop", 70), ("Lead", 60), ("Scheme", 65)],
-        (_currentDynasty is null ? Enumerable.Empty<StaffMember>() : Enum.GetValues<StaffRole>()
-            .Select(role => StaffManagementService.GetStaff(_currentDynasty, school, role)).OfType<StaffMember>()).OrderBy(coach => coach.Role).Select(coach => new View[]
+        (_currentDynasty is null ? Enumerable.Empty<StaffMember>() : CollegeStaffDirectory.Team(_currentDynasty, school)).Select(coach => new View[]
         {
             TableText(FormatStaffRole(coach.Role)), CoachLink(coach), RatingCell(coach.OverallRating), TableText(coach.Age.ToString()),
             TableText(coach.Recruiting.ToString()), TableText(coach.PlayerDevelopment.ToString()), TableText(coach.Leadership.ToString()), TableText(coach.Scheme.ToString())
