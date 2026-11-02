@@ -330,6 +330,8 @@ public sealed partial class FranchisePage
                 state = state! with { Coaches = state.Coaches.Select(c => c.TeamId == current.TeamId && c.Role == current.Role && c.Name == current.Name ? updated : c).ToList() };
                 await Save();
                 await Navigation.PopModalAsync();
+                // Replace the old profile so Back returns to the originating directory.
+                await Navigation.PopModalAsync();
                 Render();
                 await CoachProfile(updated);
             }));
