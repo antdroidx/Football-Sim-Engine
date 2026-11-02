@@ -18,6 +18,16 @@ public sealed class SafetyRulesTests
     }
 
     [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public void AutomaticKneelsAreCreditedToCpuRatherThanUser(bool pro)
+    {
+        var s=Session(pro);s.ControlledTeamName=null;s.YardLine=50;
+        s.Quarter=4;s.ClockSeconds=40;s.TwoMinuteTimeoutHalf=2;s.HomeScore=7;s.AwayTimeouts=0;
+        var snap=GameDayEngine.Step(s);
+        Assert.Equal(SnapOutcome.Kneel,snap.Outcome);Assert.Equal(PlayCallSource.Cpu,snap.CallSource);
+    }
+
+    [Theory]
     [InlineData(false, false)] [InlineData(false, true)]
     [InlineData(true, false)] [InlineData(true, true)]
     public void OwnGoalLineLossAwardsDefenseTwoPointsAndQueuesItsReceivingPossession(bool pro, bool home)
@@ -69,7 +79,7 @@ public sealed class SafetyRulesTests
             Assert.False(s.SafetyKickPending); Assert.False(s.KickoffPending);
             if (kick.IsTouchback)
             {
-                Assert.Equal(pro ? 35 : 25, s.YardLine);
+                Assert.Equal(KickoffPolicy.TouchbackSpot(s.Rules, kick.KickTouchedLandingZone, 20), s.YardLine);
                 Assert.Equal(clock, s.ClockSeconds); Assert.Equal(0, kick.ReturnYards);
             }
             else Assert.True(s.ClockSeconds < clock);

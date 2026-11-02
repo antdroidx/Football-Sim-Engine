@@ -1170,11 +1170,12 @@ public sealed partial class FoundationPage : ContentPage
         if (_currentDynasty is null || _isAdvancing)
             return;
 
-        if (_currentDynasty.UserCoachIsFired)
+        var phaseValidation = CollegePhaseValidation.Evaluate(_currentDynasty);
+        if (!phaseValidation.CanAdvance)
         {
             await GameDialogs.AlertAsync(this,
                 "Coaching Job Required",
-                "You were fired from your previous program. Open Program and accept a coaching offer before advancing.",
+                phaseValidation.FirstReason!,
                 "OK");
             ShowSection(AppSection.Program);
             return;

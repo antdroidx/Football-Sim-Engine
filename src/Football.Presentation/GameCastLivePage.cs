@@ -549,10 +549,10 @@ public class GameCastLivePage : ContentPage
             var play = PlayEditorService.OffensiveLibrary(plan).FirstOrDefault(p => p.Id == offense) ?? GamePlanService.RecommendOffensivePlay(plan, session.Down, session.Distance, session.YardLine);
             var defensePlay = PlayEditorService.DefensiveLibrary(plan).FirstOrDefault(p => p.Id == defense) ?? GamePlanService.RecommendDefensivePlay(plan, session.Down, session.Distance);
             var preview = attacking ? PersonnelRotationService.SelectOffense(depth, name, play.Personnel, fatigue, random) : PersonnelRotationService.SelectDefense(depth, name, defensePlay.Personnel, fatigue, random);
-            var unit = GameDayCoachingService.ApplySubstitutions(session, preview).PlayerIds.Select(id => session.PlayersById.GetValueOrDefault(id)).OfType<DynastyPlayer>().ToArray();
+            var unit = session.KickoffPending ? GameDayEngine.KickoffUnit(session, attacking).ToArray() : GameDayCoachingService.ApplySubstitutions(session, preview).PlayerIds.Select(id => session.PlayersById.GetValueOrDefault(id)).OfType<DynastyPlayer>().ToArray();
             for (var i = 0; i < unit.Length; i++)
             {
-                var player = unit[i]; var point = session.KickoffPending ? LiveFootballChoreography.Kickoff(attacking, attacking ? i == 0 : player.Position == Position.K, i, 2, 25, direction, session.SafetyKickPending ? 80 : 65).From : GameDayLivePresentation.HuddlePoint(session.YardLine, direction, attacking, i);
+                var player = unit[i]; var point = session.KickoffPending ? LiveFootballChoreography.Kickoff(attacking, attacking ? i == 0 : player.Position == Position.K, i, 2, 25, direction, 100 - (session.SafetyKickPending ? 20 : session.KickoffFromOwnYardLine), session.Rules.DynamicKickoff && !session.OnsideKickRequested, session.OnsideKickRequested).From : GameDayLivePresentation.HuddlePoint(session.YardLine, direction, attacking, i);
                 var marker = Marker(player, Primary(name), Secondary(name), !home);
                 if (marker.Content is FootballSpriteView sprite) sprite.HuddleFacing(.5 - point.X, .5 - point.Y);
                 AbsoluteLayout.SetLayoutFlags(marker, AbsoluteLayoutFlags.PositionProportional); AbsoluteLayout.SetLayoutBounds(marker, new Rect(point.X, point.Y, 28, 28)); players.Add(marker);

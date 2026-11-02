@@ -8,6 +8,8 @@ using Xunit.Abstractions;
 
 namespace DynastyManager.Core.Tests;
 
+[Trait("Owner", "College")]
+[Trait("Category", "Balance")]
 public class OvrCalibrationTests(ITestOutputHelper output)
 {
     internal static string Data(string name) => Path.Combine(AppContext.BaseDirectory, "TestData", name);

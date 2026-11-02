@@ -22,8 +22,8 @@ public sealed partial class FranchisePage
         var guide=new VerticalStackLayout{AutomationId="pro-offseason-guide",Spacing=6,Children={Text($"{s.Year} offseason · {title}",22,true),StageTimeline(s.OffseasonStep)}};
         var nav=new ActionRow();nav.Add(Action("Overview",()=>Open("Overview")));nav.Add(Action("Front Office",()=>Open("Front Office")));nav.Add(Action("Open "+title,async()=>await OpenOffseasonStage()));nav.Add(Action("Save",Save));nav.Add(Action("Settings",Options));guide.Add(nav);body.Insert(0,guide);
         if(s.OffseasonStep==OffseasonStep.Draft&&ProRookieOptions.Pending(s,s.UserTeam).Any())body.Add(Action("Rookie option decisions",RookieOptions));
-        var issue=ProOffseasonFlow.Blocker(s);if(issue is not null)body.Add(Text(issue,13,true));
-        var next=Action(ProOffseasonFlow.Continue(s.OffseasonStep),Advance,"pro-offseason-next");next.IsEnabled=issue is null;next.BackgroundColor=DynastyTheme.Accent;next.TextColor=DynastyTheme.IsLight?Colors.White:Color.FromArgb("#0B1726");body.Add(next);
+        var validation=ProOffseasonFlow.Validate(s);if(validation.FirstReason is {} issue)body.Add(Text(issue,13,true));
+        var next=Action(ProOffseasonFlow.Continue(s.OffseasonStep),Advance,"pro-offseason-next");next.IsEnabled=validation.CanAdvance;next.BackgroundColor=DynastyTheme.Accent;next.TextColor=DynastyTheme.IsLight?Colors.White:Color.FromArgb("#0B1726");body.Add(next);
     }
     static View StageTimeline(OffseasonStep step)
     {

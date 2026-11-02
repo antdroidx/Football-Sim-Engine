@@ -19,6 +19,39 @@ public sealed class RulesBoundaryMatrixTests
     }
 
     [Theory]
+    [InlineData(false, 1)] [InlineData(false, 2)] [InlineData(false, 3)] [InlineData(false, 4)]
+    [InlineData(true, 1)] [InlineData(true, 2)] [InlineData(true, 3)] [InlineData(true, 4)]
+    public void ExhaustedAndInvalidTimeoutsCannotCreateClockEventsOrDelayExpiry(bool pro, int quarter)
+    {
+        var s=Session(pro); s.Quarter=quarter;s.ClockSeconds=1;s.HomeTimeouts=s.AwayTimeouts=0;
+        s.TwoMinuteTimeoutHalf=2;s.HomeScore=7;
+        Assert.False(GameDayEngine.TryCallTimeout(s,"Home"));
+        Assert.False(GameDayEngine.TryCallTimeout(s,"Away"));
+        Assert.False(GameDayEngine.TryCallTimeout(s,"Unknown"));
+        Assert.Empty(s.Events);
+        var end=GameDayEngine.Step(s,"off-spread-zone");
+        Assert.Equal(SnapOutcome.ClockStoppage,end.Outcome);
+        Assert.Equal(quarter,end.Quarter);Assert.Equal(0,end.LiveBallSeconds);
+        Assert.Equal(1,end.PreSnapSeconds);
+        if(quarter==4) Assert.True(s.IsComplete); else Assert.Equal(quarter+1,s.Quarter);
+        if(quarter==2) Assert.Equal(3,s.HomeTimeouts);
+    }
+
+    [Theory]
+    [InlineData(false, "Home")] [InlineData(false, "Away")]
+    [InlineData(true, "Home")] [InlineData(true, "Away")]
+    public void TimeoutDuringReadyRestartUsesNoSnapRunoff(bool pro,string team)
+    {
+        var s=Session(pro);s.ClockSeconds=35;s.Quarter=2;s.TwoMinuteTimeoutHalf=1;
+        s.ClockStopped=true;s.ClockRestartsOnReady=true;
+        Assert.True(GameDayEngine.TryCallTimeout(s,team));
+        var stopped=s.Events[^1];Assert.Equal(team,stopped.TimeoutTeamName);
+        var snap=GameDayEngine.Step(s,"special-spike");
+        Assert.Equal(0,snap.PreSnapSeconds);Assert.Equal(35,snap.ClockSeconds);
+        Assert.False(s.ClockRestartsOnReady);
+    }
+
+    [Theory]
     [InlineData(false)] [InlineData(true)]
     public void TwoPointPolicyCoversBothPossessionSidesAndLateGameBoundaries(bool pro)
     {

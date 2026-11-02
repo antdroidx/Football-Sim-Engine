@@ -30,7 +30,8 @@ public sealed partial class FoundationPage
 
     private View PlayerLink(Guid id, string name) => PersonLink(name, () => ShowPlayerProfileAsync(id));
 
-    private View CoachLink(StaffMember coach) => PersonLink(coach.FullName, () => ShowCoachProfileAsync(coach), true);
+    private View CoachLink(StaffMember coach) => Football.Presentation.StaffDirectoryComponents.Name(coach.StaffId, coach.FullName,
+        (name, open) => PersonLink(name, open, true), id => ShowCoachProfileAsync(_currentDynasty?.Staff.FirstOrDefault(c => c.StaffId == id) ?? coach));
 
     private static View PersonLink(string name, Func<Task> open, bool staff = false)
     {

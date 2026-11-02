@@ -210,7 +210,7 @@ public static class GameCastAnimation
             }
             if (snap.Outcome == SnapOutcome.Kickoff)
             {
-                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65);
+                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65, snap.UsesDynamicKickoff, snap.IsOnsideKick);
                 x = formation.From.X; y = formation.From.Y;
             }
             x = Math.Clamp(x, .025, .96);
@@ -253,7 +253,7 @@ public static class GameCastAnimation
             }
             if (snap.Outcome == SnapOutcome.Kickoff)
             {
-                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65);
+                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65, snap.UsesDynamicKickoff, snap.IsOnsideKick);
                 endX = formation.To.X; endY = formation.To.Y;
             }
             if (player?.PlayerId == terminalCarrierId && snap.CarrierLane.HasValue) endY = snap.CarrierLane.Value;
@@ -415,7 +415,7 @@ public static class GameCastAnimation
             }
             if (snap.Outcome == SnapOutcome.Kickoff)
             {
-                var formation = LiveFootballChoreography.Kickoff(false, player?.PlayerId == snap.KickerId, index, snap.KickLandingYardLine, snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65);
+                var formation = LiveFootballChoreography.Kickoff(false, player?.PlayerId == snap.KickerId, index, snap.KickLandingYardLine, snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65, snap.UsesDynamicKickoff, snap.IsOnsideKick);
                 x = formation.From.X; y = formation.From.Y; endX = formation.To.X; endY = formation.To.Y;
                 if (player?.PlayerId == snap.PrimaryDefenderId) { endX = destination; endY = .5; }
                 if (snap.IsTouchback) { endX = Project(30); endY = y; }
@@ -532,6 +532,9 @@ public static class GameCastAnimation
                     : pursuingDefenders.Contains(movement.View)
                     ? GameDayAnimationPlanner.PursuitProgress(progress, ReferenceEquals(movement.View, primaryTacklerView))
                     : progress;
+                var kickoffKicker = movement.View is Border kickMarker && markerHosts.GetValueOrDefault(kickMarker).Player?.PlayerId == snap.KickerId;
+                if (snap.UsesDynamicKickoff && snap.Outcome == SnapOutcome.Kickoff)
+                    movementProgress = KickoffPolicy.MovementProgress(progress, true, kickoffKicker);
                 var position = blockingTracks.TryGetValue(movement.View, out var block)
                     ? BlockingTrack(movement.From, movement.To, block, progress)
                     : caught && ReferenceEquals(movement.View, terminalCarrierView) ? ReceiverTrack(progress) : routeViews.Contains(movement.View)
@@ -562,6 +565,11 @@ public static class GameCastAnimation
                             turnoverPickupPositions[movement.View] = pickup = previousPositions[movement.View];
                         position = Interpolate(pickup, carrierAt, chase);
                     }
+                }
+                if (snap.UsesDynamicKickoff && kickoffKicker && progress < .65)
+                {
+                    var limit = Project(snap.StartYardLine - 15);
+                    position = position with { X = direction > 0 ? Math.Max(position.X, limit) : Math.Min(position.X, limit) };
                 }
                 AbsoluteLayout.SetLayoutBounds(movement.View, position);
                 if (movement.View is Border host && host.Content is FootballSpriteView sprite)
@@ -633,10 +641,12 @@ public static class GameCastAnimation
                 var launch = kickerFrom ?? qbFrom ?? centerPoint;
                 if (progress < .65)
                 {
-                    var landing = returnerFrom ?? new Rect(kickLanding, .50, 14, 9);
+                    var landing = snap.KickTouchedLandingZone ? new Rect(Project(snap.KickLandingYardLine), .50, 14, 9) : returnerFrom ?? new Rect(kickLanding, .50, 14, 9);
                     currentBall = Interpolate(BallAt(launch), BallAt(landing), progress / .65);
                     currentBall = currentBall with { Y = Math.Clamp(currentBall.Y - Math.Sin(progress / .65 * Math.PI) * .18, .02, .97) };
                 }
+                else if (snap.KickTouchedLandingZone && snap.IsTouchback)
+                    currentBall = Interpolate(new Rect(Project(snap.KickLandingYardLine), .50, 14, 9), new Rect(kickLanding, .50, 14, 9), (progress - .65) / .35);
                 else if (returnerFrom.HasValue)
                     currentBall = BallAt(Track(returnerFrom, returnerTo, GameDayAnimationPlanner.ReturnProgress(progress)));
                 else currentBall = new Rect(snap.IsTouchback ? kickLanding : destination, .50, 14, 9);

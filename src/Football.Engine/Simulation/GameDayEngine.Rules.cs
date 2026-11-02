@@ -92,7 +92,7 @@ public static partial class GameDayEngine
         return snap;
     }
 
-    private static GameSnapEvent ClockPlay(GameDaySession session, bool spike)
+    private static GameSnapEvent ClockPlay(GameDaySession session, bool spike, bool userCalled = true)
     {
         if (session.OvertimeRound > 0 && !session.Rules.TimedOvertime) throw new InvalidOperationException("Clock plays are unavailable in untimed overtime.");
         var home = session.PossessionTeamName == session.Game.HomeTeamName;
@@ -105,7 +105,7 @@ public static partial class GameDayEngine
             Sequence = session.Events.Count + 1, PossessionNumber = session.PossessionNumber, Quarter = session.Quarter,
             ClockSeconds = session.ClockSeconds, OffenseTeamName = session.PossessionTeamName,
             DefenseTeamName = home ? session.Game.AwayTeamName : session.Game.HomeTeamName,
-            OffensivePlayId = string.Empty, DefensivePlayId = string.Empty, CallSource = PlayCallSource.User,
+            OffensivePlayId = string.Empty, DefensivePlayId = string.Empty, CallSource = userCalled ? PlayCallSource.User : PlayCallSource.Cpu,
             Down = session.Down, Distance = session.Distance, StartYardLine = session.YardLine,
             BallEndYardLine = session.YardLine - (spike ? 0 : 1), Yards = spike ? 0 : -1,
             QuarterbackId = qb?.PlayerId, BallCarrierId = spike ? null : qb?.PlayerId,
@@ -125,7 +125,7 @@ public static partial class GameDayEngine
         var recovered = session.Random.NextDouble() < .12;
         var receiving = session.PossessionTeamName;
         var safetyKick = session.SafetyKickPending;
-        var start = safetyKick ? 80 : 65;
+        var start = 100 - (safetyKick ? 20 : session.KickoffFromOwnYardLine);
         var landing = start - 10;
         var kickingRoster = kicking == session.Game.HomeTeamName ? session.HomeRoster : session.AwayRoster;
         var receivingRoster = receiving == session.Game.HomeTeamName ? session.HomeRoster : session.AwayRoster;
@@ -140,14 +140,15 @@ public static partial class GameDayEngine
             IsSafetyKick = safetyKick,
             StartYardLine = start, KickLandingYardLine = landing, BallEndYardLine = recovered ? 100 - landing : landing,
             KickerId = kicker?.PlayerId,
-            OffensePersonnel = SpecialTeam(receivingRoster, Returner(receivingRoster)).Select(p => p.PlayerId).ToArray(),
-            DefensePersonnel = SpecialTeam(kickingRoster, kicker).Select(p => p.PlayerId).ToArray()
+            OffensePersonnel = KickoffUnit(session, true).Select(p => p.PlayerId).ToArray(),
+            DefensePersonnel = KickoffUnit(session, false).Select(p => p.PlayerId).ToArray()
         };
         session.Events.Add(snap);
         session.PossessionTeamName = recovered ? kicking : receiving;
         session.YardLine = snap.BallEndYardLine; session.Down = 1; session.Distance = 10;
         session.PossessionNumber++; session.KickoffPending = false; session.OnsideKickRequested = false;
         session.SafetyKickPending = false;
+        session.KickoffFromOwnYardLine = 35;
         return snap;
     }
 

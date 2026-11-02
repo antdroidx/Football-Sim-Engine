@@ -4,6 +4,8 @@ using Xunit;
 
 namespace DynastyManager.Core.Tests;
 
+[Trait("Owner", "College")]
+[Trait("Category", "Career")]
 public class OffseasonPlayerLifecycleTests
 {
     [Fact]

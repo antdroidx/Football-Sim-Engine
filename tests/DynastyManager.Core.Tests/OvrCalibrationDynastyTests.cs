@@ -9,6 +9,8 @@ namespace DynastyManager.Core.Tests;
 
 /// <summary>Full FBS roster lifecycle/market stress test, without the cost of playing 20 national schedules.
 /// The separate DynastyHealthTests run complete schedules, stats, injuries and save/load.</summary>
+[Trait("Owner", "College")]
+[Trait("Category", "Career")]
 public abstract class OvrCalibrationDynastyTests(ITestOutputHelper output)
 {
     protected void RunCareer(int seed)

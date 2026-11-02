@@ -8,6 +8,8 @@ using Xunit.Abstractions;
 
 namespace DynastyManager.Core.Tests;
 
+[Trait("Owner", "College")]
+[Trait("Category", "Career")]
 public class DynastyHealthTests(ITestOutputHelper output)
 {
     [Theory]

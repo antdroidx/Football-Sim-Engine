@@ -6,6 +6,7 @@ using ProFootball.Core;
 var mode=args.ElementAtOrDefault(0)??"pro-real";var count=int.Parse(args.ElementAtOrDefault(1)??"128");var output=args.ElementAtOrDefault(2)??".artifacts/balance.json";
 if(mode=="staff-sensitivity"){await StaffSensitivityAudit.Run(count,output);return;}
 if(mode.EndsWith("seasons")){await SeasonAudit.Run(mode,count,output);return;}
+if(mode=="mode-conformance"){await ModeConformanceAudit.Run(count,output);return;}
 var baselinePacing=args.ElementAtOrDefault(3)=="baseline-pacing";
 var pro=mode.StartsWith("pro");var random=new Random(20261029);IReadOnlyList<DynastyPlayer> roster;Dictionary<string,TeamSimulationProfile> profiles;
 if(pro){var s=ProLeagueService.Create("Seattle Seahawks");if(mode.EndsWith("generated"))s=s with{Players=ProGeneratedRoster.Create(s.League,new Random(12345))};roster=s.Players.Where(p=>ProDepthChart.Active(p)&&ProReserve.MedicallyAvailable(s,p)).Select(p=>p.Football).ToArray();profiles=s.League.Teams.ToDictionary(t=>t.Name,t=>ProLeagueService.Profile(s,t.Name));}

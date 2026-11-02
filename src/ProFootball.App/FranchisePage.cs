@@ -1,3 +1,4 @@
+using Football.Presentation;
 using DynastyManager.App;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -143,11 +144,12 @@ public sealed partial class FranchisePage : ContentPage
 
         // Weekly tasks 2x2
         var notices=ProInbox.Build(s);var unread=notices.Count(n=>!s.ReadNotificationIds.Contains(n.Id));
-        var taskGrid=new Grid{ColumnSpacing=10,RowSpacing=10,ColumnDefinitions=new(){new(GridLength.Star),new(GridLength.Star)},RowDefinitions=new(){new(GridLength.Auto),new(GridLength.Auto)}};
-        taskGrid.Add(TaskTile("Roster & depth","Lineup, depth chart, injuries",()=>Open("Roster")),0,0);
-        taskGrid.Add(TaskTile("Staff & game plan","Coaches, schemes, weekly prep",()=>Open("Staff")),1,0);
-        taskGrid.Add(TaskTile("Contracts & cap","Extensions, free agents, cap management",()=>Open("Front Office")),0,1);
-        taskGrid.Add(TaskTile($"Inbox · {unread} unread","Messages, league updates",()=>Open("Inbox")),1,1);
+        var taskGrid=Football.Presentation.PhaseTaskComponents.Grid(new PhaseTask[]{
+            new("Roster","Roster & depth","Lineup, depth chart, injuries"),
+            new("Staff","Staff & game plan","Coaches, schemes, weekly prep"),
+            new("Front Office","Contracts & cap","Extensions, free agents, cap management"),
+            new("Inbox",$"Inbox · {unread} unread","Messages, league updates")},
+            task=>TaskTile(task.Title,task.Detail??"",()=>Open(task.Id)),10);
         var taskColumn=new VerticalStackLayout{Spacing=8};taskColumn.Add(taskGrid);
         var availability=notices.Where(n=>n.Id.StartsWith("ir-")||n.Id.StartsWith("injury-")).ToArray();
         if(availability.Length>0)
@@ -223,9 +225,9 @@ public sealed partial class FranchisePage : ContentPage
         var scouts=ProScoutDepartment.Team(s,team.Name);
         return ShowPage(team.Name,new TeamBadgeView(team,56),Text(team.Conference+" · "+team.Division),Text($"{standing.Wins}–{standing.Losses}–{standing.Ties} · {SeasonCapLabel(s,team.Name)}"),
             Panel("Identity",Text($"{GamePlanService.Label(plan.Offense)} offense · {GamePlanService.Label(plan.Defense)} defense · {GamePlanService.Label(plan.Approach)} approach",13,true)),
-            Panel("Coaching staff",Table([("Role",150),("Name",190),("Age",45),("OVR",50)],coaches.Select(c=>new View[]{Text(RoleName(c.Role)),c.Vacant?Text(c.Name):Link(c.Name,()=>CoachProfile(c)),Text(c.Age.ToString()),Text(c.Vacant?"—":ProStaff.Profile(c).Coaching.ToString())}))),
-            Panel("Medical staff",Table([("Role",150),("Name",190),("Age",45),("OVR",55)],medical.Select(c=>new View[]{Text(RoleName(c.Staff.Role)),Link(c.Staff.FullName,()=>MedicalProfile(c)),Text(c.Staff.Age.ToString()),Text(StaffAttributeService.Medical(c.Staff).Overall().ToString())}))),
-            Panel("Scouting staff",Table([("Coverage",90),("Name",190),("Age",45),("Quality",65)],scouts.Select(c=>new View[]{Text(c.Regional?"Regional":"National"),Link(c.Staff.FullName,()=>ShowPage("Scout profile",Text(c.Staff.FullName,22,true),Text($"Age {c.Staff.Age}"),CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(c.Staff)))),Text(c.Staff.Age.ToString()),Text(ScoutAttributes.FromLegacy(c.Staff).PredictionQuality(c.Regional).ToString())}))),
+            Panel("Coaching staff",Table([("Role",150),("Name",190),("Age",45),("OVR",50)],coaches.Select(c=>new View[]{Text(RoleName(c.Role)),c.Vacant?Text(c.Name):StaffDirectoryComponents.Name(CoachId(c),c.Name,Link,id=>CoachProfile(state!.Coaches.FirstOrDefault(x=>x.TeamId==c.TeamId&&CoachId(x)==id)??c)),Text(c.Age.ToString()),Text(c.Vacant?"—":ProStaff.Profile(c).Coaching.ToString())}))),
+            Panel("Medical staff",Table([("Role",150),("Name",190),("Age",45),("OVR",55)],medical.Select(c=>new View[]{Text(RoleName(c.Staff.Role)),StaffDirectoryComponents.Name(c.Staff.StaffId,c.Staff.FullName,Link,_=>MedicalProfile(c)),Text(c.Staff.Age.ToString()),Text(StaffAttributeService.Medical(c.Staff).Overall().ToString())}))),
+            Panel("Scouting staff",Table([("Coverage",90),("Name",190),("Age",45),("Quality",65)],scouts.Select(c=>new View[]{Text(c.Regional?"Regional":"National"),StaffDirectoryComponents.Name(c.Staff.ScoutId,c.Staff.FullName,Link,_=>ShowPage("Scout profile",Text(c.Staff.FullName,22,true),Text($"Age {c.Staff.Age}"),CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(c.Staff)))),Text(c.Staff.Age.ToString()),Text(ScoutAttributes.FromLegacy(c.Staff).PredictionQuality(c.Regional).ToString())}))),
             Panel("Players",Table([("Player",190),("Pos",50),("OVR",55)],s.Players.Where(p=>p.Football.TeamName==team.Name&&!p.Retired).OrderBy(p=>p.Football.Position.RosterOrder()).ThenByDescending(p=>p.Football.OverallRating).Select(p=>new View[]{PlayerCell(p),Text(p.Football.Position.DisplayName()),Text(p.Football.OverallRating.ToString())}))),
             Panel("Schedule",Table([("Week",60),("Opponent",210),("Result",90)],s.Games.Where(g=>g.Football.InvolvesTeam(team.Name)).Select(g=>{var f=g.Football;var opponent=s.League.Teams.Single(t=>t.Name==(f.HomeTeamName==team.Name?f.AwayTeamName:f.HomeTeamName));return new View[]{Text(ProTransactions.Period(g.Phase,f.Week)),TeamCell(opponent),f.HasPlayed?Link($"{f.AwayScore}–{f.HomeScore}",()=>BoxScore(f)):Text("Upcoming")};}))));
     }

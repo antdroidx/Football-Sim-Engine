@@ -46,7 +46,7 @@ public sealed partial class FoundationPage
                 var assignment=state.ScoutAssignments.FirstOrDefault(a=>a.ScoutId==scout.ScoutId);
                 rows.Children.Add(new Border{StrokeThickness=0,Padding=10,BackgroundColor=DynastyTheme.Palette("#1B2B37"),
                     Content=new VerticalStackLayout{Spacing=4,Children={
-                        PersonLink(scout.FullName,()=>ShowCollegeScoutProfileAsync(scout),true),
+                        StaffDirectoryComponents.Name(scout.ScoutId,scout.FullName,(name,open)=>PersonLink(name,open,true),id=>ShowCollegeScoutProfileAsync(_currentDynasty?.ScoutingStaff.FirstOrDefault(s=>s.ScoutId==id)??scout)),
                         T(assignment is null?"Unassigned":FormatScoutAssignment(assignment))}}});
             }
             return rows;

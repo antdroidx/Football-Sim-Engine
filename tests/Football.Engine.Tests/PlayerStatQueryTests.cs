@@ -8,6 +8,18 @@ namespace Football.Engine.Tests;
 [Trait("Category", "Fast")]
 public sealed class PlayerStatQueryTests
 {
+    [Fact]
+    public void CompetitionScopesDoNotCollapseSameNamedGamesOrPretendRowsHavePhaseHistory()
+    {
+        var id = Guid.NewGuid();
+        ScheduledGame Game(int yards) => new() { GameId = "same", SeasonYear = 2026, HomeTeamName = "A", AwayTeamName = "B",
+            HasPlayed = true, PlayerStats = [Line(id, 2026, "A", yards)] };
+        PlayerStatGame[] games = [new(Game(10), StatCompetition.RegularSeason), new(Game(20), StatCompetition.Postseason),
+            new(Game(900), StatCompetition.Postseason)];
+        Assert.Equal(30, PlayerStatQuery.FromCompetitiveGames(games, new()).Sum(p => p.PassYards));
+        Assert.Equal(20, Assert.Single(PlayerStatQuery.FromCompetitiveGames(games, new(Competition: StatCompetition.Postseason))).PassYards);
+        Assert.Throws<ArgumentException>(() => PlayerStatQuery.Filter([Line(id, 2026, "A", 1)],new(Competition:StatCompetition.Postseason)));
+    }
     static PlayerSeasonStatLine Line(Guid id, int year, string team, int yards) => new()
     { PlayerId = id, PlayerName = "Player", TeamName = team, SeasonYear = year, Games = 1,
         PassYards = yards, LongestPass = yards, TrackedGames = 0 };

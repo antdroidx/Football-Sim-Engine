@@ -19,7 +19,7 @@ public static class ProGeneratedRoster
                 var tier=pos==Position.OL?depth/5:pos is Position.DE or Position.DT or Position.OLB?depth/2:pos is Position.WR or Position.CB?depth/3:depth;
                 var target=Math.Clamp((practice?59:(int)Math.Round(baselines.GetValueOrDefault(pos,baselines[Position.RB]))-tier*7)+strength+random.Next(-6,7),45,96);
                 var age=practice?random.Next(22,25):22+(random.Next(0,12)+random.Next(0,12))/2;var experience=Math.Max(0,age-22);var rookie=2026-experience;
-                var code=pos switch{Position.FB=>2,Position.OL=>5+depth%5,Position.DE=>10+depth%2,Position.OLB=>depth%2==0?13:15,Position.K=>19,Position.P=>20,_=>(int?)null};
+                var code=pos switch{Position.FB=>PlayerPositionConversion.DefaultCode(pos),Position.OL=>5+depth%5,Position.DE=>10+depth%2,Position.OLB=>depth%2==0?13:15,Position.K or Position.P=>PlayerPositionConversion.DefaultCode(pos),_=>(int?)null};
                 var template=new DynastyPlayer{FullName="Generated Player",TeamName=team.Name,Position=pos,NcaaPositionCode=code,DepthChartOrder=depth+1};
                 var pool=names.Where(p=>p.Position==pos&&(pos!=Position.K||p.NcaaPositionCode==code)).OrderBy(p=>Math.Abs(p.OverallRating-target)).Take(12).ToArray();
                 if(pool.Length==0)pool=names.Where(p=>p.Position==(pos is Position.P?Position.K:Position.RB)).OrderBy(p=>Math.Abs(p.OverallRating-target)).Take(12).ToArray();

@@ -127,14 +127,13 @@ public sealed partial class FoundationPage
         cards.Add(NavigationCard("NEXT GAME", opponent, next is null ? "Open schedule ›" : $"Week {next.Week} · Matchup & prep ›", "#234A43",
             () => ShowSection(next is null ? AppSection.Schedule : AppSection.GameDay)), 0, 1);
         cards.Add(NavigationCard("INJURIES", $"{injuries} active", "Team & league report ›", "#443657", () => ShowSection(AppSection.Injuries)), 1, 1);
-        var tasks = new Grid { ColumnSpacing=6,RowSpacing=6,ColumnDefinitions=new() {new(GridLength.Star),new(GridLength.Star)},RowDefinitions=new() {new(GridLength.Auto),new(GridLength.Auto)} };
-        var taskIndex=0;
-        foreach(var task in new[] { ("Recruiting & scouting", AppSection.Recruiting), ("Roster & depth",AppSection.Roster),
-            ("Staff & game plan",AppSection.Playbook), ("Injury report",AppSection.Injuries) })
+        var tasks = Football.Presentation.PhaseTaskComponents.Grid(new PhaseTask[]{
+            new(nameof(AppSection.Recruiting),"Recruiting & scouting"),new(nameof(AppSection.Roster),"Roster & depth"),
+            new(nameof(AppSection.Playbook),"Staff & game plan"),new(nameof(AppSection.Injuries),"Injury report")}, task =>
         {
-            var button=new Button { Text=task.Item1+" ›", FontSize=11, HorizontalOptions=LayoutOptions.Fill, BackgroundColor=DynastyTheme.Panel, TextColor=DynastyTheme.Text };
-            button.Clicked+=(_,_)=>ShowSection(task.Item2); tasks.Add(button,taskIndex%2,taskIndex/2);taskIndex++;
-        }
+            var button=new Button { Text=task.Title+" ›", FontSize=11, HorizontalOptions=LayoutOptions.Fill, BackgroundColor=DynastyTheme.Panel, TextColor=DynastyTheme.Text };
+            button.Clicked+=(_,_)=>ShowSection(Enum.Parse<AppSection>(task.Id)); return button;
+        },6);
         var standings=new VerticalStackLayout { Spacing=5 };
         var conferenceName=school?.ConferenceName;
         foreach(var entry in BuildCurrentNationalRankings().Where(r=>_teamsByName.TryGetValue(r.TeamName,out var t)&&t.ConferenceName==conferenceName).Take(5))

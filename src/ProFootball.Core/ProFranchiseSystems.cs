@@ -293,6 +293,8 @@ public static class ProOffseason
     public static ProFranchise Advance(ProFranchise s)
     {
         s=ProRookieOptions.ManageCpu(s);
+        var validation = ProOffseasonFlow.Validate(s);
+        if (!validation.CanAdvance) throw new InvalidOperationException(validation.FirstReason);
         if (s.OffseasonStep == OffseasonStep.Retention)
         {
             s = ProStaff.DevelopSeason(ProCareer.Review(s));
@@ -321,11 +323,8 @@ public static class ProOffseason
         if (s.OffseasonStep == OffseasonStep.FreeAgency) return ProDraft.AutoScout(ProDraft.AutoUntilUser(ProCpu.Manage(s.AutoManageFreeAgency?ProFreeAgencyAssistance.Propose(s):s) with { OffseasonStep = OffseasonStep.Draft }));
         if (s.OffseasonStep == OffseasonStep.Draft)
         {
-            if (ProDraft.Current(s) is not null) throw new InvalidOperationException("Finish all seven draft rounds first.");
-            if(ProRookieOptions.Pending(s,s.UserTeam).Any(p=>ProCareer.Controls(s,p.Football.Position)))throw new InvalidOperationException("Decide your fifth-year rookie options before leaving the draft. Open Front Office → Rookie options, or delegate to staff.");
             return s with { OffseasonStep = OffseasonStep.RosterCuts, Players = s.Players.Concat(s.Prospects.Select(p => p with { Football = p.Football with { TeamName = "Free agent" } })).ToList(), Prospects = [] };
         }
-        if (ProRoster.CountForLimit(s, s.UserTeam) > 90) throw new InvalidOperationException("Keep your training-camp roster at 90 or fewer. Final cuts and cap compliance are required before regular-season play.");
         s = ProCpu.Manage(ProTermination.ProcessJune1(s with { Phase = ProPhase.Preseason, Week = 1 }));
         return s with { Phase = ProPhase.Preseason, Week = 1, OffseasonStep = OffseasonStep.Retention, Games = ProSchedule.Build(s.League, s.Year), TaggedTeams = [], Picks = s.Picks.Concat(ProEconomy.CreatePicks(s, s.Year + 1)).DistinctBy(p => p.Id).ToList() };
     }
