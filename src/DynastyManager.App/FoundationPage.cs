@@ -917,7 +917,7 @@ public sealed partial class FoundationPage : ContentPage
         };
 
     private static string FormatOriginalRecruitingStars(DynastyPlayer player) =>
-        player.OriginalRecruitingStars is int stars ? player.RecruitingStarsEstimated ? $"Estimated HS stars: {stars}★" : $"HS recruit: {stars} stars"
+        player.OriginalRecruitingStars is int stars ? $"HS recruit: {stars} stars"
             : player.IsWalkOn ? "Walk-on" : "HS recruit: unknown";
 
     private static string FormatClassYear(int classYear, bool redshirted = false)

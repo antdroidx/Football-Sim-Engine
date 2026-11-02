@@ -178,7 +178,7 @@ public sealed partial class FoundationPage
             TableText(OffensiveLineService.Label(player)), PlayerLink(player), RatingCell(player.OverallRating),
             TableText(FormatSigned(GameMoraleService.SeasonDelta(_currentDynasty!, player))), MoraleIcon(player),
             TableText(FormatClassYear(player.ClassYear, player.IsRedshirted || player.HasRedshirted)), TableText(FormatPotentialStars(player.PotentialRating)),
-            TableText(player.OriginalRecruitingStars is int stars ? $"{(player.RecruitingStarsEstimated ? "~" : "")}{stars}★" : "—"),
+            TableText(player.OriginalRecruitingStars is int stars ? $"{stars}★" : "—"),
             HeightCell(player.HeightInches), TableText(player.WeightPounds > 0 ? player.WeightPounds.ToString() : "—")
         }));
 }

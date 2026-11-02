@@ -132,13 +132,10 @@ public sealed partial class FranchisePage
         View[] stats = { StatTile("Overall", p.Coaching.ToString(), "Derived from coaching attributes"), StatTile("Development", p.Development.ToString(), "Player growth"), StatTile("Leadership", p.Leadership.ToString(), "Morale & focus"), StatTile("Offense Playcalling", p.Offense.ToString(), "Play calls"), StatTile("Defense Scheme", p.Defense.ToString(), "Scheme execution"), StatTile("Special teams", p.SpecialTeams.ToString(), "Units") };
         for (var i = 0; i < stats.Length; i++) tiles.Add(SectionCard("", null, stats[i]), i % 3, i / 3);
         var abilities = CoachAttributeViews.Coaching(p.Attributes);
-        var history = SectionCard("Performance history", "Observed results where available; otherwise a role-weighted club estimate.",
-            Text(ProCoachHistoryCatalog.Basis(coach), 12),
-            Text($"Initial history rating {ProCoachHistoryCatalog.Rating(coach)}/100 · {ProCoachHistoryCatalog.ObservedThrough}", 12));
         var schemes = SectionCard("Preferred schemes", "Hired coaches bring a philosophy; balance it against your roster.",
             SchemePair(p.OffenseScheme, p.DefenseScheme));
         var role = SectionCard("Role & contract", "", Text($"Role · {RoleName(coach.Role)}"), Text($"Club · {team.Name}"), Text(coach.Vacant ? "Position currently vacant. Hire a replacement from Staff." : "Reports to the head coach. Managed through Staff."));
-        return ShowPage("Coach profile", hero, tiles, abilities, history, schemes, role);
+        return ShowPage("Coach profile", hero, tiles, abilities, schemes, role);
     }
     Task GamePlan()
     {

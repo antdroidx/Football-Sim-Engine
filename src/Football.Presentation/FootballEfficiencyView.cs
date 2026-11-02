@@ -21,7 +21,7 @@ public static class FootballEfficiencyView
         {
             content.Clear();if(team.SelectedIndex<0||metric.SelectedIndex<0)return;var own=rows[team.SelectedIndex];var m=metrics[metric.SelectedIndex];var available=rows.Where(x=>m.Value(x).HasValue).ToArray();
             content.Add(Text($"{own.Games} games · {own.Plays:N0} plays · {own.ContextPlays:N0} context snaps recorded"));
-            if(m.Value(own) is not double value){content.Add(Text("Not recorded in these saved games. New games record full-play context."));return;}
+            if(m.Value(own) is not double value){content.Add(Text("No statistics available."));return;}
             var ordered=available.OrderBy(x=>m.Higher?-m.Value(x)!.Value:m.Value(x)!.Value).ToArray();var leader=ordered[0];var avg=available.Average(x=>m.Value(x)!.Value);var rank=1+available.Count(x=>m.Higher?m.Value(x)>value:m.Value(x)<value);
             content.Add(Text($"{m.Name} · Rank {rank}/{available.Length} · "+(m.Higher?"Higher is better":"Lower is better")));
             content.Add(FootballBarChart.Create(new[]{(own.Team,value),("League average",avg),("Leader · "+leader.Team,m.Value(leader)!.Value)},m.Format,metric.SelectedIndex<3?"%":""));

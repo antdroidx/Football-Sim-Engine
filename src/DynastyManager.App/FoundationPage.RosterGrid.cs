@@ -107,7 +107,7 @@ public sealed partial class FoundationPage
                 MoraleIcon(player),
                 TableText(player.IsRedshirted ? "RS" : DisplayDepthOrder(player).ToString()),
                 TableText(FormatPotentialStars(player.PotentialRating), color: DynastyTheme.Palette("#E9C76C")),
-                TableText(player.OriginalRecruitingStars is int stars ? $"{(player.RecruitingStarsEstimated ? "~" : "")}{stars}★" : "—"),
+                TableText(player.OriginalRecruitingStars is int stars ? $"{stars}★" : "—"),
                 TableText(status, color: player.CurrentInjury is not null ? NegativeChangeColor : player.IsRedshirted ? DynastyTheme.Palette("#D6A3EB") : DynastyTheme.Muted),
                 HeightCell(player.HeightInches), TableText(player.WeightPounds > 0 ? player.WeightPounds.ToString() : "—")]);
         }

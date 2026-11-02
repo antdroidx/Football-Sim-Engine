@@ -204,7 +204,7 @@ public sealed partial class FoundationPage
         } };
         if (coach.FormerPlayerId is not null) overview.Add(new Label { Text = $"Former {coach.AlmaMater} player · Class of {coach.GraduationYear} · entered coaching after apprenticeship", TextColor = DynastyTheme.Accent });
         if (coach.SharedRoleCoaches.Count > 0) overview.Add(new Label { Text = "Shared coordinator role: " + string.Join(" · ", coach.SharedRoleCoaches.Select(c => $"{c.FullName} ({c.PublishedTitle})")), TextColor = DynastyTheme.Muted });
-        if (coach.DataSeason is int dataSeason) overview.Add(new Label { Text = $"{dataSeason} staff · {coach.PublishedTitle} · age and coaching ratings are game estimates", TextColor = DynastyTheme.Muted });
+        if (coach.DataSeason is int dataSeason) overview.Add(new Label { Text = $"{dataSeason} staff · {coach.PublishedTitle}", TextColor = DynastyTheme.Muted });
         var traits = StaffAttributeService.IsMedical(coach.Role)
             ? CoachAttributeViews.Medical(StaffAttributeService.Medical(coach))
             : coach.Role==StaffRole.ChiefScout ? CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(coach))
@@ -233,7 +233,7 @@ public sealed partial class FoundationPage
         (_currentDynasty is null ? Enumerable.Empty<StaffMember>() : Enum.GetValues<StaffRole>()
             .Select(role => StaffManagementService.GetStaff(_currentDynasty, school, role)).OfType<StaffMember>()).OrderBy(coach => coach.Role).Select(coach => new View[]
         {
-            TableText(FormatStaffRole(coach.Role)), CoachLink(coach), RatingCell(coach.OverallRating), TableText(coach.DataSeason is null ? coach.Age.ToString() : $"~{coach.Age}"),
+            TableText(FormatStaffRole(coach.Role)), CoachLink(coach), RatingCell(coach.OverallRating), TableText(coach.Age.ToString()),
             TableText(coach.Recruiting.ToString()), TableText(coach.PlayerDevelopment.ToString()), TableText(coach.Leadership.ToString()), TableText(coach.Scheme.ToString())
         }));
 }

@@ -171,7 +171,7 @@ public sealed partial class FoundationPage
             var fieldGoal = recommendation.Type == RecommendedCallType.FieldGoal;
             selectedHeading.Text = "RECOMMENDED SPECIAL TEAMS CALL";
             selectedName.Text = fieldGoal ? "Field goal attempt" : "Punt";
-            selectedDetails.Text = fieldGoal ? $"{recommendation.KickDistance}-yard attempt · {recommendation.KickProbability:P0} estimated"
+            selectedDetails.Text = fieldGoal ? $"{recommendation.KickDistance}-yard attempt · {recommendation.KickProbability:P0}"
                 : $"4th & {session.Distance} · Protect field position";
             selectedDescription.Text = recommendation.Reason;
             selectedArt.IsVisible = false;

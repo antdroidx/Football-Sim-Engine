@@ -600,3 +600,8 @@ Canonical completion status: ROADMAP.md. The30-area source matrix,12 prioritized
 ## Approved parity implementation sequence started
 
 Resume at IMPLEMENTATION-HANDOFF.md. College staff links/scout department and Pro readonly opposing medical profiles implemented; both Android Compile targets pass. Existing focused staff/scouting regression cases:20 College/34 Pro pass. Baseline rules scenarios40 shared/13 Pro pass; not a complete rules certification. Device verification and later editor/aging work remain open. Pro player appearance editor was found during follow-up; audit A08 corrected to avoid a duplicate implementation.
+
+
+## User direction: keep modeling caveats out of game UI
+
+Remove player-facing research/provenance explanations about approximate ages, generated/estimated ratings and club-proxy calibration in both apps. This supersedes A09's recommendation to add assumption labels to profiles. Keep engineering evidence in developer docs, not gameplay screens. Scouting mechanics and stored data/calculations are unchanged. Removed College estimated-star/age markers and coach caveat, Pro calibration/history panels and team provenance, and simplified associated display text. Focused string-presence checks passed; Compile-only checks pass for both Android apps (College0 warnings/errors; Pro0 errors/2 existing warnings). No broad tests, simulations, device run or APK packaging for this text-only batch, per user's usage constraint.
