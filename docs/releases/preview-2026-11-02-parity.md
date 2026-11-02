@@ -1,6 +1,6 @@
 # Parity continuation — release candidate
 
-Draft changelog for the approved parity work since published main99254c7 (Pro149 / College439). Final acceptance and publication status belongs in the implementation handoff. Current Actions candidates are Pro152 and College442; these are CI artifacts until published as a release.
+Draft changelog for the approved parity work since published main99254c7 (Pro149 / College439). Final acceptance and publication status belongs in the implementation handoff. Current Actions candidates are Pro156 and College444; these are CI artifacts until published as a release.
 
 ## Both games
 
@@ -10,14 +10,15 @@ Draft changelog for the approved parity work since published main99254c7 (Pro149
 - Display numeric3-4/4-3 formation labels consistently in profile and playbook pickers.
 - Remove player-facing data-model/calibration caveats while retaining useful gameplay information and internal provenance.
 - Score ordinary run, sack and kneel safeties for the defense; retain underlying rushing/sack statistics and correct period, drive and highlight accounting. The conceding team free-kicks from20; normal/onside origins, halftime, game-end and overtime boundaries are handled independently.
+- Launch kickoff flight at the recorded kicking line, with the kicker starting the run-up behind it.
 - Preserve the punt-touchback banner at receiving20; kickoff banners use the actual awarded spot.
 - Share special-teams selection between kickoff huddles and the actual kick event. Preserve11 unique personnel per unit.
 - Retain CPU provenance for automatically called kneels.
 
 ## Pro
 
-- Add custom offensive/defensive playbook authoring using the existing shared play services. Copy plays, edit routes/blocks/defensive assignments, save the library and select calls within17-offense/14-defense limits. Fix the modal busy guard that prevented Save/Cancel from responding.
-- Add saved coach portrait appearance and an own-team portrait editor. Opponent coach editing is hidden and guarded.
+- Add custom offensive/defensive playbook authoring using the existing shared play services. Copy plays, edit routes/blocks/defensive assignments, save the library and select calls within17-offense/14-defense limits. Fix the modal busy guard that prevented Save/Cancel from responding. Live call selection now follows the active playbook instead of exposing excluded library calls.
+- Add saved coach portrait appearance and an own-team portrait editor. Saving replaces the old profile so one Back returns to its directory. Opponent coach editing is hidden and guarded.
 - Set explicit specialist aging peaks: punters32 and kickers33, with separate seeded multi-year cohort checks.
 - Lock regular/postseason overtime durations and possession-reply behavior, first-down clock differences and Pro sack accounting.
 - Implement the modern dynamic kickoff distinction: untouched end-zone touchback35, landing-zone bounce into end zone20 and midfield-origin touchback20. Align coverage/setup units, freeze non-kickers until first touch and limit early kicker advance. Preserve those flags for replay.
@@ -39,7 +40,10 @@ Draft changelog for the approved parity work since published main99254c7 (Pro149
 
 ## Validation and artifacts
 
-- [Pro152 Actions run](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41483346127):413 tests pass; packaging succeeds with two pre-existing nullable warnings. [APK artifact](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41483346127/artifacts/13161805763), SHA256 `84b686d84d6f9fa0a03da3faa75b18988dbc39ac7a5cee96be57084771ae74cd`.
-- [College442 Actions run](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41483840728):30 Engine and7 scoped College tests pass; packaging has0 warnings/errors. [APK artifact](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41483840728/artifacts/13162155152), SHA256 `d2c6251c40f4bf39c0c2ee2dbe0ea2483527e1e65f34890e3d8775ca8386cea3`.
-- [768-game mode comparison](../audits/mode-conformance-results.md) passes across real/generated rosters, both leagues, all modes and CPU/controlled calls. Focused timeout/penalty/safety71 and portrait/scoring20 pass; overlapping result sets are not summed.
-- Native acceptance is ongoing. Do not treat this draft as evidence of completed editor/gameplay/role-matrix acceptance or a published prerelease.
+The current candidate manifest, exact hashes, workflow links/counts and per-APK native acceptance boundaries are in [parity-acceptance-current.json](../audits/parity-acceptance-current.json). Pro156 and College444 package successfully; Pro retains two existing nullable warnings. Focused CI checks pass27 Pro,30 Engine and103 College/shared integration cases. Earlier unchanged-Core Pro153 attempt2 passes413 cases.
+
+The [768-game mode comparison](../audits/mode-conformance-results.md) passes across real/generated rosters, both leagues, all modes and CPU/controlled calls. Native defensive copy save/restart/reload/execution passes on Pro153. Native palette/staff/portrait checks and the current-build live-picker/safety acceptance are recorded separately in the manifest.
+
+One three-season CPU roster/cap case failed in Pro153 attempt1, passed three exact local repeats and passed the unchanged CI retry. Its root cause remains unconfirmed; it is retained as a lifecycle finding. No assertion was weakened or financial policy changed.
+
+Native acceptance is ongoing. This draft does not claim a published prerelease or a complete official-rule implementation.

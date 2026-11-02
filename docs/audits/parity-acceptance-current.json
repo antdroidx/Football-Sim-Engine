@@ -1,0 +1,88 @@
+{
+  "status": "in_progress",
+  "date": "2026-11-02",
+  "branch": "codex/parity-roadmap-audit",
+  "runtime": "730d751",
+  "workflowFix": "470caf5",
+  "apps": {
+    "Pro": {
+      "build": 156,
+      "run": 41498375895,
+      "artifact": 13166459226,
+      "sha256": "23dae56791e929d6c5610d5b49f2f48b254ba8d16075dac1b88d9b6664ac0b49",
+      "tests": {
+        "ProFast": 27
+      },
+      "package": "antdroid.profootball.franchise",
+      "runtime": "8a4feb2"
+    },
+    "College": {
+      "build": 444,
+      "run": 41494626705,
+      "artifact": 13166002329,
+      "sha256": "d2db41c68bfed414c6553b3db10bbc4ccf645b0d8f21df2577d3a3742e2abf9c",
+      "tests": {
+        "Engine": 30,
+        "CollegeParity": 103
+      },
+      "package": "antdroid.cfbcoach.dev"
+    }
+  },
+  "nativeEvidence": {
+    "directory": ".artifacts/staff-device/final",
+    "College442": [
+      "own six staff roles light/dark portrait",
+      "own dark landscape attributes",
+      "opponent seven staff roles light/dark portrait",
+      "rating endpoints light/dark portrait/landscape",
+      "user portrait Save/restart/reload",
+      "five actual department scout identities"
+    ],
+    "College443": [
+      "new user-coach directory row",
+      "correct profile and persisted Beard/Gray appearance"
+    ],
+    "Pro153": [
+      "defensive copy save/restart/reload/execute",
+      "all nine own staff entries dark portrait/landscape",
+      "rating0/100 endpoints"
+    ],
+    "Pro155": [
+      "all nine own staff entries light portrait",
+      "portrait save reproduced duplicate profile on Back"
+    ],
+    "Pro156": [
+      "installed; one-step Back after portrait Save returns to directory",
+      "restart/opponent/live-picker/safety checks in progress"
+    ]
+  },
+  "modeComparison": {
+    "games": 768,
+    "report": "mode-conformance-results.md"
+  },
+  "knownFinding": {
+    "case": "CapInitializationTests.ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets",
+    "run": 41488699569,
+    "failedAttempt": 1,
+    "detail": "2028 Philadelphia active16, cap room25997183, dead cap170834016",
+    "focusedLocalRepeats": "three passed",
+    "unchangedCiRetry": "attempt2 passed413",
+    "rootCause": "unconfirmed; not claimed fixed"
+  },
+  "remaining": [
+    "finish Pro opponent themes/orientations and full-restart portrait confirmation",
+    "verify active-book-only live picker on Pro156 / shared College444",
+    "verify exact-APK safety banner/score/free kick and box views",
+    "final acceptance documentation and authorized repository/release follow-through"
+  ],
+  "preserved": [
+    "unrelated dirty .github/workflows/pro-android-branch.yml",
+    "dirty root worktree",
+    "deferred local cleanup"
+  ],
+  "integration": {
+    "main": "99254c77e1532257fedbc6011cc9b1181b06dcc3",
+    "merged": false,
+    "publishedPrerelease": false
+  }
+}
