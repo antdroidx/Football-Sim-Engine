@@ -87,6 +87,3 @@ public sealed class FootballRulesConformanceTests
         Assert.Equal(33, ProDevelopment.PeakAge(Position.K));
     }
 }
-
-
-

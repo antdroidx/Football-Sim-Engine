@@ -318,4 +318,3 @@ public sealed partial class FranchisePage
             }));
     }
 }
-
