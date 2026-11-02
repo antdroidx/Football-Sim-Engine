@@ -141,13 +141,17 @@ public sealed partial class FranchisePage
     Task GamePlan()
     {
         var plan = state!.GamePlans.FirstOrDefault(p => p.TeamName == state.UserTeam) ?? new TeamGamePlan { TeamName = state.UserTeam };
-        Picker Choices<T>(T selected) where T : struct, Enum => new() { ItemsSource = Enum.GetNames<T>(), SelectedIndex = Array.IndexOf(Enum.GetValues<T>(), selected) };
-        var offense = Choices(plan.Offense); var defense = Choices(plan.Defense); var approach = Choices(plan.Approach); var tempo = Choices(plan.Tempo);
+        Picker Choices<T>(T selected, Func<T, string>? label = null) where T : struct, Enum => new()
+        {
+            ItemsSource = Enum.GetValues<T>().Select(value => label?.Invoke(value) ?? value.ToString()).ToArray(),
+            SelectedIndex = Array.IndexOf(Enum.GetValues<T>(), selected)
+        };
+        var offense = Choices(plan.Offense, GamePlanService.Label); var defense = Choices(plan.Defense, GamePlanService.Label); var approach = Choices(plan.Approach); var tempo = Choices(plan.Tempo);
         offense.IsEnabled = tempo.IsEnabled = ProCareer.Role(state!) != StaffRole.DefensiveCoordinator; defense.IsEnabled = approach.IsEnabled = ProCareer.Role(state!) != StaffRole.OffensiveCoordinator;
         var save = new Button { Text = "Save game plan" }; var saved = Text("");
         save.Clicked += async (_, _) =>
         {
-            var next = plan with { Offense = Enum.Parse<OffensivePlaybook>((string)offense.SelectedItem), Defense = Enum.Parse<DefensivePlaybook>((string)defense.SelectedItem), Approach = Enum.Parse<DefensiveApproach>((string)approach.SelectedItem), Tempo = Enum.Parse<OffensiveTempo>((string)tempo.SelectedItem) };
+            var next = plan with { Offense = Enum.GetValues<OffensivePlaybook>()[offense.SelectedIndex], Defense = Enum.GetValues<DefensivePlaybook>()[defense.SelectedIndex], Approach = Enum.Parse<DefensiveApproach>((string)approach.SelectedItem), Tempo = Enum.Parse<OffensiveTempo>((string)tempo.SelectedItem) };
             next = ProCareer.LimitPlan(state!, next); state = state! with { GamePlans = state.GamePlans.Where(p => p.TeamName != state.UserTeam).Append(next).ToList() }; await Save(); saved.Text = "Saved · applies to future games";
         };
         var editor = Action("Open playbook editor", () => OpenProPlaybookEditor(plan));

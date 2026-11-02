@@ -7,6 +7,22 @@ namespace ProFootball.App;
 
 public sealed partial class FranchisePage
 {
+    // Copy editors await a modal result. They must not retain the page-wide busy
+    // guard while the modal's Save/Cancel actions need that same guard.
+    Button PlayEditorAction(string text, Func<Task> action)
+    {
+        var button = new Button { Text = text };
+        button.Clicked += async (_, _) =>
+        {
+            if (!button.IsEnabled) return;
+            button.IsEnabled = false;
+            try { await action(); }
+            catch (Exception ex) { await GameDialogs.AlertAsync(this, "Unable to continue", ex.Message, "OK"); }
+            finally { button.IsEnabled = true; }
+        };
+        return button;
+    }
+
     View EditorHeading(string title, string subtitle) => new VerticalStackLayout
     {
         Spacing = 4,
@@ -67,7 +83,7 @@ public sealed partial class FranchisePage
                 {
                     library.Children.Add(PlayRow(play.Id, play.Name, $"{GamePlanService.Label(play.Formation)} · {GamePlanService.Label(play.Concept)}", play.Description,
                         true, play.Concept.ToString(), offenseIds, RenderEditor, play));
-                    var edit = Action($"Edit / copy {play.Name}", async () =>
+                    var edit = PlayEditorAction($"Edit / copy {play.Name}", async () =>
                     {
                         var result = await EditProOffensivePlay(play);
                         if (result is not null) { createdOffense.Add(result); RenderEditor(); }
@@ -82,7 +98,7 @@ public sealed partial class FranchisePage
                 {
                     library.Children.Add(PlayRow(play.Id, play.Name, $"{GamePlanService.Label(play.Formation)} · {GamePlanService.Label(play.Approach)}", play.Description,
                         false, play.Approach.ToString(), defenseIds, RenderEditor, defensive: play));
-                    var edit = Action($"Edit / copy {play.Name}", async () =>
+                    var edit = PlayEditorAction($"Edit / copy {play.Name}", async () =>
                     {
                         var result = await EditProDefensivePlay(play);
                         if (result is not null) { createdDefense.Add(result); RenderEditor(); }
