@@ -24,7 +24,7 @@ public static class LiveFootballChoreography
             name.Contains("Tampa", StringComparison.OrdinalIgnoreCase) || defense.Approach == DefensiveApproach.ProtectPass;
     }
 
-    public static string NotificationTeam(GameSnapEvent snap) => snap.Outcome is SnapOutcome.Interception or SnapOutcome.Fumble ||
+    public static string NotificationTeam(GameSnapEvent snap) => snap.IsSafety || snap.Outcome is SnapOutcome.Interception or SnapOutcome.Fumble ||
         snap.Outcome == SnapOutcome.Punt && (snap.IsTouchback || snap.Points >= 6) ? snap.DefenseTeamName : snap.OffenseTeamName;
 
     public static int KickLandingYardLine(GameSnapEvent snap) => snap.IsTouchback
@@ -40,10 +40,10 @@ public static class LiveFootballChoreography
         return new(Math.Clamp(start.X + (x - start.X) * reaction, .02, .98), Math.Clamp(start.Y + (lane - start.Y) * reaction, .06, .94));
     }
 
-    public static (GameFieldPoint From, GameFieldPoint To) Kickoff(bool receiving, bool specialist, int slot, int landing, int end, int direction)
+    public static (GameFieldPoint From, GameFieldPoint To) Kickoff(bool receiving, bool specialist, int slot, int landing, int end, int direction, int kickStartYardLine = 65)
     {
         var lane = specialist ? .5 : .08 + slot % 10 * .093;
-        var fromYard = receiving ? specialist ? landing : slot < 5 ? 43 : 25 : specialist ? 70 : 65;
+        var fromYard = receiving ? specialist ? landing : slot < 5 ? 43 : 25 : specialist ? kickStartYardLine + 5 : kickStartYardLine;
         var toYard = receiving ? specialist ? end : Math.Clamp(end + 9 + slot % 3 * 4, 12, 62) : specialist ? 52 : Math.Clamp(end + (slot % 3) * 4, 1, 75);
         return (new(GameDayAnimationPlanner.ProjectFieldYardLine(fromYard, direction), lane),
             new(GameDayAnimationPlanner.ProjectFieldYardLine(toYard, direction), specialist && receiving ? .5 : lane));

@@ -552,7 +552,7 @@ public class GameCastLivePage : ContentPage
             var unit = GameDayCoachingService.ApplySubstitutions(session, preview).PlayerIds.Select(id => session.PlayersById.GetValueOrDefault(id)).OfType<DynastyPlayer>().ToArray();
             for (var i = 0; i < unit.Length; i++)
             {
-                var player = unit[i]; var point = session.KickoffPending ? LiveFootballChoreography.Kickoff(attacking, attacking ? i == 0 : player.Position == Position.K, i, 2, 25, direction).From : GameDayLivePresentation.HuddlePoint(session.YardLine, direction, attacking, i);
+                var player = unit[i]; var point = session.KickoffPending ? LiveFootballChoreography.Kickoff(attacking, attacking ? i == 0 : player.Position == Position.K, i, 2, 25, direction, session.SafetyKickPending ? 80 : 65).From : GameDayLivePresentation.HuddlePoint(session.YardLine, direction, attacking, i);
                 var marker = Marker(player, Primary(name), Secondary(name), !home);
                 if (marker.Content is FootballSpriteView sprite) sprite.HuddleFacing(.5 - point.X, .5 - point.Y);
                 AbsoluteLayout.SetLayoutFlags(marker, AbsoluteLayoutFlags.PositionProportional); AbsoluteLayout.SetLayoutBounds(marker, new Rect(point.X, point.Y, 28, 28)); players.Add(marker);

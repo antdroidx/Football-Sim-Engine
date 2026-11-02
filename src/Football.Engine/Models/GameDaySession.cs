@@ -21,6 +21,9 @@ public sealed record GameSnapEvent
     public int? TurnoverYardLine { get; init; }
     public Guid? ReturnTacklerId { get; init; }
     public bool DefensiveScore => TurnoverYardLine.HasValue && Points >= 6;
+    public bool IsSafety { get; init; }
+    public bool IsSafetyKick { get; init; }
+    public string ScoringTeamName => IsSafety || DefensiveScore ? DefenseTeamName : OffenseTeamName;
     public bool BrokeTackle { get; init; }
     public int Sequence { get; init; }
     public int PossessionNumber { get; init; }
@@ -115,6 +118,7 @@ public sealed class GameDaySession
     public int YardLine { get; set; } = 25;
     public int PossessionNumber { get; set; } = 1;
     public bool KickoffPending { get; set; } = true;
+    public bool SafetyKickPending { get; set; }
     public CoinTossResult? CoinToss { get; set; }
     public string OpeningReceivingTeam { get; set; } = string.Empty;
     public string KickoffTeamName { get; set; } = string.Empty;

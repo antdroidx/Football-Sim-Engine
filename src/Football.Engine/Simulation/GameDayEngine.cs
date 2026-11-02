@@ -232,7 +232,9 @@ public static partial class GameDayEngine
             if (session.Random.NextDouble() < Math.Clamp(.065 + (escape - tackling) * .002, .015, .16))
                 { brokeTackle = true; yards += session.Random.Next(12, 29) + (session.Random.NextDouble() < .18 ? session.Random.Next(10, 41) : 0); }
         }
-        yards = Math.Clamp(yards, 1 - session.YardLine, 100 - session.YardLine);
+        // A loss can reach the offense's goal line for a safety. Statistical
+        // yardage stops there rather than counting distance inside the end zone.
+        yards = Math.Clamp(yards, -session.YardLine, 100 - session.YardLine);
         var liveSeconds = Math.Clamp((int)Math.Round(isPass ? read.ReleaseSeconds + 1.2 + Math.Max(0, yards) / 8d : 3 + Math.Max(0, yards) / 6d), 4, 17);
 
         var carrierLane = .50;
@@ -349,7 +351,7 @@ public static partial class GameDayEngine
             bool IsPass(GameSnapEvent item) => item.Outcome==SnapOutcome.Spike || !item.IsQuarterbackKeep && !item.IsQuarterbackScramble && item.Outcome != SnapOutcome.Scramble &&
                 ConceptOf(session, item) is
                     OffensiveConcept.QuickPass or OffensiveConcept.PlayAction or OffensiveConcept.DeepPass;
-            var points = group.Where(item => !item.DefensiveScore).Sum(item => item.Outcome == SnapOutcome.Touchdown ? 6 : item.Outcome == SnapOutcome.FieldGoal ? 3 : item.Points);
+            var points = group.Where(item => !item.DefensiveScore && !item.IsSafety).Sum(item => item.Outcome == SnapOutcome.Touchdown ? 6 : item.Outcome == SnapOutcome.FieldGoal ? 3 : item.Points);
             return new GameDriveSummary
             {
                 TeamName = group.Key.OffenseTeamName, PossessionNumber = group.Key.PossessionNumber,
@@ -359,7 +361,7 @@ public static partial class GameDayEngine
                 RushAttempts = scrimmage.Count(item => !IsPass(item) || item.Outcome == SnapOutcome.Sack && session.Rules.SacksCountAsRushing),
                 PassYards = scrimmage.Where(item => IsPass(item) && item.Outcome is SnapOutcome.Completion or SnapOutcome.Touchdown).Sum(item => item.Yards),
                 RushYards = scrimmage.Where(item => !IsPass(item) || item.Outcome == SnapOutcome.Sack && session.Rules.SacksCountAsRushing).Sum(item => item.Yards),
-                Outcome = touchdown ? DriveOutcome.Touchdown : turnover ? DriveOutcome.Turnover : fieldGoal ? DriveOutcome.FieldGoal : DriveOutcome.Punt,
+                Outcome = group.Any(item => item.IsSafety) ? DriveOutcome.Safety : touchdown ? DriveOutcome.Touchdown : turnover ? DriveOutcome.Turnover : fieldGoal ? DriveOutcome.FieldGoal : DriveOutcome.Punt,
                 Points = points
             };
         }).ToArray();
@@ -555,6 +557,14 @@ public static partial class GameDayEngine
         session.ClockStopped = incomplete || turnover || touchdown;
         session.ClockRestartsOnReady = false;
         session.PlayClockSeconds = 40;
+        if (!turnover && !incomplete && session.YardLine + yards <= 0)
+        {
+            AwardSafety(session, homeOnOffense);
+            if (session.IsComplete) return;
+            CheckTwoMinuteTimeout(session);
+            AdvanceQuarter(session);
+            return;
+        }
         if (touchdown)
         {
             if (homeOnOffense) session.HomeScore += 6; else session.AwayScore += 6;
@@ -590,6 +600,7 @@ public static partial class GameDayEngine
         if (session.Quarter == 4)
         {
             session.KickoffPending = false;
+            session.SafetyKickPending = false;
             if (session.HomeScore != session.AwayScore) session.IsComplete = true;
             else if (session.Rules.TimedOvertime) StartProfessionalOvertime(session);
             else StartOvertimeRound(session);
@@ -652,7 +663,8 @@ public static partial class GameDayEngine
         var kickoffRandom = new Random(unchecked(session.Game.SimulationSeed * 397 ^ session.PossessionNumber * 7919 ^
             session.Quarter * 31 ^ 0x4B1C));
         var returnYards = kickoffRandom.Next(16, 34);
-        var start = 65;
+        var safetyKick = session.SafetyKickPending;
+        var start = safetyKick ? 80 : 65;
         var landing = kickoffRandom.Next(1, 8);
         landing = Math.Clamp(landing - (int)Math.Round(GameWeatherService.Tailwind(session, session.KickoffTeamName) * .22), 1, 15);
         var coverageSpeed = kickingRoster.Where(p => p.Position is Position.CB or Position.SS or Position.OLB).Select(p => (double)p.SpeedRating).DefaultIfEmpty(70).Average();
@@ -678,7 +690,7 @@ public static partial class GameDayEngine
             KickLandingYardLine = landing,
             Yards = 0, ReturnYards = returnYards, Outcome = SnapOutcome.Kickoff,
             KickerId = kicker?.PlayerId, ReturnerId = touchback ? null : returner?.PlayerId, BallCarrierId = touchback ? null : returner?.PlayerId,
-            IsTouchback = touchback,
+            IsTouchback = touchback, IsSafetyKick = safetyKick,
             PrimaryDefenderId = touchdown || touchback ? null : coverageTackler?.PlayerId, Points = touchdown ? 6 : 0,
             OffensePersonnel = receivingUnit.Select(player => player.PlayerId).ToArray(),
             DefensePersonnel = coverageUnit.Select(player => player.PlayerId).ToArray()
@@ -686,6 +698,7 @@ public static partial class GameDayEngine
         session.Events.Add(kickoff);
         session.YardLine = end; session.Down = 1; session.Distance = Math.Min(10, 100 - end);
         session.KickoffPending = false;
+        session.SafetyKickPending = false;
         if (touchdown)
         {
             if (receivingHome) session.HomeScore += 6; else session.AwayScore += 6;
@@ -700,6 +713,7 @@ public static partial class GameDayEngine
     private static void QueueKickoff(GameDaySession session, string kickingTeamName)
     {
         session.KickoffPending = true;
+        session.SafetyKickPending = false;
         session.KickoffTeamName = kickingTeamName;
         session.YardLine = 25; session.Down = 1; session.Distance = 10;
     }

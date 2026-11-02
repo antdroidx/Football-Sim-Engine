@@ -32,6 +32,9 @@ public static class GameDayCommentaryService
         var returner = Name(snap.ReturnerId, "the returner");
         var gain = YardPhrase(snap.Yards);
 
+        if (snap.IsSafety)
+            return $"SAFETY! {snap.OffenseTeamName} is down in its own end zone. {snap.DefenseTeamName} scores two points.";
+
         if (snap.TurnoverYardLine.HasValue)
         {
             var turnover = snap.Outcome == SnapOutcome.Interception ? $"{defender} intercepts {quarterback}'s pass intended for {target}" : $"{carrier} fumbles; {defender} recovers";
@@ -40,9 +43,10 @@ public static class GameDayCommentaryService
         }
         return snap.Outcome switch
         {
-            SnapOutcome.Kickoff when snap.IsTouchback => $"{kicker} kicks into the end zone. TOUCHBACK — {snap.OffenseTeamName} takes over at its {(snap.BallEndYardLine > 0 ? snap.BallEndYardLine : 25)}-yard line.",
+            SnapOutcome.Kickoff when snap.IsTouchback => $"{kicker} {(snap.IsSafetyKick ? "takes the free kick after the safety" : "kicks")} into the end zone. TOUCHBACK — {snap.OffenseTeamName} takes over at its {(snap.BallEndYardLine > 0 ? snap.BallEndYardLine : 25)}-yard line.",
             SnapOutcome.Kickoff when snap.Points >= 6 => $"{returner} takes the kickoff {snap.ReturnYards} yards for a TOUCHDOWN!",
             SnapOutcome.Kickoff when snap.IsOnsideKick => snap.KickingTeamRecovered ? $"{snap.DefenseTeamName} recovers the onside kick!" : $"{snap.OffenseTeamName} secures the onside kick.",
+            SnapOutcome.Kickoff when snap.IsSafetyKick => $"{kicker} takes the free kick after the safety to {returner}, who returns it {snap.ReturnYards} yards.",
             SnapOutcome.Kickoff when snap.PrimaryDefenderId.HasValue =>
                 $"{kicker} kicks to {returner}, who returns it {snap.ReturnYards} yards before {defender} makes the tackle.",
             SnapOutcome.Kickoff => $"{kicker} kicks to {returner}, who returns it {snap.ReturnYards} yards.",

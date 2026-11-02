@@ -13,8 +13,9 @@ public static class GameCastHighlight
         Func<string, Color> teamColor, string? period = null)
     {
         var game = session.Game;
-        var headline = period ?? (snap.IsTouchback
-            ? $"TOUCHBACK\nBall at {(snap.Outcome == SnapOutcome.Kickoff ? session.Rules.KickoffTouchbackYardLine : 20)}"
+        var headline = period ?? (snap.IsSafety ? "SAFETY"
+            : snap.IsTouchback
+            ? $"TOUCHBACK\nBall at {(snap.BallEndYardLine > 0 ? snap.BallEndYardLine : snap.Outcome == SnapOutcome.Kickoff ? session.Rules.KickoffTouchbackYardLine : 20)}"
             : snap.Points >= 6 ? "TOUCHDOWN"
             : snap.Outcome == SnapOutcome.ClockStoppage
                 ? snap.TimeoutTeamName is not null ? "TIMEOUT" : snap.Description?.Contains("Two-minute", StringComparison.OrdinalIgnoreCase) == true ? "TWO-MINUTE TIMEOUT" : null

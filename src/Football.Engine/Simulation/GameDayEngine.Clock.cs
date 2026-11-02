@@ -93,7 +93,7 @@ public static partial class GameDayEngine
 
     private static bool ShouldKneel(GameDaySession session)
     {
-        if (session.OvertimeRound > 0 || session.Quarter != 4 || session.ClockSeconds > 120 ||
+        if (session.YardLine <= 1 || session.OvertimeRound > 0 || session.Quarter != 4 || session.ClockSeconds > 120 ||
             session.Mode == GameDayMode.Play && session.ControlledTeamName == session.PossessionTeamName) return false;
         var home = session.PossessionTeamName == session.Game.HomeTeamName;
         var margin = home ? session.HomeScore - session.AwayScore : session.AwayScore - session.HomeScore;

@@ -210,7 +210,7 @@ public static class GameCastAnimation
             }
             if (snap.Outcome == SnapOutcome.Kickoff)
             {
-                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction);
+                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65);
                 x = formation.From.X; y = formation.From.Y;
             }
             x = Math.Clamp(x, .025, .96);
@@ -253,7 +253,7 @@ public static class GameCastAnimation
             }
             if (snap.Outcome == SnapOutcome.Kickoff)
             {
-                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction);
+                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65);
                 endX = formation.To.X; endY = formation.To.Y;
             }
             if (player?.PlayerId == terminalCarrierId && snap.CarrierLane.HasValue) endY = snap.CarrierLane.Value;
@@ -415,7 +415,7 @@ public static class GameCastAnimation
             }
             if (snap.Outcome == SnapOutcome.Kickoff)
             {
-                var formation = LiveFootballChoreography.Kickoff(false, player?.PlayerId == snap.KickerId, index, snap.KickLandingYardLine, snap.BallEndYardLine, direction);
+                var formation = LiveFootballChoreography.Kickoff(false, player?.PlayerId == snap.KickerId, index, snap.KickLandingYardLine, snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65);
                 x = formation.From.X; y = formation.From.Y; endX = formation.To.X; endY = formation.To.Y;
                 if (player?.PlayerId == snap.PrimaryDefenderId) { endX = destination; endY = .5; }
                 if (snap.IsTouchback) { endX = Project(30); endY = y; }

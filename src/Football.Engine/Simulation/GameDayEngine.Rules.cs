@@ -4,6 +4,22 @@ namespace DynastyManager.Core.Simulation;
 
 public static partial class GameDayEngine
 {
+    private static void AwardSafety(GameDaySession session, bool homeOnOffense)
+    {
+        var snap = session.Events[^1];
+        session.Events[^1] = snap with { IsSafety = true, Points = 2, BallEndYardLine = 0, Yards = -snap.StartYardLine };
+        if (homeOnOffense) session.AwayScore += 2; else session.HomeScore += 2;
+        session.TryPending = false; session.OnsideKickRequested = false;
+        session.ClockStopped = true; session.ClockRestartsOnReady = false; session.PlayClockSeconds = 25;
+        session.KickoffPending = session.SafetyKickPending = false;
+        if (session.OvertimeRound > 0) { session.IsComplete = true; return; }
+        session.KickoffTeamName = snap.OffenseTeamName;
+        session.PossessionTeamName = snap.DefenseTeamName;
+        session.PossessionNumber++; session.Down = 1; session.Distance = 10;
+        session.YardLine = 20;
+        session.KickoffPending = session.SafetyKickPending = true;
+    }
+
     public static bool IsScrimmage(GameSnapEvent snap) => snap.Outcome is SnapOutcome.Run or SnapOutcome.Completion or
         SnapOutcome.Incompletion or SnapOutcome.Sack or SnapOutcome.Turnover or SnapOutcome.Touchdown or
         SnapOutcome.Interception or SnapOutcome.Fumble or SnapOutcome.Scramble or SnapOutcome.Kneel or SnapOutcome.Spike;
@@ -100,7 +116,7 @@ public static partial class GameDayEngine
         session.Events.Add(snap);
         ConsumeLiveClock(session, spike ? 2 : 4);
         AdvanceState(session, home, snap.Yards, false, false, spike);
-        return snap;
+        return session.Events[^1];
     }
 
     private static GameSnapEvent ResolveOnsideKick(GameDaySession session)
@@ -108,6 +124,12 @@ public static partial class GameDayEngine
         var kicking = session.KickoffTeamName;
         var recovered = session.Random.NextDouble() < .12;
         var receiving = session.PossessionTeamName;
+        var safetyKick = session.SafetyKickPending;
+        var start = safetyKick ? 80 : 65;
+        var landing = start - 10;
+        var kickingRoster = kicking == session.Game.HomeTeamName ? session.HomeRoster : session.AwayRoster;
+        var receivingRoster = receiving == session.Game.HomeTeamName ? session.HomeRoster : session.AwayRoster;
+        var kicker = GameDayCoachingService.Specialist(session, kicking, Kicker(kickingRoster));
         var snap = new GameSnapEvent
         {
             StatsVersion = 1,
@@ -115,12 +137,17 @@ public static partial class GameDayEngine
             Quarter = session.Quarter, ClockSeconds = session.ClockSeconds, OffenseTeamName = receiving,
             DefenseTeamName = kicking, OffensivePlayId = "", DefensivePlayId = "", Outcome = SnapOutcome.Kickoff,
             IsOnsideKick = true, KickingTeamRecovered = recovered,
-            StartYardLine = 65, KickLandingYardLine = 55, BallEndYardLine = recovered ? 45 : 55
+            IsSafetyKick = safetyKick,
+            StartYardLine = start, KickLandingYardLine = landing, BallEndYardLine = recovered ? 100 - landing : landing,
+            KickerId = kicker?.PlayerId,
+            OffensePersonnel = SpecialTeam(receivingRoster, Returner(receivingRoster)).Select(p => p.PlayerId).ToArray(),
+            DefensePersonnel = SpecialTeam(kickingRoster, kicker).Select(p => p.PlayerId).ToArray()
         };
         session.Events.Add(snap);
         session.PossessionTeamName = recovered ? kicking : receiving;
         session.YardLine = snap.BallEndYardLine; session.Down = 1; session.Distance = 10;
         session.PossessionNumber++; session.KickoffPending = false; session.OnsideKickRequested = false;
+        session.SafetyKickPending = false;
         return snap;
     }
 

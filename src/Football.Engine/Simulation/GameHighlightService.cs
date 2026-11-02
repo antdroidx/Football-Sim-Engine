@@ -21,6 +21,7 @@ public static class GameHighlightService
 
     public static double Value(GameSnapEvent e) => (e.Outcome switch
     {
+        _ when e.IsSafety => 95,
         _ when e.Points >= 6 => 110,
         SnapOutcome.Touchdown => 100,
         SnapOutcome.Interception or SnapOutcome.Fumble or SnapOutcome.Turnover => 85,

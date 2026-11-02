@@ -1,6 +1,6 @@
 namespace DynastyManager.Core.Models;
 
-public enum DriveOutcome { Punt, Touchdown, FieldGoal, Turnover }
+public enum DriveOutcome { Punt, Touchdown, FieldGoal, Turnover, Safety }
 
 public sealed record GameDriveSummary
 {
