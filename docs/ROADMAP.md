@@ -21,14 +21,14 @@ Canonical status at main99254c7; supersedes outstanding-work wording in historic
 
 ## Remaining, prioritized
 
-- **P1:** A01-A03 staff links, real scout visibility and opponent medical permissions are implemented. Finish A04's remaining exact-APK device matrix; see the handoff for verified roles/themes.
-- **P1:** A05 league-rule conformance and live/fast-mode comparison. Validate scenarios before changing chosen policies.
-- A05 update: ordinary scrimmage safety scoring/free kicks and boundary accounting are implemented;25 focused cases pass. Dynamic kickoff details, penalty/return exceptions and fresh exact-APK safety acceptance remain open. See the current handoff; earlier safety-gap notes are historical.
-- **P2:** A06 is implemented (P peak32, K peak33); the 64-seed-per-position, twelve-year aging characterization passes. A07 custom plays and A08 coach portraits are implemented; finish device persistence/execution acceptance. A09 remains developer-only; no player-facing assumption labels.
-- **P2:** A10 shared statistical-query contract; A11 audited Engine/College/Pro test ownership and test tiers.
-- A10 now shares season/team/player scope and completed-game deduplication through both league adapters; broader competition/historical scope remains. A12's shared attribute bounds are now used by Pro coaches/scouts and College scouts without merging policies.
-- **P3:** A12 arithmetic primitives are shared; characterize annual output before further extraction. Evaluate College.Core separation after test ownership improves; no assembly rename is planned.
-- Routine real-world data refreshes, playtesting and performance checks remain ongoing. A test count is not feature completeness.
+- **P1 — Device acceptance:** staff links, editors, portraits, palette and safety/kickoff changes are implemented. Complete the final exact-APK role/theme/orientation/extreme-rating matrix and defensive play save/restart/reload/execution. Prior accepted device checks remain scoped to their APK hashes.
+- **P1 — A05:** ordinary safeties/free kicks and modern Pro dynamic kickoff behavior are implemented. Timeout/expiry/two-point/onside/penalty boundary tests pass; the768-game real/generated CPU/controlled mode comparison passes. Live-ball penalties, runoff/untimed-down and return/try safety exceptions still need production coverage. See [rules matrix](audits/rules-conformance-matrix.md).
+- **A06–A08:** P/K aging policy and multi-year cohorts pass. Custom plays and persisted coach portraits are implemented; remaining device acceptance is above. A09 remains developer-only.
+- **Shared work delivered:** A10 scope/competition/deduplication contracts and league adapters; shared phase-validation/task layout; stable-ID staff-name link components; canonical specialist/fullback adapters; A12 attribute bounds with annual staff characterization. Further extraction is optional when it removes matching behavior, not a requirement to merge league policies.
+- **A11:** Engine/College/Pro ownership and explicit Fast/Balance/Career runner are established; major historical College career/calibration classes are tagged. Legacy ownership migration is incremental. Device is a separate exact-APK tier.
+- **College.Core evaluation:** completed; physical separation deferred to avoid assembly/save migration before dependency ownership is clearer.
+- **Integration/release:** branch changes and final build/device evidence must be accepted before integration/release. Preserve the unrelated workflow edit and deferred local cleanup.
+- Routine data refreshes, playtesting and performance checks remain ongoing.
 
 ## Release/validation status
 

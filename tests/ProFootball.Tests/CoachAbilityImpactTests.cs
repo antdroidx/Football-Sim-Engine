@@ -4,6 +4,8 @@ using Xunit;
 
 namespace ProFootball.Tests;
 
+[Trait("Owner", "Pro")]
+[Trait("Category", "Balance")]
 public class CoachAbilityImpactTests
 {
     static ProFranchise WithAbilities(string team, int offense, int defense, int leadership, int development)

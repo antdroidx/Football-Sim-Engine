@@ -6,6 +6,8 @@ using Xunit;
 
 namespace ProFootball.Tests;
 
+[Trait("Owner", "Pro")]
+[Trait("Category", "Fast")]
 public sealed class ProEditorParityTests
 {
     [Fact]

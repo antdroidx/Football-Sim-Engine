@@ -3,6 +3,8 @@ using ProFootball.Core;
 using Xunit;
 namespace ProFootball.Tests;
 
+[Trait("Owner", "Pro")]
+[Trait("Category", "Fast")]
 public class RookieOptionTests
 {
     static (ProFranchise State,ProPlayer Player,ProContract Contract) Setup()

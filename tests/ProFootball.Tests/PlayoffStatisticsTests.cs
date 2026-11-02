@@ -2,6 +2,8 @@ using DynastyManager.Core.Models;
 using ProFootball.Core;
 using Xunit;
 namespace ProFootball.Tests;
+[Trait("Owner", "Pro")]
+[Trait("Category", "Fast")]
 public class PlayoffStatisticsTests
 {
     [Fact] public void SeasonCareerAndCompetitionStaySeparateWithoutArchiveDuplicates()

@@ -2,6 +2,8 @@ using DynastyManager.Core.Models;
 using ProFootball.Core;
 using Xunit;
 namespace ProFootball.Tests;
+[Trait("Owner", "Pro")]
+[Trait("Category", "Fast")]
 public class GuidedOffseasonTests
 {
     static ProFranchise Fictional()=>ProLeagueService.Create("Seattle Seahawks",generatedPlayers:true) with{SalaryCap=2_000_000_000,TeamCapAllocations=[]};

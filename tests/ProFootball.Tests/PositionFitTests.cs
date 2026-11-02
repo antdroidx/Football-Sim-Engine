@@ -4,6 +4,8 @@ using Xunit;
 
 namespace ProFootball.Tests;
 
+[Trait("Owner", "Pro")]
+[Trait("Category", "Fast")]
 public class PositionFitTests
 {
     static DynastyPlayer Player(Position position, int overall = 85)

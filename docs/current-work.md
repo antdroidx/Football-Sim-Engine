@@ -1,3 +1,9 @@
+## Active parity continuation — November 2, 2026
+
+Feature branch runtime5239013 adds dynamic Pro kickoffs, shared phase/task and staff-link contracts, competition-aware statistical queries and canonical specialist adapters. The768-game real/generated CPU/controlled comparison passes; focused timeout/penalty/safety checks pass71 cases. CPU kneels now retain CPU call provenance. See [current handoff](IMPLEMENTATION-HANDOFF.md) and [mode report](audits/mode-conformance-results.md).
+
+A device-discovered College opponent portrait permission gap is fixed at UI/save boundaries in2f1eae5; College-only compile correction1b118a2 preserves player controls. Successful Actions APKs: Pro152 (413 cases) and College442 (Engine30 + scoped College7). Exact hashes, failed/superseded build accounting and the ongoing native acceptance matrix are recorded in the handoff. No final all-scope acceptance, merge, release or local cleanup is claimed yet. The unrelated branch workflow edit remains preserved.
+
 ## Safety/query continuation — November 2, runtime0a4b430
 
 Safety36fc92c fixes ordinary run/sack/kneel safety scoring, free kicks from20, scoring/drive/stat reconciliation and period/overtime boundaries. Shared scopes and staff bounds53e318a preserve league phase/history and lifecycle policies. Presentation0a4b430 preserves punt-touchback20 labels. Initial safety reproductions failed before the fix; final25 safety cases and the scoped shared/Pro/query/lifecycle checks pass. Both Android hosts compile. Exact local APK details and device limits: `audits/safety-query-checkpoint.json`; handoff has the remaining authorized scope. Earlier palette/editor device acceptance remains tied to its old APK hashes. No merge/prerelease/cleanup or new safety-specific device acceptance is claimed; unrelated workflow edit preserved.
