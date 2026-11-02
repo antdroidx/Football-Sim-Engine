@@ -23,7 +23,7 @@ on:
       management_scope:
         description: Focus device and engine checks on the changed management flow
         type: choice
-        options: [overview-roster, statistics, full, fast-forward, generated-roster]
+        options: [parity, overview-roster, statistics, full, fast-forward, generated-roster]
         default: full
       reuse_apk_run_id:
         description: Prior APK run for harness-only retries; application input differences reject reuse
@@ -107,6 +107,8 @@ jobs:
         run: |
           if [ "$MANAGEMENT_SCOPE" = "overview-roster" ]; then
             dotnet test tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj -c Release --no-restore --filter 'FullyQualifiedName~FullbackRoleTests'
+          elif [ "$MANAGEMENT_SCOPE" = "parity" ]; then
+            dotnet test tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj -c Release --no-restore --filter 'FullyQualifiedName~CollegeStaffDirectoryTests|FullyQualifiedName~CollegePhaseValidationTests|FullyQualifiedName~DynamicKickoffTests|FullyQualifiedName~RulesBoundaryMatrixTests|FullyQualifiedName~SafetyRulesTests|FullyQualifiedName~PortraitAndScoringPolishTests|FullyQualifiedName~CollegeStatGamesTests|FullyQualifiedName~SelectedCustomDefenseRunsAndUnselectedLibraryCallIsRejected|FullyQualifiedName~PenaltyPresentationTests'
           elif [ "$MANAGEMENT_SCOPE" = "fast-forward" ]; then
             dotnet test tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj -c Release --no-restore --filter 'FullyQualifiedName~SeasonProgressionTests|FullyQualifiedName~DynastySaveRepositoryTests|FullyQualifiedName~CollegeSeasonFeatureTests'
           elif [ "$RUN_RATING_CALIBRATION" = "true" ]; then

@@ -296,9 +296,9 @@ public class GameCastLivePage : ContentPage
 
     List<GameDayCallChoice> Choices()
     {
-        if (control.CanCall(true)) return PlayEditorService.DefensiveLibrary(Plan).Select(p => new GameDayCallChoice(p.Id, p.Name,
+        if (control.CanCall(true)) return GamePlanService.AvailableDefensivePlays(Plan).Select(p => new GameDayCallChoice(p.Id, p.Name,
             GamePlanService.Label(p.Formation), GamePlanService.Label(p.Approach), new PlayArtDrawable(p.Id, p.Name, false, p.Approach.ToString(), defensiveDefinition: p))).ToList();
-        var choices = session.TryPending ? new List<GameDayCallChoice>() : PlayEditorService.OffensiveLibrary(Plan).Select(p => new GameDayCallChoice(p.Id, p.Name,
+        var choices = session.TryPending ? new List<GameDayCallChoice>() : GamePlanService.AvailableOffensivePlays(Plan).Select(p => new GameDayCallChoice(p.Id, p.Name,
             GamePlanService.Label(p.Formation), p.Concept is OffensiveConcept.InsideRun or OffensiveConcept.OutsideRun ? "RUN" : "PASS", new PlayArtDrawable(p.Id, p.Name, true, p.Concept.ToString(), p))).ToList();
         foreach (var id in control.SpecialCalls())
         {
@@ -546,8 +546,8 @@ public class GameCastLivePage : ContentPage
             var profile = home ? session.HomeProfile : session.AwayProfile; var plan = profile.GamePlan ?? new() { TeamName = name };
             var depth = home ? session.HomeDepthChart : session.AwayDepthChart; var fatigue = home ? session.HomeFatigue : session.AwayFatigue;
             var random = new Random(unchecked(session.Game.SimulationSeed ^ session.Events.Count * 31 ^ (home ? 17 : 37)));
-            var play = PlayEditorService.OffensiveLibrary(plan).FirstOrDefault(p => p.Id == offense) ?? GamePlanService.RecommendOffensivePlay(plan, session.Down, session.Distance, session.YardLine);
-            var defensePlay = PlayEditorService.DefensiveLibrary(plan).FirstOrDefault(p => p.Id == defense) ?? GamePlanService.RecommendDefensivePlay(plan, session.Down, session.Distance);
+            var play = GamePlanService.AvailableOffensivePlays(plan).FirstOrDefault(p => p.Id == offense) ?? GamePlanService.RecommendOffensivePlay(plan, session.Down, session.Distance, session.YardLine);
+            var defensePlay = GamePlanService.AvailableDefensivePlays(plan).FirstOrDefault(p => p.Id == defense) ?? GamePlanService.RecommendDefensivePlay(plan, session.Down, session.Distance);
             var preview = attacking ? PersonnelRotationService.SelectOffense(depth, name, play.Personnel, fatigue, random) : PersonnelRotationService.SelectDefense(depth, name, defensePlay.Personnel, fatigue, random);
             var unit = session.KickoffPending ? GameDayEngine.KickoffUnit(session, attacking).ToArray() : GameDayCoachingService.ApplySubstitutions(session, preview).PlayerIds.Select(id => session.PlayersById.GetValueOrDefault(id)).OfType<DynastyPlayer>().ToArray();
             for (var i = 0; i < unit.Length; i++)

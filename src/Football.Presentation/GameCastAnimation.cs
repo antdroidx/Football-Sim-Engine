@@ -639,10 +639,13 @@ public static class GameCastAnimation
             if (isKick && snap.Outcome is SnapOutcome.Kickoff or SnapOutcome.Punt)
             {
                 var launch = kickerFrom ?? qbFrom ?? centerPoint;
+                // The kicker's run-up begins behind the line; the free-kick ball leaves the kicking line.
+                var launchBall = snap.Outcome == SnapOutcome.Kickoff
+                    ? new Rect(Project(snap.StartYardLine), .50, 14, 9) : BallAt(launch);
                 if (progress < .65)
                 {
                     var landing = snap.KickTouchedLandingZone ? new Rect(Project(snap.KickLandingYardLine), .50, 14, 9) : returnerFrom ?? new Rect(kickLanding, .50, 14, 9);
-                    currentBall = Interpolate(BallAt(launch), BallAt(landing), progress / .65);
+                    currentBall = Interpolate(launchBall, BallAt(landing), progress / .65);
                     currentBall = currentBall with { Y = Math.Clamp(currentBall.Y - Math.Sin(progress / .65 * Math.PI) * .18, .02, .97) };
                 }
                 else if (snap.KickTouchedLandingZone && snap.IsTouchback)

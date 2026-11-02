@@ -21,6 +21,31 @@ public class GameDayEngineTests
         }
     }
 
+    [Theory]
+    [Trait("Owner", "Engine")]
+    [Trait("Category", "Fast")]
+    [InlineData(false)] [InlineData(true)]
+    public void SelectedCustomDefenseRunsAndUnselectedLibraryCallIsRejected(bool pro)
+    {
+        var source=Session(GameDayMode.Play);
+        var stock=PlaybookCatalog.DefensivePlays.First();
+        var custom=stock with {Id="custom-defensive-selection",Name="Selected custom defense"};
+        var plan=new TeamGamePlan {TeamName="Away",Defense=DefensivePlaybook.Custom,
+            CreatedDefensivePlays=[custom],CustomDefensivePlayIds=[custom.Id]};
+        PlayEditorService.Validate(plan);
+        Assert.Equal(custom,Assert.Single(GamePlanService.AvailableDefensivePlays(plan)));
+        GameDaySession Start()
+        {
+            var s=GameDayEngine.Start(source.Game,source.HomeProfile,source.AwayProfile with {GamePlan=plan},
+                source.Roster,GameDayMode.Play,rules:pro?FootballRules.Professional:FootballRules.College);
+            s.KickoffPending=false;s.PossessionTeamName="Home";s.ControlledTeamName="Away";return s;
+        }
+        var snap=GameDayEngine.Step(Start(),userDefensivePlayId:custom.Id);
+        Assert.Equal(custom.Id,snap.DefensivePlayId);Assert.Equal(PlayCallSource.User,snap.DefensiveCallSource);
+        Assert.Equal(11,snap.DefensePersonnel.Distinct().Count());
+        Assert.Throws<ArgumentException>(()=>GameDayEngine.Step(Start(),userDefensivePlayId:stock.Id));
+    }
+
     [Fact]
     public void GameDayIsAvailableOnlyInItsScheduledWeekAndYear()
     {

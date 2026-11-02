@@ -17,7 +17,7 @@ on:
       validation_scope:
         description: Finance checks financial management; termination checks release/waiver/accrual; live checks GameCast; other scopes cover their management flows
         type: choice
-        options: [guided-offseason, profile-tabs, statistics, fast, generated-roster, retention-table, inseason-phase, depth-editor, cap-display, roster-update, staff-calendar, exchange, presentation, roadmap, full, finance, opening, live, trade, retention, reserve, termination]
+        options: [parity, guided-offseason, profile-tabs, statistics, fast, generated-roster, retention-table, inseason-phase, depth-editor, cap-display, roster-update, staff-calendar, exchange, presentation, roadmap, full, finance, opening, live, trade, retention, reserve, termination]
         default: fast
       reuse_apk_run_id:
         description: Optional prior run ID for test-only retries; app-source differences reject reuse
@@ -77,6 +77,9 @@ jobs:
           PRO_COORDINATOR_UI_FIXTURES: ${{ github.workspace }}
         if: github.event_name == 'push' || inputs.validation_scope == 'fast' || inputs.validation_scope != 'guided-offseason' && inputs.validation_scope != 'profile-tabs' && inputs.validation_scope != 'retention-table' && ( inputs.validation_scope == 'statistics' || inputs.validation_scope == 'generated-roster' || inputs.validation_scope == 'inseason-phase' || inputs.validation_scope == 'depth-editor' || inputs.validation_scope == 'cap-display' || inputs.validation_scope == 'roster-update' || inputs.validation_scope == 'staff-calendar') || inputs.validation_scope == 'exchange' || inputs.validation_scope == 'presentation' || inputs.validation_scope == 'roadmap' || inputs.validation_scope == 'termination' || inputs.validation_scope == 'opening' || inputs.validation_scope == 'finance' || inputs.validation_scope == 'live' || inputs.validation_scope == 'trade' || inputs.validation_scope == 'retention' || inputs.validation_scope == 'reserve'
         run: dotnet test tests/ProFootball.Tests/ProFootball.Tests.csproj -c Release --filter 'FullyQualifiedName!~TwentySeasons&FullyQualifiedName!~SourcedFiveSeasons'
+      - name: Focused parity regressions
+        if: inputs.validation_scope == 'parity'
+        run: dotnet test tests/ProFootball.Tests/ProFootball.Tests.csproj -c Release --filter 'Category=Fast'
       - name: Guided offseason and roster regressions
         if: inputs.validation_scope == 'guided-offseason'
         env:
@@ -120,7 +123,7 @@ jobs:
           retention-days: 7
   pro-device:
     needs: pro-build
-    if: github.event_name == 'workflow_dispatch' && inputs.validation_scope != 'fast' && (inputs.validation_scope != 'exchange' || inputs.college_run != '') && always() && !cancelled() && (needs.pro-build.result == 'success' || inputs.reuse_apk_run_id != '')
+    if: github.event_name == 'workflow_dispatch' && inputs.validation_scope != 'fast' && inputs.validation_scope != 'parity' && (inputs.validation_scope != 'exchange' || inputs.college_run != '') && always() && !cancelled() && (needs.pro-build.result == 'success' || inputs.reuse_apk_run_id != '')
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
