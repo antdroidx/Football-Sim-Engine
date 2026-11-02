@@ -1,3 +1,7 @@
+## Safety/query continuation — November 2, runtime0a4b430
+
+Safety36fc92c fixes ordinary run/sack/kneel safety scoring, free kicks from20, scoring/drive/stat reconciliation and period/overtime boundaries. Shared scopes and staff bounds53e318a preserve league phase/history and lifecycle policies. Presentation0a4b430 preserves punt-touchback20 labels. Initial safety reproductions failed before the fix; final25 safety cases and the scoped shared/Pro/query/lifecycle checks pass. Both Android hosts compile. Exact local APK details and device limits: `audits/safety-query-checkpoint.json`; handoff has the remaining authorized scope. Earlier palette/editor device acceptance remains tied to its old APK hashes. No merge/prerelease/cleanup or new safety-specific device acceptance is claimed; unrelated workflow edit preserved.
+
 ## Parity continuation — November 2, 2026
 
 Work is on `codex/parity-roadmap-audit` in `.codex-coach-fix`; root main contains unrelated dirty work. Runtime0138a4a fixes the reproducible Pro custom-play modal busy lock and raw formation picker labels. Both local Debug APKs packaged; exact-APK checks and remaining gaps are in `IMPLEMENTATION-HANDOFF.md` and `audits/parity-continuation-checkpoint.json`. College light-theme identity/staff navigation and Pro custom library save/reload/user-coach portrait restart are checked in an isolated read-only emulator clone. Full device acceptance is not claimed.

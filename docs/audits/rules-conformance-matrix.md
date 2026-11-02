@@ -24,6 +24,7 @@ These links record the rules currently in effect for the implementation. Gamepla
 | Kickoff recovery | User can request; CPU onside logic is situational | User can request; CPU logic is situational | Existing kickoff tests | Needs broader recovery/formation coverage |
 | Extra point | 20-yard attempt | 33-yard attempt | Existing foundation test | Locked |
 | Postseason flag | College postseason services pass their phase | Pro playoff games set `Postseason=true` | Existing foundation plus new overtime test | Covered at engine boundary |
+| Ordinary scrimmage safety | Defense gets2; conceding team free-kicks from20 outside overtime/half-end exceptions | Same core scoring/free-kick behavior | `SafetyRulesTests`25 cases; source36fc92c | Implemented; exact-APK banner/kick acceptance pending |
 
 ## Production-path checks still required
 
@@ -42,7 +43,7 @@ Statistical outcomes should not be required to be byte-identical across Play and
 - Full timeout and period-expiry combinations.
 - Kickoff setup/onside eligibility and dynamic touchback details.
 - Complete penalty timing/enforcement.
-- Safety scoring and free-kick behavior.
+- Return/foul/try-generated safeties and complete free-kick formation/flight behavior beyond the implemented scrimmage path.
 - Two-point decision completeness in all score/time combinations.
 - Full live-versus-fast distribution comparison.
 
@@ -55,3 +56,13 @@ These are explicit follow-ups, not assumptions that current behavior is incorrec
 - These are current-policy characterization checks. Full dynamic-kickoff landing/formation/eligibility, safety free kicks, live-ball penalties, late-half runoff/untimed-down rules and actively controlled-call distributions remain open.
 - **Confirmed source gap:** `AdvanceState` clamps negative plays at the one-yard line. There is no safety scoring event/free-kick state in `GameDaySession`. The next safety batch needs a failing own-goal-line loss scenario, two-point defensive accounting, free-kick state/spot, halftime/game-end handling and presentation/stat/save coverage. No safety fix or conformance acceptance is claimed here.
 - The official2026 NFL rules page was rechecked during this continuation. Rule6 amendments include onside declarations at any game time and kickoff/safety-kick setup changes. Keep declaration eligibility separate from the CPU's late-game strategy; the existing requested-onside test is not full formation compliance.
+
+## Safety implementation — 36fc92c / runtime53e318a
+
+The earlier confirmed scrimmage-safety gap is fixed. Four narrow reproductions first failed with defense0 instead of2. Runs, sacks and intentional kneels can now reach the offense's goal line; losses stop statistically at that line. `IsSafety` preserves the underlying play type, `ScoringTeamName` credits the defense, drives report Safety with no offensive points, and no defensive touchdown is invented. Optional event flags and an appended DriveOutcome value preserve old saves/numeric IDs.
+
+The conceding team supplies a free kick from its own20 (80 in receiving-team field coordinates); normal and onside kicks carry the safety-kick marker and correct origin/recovery spots. Onside events now retain their actual personnel. Ordinary kicks reset that state. Quarter1 keeps the kick in quarter2; halftime replaces it with the normal second-half kickoff. Game-ending or overtime safeties do not queue an extra kick/try; a safety tying regulation at expiry starts the appropriate league overtime. CPU automatic kneeling avoids conceding a safety at its own1.
+
+25 focused cases cover both scoring sides/rule sets, normal/touchback and both onside recoveries, run/sack accounting, scoring-period totals, drive/highlight serialization, regular/postseason overtime and expiry/tied-game boundaries. Affected shared regressions passed138 cases (including22 initial safety cases); the final25-case safety matrix adds three further boundaries. Pro rules/foundation17 also passed. These are focused engine checks; no new safety-specific device acceptance is claimed.
+
+Policy references: [NFL2026 official rulebook](https://operations.nfl.com/rules-officiating/2026-nfl-rulebook), rules6-1 and11-5; [NCAA official rules portal](https://www.ncaa.org/championships/playing-rules/football-playing-rules/) and [NCAA Rule8 text published by SDCFOA](https://www.sdcfoa.org/ncaa/rule-8-scoring), sections8-1 and8-5. The portal's current PDF exceeded the browser fetch limit; the officials' published rule text was inspected for the College safety/free-kick provisions. No general all-rule certification is implied. Dynamic landing-zone touchbacks and complete modern NFL formation restrictions remain open.

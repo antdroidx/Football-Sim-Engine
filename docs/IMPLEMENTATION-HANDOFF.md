@@ -1,6 +1,6 @@
 # Implementation handoff — resume here
 
-Last updated: November 2, 2026 (America/Los_Angeles). Palette baseline: `f9597a5`; see the November 2 continuation below for subsequent fixes and evidence. This document is the model-independent continuation point; read it before making changes.
+Last updated: November 2, 2026 (America/Los_Angeles). Latest runtime source: `0a4b430` (safety `36fc92c`, shared queries/lifecycle `53e318a`); see the latest continuation below. Palette baseline: `f9597a5`. This document is the model-independent continuation point; read it before making changes.
 
 ## User-approved scope and preferences
 
@@ -37,14 +37,14 @@ This is the full continuation scope, not just the first four implementation batc
 | A02 actual College scouts and assignments | Implemented; scout identity, attributes and assignment checked on device | Verify remaining scouts and reload |
 | A03 Pro opponent medical editing | Implemented; correct opponent identity and no edit action checked on device | Verify user medical editing still works and other roles remain consistent |
 | A04 full device matrix | New palette APKs packaged; College light portrait/landscape subset checked; Pro editor lock found and fixed on device | Remaining Pro themes, opponent roles and rating extremes |
-| A05 rules/simulation conformance | Matrix and focused rules tests added; production-path distribution comparison remains | Extend full timeout/kickoff/safety/two-point scenarios and compare modes |
+| A05 rules/simulation conformance | Ordinary scrimmage safeties/free kicks implemented;25 safety scenarios pass alongside focused clock/kick/stat checks | Full dynamic kickoff, return/foul/try safety cases, penalty timing and actively controlled mode distributions |
 | A06 punter aging | Implemented: Pro P peak32; K peak33; 64 cohorts per position pass twelve annual steps with ceiling/decline checks | Broader real/generated career integration remains separate from this bounded development check |
 | A07 Pro custom-play editor | Modal busy-lock fixed; offensive UI create/save/select/restart/reload/live execution passes on exact APK | Defensive copy-editor device roundtrip remains additional coverage |
 | A08 portrait/editor parity | User-team coach portrait save/restart/reload checked; opponent Jim Harbaugh profile has no portrait-edit action on exact APK | Additional role combinations remain in A04's broader matrix |
 | Shared staff-directory/rating components | Shared `StaffProfileComponents.RatingBar` extracted and used by College | Migrate remaining Pro rating visuals where semantics match |
-| A10 statistical-query contracts | Shared `PlayerStatTotals.GroupByPlayer` now owns multi-team labels and maximum/counter aggregation for both apps | Add a broader query-scope contract/adapters |
+| A10 statistical-query contracts | Shared `PlayerStatQuery` owns season/team/player filters and played-game deduplication; Pro and College adapters use it; shared totals retain maxima/counters | Broader competition-phase/missing-history adapters remain league-specific work |
 | A11 test ownership/categories | Engine owns shared stat/lifecycle and moved position tests; Fast/Balance/Career traits introduced; Device remains exact-APK tier | Classify remaining legacy cases and migrate shared integration tests incrementally |
-| A12 staff-lifecycle primitives | Shared arithmetic extracted; bounded six-year Pro and College scout output/reload characterization passes | Extract only equivalent logic; preserve different seed algorithms and annual-call ownership |
+| A12 staff-lifecycle primitives | Pro coaches/scouts and College scouts now use shared shift and attribute-bound helpers; bounded annual checks pass | Keep different seed algorithms, growth/retirement policies and annual-call ownership separate |
 | Phase validation/task components | Planned; not extracted | Share result contracts and task UI, not the leagues' phase graphs |
 | Rating/physical/position adapters | Existing canonical calculations shared; consolidation pending | Audit remaining adapters and specialist/import cases |
 | College.Core separation | Initial evaluation recommends deferring physical split while test ownership is incomplete | Inventory College-only dependencies before any move; preserve assembly/save compatibility |
@@ -183,7 +183,7 @@ The latest user scope is **only** the continuation items listed in chat: device/
 - Pro light portrait opponent coach profile visually checked with green/teal attribute bars; correct Jim Harbaugh identity and absence of Edit portrait asserted from the UI tree. Light landscape profile captured. The unfinished test game was discarded through the UI; previously saved season/playbooks remained intact.
 - Initial College.Core separation evaluation recommends deferring the physical split until shared-test ownership/dependency inventory is clearer. No namespace, assembly or save migration was attempted.
 
-### Still open within the approved scope
+### Remaining at0138a4a checkpoint (historical; superseded below)
 
 - Finish the exact-APK role/theme matrix, extreme rating colors and defensive copy-editor device roundtrip as recorded in the checkpoint. The offensive custom-call end-to-end and one opponent-coach read-only scenario pass; do not generalize them to every role/editor/formation.
 - Actively controlled-call distributions and broader real/generated Simulate/Watch/Play integration. The new mode comparison delegates all calls to CPU.
@@ -193,3 +193,22 @@ The latest user scope is **only** the continuation items listed in chat: device/
 - Continue A11 legacy ownership/category classification. New Fast/Balance/Career traits do not classify every historical long test. Device remains a separate exact-APK tier.
 - A12 now has bounded annual characterization for both leagues; further extraction must preserve each seed algorithm, caller-owned annual application, ordering and distinct hiring/retirement policies.
 - The feature branch is not merged and no new prerelease/CI artifact is published. Existing local APKs are development packages, not release assets. Finish acceptance before integration/release; preserve the unrelated workflow edit. Local cleanup remains deferred.
+
+## Safety and shared-code continuation — runtime0a4b430
+
+This supersedes the earlier scrimmage-safety, basic query-scope and staff-bound extraction pending notes. Scope remains the user's listed issues; the older design backlog remains excluded.
+
+- **36fc92c:** ordinary run/sack/kneel losses can produce safeties. Defense receives2 points, underlying play statistics remain intact, losses stop at the goal line, drive/period/highlight totals agree, and optional event flags survive serialization. The conceding team free-kicks from20. Normal and onside free kicks preserve their origin and actual personnel; subsequent normal kicks clear safety state. Period/halftime, tied regulation, regular/postseason overtime and CPU kneel boundaries are covered. Shared commentary/banner/animation origins now recognize the safety. **0a4b430** preserves the punt-touchback banner's receiving20 while kickoff banners use their actual awarded spot.
+- **53e318a:** `PlayerStatScope`/`PlayerStatQuery` share season/team/player selection and completed-game `(SeasonYear, GameId)` deduplication. First played input wins, retaining current-before-archive precedence. Game-backed queries use game year even if an old line lacks year metadata. Pro's regular/playoff adapter and College's current-year rebuild remain separate. Counter/max totals and missing tracked history remain unchanged.
+- **53e318a:** Pro coaching/scouting and College scouting now call the existing shared attribute-bound helper. Seed algorithms, thresholds, random/attribute evaluation order and hiring/retirement/annual-call policies are unchanged.
+- **Checks:** four initial safety reproductions failed before the fix. The final safety matrix passes25 cases. The affected shared clock/kick/stat/mode set passes138 cases (including22 initial safety cases), Pro rules/foundation17, Engine14, Pro lifecycle/query6 and College annual scouting4. Result sets overlap; do not sum repeated runs as new coverage. Both Android hosts compile; Pro retains the two existing CS8625 warnings. Final local package details belong in `audits/safety-query-checkpoint.json`; earlier palette device evidence applies to its recorded APK hashes only.
+- **Packaging/device boundary:** APKs are local Debug builds, not GitHub Actions artifacts or prereleases. No new safety-specific device scenario or complete all-role/theme matrix has been run for this runtime. Do not relabel the earlier custom-play/palette device evidence as acceptance of these newer binaries.
+
+### Next work, still within the approved list
+
+1. Exact-APK safety banner, score/box/drive views and free-kick playback; remaining role/theme/extreme-rating and defensive editor scenarios.
+2. Full dynamic kickoff landing-zone/touchback and modern Pro formation restrictions; loose-ball/return/foul/try safeties; broader live-ball penalty, runoff and untimed-down cases. The implemented safety path is ordinary scrimmage play, not every impetus/penalty exception.
+3. Actively controlled-call and broader real/generated mode distributions. CPU-delegated parity is already covered.
+4. Broader league competition-phase/historical query adapters; phase blocker/task result contracts and reusable task UI; remaining physical/position/import adapters and stable-ID staff-directory components.
+5. Continue incremental legacy test ownership/categories. Keep College.Core physical separation deferred under the recorded evaluation. No shared seed/hash replacement or league-policy merger is planned.
+6. Integrate/release only after acceptance; preserve the unrelated Pro workflow edit and deferred local cleanup. No new merge or prerelease has occurred in this continuation.

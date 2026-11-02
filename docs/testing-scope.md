@@ -1,3 +1,7 @@
+## Safety/query continuation — November 2, runtime0a4b430
+
+Focused passing result sets: final SafetyRulesTests25; affected clock/kick/stat/mode regression138 (includes22 initial safety cases); Pro rules/foundation17; Engine14; Pro staff-lifecycle/query6; College annual scouting4. Repeated/overlapping results must not be added as fresh coverage. No whole-repository career/balance suite was run. Both Android Compile targets pass (Pro's two existing CS8625 warnings retained). Local package hashes/source and no-new-device-acceptance boundary are in `audits/safety-query-checkpoint.json`. Full dynamic kickoff/formation, return/foul/try safety and late-penalty exceptions remain open. Do not use old palette APK evidence as validation of the changed engine/presentation.
+
 ## Parity continuation — November 2, 2026
 
 Runtime0138a4a, local Debug packages: use `audits/parity-continuation-checkpoint.json` for exact APK hashes/source/scenario limits. Narrow new checks:12 CPU-delegated mode cases (six seeds per rule adapter/36 games),20 rule-boundary cases,2 specialist cohort cases (64 seeds/position over12 annual steps),4 Pro and4 College six-year staff characterization cases,12 Engine Fast cases. All54 pass. Position cases are moved, not duplicated. No whole-suite, complete real/generated career, all-screen device or official-rule certification is claimed.

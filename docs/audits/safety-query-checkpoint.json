@@ -1,0 +1,103 @@
+{
+  "date": "2026-11-02",
+  "branch": "codex/parity-roadmap-audit",
+  "runtimeSource": "0a4b4300d93d349f1f8874db725540af1358d6e1",
+  "commits": {
+    "safety": "36fc92c",
+    "query_lifecycle": "53e318a",
+    "punt_touchback_banner": "0a4b430"
+  },
+  "priorCheckpoint": "parity-continuation-checkpoint.json",
+  "changes": [
+    "Ordinary scrimmage safeties, defense scoring credit, free-kick origin/personnel/state, period/overtime/CPU-kneel boundaries and scoring/stat/save/presentation accounting",
+    "Shared season/team/player stat scope and played-game deduplication; league phase/history adapters retained",
+    "Pro coach/scout and College scout attribute bounds delegate to shared helper without seed/policy changes"
+  ],
+  "tests": [
+    {
+      "scope": "shared_safety_clock_kick_stat_mode",
+      "passed": 138,
+      "failed": 0,
+      "log": ".artifacts/safety-regression.log"
+    },
+    {
+      "scope": "final_safety_matrix",
+      "passed": 25,
+      "failed": 0,
+      "log": ".artifacts/safety-final-matrix.log"
+    },
+    {
+      "scope": "pro_rules_foundation",
+      "passed": 17,
+      "failed": 0,
+      "log": ".artifacts/safety-pro-regression.log"
+    },
+    {
+      "scope": "engine_query_lifecycle_position",
+      "passed": 14,
+      "failed": 0,
+      "log": ".artifacts/shared-query-lifecycle-tests.log"
+    },
+    {
+      "scope": "pro_staff_lifecycle_query",
+      "passed": 6,
+      "failed": 0,
+      "log": ".artifacts/pro-lifecycle-query-tests.log"
+    },
+    {
+      "scope": "college_annual_scouting",
+      "passed": 4,
+      "failed": 0,
+      "log": ".artifacts/college-lifecycle-extraction-tests.log"
+    }
+  ],
+  "testCaveat": "Result sets overlap. The138-case set includes22 initial safety cases; the25-case final safety matrix adds3 boundaries. No whole-repository suite or broad career/balance calibration was run.",
+  "apks": {
+    "pro": {
+      "path": "src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk",
+      "sha256": "5d27f1200e48c04b007a5ce96fa6c77c682f6e10f5c2aff43aacfa76f2bb40ac",
+      "bytes": 89609839,
+      "variant": "Debug",
+      "sourceCommit": "0a4b4300d93d349f1f8874db725540af1358d6e1",
+      "buildLog": ".artifacts/safety-query-pro-package-final.log"
+    },
+    "college": {
+      "path": "src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk",
+      "sha256": "f93c933ee103816db219d6d0338ae0899f55e959e6c37e28f6b159d6a0baa678",
+      "bytes": 91301938,
+      "variant": "Debug",
+      "sourceCommit": "0a4b4300d93d349f1f8874db725540af1358d6e1",
+      "buildLog": ".artifacts/safety-query-college-package-final.log"
+    }
+  },
+  "builds": {
+    "runner": "Visual Studio18 MSBuild SignAndroidPackage, Configuration=Debug, m:1, nr:false",
+    "proExitCode": 0,
+    "collegeExitCode": 0,
+    "proWarnings": "Two existing CS8625 warnings",
+    "collegeWarnings": "No warnings reported",
+    "retry": "First packaging pass canceled to correct the punt touchback banner before final artifacts"
+  },
+  "deviceAcceptance": {
+    "newRuntimeDeviceTested": false,
+    "priorEvidence": "Earlier palette/editor device checks belong only to their recorded APK hashes",
+    "next": [
+      "Safety banner/score/box/drive views and safety-kick playback",
+      "Complete role/theme/extreme-rating matrix and defensive custom editor roundtrip"
+    ]
+  },
+  "remaining": [
+    "Dynamic kickoff flight/touchback details and modern Pro formation restrictions",
+    "Return/foul/try safety exceptions; live-ball penalties, runoff and untimed-down cases",
+    "Actively controlled-call and broader real/generated mode distributions",
+    "Broader phase/history query adapters, phase blocker/task contracts and UI, remaining physical/position/import/staff-directory adapters",
+    "Incremental legacy test ownership/categories; physical College.Core split deferred"
+  ],
+  "repository": {
+    "merged": false,
+    "githubActionsRunStarted": false,
+    "prereleasePublished": false,
+    "localCleanup": "deferred",
+    "unrelatedWorkflowEdit": "preserved and excluded"
+  }
+}
