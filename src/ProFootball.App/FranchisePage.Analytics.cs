@@ -57,7 +57,7 @@ public sealed partial class FranchisePage
             if(selected.Length>0)
             {
                 var metric=new Picker{Title="Compare metric",ItemsSource=selected.Select(c=>c.Metric).ToArray(),SelectedIndex=0};var chart=new ContentView();content.Add(metric);content.Add(chart);
-                void Chart(){if(metric.SelectedIndex<0)return;var c=selected[metric.SelectedIndex];chart.Content=FootballBarChart.Create(new[]{(s.UserTeam,c.Team),("League average",c.Average),("Leader · "+c.LeaderTeam,c.Leader)},"0.0");}
+                void Chart(){if(metric.SelectedIndex<0)return;var c=selected[metric.SelectedIndex];chart.Content=FootballBarChart.Create(new[]{(s.UserTeam,c.Team),("League average",c.Average),("Leader · "+c.LeaderTeam,c.Leader)},"0.0",colorFor:c.Unit=="OVR"?x=>Football.Presentation.RatingQualityColors.ForRating((int)Math.Round(x.Value),DynastyTheme.IsLight):null);}
                 metric.SelectedIndexChanged+=(_,_)=>Chart();Chart();
                 content.Add(Table([("Metric",170),("Your team",80),("League avg",85),("Leader",85),("Rank",65)],selected.Select(c=>new View[]{Text(c.Metric+" · "+c.Unit),Text(c.Team.ToString("0.0")),Text(c.Average.ToString("0.0")),Text(c.Leader.ToString("0.0")),Text($"{c.Rank}/{c.Teams}")})));
             }
