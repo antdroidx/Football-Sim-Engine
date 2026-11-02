@@ -146,4 +146,33 @@ public sealed class RulesBoundaryMatrixTests
         }
         Assert.Fail("No seeded dead-ball foul found.");
     }
+    [Theory]
+    [InlineData(false, true)] [InlineData(false, false)]
+    [InlineData(true, true)] [InlineData(true, false)]
+    public void RunningClockFoulRecordsElapsedTimeWithoutLiveBallOrAttempt(bool pro, bool offense)
+    {
+        for (var seed = 0; seed < 1000; seed++)
+        {
+            var s = Session(pro, seed);
+            s.Quarter = 1; s.ClockSeconds = 300; s.ClockStopped = false;
+            s.YardLine = 50; s.Down = 3; s.Distance = 3;
+            s.Events.Add(new GameSnapEvent { OffenseTeamName = "Home", DefenseTeamName = "Away",
+                OffensivePlayId = "", DefensivePlayId = "", Outcome = SnapOutcome.ClockStoppage });
+            var foul = GameDayEngine.Step(s, "off-spread-zone");
+            if (foul.Outcome != SnapOutcome.Penalty || (foul.PenalizedTeamName == "Home") != offense) continue;
+            Assert.InRange(foul.PreSnapSeconds, 1, 40);
+            Assert.Equal(300 - foul.PreSnapSeconds, s.ClockSeconds);
+            Assert.Equal(s.ClockSeconds, foul.ClockSeconds);
+            Assert.Equal(0, foul.LiveBallSeconds);
+            Assert.True(s.ClockStopped); Assert.True(s.ClockRestartsOnReady);
+            Assert.Equal(offense ? 3 : 1, s.Down);
+            Assert.Equal(offense ? 8 : 10, s.Distance);
+            var box = GameDayEngine.BoxScore(s);
+            Assert.Equal(0, box.HomeStats.PassAttempts + box.HomeStats.RushAttempts);
+            Assert.Equal(0, box.HomeStats.TotalYards);
+            return;
+        }
+        Assert.Fail("No seeded running-clock foul found.");
+    }
+
 }

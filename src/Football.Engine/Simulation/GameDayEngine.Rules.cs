@@ -171,7 +171,9 @@ public static partial class GameDayEngine
         {
             StatsVersion = 1, PenalizedPlayerId = culprit,
             Sequence = session.Events.Count + 1, PossessionNumber = session.PossessionNumber,
-            Quarter = session.Quarter, ClockSeconds = session.ClockSeconds, OffenseTeamName = session.PossessionTeamName,
+            Quarter = session.Quarter, ClockSeconds = session.ClockSeconds,
+            PreSnapSeconds = session.LastPreSnapSeconds,
+            OffenseTeamName = session.PossessionTeamName,
             DefenseTeamName = defenseTeam,
             OffensivePlayId = "", DefensivePlayId = "", Down = session.Down, Distance = session.Distance,
             StartYardLine = session.YardLine, BallEndYardLine = session.YardLine + yards,

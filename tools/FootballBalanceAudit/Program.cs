@@ -7,6 +7,7 @@ var mode=args.ElementAtOrDefault(0)??"pro-real";var count=int.Parse(args.Element
 if(mode=="staff-sensitivity"){await StaffSensitivityAudit.Run(count,output);return;}
 if(mode.EndsWith("seasons")){await SeasonAudit.Run(mode,count,output);return;}
 if(mode=="mode-conformance"){await ModeConformanceAudit.Run(count,output);return;}
+if(mode=="verify-device-fixture"){await DeviceAcceptanceFixture.Verify(output);return;}
 if(mode=="device-fixture"){await DeviceAcceptanceFixture.Run(output);return;}
 var baselinePacing=args.ElementAtOrDefault(3)=="baseline-pacing";
 var pro=mode.StartsWith("pro");var random=new Random(20261029);IReadOnlyList<DynastyPlayer> roster;Dictionary<string,TeamSimulationProfile> profiles;
