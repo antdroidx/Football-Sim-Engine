@@ -153,10 +153,11 @@ public sealed partial class FoundationPage
         if (coach.Role == StaffRole.ChiefScout) return CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(coach));
         if (StaffAttributeService.IsMedical(coach.Role))
             return CoachAttributeViews.Medical(StaffAttributeService.Medical(coach));
+        var attributes = StaffAttributeService.Coaching(coach);
         var tiles = new View[] {
             CoachStatTile("Overall", coach.OverallRating, FormatStaffRole(coach.Role)),
-            CoachStatTile("Leadership", coach.Leadership, "Program culture"),
-            CoachStatTile("Development", coach.PlayerDevelopment, "Player growth"),
+            CoachStatTile("Leadership", attributes.Leadership, "Program culture"),
+            CoachStatTile("Development", attributes.Development, "Player growth"),
             CoachStatTile("Recruiting", coach.Recruiting, "Talent acquisition") };
         var grid = new Grid { ColumnSpacing = 10, RowSpacing = 10 };
         var previous = 0;
