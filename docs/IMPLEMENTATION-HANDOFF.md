@@ -1,6 +1,6 @@
 # Implementation handoff — resume here
 
-Last updated: November 1, 2026 (America/Los_Angeles). Latest implementation commit: `71bcd3a`. This document is the model-independent continuation point; read it before making changes.
+Last updated: November 1, 2026 (America/Los_Angeles). Latest implementation commit: `b080ab7`. This document is the model-independent continuation point; read it before making changes.
 
 ## User-approved scope and preferences
 
@@ -141,7 +141,7 @@ Next scenarios: OT possession/period expiry and defensive scores, regular/playof
 
 Do not merge the two save formats, application state/page classes, financial/recruiting economies, playoff systems or aging policies. Pro cap/contracts and College academics/recruiting stay league-specific. This work should reduce duplication without forcing identical gameplay.
 
-## New implementation checkpoint (working tree)
+## New implementation checkpoint — source b080ab7
 
 - A04 core exact-build checks covered College rating bars without denominators, numeric `3-4`, coach/scout navigation, portrait and landscape, plus Pro opponent read-only/user-editable medical roles. Narrow-screen College scouting clipping was found; its Age column was removed and the two-column layout compiled.
 - A05 matrix is in `audits/rules-conformance-matrix.md`. Four focused NFL tests now lock regular/playoff overtime, second possession after a touchdown, first-down/sack behavior and P/K aging. The matrix deliberately records remaining timeout/kickoff/safety/two-way-mode gaps.
