@@ -58,10 +58,10 @@ public static class ProScoutDepartment
                 return StaffLifecycleMath.Shift(roll, growthChance, declineChance);
             }
             attributes=new ScoutAttributes{
-                Evaluation=Math.Clamp(attributes.Evaluation+Shift("evaluation"),35,96),
-                Communication=Math.Clamp(attributes.Communication+Shift("communication"),35,96),
-                RegionalKnowledge=Math.Clamp(attributes.RegionalKnowledge+Shift("regional"),35,96),
-                NationalKnowledge=Math.Clamp(attributes.NationalKnowledge+Shift("national"),35,96)};
+                Evaluation=StaffLifecycleMath.Attribute(attributes.Evaluation,Shift("evaluation")),
+                Communication=StaffLifecycleMath.Attribute(attributes.Communication,Shift("communication")),
+                RegionalKnowledge=StaffLifecycleMath.Attribute(attributes.RegionalKnowledge,Shift("regional")),
+                NationalKnowledge=StaffLifecycleMath.Attribute(attributes.NationalKnowledge,Shift("national"))};
             var retirementChance=Math.Clamp((age-60)*4,0,80);
             var retire=age>=79||age>=60&&ProStaffRandom.Create(s.Id,s.Year,0,scout.Staff.ScoutId.ToString("N"),"scout-retirement")%100<retirementChance;
             if(retire)

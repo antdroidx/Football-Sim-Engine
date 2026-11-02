@@ -7,10 +7,11 @@ public static class ProPlayerStatistics
     public static IReadOnlyList<PlayerSeasonStatLine> Lines(ProFranchise state, bool playoffs, bool career)
     {
         var phase=playoffs?ProPhase.Playoffs:ProPhase.RegularSeason;
-        return state.Games.Concat(state.History.SelectMany(h=>h.Games))
-            .Where(g=>g.Phase==phase&&g.Football.HasPlayed&&(career||g.Football.SeasonYear==state.Year))
-            .DistinctBy(g=>(g.Football.SeasonYear,g.Football.GameId)).SelectMany(g=>g.Football.PlayerStats).ToArray();
+        return PlayerStatQuery.FromCompletedGames(
+            state.Games.Concat(state.History.SelectMany(h=>h.Games))
+                .Where(g=>g.Phase==phase).Select(g=>g.Football),
+            new PlayerStatScope(SeasonYear: career ? null : state.Year));
     }
     public static IReadOnlyList<PlayerSeasonStatLine> Totals(ProFranchise state,bool playoffs,bool career,string? team=null)
-        => PlayerStatTotals.GroupByPlayer(Lines(state,playoffs,career).Where(p=>team is null||p.TeamName==team),"Multiple teams");
+        => PlayerStatTotals.GroupByPlayer(PlayerStatQuery.Filter(Lines(state,playoffs,career), new PlayerStatScope(TeamName: team)),"Multiple teams");
 }

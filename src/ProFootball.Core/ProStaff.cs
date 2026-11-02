@@ -73,14 +73,14 @@ public static class ProStaff
             }
             var updated=attributes with
             {
-                Leadership=Math.Clamp(attributes.Leadership+Shift("leadership"),35,96),
-                Development=Math.Clamp(attributes.Development+Shift("development"),35,96),
-                OffensePlaycalling=Math.Clamp(attributes.OffensePlaycalling+Shift("offense"),35,96),
-                OffenseDevelopment=Math.Clamp(attributes.OffenseDevelopment+Shift("offense-development"),35,96),
-                DefenseScheme=Math.Clamp(attributes.DefenseScheme+Shift("defense"),35,96),
-                DefenseDevelopment=Math.Clamp(attributes.DefenseDevelopment+Shift("defense-development"),35,96),
-                SpecialTeams=Math.Clamp(attributes.SpecialTeams+Shift("special-teams"),35,96),
-                TalentEvaluation=Math.Clamp(attributes.TalentEvaluation+Shift("talent"),35,96)
+                Leadership=StaffLifecycleMath.Attribute(attributes.Leadership,Shift("leadership")),
+                Development=StaffLifecycleMath.Attribute(attributes.Development,Shift("development")),
+                OffensePlaycalling=StaffLifecycleMath.Attribute(attributes.OffensePlaycalling,Shift("offense")),
+                OffenseDevelopment=StaffLifecycleMath.Attribute(attributes.OffenseDevelopment,Shift("offense-development")),
+                DefenseScheme=StaffLifecycleMath.Attribute(attributes.DefenseScheme,Shift("defense")),
+                DefenseDevelopment=StaffLifecycleMath.Attribute(attributes.DefenseDevelopment,Shift("defense-development")),
+                SpecialTeams=StaffLifecycleMath.Attribute(attributes.SpecialTeams,Shift("special-teams")),
+                TalentEvaluation=StaffLifecycleMath.Attribute(attributes.TalentEvaluation,Shift("talent"))
             };
             var applied=Apply(coach,updated) with{
                 Age=age,CareerYears=coach.CareerYears+1,TenureYears=coach.TenureYears+1,LastDevelopmentYear=s.Year};

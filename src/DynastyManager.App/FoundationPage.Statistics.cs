@@ -48,8 +48,9 @@ public sealed partial class FoundationPage
             _updatingStatisticsFilters = false;
         }
         _statisticsRows.Children.Clear();
-        var lines = visibleStats.Where(line => _statisticsScope.SelectedIndex == 1 || line.TeamName == _currentDynasty.UserTeamName);
-        if (int.TryParse(_statisticsSeason.SelectedItem as string, out var year)) lines = lines.Where(line => line.SeasonYear == year);
+        var lines = PlayerStatQuery.Filter(visibleStats, new PlayerStatScope(
+            SeasonYear: int.TryParse(_statisticsSeason.SelectedItem as string, out var year) ? year : null,
+            TeamName: _statisticsScope.SelectedIndex == 1 ? null : _currentDynasty.UserTeamName));
         IEnumerable<PlayerSeasonStatLine> totals = PlayerStatTotals.GroupByPlayer(lines, "Multiple teams");
         var category = _statisticsCategory.SelectedItem as string ?? "Passing";
         totals = totals.Where(line => CategoryEligible(line, category));

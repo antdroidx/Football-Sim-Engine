@@ -169,10 +169,10 @@ public static class ScoutingDepartmentService
             }
             attributes = new ScoutAttributes
             {
-                Evaluation = Math.Clamp(attributes.Evaluation + Shift("evaluation"), 35, 96),
-                Communication = Math.Clamp(attributes.Communication + Shift("communication"), 35, 96),
-                RegionalKnowledge = Math.Clamp(attributes.RegionalKnowledge + Shift("regional"), 35, 96),
-                NationalKnowledge = Math.Clamp(attributes.NationalKnowledge + Math.Clamp(Shift("national"),-1,1), 35, 96)
+                Evaluation = StaffLifecycleMath.Attribute(attributes.Evaluation, Shift("evaluation")),
+                Communication = StaffLifecycleMath.Attribute(attributes.Communication, Shift("communication")),
+                RegionalKnowledge = StaffLifecycleMath.Attribute(attributes.RegionalKnowledge, Shift("regional")),
+                NationalKnowledge = StaffLifecycleMath.Attribute(attributes.NationalKnowledge, Shift("national"))
             };
             var updated = scout with
             {
