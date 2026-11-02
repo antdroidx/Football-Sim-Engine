@@ -1,4 +1,5 @@
 using DynastyManager.Core.Models;
+using DynastyManager.Core.Simulation;
 using System.Security.Cryptography;
 using System.Text;
 namespace ProFootball.Core;
@@ -54,7 +55,7 @@ public static class ProScoutDepartment
             int Shift(string key)
             {
                 var roll=ProStaffRandom.Create(s.Id,s.Year,ProStaffRandom.Salt(scout.Staff.ScoutId),scout.Team,$"scout-{key}-{age}")%100;
-                return roll<growthChance?1:roll>=100-declineChance?-1:0;
+                return StaffLifecycleMath.Shift(roll, growthChance, declineChance);
             }
             attributes=new ScoutAttributes{
                 Evaluation=Math.Clamp(attributes.Evaluation+Shift("evaluation"),35,96),

@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-01",
+  "device": "emulator-5580",
+  "isolation": "AVD launched read-only with no snapshot save",
+  "college": {
+    "package": "antdroid.cfbcoach.dev",
+    "versionName": "0.20.0",
+    "versionCode": 400,
+    "apkSha256": "003e30183c206845ea1117412f662cbd0decf148cd2d4cb5fab8e653964e800b",
+    "verified": [
+      "prestige and academics bars without denominators",
+      "numeric 3-4 formation label",
+      "coach profile link and Back navigation",
+      "scout profile, attributes and assignment",
+      "portrait and landscape scout profile",
+      "no player-facing rating or age provenance caveat",
+      "responsive scout cards show full assignment text",
+      "final playbook editor package built after all layout changes"
+    ],
+    "found": "narrow-screen scouting table clipped assignment text",
+    "followUp": "Light theme remains unverified on the final package."
+  },
+  "pro": {
+    "package": "antdroid.profootball.franchise",
+    "versionName": "0.1.0",
+    "versionCode": 1,
+    "apkSha256": "e11b93af2a3078c2731b1e6c4e799739d836146e2f97365352fa897780e81a5c",
+    "verified": [
+      "opponent identity and numeric formation",
+      "opponent medical profile has no editing action",
+      "user medical profile retains Edit attributes",
+      "no player-facing team calibration caveat",
+      "custom playbook editor opens with offense/defense selection and full play catalog",
+      "play cards show non-overlapping artwork and descriptions after device-found layout fix",
+      "offensive assignment editor exposes formation, concept, block/route and run controls",
+      "user coach portrait editor saves and returns to coach profile"
+    ],
+    "found": "An automated tap on Save to play library did not register in the slow read-only emulator; source validation and engine custom-play tests pass, but device save/reload remains explicit follow-up."
+  },
+  "limitations": [
+    "Light theme and full own/opponent role matrix remain to be rechecked on final packages.",
+    "The custom-play save/reload/end-to-end device flow remains open; rule/editor unit tests and UI navigation passed.",
+    "No broad suite or multi-season run was executed for this checkpoint."
+  ]
+}

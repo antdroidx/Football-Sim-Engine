@@ -11,6 +11,16 @@ public static class PlayerStatTotals
         foreach(var (name,p) in Counters){var x=(int)p.GetValue(a)!;var y=(int)p.GetValue(b)!;p.SetValue(result,Maximum(name)?Math.Max(x,y):checked(x+y));}
         return result;
     }
+    public static IReadOnlyList<PlayerSeasonStatLine> GroupByPlayer(
+        IEnumerable<PlayerSeasonStatLine> lines, string multipleTeamsLabel)
+    {
+        ArgumentNullException.ThrowIfNull(lines);
+        return lines.GroupBy(line => line.PlayerId).Select(group =>
+        {
+            var teams = group.Select(line => line.TeamName).Where(name => !string.IsNullOrWhiteSpace(name)).Distinct().ToArray();
+            return Total(group) with { TeamName = teams.Length > 1 ? multipleTeamsLabel : teams.FirstOrDefault() ?? "Unknown" };
+        }).ToArray();
+    }
     public static PlayerSeasonStatLine Total(IEnumerable<PlayerSeasonStatLine> lines)
     {
         var rows=lines.OrderByDescending(p=>p.SeasonYear).ToArray();return rows.Skip(1).Aggregate(rows[0],Add);

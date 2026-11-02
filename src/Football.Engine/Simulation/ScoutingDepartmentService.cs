@@ -165,7 +165,7 @@ public static class ScoutingDepartmentService
             {
                 var roll = SimulationSeed.Create(state.DynastyId, state.SeasonYear,
                     (BitConverter.ToInt32(scout.ScoutId.ToByteArray(),0)&int.MaxValue), userTeam.Name, $"scout-{key}-{age}") % 100;
-                return roll < growthChance ? 1 : roll >= 100 - declineChance ? -1 : 0;
+                return StaffLifecycleMath.Shift(roll, growthChance, declineChance);
             }
             attributes = new ScoutAttributes
             {

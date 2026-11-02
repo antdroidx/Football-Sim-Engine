@@ -23,7 +23,7 @@ Canonical status at main99254c7; supersedes outstanding-work wording in historic
 
 - **P1:** A01 College staff links; A02 actual scouting-department visibility; A03 opponent medical editor identity/authority; A04 exact-build UI acceptance.
 - **P1:** A05 league-rule conformance and live/fast-mode comparison. Validate scenarios before changing chosen policies.
-- **P2:** A06 explicit punter aging curve decision; A07 Pro custom plays and A08 portrait editor product decisions; A09 honest calibration provenance.
+- **P2:** A06 explicit punter aging curve decision; A07 Pro custom plays and A08 portrait editor product decisions; A09 developer-only calibration provenance; no player-facing assumption labels.
 - **P2:** A10 shared statistical-query contract; A11 audited Engine/College/Pro test ownership and test tiers.
 - **P3:** A12 bounded shared staff-lifecycle primitives; gradual College-specific core separation after tests.
 - Routine real-world data refreshes, playtesting and performance checks remain ongoing. A test count is not feature completeness.

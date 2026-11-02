@@ -25,7 +25,7 @@ public sealed partial class FranchisePage
     {
         if(c.Vacant)return Text("Vacant",22,true);
         var portrait=ProCoachPortraits.Find(c.Name);
-        return new HorizontalStackLayout { Spacing = 12, Children = { PersonPortrait.Create(CoachId(c), c.Name, Color.FromArgb(team.Primary), Color.FromArgb(team.Secondary), 70, staff: true, age: c.Age > 0 ? c.Age : 48, appearance:portrait?.Appearance,glasses:portrait?.Glasses,moustache:portrait?.Moustache??false), Text(c.Name.Replace("\uFFFD","’"), 22, true) } };
+        return new HorizontalStackLayout { Spacing = 12, Children = { PersonPortrait.Create(CoachId(c), c.Name, Color.FromArgb(team.Primary), Color.FromArgb(team.Secondary), 70, staff: true, age: c.Age > 0 ? c.Age : 48, appearance:c.Appearance ?? portrait?.Appearance,glasses:portrait?.Glasses,moustache:portrait?.Moustache??false), Text(c.Name.Replace("\uFFFD","’"), 22, true) } };
     }
     async Task ShowPage(string title, params View[] views)
     {
@@ -122,20 +122,21 @@ public sealed partial class FranchisePage
     {
         var team = state!.League.Teams.Single(t => t.Id == coach.TeamId);
         var p = ProStaff.Profile(coach);
-        var hero = new HorizontalStackLayout { Spacing = 12, Children = { new TeamBadgeView(team, 52), new VerticalStackLayout { Spacing = 2, Children = {
-            Text(coach.Name, 21, true),
+        var hero = new VerticalStackLayout { Spacing = 8, Children = {
+            CoachIdentity(coach, team),
             new HorizontalStackLayout { Spacing = 8, Children = { Text(RoleName(coach.Role), 13, true), Text(coach.Vacant ? "Vacant" : "Employed", 12) } },
-            Text(coach.Title, 12), Text($"Age {coach.Age} · {coach.CareerYears} career years · {coach.TenureYears} with this club · growth {coach.GrowthPotential}/5", 11) } } } };
+            Text(coach.Title, 12), Text($"Age {coach.Age} · {coach.CareerYears} career years · {coach.TenureYears} with this club · growth {coach.GrowthPotential}/5", 11) } };
         var tiles = new Grid { ColumnSpacing = 8, RowSpacing = 8,
             ColumnDefinitions = { new(GridLength.Star), new(GridLength.Star), new(GridLength.Star) },
             RowDefinitions = { new(GridLength.Auto), new(GridLength.Auto) } };
         View[] stats = { StatTile("Overall", p.Coaching.ToString(), "Derived from coaching attributes"), StatTile("Development", p.Development.ToString(), "Player growth"), StatTile("Leadership", p.Leadership.ToString(), "Morale & focus"), StatTile("Offense Playcalling", p.Offense.ToString(), "Play calls"), StatTile("Defense Scheme", p.Defense.ToString(), "Scheme execution"), StatTile("Special teams", p.SpecialTeams.ToString(), "Units") };
         for (var i = 0; i < stats.Length; i++) tiles.Add(SectionCard("", null, stats[i]), i % 3, i / 3);
         var abilities = CoachAttributeViews.Coaching(p.Attributes);
+        var editPortrait = team.Name == state.UserTeam && !coach.Vacant ? Action("Edit portrait", () => EditCoachAppearance(coach)) : new Button { IsVisible = false };
         var schemes = SectionCard("Preferred schemes", "Hired coaches bring a philosophy; balance it against your roster.",
             SchemePair(p.OffenseScheme, p.DefenseScheme));
         var role = SectionCard("Role & contract", "", Text($"Role · {RoleName(coach.Role)}"), Text($"Club · {team.Name}"), Text(coach.Vacant ? "Position currently vacant. Hire a replacement from Staff." : "Reports to the head coach. Managed through Staff."));
-        return ShowPage("Coach profile", hero, tiles, abilities, schemes, role);
+        return ShowPage("Coach profile", hero, editPortrait, tiles, abilities, schemes, role);
     }
     Task GamePlan()
     {
@@ -149,7 +150,8 @@ public sealed partial class FranchisePage
             var next = plan with { Offense = Enum.Parse<OffensivePlaybook>((string)offense.SelectedItem), Defense = Enum.Parse<DefensivePlaybook>((string)defense.SelectedItem), Approach = Enum.Parse<DefensiveApproach>((string)approach.SelectedItem), Tempo = Enum.Parse<OffensiveTempo>((string)tempo.SelectedItem) };
             next = ProCareer.LimitPlan(state!, next); state = state! with { GamePlans = state.GamePlans.Where(p => p.TeamName != state.UserTeam).Append(next).ToList() }; await Save(); saved.Text = "Saved · applies to future games";
         };
-        return ShowPage("Game plan", Text("Offensive playbook"), offense, Text("Defensive playbook"), defense, Text("Defensive approach"), approach, Text("Tempo"), tempo, save, saved);
+        var editor = Action("Open playbook editor", () => OpenProPlaybookEditor(plan));
+        return ShowPage("Game plan", Text("Offensive playbook"), offense, Text("Defensive playbook"), defense, Text("Defensive approach"), approach, Text("Tempo"), tempo, save, saved, editor);
     }
     Task InjuryReport()
     {

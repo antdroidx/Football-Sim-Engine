@@ -36,15 +36,15 @@ This is the full continuation scope, not just the first four implementation batc
 | A01 College staff links | Implemented; one coaching profile and Back checked on device | Complete own/opponent medical/chief-scout role matrix |
 | A02 actual College scouts and assignments | Implemented; scout identity, attributes and assignment checked on device | Verify remaining scouts and reload |
 | A03 Pro opponent medical editing | Implemented; correct opponent identity and no edit action checked on device | Verify user medical editing still works and other roles remain consistent |
-| A04 full device matrix | Partially complete on an earlier implementation APK | Test latest packaged source when this stage resumes; remaining themes, orientations, reload and rating-bar endpoints |
-| A05 rules/simulation conformance | Preparation and baseline tests only | Build source-backed scenario matrix; no simulation rules changed yet |
-| A06 punter aging | Not implemented | Decide explicit Pro P curve; current P falls through default28, K explicitly33 |
-| A07 Pro custom-play editor | Not implemented | Trace existing engine support, add/reuse UI if absent; require save/reload and actual execution |
-| A08 portrait/editor parity | Audit corrected; existing player appearance editor found | Verify existing player editing; inspect staff appearance customization separately |
-| Shared staff-directory/rating components | Planned; not extracted | Stabilize profile identity/permission behavior, then reuse components in both apps |
-| A10 statistical-query contracts | Planned; not implemented | Characterize both league queries and extract common scope/aggregation contracts |
-| A11 test ownership/categories | Planned; not implemented | Separate shared-engine, College and Pro ownership incrementally |
-| A12 staff-lifecycle primitives | Planned; not extracted | Characterize seeded behavior before extracting helpers |
+| A04 full device matrix | Core final-build checks pass for both apps; scouting cards and Pro playbook-card layout fixed from device findings | Light theme and remaining role combinations |
+| A05 rules/simulation conformance | Matrix and focused rules tests added; production-path distribution comparison remains | Extend full timeout/kickoff/safety/two-point scenarios and compare modes |
+| A06 punter aging | Implemented: Pro P peak32; K peak33, with focused test | Extend with multi-year P/K distribution check |
+| A07 Pro custom-play editor | Implemented and visually opened on device; shared validation and custom execution tests pass | One automated save tap did not register; repeat save/reload/end-to-end device scenario |
+| A08 portrait/editor parity | Player editor retained; user-team coach portrait editor saved and returned to profile on device | Full restart/reload and opponent read-only portrait verification |
+| Shared staff-directory/rating components | Shared `StaffProfileComponents.RatingBar` extracted and used by College | Migrate remaining Pro rating visuals where semantics match |
+| A10 statistical-query contracts | Shared `PlayerStatTotals.GroupByPlayer` now owns multi-team labels and maximum/counter aggregation for both apps | Add a broader query-scope contract/adapters |
+| A11 test ownership/categories | New `Football.Engine.Tests` project owns shared stat/lifecycle tests and runs in College/shared CI | Move/categorize more shared tests; add balance/career/device tiers |
+| A12 staff-lifecycle primitives | Shared shift and attribute-bound arithmetic extracted and used by Pro coach/scout and College scouting lifecycles | Characterize annual output parity; do not merge hiring/retirement policy |
 | Phase validation/task components | Planned; not extracted | Share result contracts and task UI, not the leagues' phase graphs |
 | Rating/physical/position adapters | Existing canonical calculations shared; consolidation pending | Audit remaining adapters and specialist/import cases |
 | College.Core separation | Later architectural option; not started | Evaluate after test ownership is clear; preserve assembly/save compatibility |
@@ -140,6 +140,16 @@ Next scenarios: OT possession/period expiry and defensive scores, regular/playof
 5. Reassess optional College.Core separation last.
 
 Do not merge the two save formats, application state/page classes, financial/recruiting economies, playoff systems or aging policies. Pro cap/contracts and College academics/recruiting stay league-specific. This work should reduce duplication without forcing identical gameplay.
+
+## New implementation checkpoint (working tree)
+
+- A04 core exact-build checks covered College rating bars without denominators, numeric `3-4`, coach/scout navigation, portrait and landscape, plus Pro opponent read-only/user-editable medical roles. Narrow-screen College scouting clipping was found; its Age column was removed and the two-column layout compiled.
+- A05 matrix is in `audits/rules-conformance-matrix.md`. Four focused NFL tests now lock regular/playoff overtime, second possession after a touchdown, first-down/sack behavior and P/K aging. The matrix deliberately records remaining timeout/kickoff/safety/two-way-mode gaps.
+- A06 sets P peak age to32 and K to33.
+- A07 adds a Pro custom playbook editor with full defensive assignments and offensive route/block editing through the existing shared play services. It requires final device save/reload/execution verification.
+- A08 adds persisted `ProCoach.Appearance` and a user-team coach portrait editor. Player appearance already existed and remains unchanged.
+- Shared refactoring started: `StaffProfileComponents`, `PlayerStatTotals.GroupByPlayer` and `StaffLifecycleMath`; a dedicated `Football.Engine.Tests` project now owns two focused tests and is wired into the College/shared CI workflow.
+- Checks at this checkpoint: rules/editor Pro tests6 passed; College staff/scouting/academics18 passed; shared project2 passed; both Android Compile targets passed. Final local APK hashes: Pro `e11b93af...81a5c`, College `003e3018...e800b`. Core staff/profile/portrait/navigation checks pass; custom-play save/reload and light-theme checks remain.
 
 ## Next actions for the incoming model
 

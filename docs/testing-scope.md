@@ -396,3 +396,8 @@ Resume at IMPLEMENTATION-HANDOFF.md. College staff links/scout department and Pr
 ## User direction: keep modeling caveats out of game UI
 
 Remove player-facing research/provenance explanations about approximate ages, generated/estimated ratings and club-proxy calibration in both apps. This supersedes A09's recommendation to add assumption labels to profiles. Keep engineering evidence in developer docs, not gameplay screens. Scouting mechanics and stored data/calculations are unchanged. Removed College estimated-star/age markers and coach caveat, Pro calibration/history panels and team provenance, and simplified associated display text. Focused string-presence checks passed; Compile-only checks pass for both Android apps (College0 warnings/errors; Pro0 errors/2 existing warnings). No broad tests, simulations, device run or APK packaging for this text-only batch, per user's usage constraint.
+
+
+## Parity implementation checkpoint — branch development
+
+Added a source-backed rules matrix, four focused NFL conformance tests, explicit Pro P/K aging peaks, a Pro custom offensive/defensive playbook editor, and persisted user-coach portrait editing. College scouting table clipping was corrected. Shared code now includes a rating-bar component, stat aggregation, staff lifecycle arithmetic, and a separate Football.Engine.Tests project wired into shared CI. Focused results:6 Pro rules/editor,18 College staff/academics,2 shared tests; both Android Compile targets pass. Final package/device checks remain for the editor and portrait changes.

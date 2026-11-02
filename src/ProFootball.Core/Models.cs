@@ -125,7 +125,7 @@ public sealed record ProCoach(string TeamId, StaffRole Role, string Name, string
     public int LastDevelopmentYear {get;init;} public bool Vacant { get; init; } public int Rating { get; init; } = 70; public int Development { get; init; } = 65;
     // Franchise-specific coaching abilities. Existing saves see these as defaulted values; a hire refreshes them.
     public int OffenseRating { get; init; } = 55; public int DefenseRating { get; init; } = 55; public int SpecialTeamsRating { get; init; } = 55;
-    public int Leadership { get; init; } = 55; public string PreferredOffense { get; init; } = "Balanced"; public string PreferredDefense { get; init; } = "Balanced";
+    public int Leadership { get; init; } = 55; public string PreferredOffense { get; init; } = "Balanced"; public string PreferredDefense { get; init; } = "Balanced"; public NcaaPlayerAppearance? Appearance { get; init; }
 }
 public sealed record NflSnapshot(int Version, int Season, int Week, string RetrievedUtc, int MaddenMatched, int Estimated, List<ProPlayer> Players, List<ProCoach> Coaches) { public List<CoachCandidate> Candidates { get; init; } = []; }
 public sealed record ContractYear(int Year, long Salary, long Guaranteed)

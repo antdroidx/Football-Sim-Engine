@@ -101,9 +101,9 @@ Trace supported Pro play selection and decide whether to expose existing PlayEdi
 
 ### A09 · P2 · History-calibration transparency
 
-**Evidence:** Known modeling limitation.
+**Evidence:** Known modeling limitation; player-facing wording intentionally removed.
 
-College real names retain generated ratings; Pro coordinators use club proxies. Label assumptions consistently and add personal-tenure evidence only if worth the maintenance cost.
+College real names retain generated ratings; Pro coordinators use club proxies. Keep this provenance in developer data and audits only. Do not add rating/age assumption labels to game screens. Add personal-tenure research only if a gameplay decision requires it.
 
 ### A10 · P2 · Stat query parity
 

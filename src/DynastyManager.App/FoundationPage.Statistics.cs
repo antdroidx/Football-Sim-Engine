@@ -50,7 +50,7 @@ public sealed partial class FoundationPage
         _statisticsRows.Children.Clear();
         var lines = visibleStats.Where(line => _statisticsScope.SelectedIndex == 1 || line.TeamName == _currentDynasty.UserTeamName);
         if (int.TryParse(_statisticsSeason.SelectedItem as string, out var year)) lines = lines.Where(line => line.SeasonYear == year);
-        var totals = lines.GroupBy(line=>line.PlayerId).Select(PlayerStatTotals.Total);
+        IEnumerable<PlayerSeasonStatLine> totals = PlayerStatTotals.GroupByPlayer(lines, "Multiple teams");
         var category = _statisticsCategory.SelectedItem as string ?? "Passing";
         totals = totals.Where(line => CategoryEligible(line, category));
         var query = $"{_currentDynasty.DynastyId}/{_statisticsSeason.SelectedItem}/{_statisticsScope.SelectedIndex}/{category}/{_statisticsHeaderColumn}/{_statisticsHeaderDescending}";

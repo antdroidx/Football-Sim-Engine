@@ -1,3 +1,4 @@
+using Football.Presentation;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 namespace DynastyManager.App;
@@ -34,8 +35,23 @@ public sealed partial class FoundationPage
             foreach(var view in views) stack.Children.Add(view);
             return ManagementPanel(title,stack);
         }
-        View RatingBar(string label,int rating)=>new VerticalStackLayout{Spacing=4,Children={
-            T($"{label} {rating}",true),new ProgressBar{Progress=Math.Clamp(rating/99d,0,1),ProgressColor=DynastyTheme.Accent,HeightRequest=8,AutomationId="college-"+label.ToLowerInvariant()+"-bar"}}};
+        View ScoutDirectory()
+        {
+            if(!team.Name.Equals(state.UserTeamName,StringComparison.OrdinalIgnoreCase))
+                return T("See the chief scout in Staff above.");
+            if(state.ScoutingStaff.Count==0) return T("No scouting department records are available.");
+            var rows=new VerticalStackLayout{Spacing=8};
+            foreach(var scout in state.ScoutingStaff)
+            {
+                var assignment=state.ScoutAssignments.FirstOrDefault(a=>a.ScoutId==scout.ScoutId);
+                rows.Children.Add(new Border{StrokeThickness=0,Padding=10,BackgroundColor=DynastyTheme.Palette("#1B2B37"),
+                    Content=new VerticalStackLayout{Spacing=4,Children={
+                        PersonLink(scout.FullName,()=>ShowCollegeScoutProfileAsync(scout),true),
+                        T(assignment is null?"Unassigned":FormatScoutAssignment(assignment))}}});
+            }
+            return rows;
+        }
+        View RatingBar(string label,int rating)=>StaffProfileComponents.RatingBar(label,rating,DynastyTheme.Accent,"college-"+label.ToLowerInvariant()+"-bar");
         var close=new Button{Text="Close"};
         close.Clicked+=async(_,_)=>await Navigation.PopModalAsync();
         var content=new VerticalStackLayout{Padding=16,Spacing=12,Children={
@@ -46,12 +62,7 @@ public sealed partial class FoundationPage
                 T($"{GamePlanService.Label(plan.Offense)} offense · {GamePlanService.Label(plan.Defense)} defense · {GamePlanService.Label(plan.Approach)} approach",true)),
             Box("Staff",staff.Length==0?T("No staff records are available."):DataTable([("Role",170),("Name",210),("Age",55),("Overall",75)],staff.Select(item=>new View[]{
                 TableText(FormatStaffRole(item.Role)),CoachLink(item),TableText(item.Age.ToString()),TableText(item.OverallRating.ToString(),true)}))),
-            Box("Scouting department",team.Name.Equals(state.UserTeamName,StringComparison.OrdinalIgnoreCase)
-                ? state.ScoutingStaff.Count==0 ? T("No scouting department records are available.")
-                : DataTable([("Scout",210),("Age",55),("Assignment",180)],state.ScoutingStaff.Select(scout=>new View[]{
-                    PersonLink(scout.FullName,()=>ShowCollegeScoutProfileAsync(scout),true),TableText(scout.Age>0?scout.Age.ToString():"—"),
-                    TableText(state.ScoutAssignments.FirstOrDefault(a=>a.ScoutId==scout.ScoutId) is {} assignment ? FormatScoutAssignment(assignment) : "Unassigned")}))
-                : T("See the chief scout in Staff above.")),
+            Box("Scouting department",ScoutDirectory()),
             Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true))
         }};
         await Navigation.PushModalAsync(new ContentPage{Title=team.Name+" profile",AutomationId="college-team-profile-page",BackgroundColor=DynastyTheme.Background,Content=new ScrollView{Content=content}});

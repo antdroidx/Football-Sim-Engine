@@ -69,7 +69,7 @@ public static class ProStaff
             int Shift(string key)
             {
                 var roll=ProStaffRandom.Create(s.Id,s.Year,0,coach.TeamId+coach.Role,coach.Name+"|"+key+"|"+age)%100;
-                return roll<growthChance?1:roll>=100-declineChance?-1:0;
+                return StaffLifecycleMath.Shift(roll, growthChance, declineChance);
             }
             var updated=attributes with
             {
