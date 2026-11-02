@@ -101,6 +101,7 @@ jobs:
           -p:AndroidPackageFormats=apk -p:ApplicationVersion=${{ github.run_number }}
           -p:ApplicationDisplayVersion=0.1.${{ github.run_number }}
       - name: Stage isolated management UI fixtures
+        if: inputs.validation_scope != 'parity'
         run: |
           if [ '${{ inputs.validation_scope }}' = guided-offseason ]; then
             cp pro-staff-guided-ui-fixture.json.gz src/ProFootball.App/bin/Debug/net10.0-android/
