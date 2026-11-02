@@ -84,7 +84,8 @@ public sealed partial class FoundationPage
         close.Clicked += (_, _) => closeProfile();
         View PlayerHeader() => IdentityHeader(player.PlayerId, player.FullName, player.TeamName, $"{(player.JerseyNumber is int number ? $"#{number} · " : "")}{OffensiveLineService.Label(player)} · {(active is null ? "Archived player" : FormatClassYear(player.ClassYear, player.IsRedshirted || player.HasRedshirted))}", appearance: player.Appearance);
         var portraitHeader = new ContentView { Content = PlayerHeader() };
-        var editPortrait = new Button { Text = "Edit portrait", FontSize = 11 };
+        var editPortrait = new Button { Text = "Edit portrait", FontSize = 11,
+            IsVisible = coach.TeamName.Equals(state.UserTeamName, StringComparison.OrdinalIgnoreCase) };
         editPortrait.Clicked += async (_, _) =>
         {
             var next = await EditPortraitAsync(player.PlayerId, player.FullName, player.TeamName, player.Appearance);
@@ -191,7 +192,8 @@ public sealed partial class FoundationPage
         var close = new Button { Text = "‹ Back" }; close.Clicked += async (_, _) => await Navigation.PopModalAsync();
         View CoachHeader() => IdentityHeader(coach.StaffId, coach.FullName, coach.TeamName, FormatStaffRole(coach.Role), true, coach.Age, coach.Appearance);
         var portraitHeader = new ContentView { Content = CoachHeader() };
-        var editPortrait = new Button { Text = "Edit portrait", FontSize = 11 };
+        var editPortrait = new Button { Text = "Edit portrait", FontSize = 11,
+            IsVisible = coach.TeamName.Equals(state.UserTeamName, StringComparison.OrdinalIgnoreCase) };
         editPortrait.Clicked += async (_, _) =>
         {
             var next = await EditPortraitAsync(coach.StaffId, coach.FullName, coach.TeamName, coach.Appearance, true, coach.Age);

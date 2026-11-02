@@ -293,6 +293,7 @@ public sealed partial class FranchisePage
 
     async Task EditCoachAppearance(ProCoach original)
     {
+        if (state is null || state.League.Teams.FirstOrDefault(t => t.Id == original.TeamId)?.Name != state.UserTeam) return;
         var current = state!.Coaches.FirstOrDefault(c => c.TeamId == original.TeamId && c.Role == original.Role && c.Name == original.Name) ?? original;
         var appearance = current.Appearance ?? ProCoachPortraits.Find(current.Name)?.Appearance ?? new NcaaPlayerAppearance();
         var staffAppearance = PortraitAppearance.ForStaff(CoachId(current), Math.Max(30, current.Age), appearance);

@@ -112,4 +112,20 @@ public sealed class PortraitAndScoringPolishTests
         Assert.Equal(60, edited.UserHeadCoach.Age); Assert.Null(state.UserHeadCoach!.Appearance);
         Assert.Throws<ArgumentException>(() => PortraitCustomizationService.Apply(state, coach.StaffId, appearance with { FacialHair = 99 }, true));
     }
+    [Fact]
+    public void OpponentStaffPortraitsAreReadOnlyEvenWhenCalledDirectly()
+    {
+        foreach (var role in Enum.GetValues<StaffRole>())
+        {
+            var own = new StaffMember {FullName="Same Name",TeamName="Home",Role=role};
+            var opponent = own with {StaffId=Guid.NewGuid(),TeamName="Away"};
+            var state=new DynastyState {DynastyName="Permissions",UserTeamName="Home",Staff=[own,opponent]};
+            var appearance=new NcaaPlayerAppearance {HairStyle=4};
+            Assert.Throws<InvalidOperationException>(()=>PortraitCustomizationService.Apply(state,opponent.StaffId,appearance,true));
+            var changed=PortraitCustomizationService.Apply(state,own.StaffId,appearance,true);
+            Assert.Null(changed.Staff.Single(c=>c.StaffId==opponent.StaffId).Appearance);
+            Assert.Equal(appearance,changed.Staff.Single(c=>c.StaffId==own.StaffId).Appearance);
+        }
+    }
+
 }
