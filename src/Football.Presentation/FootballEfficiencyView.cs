@@ -24,7 +24,13 @@ public static class FootballEfficiencyView
             if(m.Value(own) is not double value){content.Add(Text("No statistics available."));return;}
             var ordered=available.OrderBy(x=>m.Higher?-m.Value(x)!.Value:m.Value(x)!.Value).ToArray();var leader=ordered[0];var avg=available.Average(x=>m.Value(x)!.Value);var rank=1+available.Count(x=>m.Higher?m.Value(x)>value:m.Value(x)<value);
             content.Add(Text($"{m.Name} · Rank {rank}/{available.Length} · "+(m.Higher?"Higher is better":"Lower is better")));
-            content.Add(FootballBarChart.Create(new[]{(own.Team,value),("League average",avg),("Leader · "+leader.Team,m.Value(leader)!.Value)},m.Format,metric.SelectedIndex<3?"%":""));
+            Color QualityColor(double candidate)
+            {
+                var betterCount = available.Count(x => m.Higher ? m.Value(x) > candidate : m.Value(x) < candidate);
+                var score = available.Length <= 1 ? 50 : 100d - 100d * betterCount / (available.Length - 1);
+                return Football.Presentation.RatingQualityColors.ForRating((int)Math.Round(score), DynastyTheme.IsLight);
+            }
+            content.Add(FootballBarChart.Create(new[]{(own.Team,value),("League average",avg),("Leader · "+leader.Team,m.Value(leader)!.Value)},m.Format,metric.SelectedIndex<3?"%":"", x => QualityColor(x.Value)));
             content.Add(FootballDataGrid.Create([("Team",180),("Value",90),("Games",55),("Plays",65)],ordered.Select(x=>new View[]{Text(x.Team),Text(m.Value(x)!.Value.ToString(m.Format)),Text(x.Games.ToString()),Text(x.Plays.ToString())})));
         }
         team.SelectedIndexChanged+=(_,_)=>Draw();metric.SelectedIndexChanged+=(_,_)=>Draw();body.Add(team);body.Add(metric);body.Add(content);Draw();

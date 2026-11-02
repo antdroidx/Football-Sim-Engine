@@ -15,7 +15,7 @@ public sealed partial class FranchisePage
         var peers = s.Players.Where(p => !p.Retired && p.Football.Position == player.Football.Position).ToArray();
         return Panel("Player analytics", PlayerEfficiencyView.Create(games.Where(g=>g.SeasonYear==s.Year).SelectMany(g=>g.PlayerStats),id), Text(metric + " · game log", 15, true), FootballBarChart.Create(current.Select(x => ($"Week {x.Game.Week}", Value(x.Line!)))),
             Text(metric + " · career by season", 15, true), FootballBarChart.Create(career.Select(g => (g.Key.ToString(), g.Sum(Value)))),
-            Text("Position comparison · overall", 15, true), FootballBarChart.Create(new[] { (player.Football.FullName, (double)player.Football.OverallRating), ("League position average", peers.Select(p => (double)p.Football.OverallRating).DefaultIfEmpty(0).Average()), ("League position best", peers.Select(p => (double)p.Football.OverallRating).DefaultIfEmpty(0).Max()) }, "0.0"));
+            Text("Position comparison · overall", 15, true), FootballBarChart.Create(new[] { (player.Football.FullName, (double)player.Football.OverallRating), ("League position average", peers.Select(p => (double)p.Football.OverallRating).DefaultIfEmpty(0).Average()), ("League position best", peers.Select(p => (double)p.Football.OverallRating).DefaultIfEmpty(0).Max()) }, "0.0", colorFor: x => Football.Presentation.RatingQualityColors.ForRating((int)Math.Round(x.Value), DynastyTheme.IsLight)));
     }
     int analyticsSection;
     void Analytics()

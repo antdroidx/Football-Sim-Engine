@@ -3,7 +3,7 @@ namespace DynastyManager.App;
 /// <summary>Shared accessible chart: every bar retains its exact label and numeric value.</summary>
 public static class FootballBarChart
 {
-    public static View Create(IEnumerable<(string Label, double Value)> source, string format = "0", string suffix = "")
+    public static View Create(IEnumerable<(string Label, double Value)> source, string format = "0", string suffix = "", Func<(string Label, double Value), Color>? colorFor = null)
     {
         var items = source.ToArray(); var max = Math.Max(1, items.Select(x => Math.Abs(x.Value)).DefaultIfEmpty(1).Max());
         var rows = new VerticalStackLayout { Spacing = 8 };
@@ -14,7 +14,7 @@ public static class FootballBarChart
             var track = new Grid { HeightRequest = 10, BackgroundColor = DynastyTheme.Panel };
             track.ColumnDefinitions.Add(new(new GridLength(Math.Max(.001, Math.Abs(item.Value) / max), GridUnitType.Star)));
             track.ColumnDefinitions.Add(new(new GridLength(Math.Max(.001, 1 - Math.Abs(item.Value) / max), GridUnitType.Star)));
-            track.Add(new BoxView { Color = item.Value < 0 ? (DynastyTheme.IsLight?Color.FromArgb("#AA3443"):Color.FromArgb("#F18A91")) : DynastyTheme.Accent });
+            track.Add(new BoxView { Color = item.Value < 0 ? (DynastyTheme.IsLight?Color.FromArgb("#AA3443"):Color.FromArgb("#F18A91")) : colorFor?.Invoke(item) ?? DynastyTheme.Accent });
             SemanticProperties.SetDescription(track, label.Text); rows.Add(label); rows.Add(track);
         }
         return rows;

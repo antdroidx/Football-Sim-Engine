@@ -51,7 +51,7 @@ public sealed partial class FoundationPage
             }
             return rows;
         }
-        View RatingBar(string label,int rating)=>StaffProfileComponents.RatingBar(label,rating,DynastyTheme.Accent,"college-"+label.ToLowerInvariant()+"-bar");
+        View RatingBar(string label,int rating)=>StaffProfileComponents.RatingBar(label,rating,"college-"+label.ToLowerInvariant()+"-bar");
         var close=new Button{Text="Close"};
         close.Clicked+=async(_,_)=>await Navigation.PopModalAsync();
         var content=new VerticalStackLayout{Padding=16,Spacing=12,Children={

@@ -21,10 +21,10 @@ public static class PlayerAttributeViews
                     ColumnDefinitions = new ColumnDefinitionCollection { new(GridLength.Star), new(GridLength.Auto) } };
                 row.Add(new Label { Text = attribute.Name, FontSize = 12, VerticalTextAlignment = TextAlignment.Center }, 0, 0);
                 row.Add(new Label { Text=attribute.Rating.ToString(), FontSize=12, FontAttributes=FontAttributes.Bold,
-                    TextColor=DynastyTheme.IsLight ? Color.FromArgb("#166841") : Color.FromArgb("#70D4AD"), VerticalTextAlignment=TextAlignment.Center },1,0);
+                    TextColor=Football.Presentation.RatingQualityColors.ForRating(attribute.Rating,DynastyTheme.IsLight), VerticalTextAlignment=TextAlignment.Center },1,0);
                 tiles.Add(new VerticalStackLayout { Spacing=5, Padding=new Thickness(4,5), Children={row,
                     new ProgressBar { Progress=Math.Clamp(attribute.Rating/99.0,0,1), HeightRequest=4,
-                        ProgressColor=attribute.Rating>=85 ? Color.FromArgb("#38B888") : attribute.Rating>=70 ? Color.FromArgb("#599BDB") : Color.FromArgb("#B49C61") } } },i%columns,i/columns);
+                        ProgressColor=Football.Presentation.RatingQualityColors.ForRating(attribute.Rating,DynastyTheme.IsLight) } } },i%columns,i/columns);
             }
         }
         Arrange(2);

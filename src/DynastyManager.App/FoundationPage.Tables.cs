@@ -83,9 +83,7 @@ public sealed partial class FoundationPage
 
     private static View RatingCell(int rating)
     {
-        var color = Color.FromArgb(DynastyTheme.IsLight
-            ? rating >= 90 ? "#7B5B00" : rating >= 80 ? "#116540" : rating >= 70 ? "#225D9A" : "#526377"
-            : rating >= 90 ? "#F4CC66" : rating >= 80 ? "#74D6AA" : rating >= 70 ? "#8EBEEB" : "#B6BFCD");
+        var color = Football.Presentation.RatingQualityColors.ForRating(rating, DynastyTheme.IsLight);
         return new Border { BackgroundColor = color.WithAlpha(.13f), StrokeThickness = 0,
             HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center, Padding = new Thickness(7, 4),
             Content = new Label { Text = rating.ToString(), FontSize = 12, FontAttributes = FontAttributes.Bold, TextColor = color } };

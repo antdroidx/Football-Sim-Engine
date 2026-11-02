@@ -161,3 +161,8 @@ Do not merge the two save formats, application state/page classes, financial/rec
 6. Update this page after each reviewable batch with commit, exact checks, failures/limitations and the next action. Commit/push to the feature branch; do not merge or publish automatically.
 
 The released401 Pro/760 Core-College test totals are prior evidence and were not rerun for this handoff or the latest wording changes. No production changes are part of this handoff-only update.
+
+
+## Rating quality color palette
+
+A shared `RatingQualityColors` palette now drives player/staff attribute bars, rating badges, quality comparisons, College conduct meters, conference-power charts, rank charts and Pro efficiency comparisons. Bands: red below50, orange50s, yellow60s, green70s, teal80s, blue85-89 and violet90+. Light and dark themes use contrast-adjusted variants. Neutral volume/cap/draft charts retain their existing semantics; only charts where relative quality is meaningful use the rating palette. Both Android Compile targets pass after this presentation change.

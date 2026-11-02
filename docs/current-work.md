@@ -610,3 +610,6 @@ Remove player-facing research/provenance explanations about approximate ages, ge
 ## Parity implementation checkpoint — branch development
 
 Added a source-backed rules matrix, four focused NFL conformance tests, explicit Pro P/K aging peaks, a Pro custom offensive/defensive playbook editor, and persisted user-coach portrait editing. College scouting table clipping was corrected. Shared code now includes a rating-bar component, stat aggregation, staff lifecycle arithmetic, and a separate Football.Engine.Tests project wired into shared CI. Focused results:6 Pro rules/editor,18 College staff/academics,2 shared tests; both Android Compile targets pass. Final package/device checks remain for the editor and portrait changes.
+
+
+Shared rating palette: player/staff attribute bars, rating badges and quality-based analytics are now color-coded across red/orange/yellow/green/teal/blue/violet bands, including College rank/conference-power visuals and Pro efficiency/overall comparisons. Both Android Compile targets pass; neutral volume and financial charts retain their non-quality color semantics.

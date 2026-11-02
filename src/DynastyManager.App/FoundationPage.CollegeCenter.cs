@@ -248,7 +248,7 @@ public sealed partial class FoundationPage
             var name = school.SelectedItem as string ?? state.UserTeamName;
             var history = state.PollHistory.Where(p => p.SeasonYear == state.SeasonYear && p.Kind == kind)
                 .Select(p => (Label: p.Phase == SeasonPhase.Preseason ? "Pre" : p.Week.ToString(), Value: (double)(p.Rankings.FirstOrDefault(r => r.TeamName == name)?.Rank ?? state.LeagueTeams.Count))).ToArray();
-            graph.Content = TrendChart(history, $"{name} · rank by week (lower is better)", true);
+            graph.Content = TrendChart(history, $"{name} · rank by week (lower is better)", true, true);
             var ranks = CollegePollService.GetPublished(state, _teamsByName, kind, BuildCurrentSimulationProfiles());
             table.Content = DataTable([("Rank",45),("School",195),("W",35),("L",35),(kind == PollKind.Computer ? "Index" : "Votes",70)],
                 ranks.Take(25).Select(r => new View[] { TableText(r.Rank.ToString(),true), SchoolCell(r.TeamName, false), TableText(r.Wins.ToString()), TableText(r.Losses.ToString()), TableText(r.Score.ToString("F1")) }));
@@ -269,7 +269,7 @@ public sealed partial class FoundationPage
             var record = state.ProgramConduct.FirstOrDefault(p => p.TeamName == team);
             var score = record?.Score ?? 80;
             list.Children.Add(new Label { Text = $"{team} · Conduct {score}/100 · {(score >= 70 ? "Healthy" : score >= 40 ? "Needs attention" : "Under scrutiny")}", FontSize = 17, FontAttributes = FontAttributes.Bold });
-            list.Children.Add(new ProgressBar { Progress = score / 100.0, ProgressColor = score >= 70 ? DynastyTheme.Palette("#72D4B2") : DynastyTheme.Palette("#F4BC68"), HeightRequest = 12 });
+            list.Children.Add(new ProgressBar { Progress = score / 100.0, ProgressColor = Football.Presentation.RatingQualityColors.ForRating(score, DynastyTheme.IsLight), HeightRequest = 12 });
             if (!ProgramDisciplineService.PostseasonEligible(state, team)) list.Children.Add(new Label { Text = "Postseason ban this season", TextColor = DynastyTheme.Palette("#F4A6A6") });
             if (team == state.UserTeamName && state.LeagueRules.ProgramDiscipline)
             {
@@ -319,7 +319,7 @@ public sealed partial class FoundationPage
     {
         var state = _currentDynasty!;
         body.Children.Add(SectionTitle("Conference landscape", $"Realignment {(state.LeagueRules.ConferenceRealignment ? "on" : "off")} · FCS promotion {(state.LeagueRules.FcsPromotion ? "on" : "off")} · Change options in Settings"));
-        body.Children.Add(TrendChart(LeagueEvolutionService.ConferencePower(state).OrderByDescending(p => p.Value).Select(p => (p.Key, p.Value)).ToArray(), "Conference power · average current program prestige"));
+        body.Children.Add(TrendChart(LeagueEvolutionService.ConferencePower(state).OrderByDescending(p => p.Value).Select(p => (p.Key, p.Value)).ToArray(), "Conference power · average current program prestige", ratingColors: true));
         foreach (var move in state.LeagueMovementHistory.Reverse().Take(30)) body.Children.Add(new Label { Text = $"{move.SeasonYear} · {move.TeamName}: {move.FromConference} → {move.ToConference}{(move.Promotion ? " · Promoted to FBS" : "")}", FontSize = 12 });
         body.Children.Add(SectionTitle("FCS opponent library", $"{FcsLeagueService.Available(state.LeagueTeams).Count} external schools · schools already in this league are excluded"));
         body.Children.Add(new Label { Text = string.Join(" · ", FcsLeagueService.Available(state.LeagueTeams).Select(t => t.Name)), FontSize = 11, TextColor = DynastyTheme.Muted });
@@ -361,14 +361,14 @@ public sealed partial class FoundationPage
 
     }
 
-    private static View TrendChart((string Label, double Value)[] points, string caption, bool ranks = false) => new VerticalStackLayout { Spacing = 6, Children =
+    private static View TrendChart((string Label, double Value)[] points, string caption, bool ranks = false, bool ratingColors = false) => new VerticalStackLayout { Spacing = 6, Children =
     {
         new Label { Text = caption, FontSize = 12, FontAttributes = FontAttributes.Bold, TextColor = DynastyTheme.Accent },
-        new GraphicsView { Drawable = new SeasonChartDrawable(points, ranks), HeightRequest = 185, BackgroundColor = DynastyTheme.Palette("#142530") },
+        new GraphicsView { Drawable = new SeasonChartDrawable(points, ranks, ratingColors), HeightRequest = 185, BackgroundColor = DynastyTheme.Palette("#142530") },
         new Label { Text = points.Length == 0 ? "Data appears as the season progresses." : string.Join(" · ", points.Select(p => $"{p.Label}: {p.Value:F0}")), FontSize = 10, TextColor = DynastyTheme.Muted }
     } };
 
-    private sealed class SeasonChartDrawable((string Label, double Value)[] points, bool ranks) : IDrawable
+    private sealed class SeasonChartDrawable((string Label, double Value)[] points, bool ranks, bool ratingColors) : IDrawable
     {
         public void Draw(ICanvas c, RectF rect)
         {
@@ -381,7 +381,7 @@ public sealed partial class FoundationPage
             {
                 var x = 16 + width * (i + .5f) / points.Length; var normalized = (float)(points[i].Value / max);
                 var y = 15 + height * (ranks ? normalized : 1-normalized);
-                c.FillColor = Color.FromArgb(i % 2 == 0 ? "#6CD2BC" : "#E6BF72");
+                var qualityScore = ranks ? Math.Clamp(100 - points[i].Value, 0, 99) : Math.Clamp(points[i].Value, 0, 99); c.FillColor = ratingColors ? Football.Presentation.RatingQualityColors.ForRating((int)Math.Round(qualityScore), DynastyTheme.IsLight) : Color.FromArgb(i % 2 == 0 ? "#6CD2BC" : "#E6BF72");
                 if (ranks)
                 {
                     c.FillCircle(x,y,4);
