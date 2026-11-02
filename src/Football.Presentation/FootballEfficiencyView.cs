@@ -26,8 +26,10 @@ public static class FootballEfficiencyView
             content.Add(Text($"{m.Name} · Rank {rank}/{available.Length} · "+(m.Higher?"Higher is better":"Lower is better")));
             Color QualityColor(double candidate)
             {
-                var betterCount = available.Count(x => m.Higher ? m.Value(x) > candidate : m.Value(x) < candidate);
-                var score = available.Length <= 1 ? 50 : 100d - 100d * betterCount / (available.Length - 1);
+                var low = available.Min(x => m.Value(x)!.Value);
+                var high = available.Max(x => m.Value(x)!.Value);
+                var score = high == low ? 50 : 100d * (candidate - low) / (high - low);
+                if (!m.Higher) score = 100 - score;
                 return Football.Presentation.RatingQualityColors.ForRating((int)Math.Round(score), DynastyTheme.IsLight);
             }
             content.Add(FootballBarChart.Create(new[]{(own.Team,value),("League average",avg),("Leader · "+leader.Team,m.Value(leader)!.Value)},m.Format,metric.SelectedIndex<3?"%":"", x => QualityColor(x.Value)));
