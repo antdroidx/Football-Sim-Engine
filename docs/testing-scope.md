@@ -1,3 +1,9 @@
+## Parity continuation — November 2, 2026
+
+Runtime0138a4a, local Debug packages: use `audits/parity-continuation-checkpoint.json` for exact APK hashes/source/scenario limits. Narrow new checks:12 CPU-delegated mode cases (six seeds per rule adapter/36 games),20 rule-boundary cases,2 specialist cohort cases (64 seeds/position over12 annual steps),4 Pro and4 College six-year staff characterization cases,12 Engine Fast cases. All54 pass. Position cases are moved, not duplicated. No whole-suite, complete real/generated career, all-screen device or official-rule certification is claimed.
+
+Use exact test-name filters from `audits/test-ownership-and-refactoring.md`. Do not use a negative Career filter as a guaranteed fast suite: legacy long cases remain unclassified. Device checks use the emulator QA skill, read-only AVD clone and UI-tree-derived taps. Pro copy-editor global busy-lock reproduction led to a focused fix and new APK; initial failed save taps are superseded only by the successful fixed-APK scenario. Safety/free kicks, full dynamic kickoff/penalty timing and actively controlled-call distributions remain open. Preserve unrelated work and defer cleanup.
+
 ## Accepted Pro115 / College412 — guided offseason, compact overview and backfield corrections
 
 User scope: Pro roster FB order/identity audit, compact College-style overview with weekly tasks, automatic dedicated offseason screens, dense post-draft training camp, draft board/results/order/prospect details, yearly offer/team-room projections, manual HC offseason over-budget extensions with regular-season compliance preserved, contrasting FA actions/visible rival bids and optional non-destructive GM bidding help. Both apps: Settings naming, confirmed save/exit moved into Settings, default FB order beside HB, offseason card near overview top. Save enum IDs and signed contracts are preserved; old Pro RosterCuts value3 is presented as Training Camp, directly after Draft.

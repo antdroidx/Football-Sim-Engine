@@ -6,6 +6,35 @@ namespace DynastyManager.Core.Tests;
 
 public class ScoutingDepartmentTests
 {
+    [Theory]
+    [Trait("Category", "Career")]
+    [InlineData(19)] [InlineData(41)] [InlineData(73)] [InlineData(103)]
+    public void AnnualScoutOutputAndReplacementAssignmentsSurviveReload(int seed)
+    {
+        var team = Team();
+        var state = ScoutingDepartmentService.EnsureDepartment(
+            State(0) with { DynastyId = new Guid(seed, 0, 0, new byte[8]) }, team);
+        // Force a replacement boundary, then observe the ordinary six-year output.
+        state = state with { ScoutingStaff = state.ScoutingStaff.Select(s => s with { Age = 79 }).ToArray() };
+        static string Snapshot(DynastyState s) => System.Text.Json.JsonSerializer.Serialize(new
+        { s.ScoutingStaff, s.ScoutAssignments });
+        for (var year = 0; year < 6; year++)
+        {
+            state = state with { SeasonYear = 2027 + year };
+            var loaded = System.Text.Json.JsonSerializer.Deserialize<DynastyState>(
+                System.Text.Json.JsonSerializer.Serialize(state))!;
+            var next = ScoutingDepartmentService.AdvanceSeason(state, team);
+            Assert.Equal(Snapshot(next), Snapshot(ScoutingDepartmentService.AdvanceSeason(loaded, team)));
+            Assert.Equal(3, next.ScoutingStaff.Count);
+            Assert.Equal(3, next.ScoutingStaff.Select(s => s.ScoutId).Distinct().Count());
+            Assert.All(next.ScoutAssignments, a => Assert.Contains(next.ScoutingStaff, s => s.ScoutId == a.ScoutId));
+            Assert.All(next.ScoutingStaff, s => Assert.All(ScoutAttributes.FromLegacy(s).Values(),
+                a => Assert.InRange(a.Rating, 35, 96)));
+            if (year == 0) Assert.DoesNotContain(next.ScoutingStaff, s => s.Age >= 80);
+            state = next;
+        }
+    }
+
     [Fact]
     public void RegularSeasonScoutingCreatesStaffAndImprovesKnowledge()
     {

@@ -21,11 +21,11 @@ Canonical status at main99254c7; supersedes outstanding-work wording in historic
 
 ## Remaining, prioritized
 
-- **P1:** A01 College staff links; A02 actual scouting-department visibility; A03 opponent medical editor identity/authority; A04 exact-build UI acceptance.
+- **P1:** A01-A03 staff links, real scout visibility and opponent medical permissions are implemented. Finish A04's remaining exact-APK device matrix; see the handoff for verified roles/themes.
 - **P1:** A05 league-rule conformance and live/fast-mode comparison. Validate scenarios before changing chosen policies.
-- **P2:** A06 explicit punter aging curve decision; A07 Pro custom plays and A08 portrait editor product decisions; A09 developer-only calibration provenance; no player-facing assumption labels.
+- **P2:** A06 is implemented (P peak32, K peak33); the 64-seed-per-position, twelve-year aging characterization passes. A07 custom plays and A08 coach portraits are implemented; finish device persistence/execution acceptance. A09 remains developer-only; no player-facing assumption labels.
 - **P2:** A10 shared statistical-query contract; A11 audited Engine/College/Pro test ownership and test tiers.
-- **P3:** A12 bounded shared staff-lifecycle primitives; gradual College-specific core separation after tests.
+- **P3:** A12 arithmetic primitives are shared; characterize annual output before further extraction. Evaluate College.Core separation after test ownership improves; no assembly rename is planned.
 - Routine real-world data refreshes, playtesting and performance checks remain ongoing. A test count is not feature completeness.
 
 ## Release/validation status

@@ -6,6 +6,33 @@ namespace ProFootball.Tests;
 
 public class StaffBalanceTests
 {
+    [Theory]
+    [Trait("Category", "Career")]
+    [InlineData(19)] [InlineData(41)] [InlineData(73)] [InlineData(103)]
+    public void AnnualStaffOutputIsRepeatableAfterReloadAndIdempotentWithinYear(int seed)
+    {
+        var state = New() with { Id = new Guid(seed, 0, 0, new byte[8]) };
+        static string Snapshot(ProFranchise s) => System.Text.Json.JsonSerializer.Serialize(new
+        {
+            s.Coaches, s.MedicalStaff, s.Scouts, s.CoachCandidates, s.StaffRetirements, s.StaffLifecycleYear
+        });
+        for (var year = 0; year < 6; year++)
+        {
+            state = state with { Year = 2026 + year, Games = state.Games.Select(g =>
+                g.Phase == ProPhase.RegularSeason ? g with { Football = g.Football with
+                { HasPlayed = true, HomeScore = 24, AwayScore = 17 } } : g).ToList() };
+            var reloaded = System.Text.Json.JsonSerializer.Deserialize<ProFranchise>(
+                System.Text.Json.JsonSerializer.Serialize(state))!;
+            var next = ProStaff.DevelopSeason(state);
+            Assert.Equal(Snapshot(next), Snapshot(ProStaff.DevelopSeason(reloaded)));
+            Assert.Same(next, ProStaff.DevelopSeason(next));
+            Assert.Equal(state.Year, next.StaffLifecycleYear);
+            Assert.All(next.Coaches.Where(c => !c.Vacant), c =>
+                Assert.All(ProStaff.Profile(c).Attributes.Values(), a => Assert.InRange(a.Rating, 0, 100)));
+            state = ProStaff.ManageCpu(next);
+        }
+    }
+
     static ProFranchise New()=>ProLeagueService.Create("Seattle Seahawks",generatedPlayers:true,applyOpeningTrades:false);
 
     [Fact] public void EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity()

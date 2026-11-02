@@ -4,6 +4,8 @@ using Xunit;
 
 namespace Football.Engine.Tests;
 
+[Trait("Owner", "Engine")]
+[Trait("Category", "Fast")]
 public sealed class SharedCoreTests
 {
     [Fact]

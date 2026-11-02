@@ -47,3 +47,11 @@ Statistical outcomes should not be required to be byte-identical across Play and
 - Full live-versus-fast distribution comparison.
 
 These are explicit follow-ups, not assumptions that current behavior is incorrect. Any correction needs a focused failing scenario and a cited policy.
+
+## November 2 continuation
+
+- `GameDayEngineTests.SimWatchAndCpuDelegatedPlayProduceTheSameStats` now covers both rule adapters, six seeds each and all three modes: 12 passing cases / 36 completed games. With every call CPU-delegated, outcomes, clock/period events, offensive/defensive personnel and final team/player statistics match. This is a controlled mode comparison, not a large real/generated statistical calibration or proof of user-selected-call distributions.
+- `RulesBoundaryMatrixTests`: 20 passing cases. Covers timeouts immediately before expiry in all four regulation periods and both rule sets; current two-point policy on both possession sides across quarters2/3/4, five clock boundaries and margins-16 through16; requested onside kicks across64 seeds per league including both recovery outcomes, field position and no invented return statistics; late-game false-start/offside enforcement at midfield and near either goal line with no snap/clock loss.
+- These are current-policy characterization checks. Full dynamic-kickoff landing/formation/eligibility, safety free kicks, live-ball penalties, late-half runoff/untimed-down rules and actively controlled-call distributions remain open.
+- **Confirmed source gap:** `AdvanceState` clamps negative plays at the one-yard line. There is no safety scoring event/free-kick state in `GameDaySession`. The next safety batch needs a failing own-goal-line loss scenario, two-point defensive accounting, free-kick state/spot, halftime/game-end handling and presentation/stat/save coverage. No safety fix or conformance acceptance is claimed here.
+- The official2026 NFL rules page was rechecked during this continuation. Rule6 amendments include onside declarations at any game time and kickoff/safety-kick setup changes. Keep declaration eligibility separate from the CPU's late-game strategy; the existing requested-onside test is not full formation compliance.

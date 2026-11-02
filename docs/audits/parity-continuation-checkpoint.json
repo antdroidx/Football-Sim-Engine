@@ -1,0 +1,85 @@
+{
+  "date": "2026-11-02",
+  "branch": "codex/parity-roadmap-audit",
+  "runtimeFixCommit": "0138a4a",
+  "apks": {
+    "pro": {
+      "path": "src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk",
+      "variant": "Debug",
+      "sourceCommit": "0138a4a",
+      "sha256": "91b7f72fbbdf592d80c521d197e077086de4b372a8359a66a7204f6c3f7a7432",
+      "bytes": 89605743,
+      "delivery": "local APK; not a GitHub release or CI artifact"
+    },
+    "college": {
+      "path": "src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk",
+      "variant": "Debug",
+      "sourceCommit": "f9597a5",
+      "sha256": "ae49d8b33133b1aa46dff257946460099a5f681377afc1a6736db014bdf831b7",
+      "bytes": 90959000,
+      "delivery": "local APK; not a GitHub release or CI artifact"
+    }
+  },
+  "device": {
+    "serial": "emulator-5580",
+    "avd": "pixel_9_-_api_36",
+    "isolation": "read-only; no snapshot save; original AVD saves preserved",
+    "college": [
+      "updated APK install and saved Washington career reload",
+      "light portrait program profile: prestige75 green, academics82 teal, no denominator, numeric3-4; screenshot visually reviewed",
+      "light landscape program profile captured",
+      "own medical Devin Navarro, strength Casey Grant and chief-scout Darius Davis correct identity/role; Back returns to team directory"
+    ],
+    "pro": [
+      "initial current APK reproduces ignored Save/Cancel caused by copy-modal busy guard",
+      "fixed APK UI offensive custom library save and franchise save succeed",
+      "Inside Zone Custom ID custom-af6acac65ba34dc3bbfadae70dea112e and assignments persist in actual saved JSON",
+      "selected custom call ID saved within17-call offense; no direct save edits",
+      "full process restart; custom available in live Shotgun Spread picker",
+      "selected custom executed: Q1 15:00 first-and10 SEA35 to Q1 14:56 second-and9 SEA36; Charbonnet1-yard run",
+      "user coach portrait Save then full process restart: Light/Brown/Buzz cut/Clean shaven selections retained",
+      "light portrait opponent Jim Harbaugh profile: correct identity, no Edit portrait action; XML assertion passes; screenshot visually reviewed with green/teal bars",
+      "light landscape opponent coach profile captured; restored portrait; unfinished custom-call test game discarded while prior saved season retained"
+    ],
+    "notVerified": [
+      "remaining own/opponent staff-role matrix",
+      "low/high rating extremes across both themes",
+      "defensive copy-editor device roundtrip",
+      "complete dark/light portrait/landscape all-role matrix beyond recorded subsets"
+    ]
+  },
+  "tests": {
+    "engineFast": 12,
+    "modeComparison": 12,
+    "modeCompletedGames": 36,
+    "ruleBoundaries": 20,
+    "specialistCohorts": 2,
+    "specialistSeedsPerPosition": 64,
+    "specialistAnnualSteps": 12,
+    "proAnnualStaff": 4,
+    "collegeAnnualScouting": 4,
+    "annualStaffStepsPerCase": 6,
+    "totalPassingCases": 54,
+    "limits": "bounded characterization fixtures; no full regression suite or broad real/generated career acceptance"
+  },
+  "builds": {
+    "runner": "Visual Studio18 MSBuild SignAndroidPackage, Debug, single worker",
+    "college": "exit0; no warnings reported",
+    "proFixed": "exit0; two pre-existing CS8625 warnings",
+    "abandoned": "dotnet packaging stalled and was canceled before direct MSBuild retry"
+  },
+  "evidenceDirectory": ".artifacts/staff-device (local screenshots, XML and cloned gameplay save; not published)",
+  "openRisks": [
+    "safety scoring and free-kick state absent; negative plays clamp at own1",
+    "full dynamic kickoff, timeout/period and live-ball/late-half penalty conformance",
+    "actively controlled-call distribution comparison",
+    "remaining A10/A11/A12 and phase/rating/physical/staff-directory extractions"
+  ],
+  "repository": {
+    "merged": false,
+    "prereleasePublished": false,
+    "unrelatedWorkflowEdit": "preserved, excluded from implementation commits",
+    "localCleanup": "deferred"
+  },
+  "workflowValidation": "actionlint1.7.12 passes for modified csharp-ci.yml; git diff --check passes"
+}

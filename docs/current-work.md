@@ -1,3 +1,9 @@
+## Parity continuation — November 2, 2026
+
+Work is on `codex/parity-roadmap-audit` in `.codex-coach-fix`; root main contains unrelated dirty work. Runtime0138a4a fixes the reproducible Pro custom-play modal busy lock and raw formation picker labels. Both local Debug APKs packaged; exact-APK checks and remaining gaps are in `IMPLEMENTATION-HANDOFF.md` and `audits/parity-continuation-checkpoint.json`. College light-theme identity/staff navigation and Pro custom library save/reload/user-coach portrait restart are checked in an isolated read-only emulator clone. Full device acceptance is not claimed.
+
+54 focused cases pass across modes/rules, multi-year specialists, Pro/College staff characterization and shared test ownership. PositionTests moved to Engine; incremental Fast/Balance/Career traits introduced. `audits/test-ownership-and-refactoring.md` records completed inventory and pending extraction boundaries. Safety/free kicks are a confirmed missing engine path, not an accepted rules scenario. Remaining scope is explicitly retained in the handoff; older design backlog excluded. No merge, prerelease, new CI run or local cleanup is claimed. Unrelated workflow edit preserved.
+
 ## Accepted Pro115 / College412 — guided offseason, compact overview and backfield corrections
 
 User scope: Pro roster FB order/identity audit, compact College-style overview with weekly tasks, automatic dedicated offseason screens, dense post-draft training camp, draft board/results/order/prospect details, yearly offer/team-room projections, manual HC offseason over-budget extensions with regular-season compliance preserved, contrasting FA actions/visible rival bids and optional non-destructive GM bidding help. Both apps: Settings naming, confirmed save/exit moved into Settings, default FB order beside HB, offseason card near overview top. Save enum IDs and signed contracts are preserved; old Pro RosterCuts value3 is presented as Training Camp, directly after Draft.

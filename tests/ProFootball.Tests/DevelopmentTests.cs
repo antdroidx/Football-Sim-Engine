@@ -7,6 +7,44 @@ namespace ProFootball.Tests;
 
 public sealed class DevelopmentTests
 {
+    [Theory]
+    [Trait("Category", "Career")]
+    [InlineData(Position.K)]
+    [InlineData(Position.P)]
+    public void SpecialistCohortsKeepTheirCeilingsAndDeclineAfterTheirPeak(Position position)
+    {
+        var peak = ProDevelopment.PeakAge(position);
+        var peakRatings = new List<int>();
+        var finalRatings = new List<int>();
+        for (var seed = 0; seed < 64; seed++)
+        {
+            var player = Player(position, peak - 4);
+            var initial = player.Football.OverallRating;
+            var ceiling = ProDevelopment.Ceiling(player);
+            var random = new Random(seed);
+            for (var year = 0; year < 12; year++)
+            {
+                var previous = player;
+                player = ProDevelopment.AgeOneYear(player, random);
+                Assert.Equal(previous.Age + 1, player.Age);
+                Assert.InRange(player.Football.OverallRating, 1, ceiling);
+                Assert.InRange(player.Football.PotentialRating, player.Football.OverallRating, ceiling);
+                Assert.Equal(PlayerRatingService.CalculateOverall(player.Football), player.Football.OverallRating);
+                if (player.Age == peak)
+                {
+                    Assert.True(player.Football.OverallRating >= initial);
+                    peakRatings.Add(player.Football.OverallRating);
+                }
+                if (player.Age > peak + 2)
+                    Assert.True(player.Football.OverallRating <= previous.Football.OverallRating);
+            }
+            finalRatings.Add(player.Football.OverallRating);
+        }
+        Assert.True(peakRatings.Distinct().Count() > 1);
+        Assert.True(finalRatings.Average() < peakRatings.Average());
+        Assert.True(finalRatings.Max() < peakRatings.Min());
+    }
+
     static ProPlayer Player(Position position, int age) => ProPlayerRatingService.Refresh(new(new DynastyPlayer
     {
         PlayerId = Guid.NewGuid(), FullName = "Development test", TeamName = "Test", Position = position,

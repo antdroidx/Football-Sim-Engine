@@ -1,8 +1,10 @@
 using DynastyManager.Core.Models;
 using Xunit;
 
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
 
+[Trait("Owner", "Engine")]
+[Trait("Category", "Fast")]
 public class PositionTests
 {
     [Theory]

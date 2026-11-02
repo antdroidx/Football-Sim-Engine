@@ -10,6 +10,7 @@ on:
       - 'src/DynastyManager.App/**'
       - 'src/DynastyManager.Data/**'
       - 'tests/DynastyManager.Core.Tests/**'
+      - 'tests/Football.Engine.Tests/**'
       - 'build/android-*.py'
       - 'build/college-*.py'
       - 'global.json'
@@ -105,7 +106,7 @@ jobs:
           CFDM_CALIBRATION_REPORT_DIR: ${{ github.workspace }}/artifacts/calibration
         run: |
           if [ "$MANAGEMENT_SCOPE" = "overview-roster" ]; then
-            dotnet test tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj -c Release --no-restore --filter 'FullyQualifiedName~PositionTests|FullyQualifiedName~FullbackRoleTests'
+            dotnet test tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj -c Release --no-restore --filter 'FullyQualifiedName~FullbackRoleTests'
           elif [ "$MANAGEMENT_SCOPE" = "fast-forward" ]; then
             dotnet test tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj -c Release --no-restore --filter 'FullyQualifiedName~SeasonProgressionTests|FullyQualifiedName~DynastySaveRepositoryTests|FullyQualifiedName~CollegeSeasonFeatureTests'
           elif [ "$RUN_RATING_CALIBRATION" = "true" ]; then
