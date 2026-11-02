@@ -35,9 +35,11 @@ public sealed partial class FranchisePage
         var attributes = StaffAttributeService.Medical(current.Staff);
         var edit = Action("Edit attributes", () =>
         {
+            if (current.Team != state!.UserTeam) return Task.CompletedTask;
             editorEntity = "Medical · " + RoleName(current.Staff.Role) + " · " + current.Staff.FullName;
             return Editor();
         });
+        edit.IsVisible = current.Team == state!.UserTeam;
         return ShowPage("Medical staff profile",
             Text(current.Staff.FullName, 22, true), Text($"Age {current.Staff.Age} · {current.Staff.CareerYears} career years · {current.Staff.TenureYears} with this club"), Text(RoleName(current.Staff.Role)),
             CoachAttributeViews.Medical(attributes),

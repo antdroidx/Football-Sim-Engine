@@ -45,7 +45,7 @@ The previous parity checklist is obsolete: it lists career statistics, medical/s
 | Statistics | Shared recorded player/stat/efficiency data with College aggregation | Regular/playoff/current/career filters and deduplication | Shared aggregation primitives exist; unify query specification next | Football.Engine/Simulation/PlayerStatTotals.cs; ProFootball.Core/ProPlayerStatistics.cs |
 | Analytics/news | College-specific awards, recruiting and program history | Draft/development comparisons, league review, projections | Shared factual event/query contracts; different editorial topics | Football.Engine/Simulation/DynastyNewsService.cs; ProFootball.Core/ProNews.cs; ProAnalytics.cs |
 | Custom plays | Dedicated PlayEditor page and validation service | No Pro app custom-play editor reference found | Candidate missing feature; decide whether deliberate before porting | DynastyManager.App/FoundationPage.PlayEditor.cs; Football.Engine/Simulation/PlayEditorService.cs |
-| Portrait editing | Dedicated portrait editor uses shared customization service | Attribute editor present; no Pro portrait-customization route found | Candidate parity gap; renderer already shared | DynastyManager.App/FoundationPage.PortraitEditor.cs; ProFootball.App/FranchisePage.Editor.cs |
+| Portrait editing | Dedicated portrait editor uses shared customization service | Player profile has Edit appearance / EditPlayerAppearance; staff customization still needs review | Player appearance parity already implemented; staff parity unverified | DynastyManager.App/FoundationPage.PortraitEditor.cs; ProFootball.App/FranchisePage.Editor.cs |
 | Presentation | Large FoundationPage partials and MAUI management shell | Large FranchisePage/FrontOfficePage partials; same data-grid primitives | Share components, not a giant shared page/state class | Football.Presentation/FootballDataGrid.cs; GameCastLivePage.cs |
 | Saves/migration | Dynasty persistence and legacy/current import compatibility | Independent Pro save schema and additive migration | Keep schemas separate; share atomic write/version guard utilities only | DynastyManager.Data; ProFootball.Core/ProSaveStore.cs |
 | Testing structure | Core plus College cases in one project | Separate Pro tests reference shared engine | Confirmed organization debt: shared tests are not independently owned | tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj; tests/ProFootball.Tests/ProFootball.Tests.csproj |
@@ -97,9 +97,7 @@ Trace supported Pro play selection and decide whether to expose existing PlayEdi
 
 ### A08 · P2 · Portrait customization parity
 
-**Evidence:** Negative source-search candidate.
-
-Reuse shared portrait customization with Pro identity lookup, or document editing intentionally unavailable. Preserve existing illustrated identities on reload.
+**Evidence:** Follow-up source tracing corrected the original negative search: `FranchisePage.Profiles.cs` exposes Player -> Edit appearance and persists player skin/hair/facial-hair changes. Do not implement a duplicate player portrait editor. Staff portrait customization remains a separate unverified parity question. Verify existing appearance save/reload and inspect staff identity storage before adding staff customization.
 
 ### A09 · P2 · History-calibration transparency
 

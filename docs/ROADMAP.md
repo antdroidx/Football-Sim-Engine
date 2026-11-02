@@ -17,6 +17,8 @@ Canonical status at main99254c7; supersedes outstanding-work wording in historic
 | Simulation foundation checks | Real/generated balance samples, personnel/stat accounting, Pro pacing and staff sensitivity | football-balance-audit.md; pro-pacing-audit.md; coach-rating verification |
 | Integration/archive/release | Shared work merged to main; Java retained under Archive; repository renamed; dual APK prerelease and full changelog published | releases/preview-2026-11-01.md |
 
+[Active implementation handoff](IMPLEMENTATION-HANDOFF.md) records the approved sequence, checkpoints and model-resume instructions.
+
 ## Remaining, prioritized
 
 - **P1:** A01 College staff links; A02 actual scouting-department visibility; A03 opponent medical editor identity/authority; A04 exact-build UI acceptance.

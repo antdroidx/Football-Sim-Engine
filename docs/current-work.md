@@ -595,3 +595,8 @@ Runtime source0bf0989: removed redundant Pro History column, linked staff profil
 ## Roadmap/parity audit and GitHub hygiene — November 1, 2026
 
 Canonical completion status: ROADMAP.md. The30-area source matrix,12 prioritized findings and shared-code extraction plan are in audits/pro-college-parity-2026-11-01.md, with an HTML companion. New checks:41 Pro and43 Core/College passed; release401/760 counts are reused, not rerun here. No production edits, new APK, fresh rulebook certification, device walkthrough or extended-career acceptance claimed. Removed59 superseded APK artifacts,20 caches,9 artifact-free failed/cancelled runs and both merged remote feature branches. Release assets/non-APK evidence and dirty local worktrees retained. Redundant branch workflow disabled, primary Android workflows active. Exact accounting: audits/audit-evidence.json.
+
+
+## Approved parity implementation sequence started
+
+Resume at IMPLEMENTATION-HANDOFF.md. College staff links/scout department and Pro readonly opposing medical profiles implemented; both Android Compile targets pass. Existing focused staff/scouting regression cases:20 College/34 Pro pass. Baseline rules scenarios40 shared/13 Pro pass; not a complete rules certification. Device verification and later editor/aging work remain open. Pro player appearance editor was found during follow-up; audit A08 corrected to avoid a duplicate implementation.
