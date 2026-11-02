@@ -51,7 +51,7 @@ public class FoundationTests
         {
             var game = s.Games[0] with { Football = s.Games[0].Football with { SimulationSeed = seed } };
             var session = ProLeagueService.Start(s, game, GameDayMode.Play); var kickoff = GameDayEngine.Step(session);
-            if (kickoff.IsTouchback) { Assert.Equal(35, session.YardLine); found = true; }
+            if (kickoff.IsTouchback) { Assert.Equal(kickoff.KickTouchedLandingZone ? 20 : 35, session.YardLine); found = true; }
             session.KickoffPending = false; session.OvertimeRound = 1; session.Quarter = 5; session.ClockSeconds = 600;
             session.PossessionTeamName = session.Game.HomeTeamName; session.HomeScore = 7; session.AwayScore = 0;
             session.OvertimePossessions = 0; session.TryPending = true;
