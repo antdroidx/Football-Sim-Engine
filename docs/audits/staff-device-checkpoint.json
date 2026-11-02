@@ -1,0 +1,13 @@
+{
+  "baselineCommit": "76dcbe1",
+  "serial": "emulator-5580",
+  "isolation": "AVD read-only/no-snapshot-save",
+  "checks": {
+    "collegeCoachLinkAndBack": true,
+    "collegeScoutIdentityAssignmentAttributes": true,
+    "proOpponentMedicalIdentityAndReadOnly": true
+  },
+  "collegeApkSha256": "818536e36e65ef2a319275ca96ffb61236a8968f86068d79beeb99957bec2390",
+  "proApkSha256": "d730877d1285b85199f1846baf468df369e1ff4c8ae4d6f94537e0f641dc438e",
+  "limits": "Not full A04 acceptance. Final missing-age display fix compiled after tested College APK; requires package and device retry. Other teams, themes/orientations, reload/endpoints remain open."
+}

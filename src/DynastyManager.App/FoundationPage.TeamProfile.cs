@@ -13,7 +13,7 @@ public sealed partial class FoundationPage
         await Navigation.PushModalAsync(new ContentPage{Title="Scout profile",AutomationId="college-scout-profile",BackgroundColor=DynastyTheme.Background,
             Content=new ScrollView{Content=new VerticalStackLayout{Padding=16,Spacing=12,Children={back,
                 new Label{Text=scout.FullName,FontSize=22,TextColor=DynastyTheme.Text},
-                new Label{Text=$"Age {scout.Age} · {scout.CareerYears} career years · {scout.TenureYears} with this program",TextColor=DynastyTheme.Text},
+                new Label{Text=scout.Age>0?$"Age {scout.Age} · {scout.CareerYears} career years · {scout.TenureYears} with this program":"Age and career history not recorded",TextColor=DynastyTheme.Text},
                 new Label{Text=assignment is null?"Unassigned":FormatScoutAssignment(assignment),TextColor=DynastyTheme.Text},
                 CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(scout))}}}});
     }
@@ -49,7 +49,7 @@ public sealed partial class FoundationPage
             Box("Scouting department",team.Name.Equals(state.UserTeamName,StringComparison.OrdinalIgnoreCase)
                 ? state.ScoutingStaff.Count==0 ? T("No scouting department records are available.")
                 : DataTable([("Scout",210),("Age",55),("Assignment",180)],state.ScoutingStaff.Select(scout=>new View[]{
-                    PersonLink(scout.FullName,()=>ShowCollegeScoutProfileAsync(scout),true),TableText(scout.Age.ToString()),
+                    PersonLink(scout.FullName,()=>ShowCollegeScoutProfileAsync(scout),true),TableText(scout.Age>0?scout.Age.ToString():"—"),
                     TableText(state.ScoutAssignments.FirstOrDefault(a=>a.ScoutId==scout.ScoutId) is {} assignment ? FormatScoutAssignment(assignment) : "Unassigned")}))
                 : T("Only recorded chief-scout information is available for this program; see Staff above.")),
             Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true))
