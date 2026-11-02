@@ -1,3 +1,5 @@
+> **Status update — November 1, 2026:** Historical plan/audit retained for provenance. Its forward-looking gaps are superseded by [the current roadmap](ROADMAP.md) and [the current parity audit](audits/pro-college-parity-2026-11-01.md). Implementation/release milestones are complete as recorded there; remaining recommendations have explicit IDs and evidence levels.
+
 # Autonomous Pro trade work — next implementation batch
 
 Existing services remain the authority: ProTrade.Propose transfers player/pick ownership and validates current cap/roster rules; ProTradeMarket supplies block candidates, package values and smallest-sufficient pick suggestions; ProManagement wraps coordinator recommendations and protects shared picks/future unit budgets. Do not build a second trade engine or silently change user assets.

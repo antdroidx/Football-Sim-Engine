@@ -1,3 +1,5 @@
+> **Status update — November 1, 2026:** Historical plan/audit retained for provenance. Its forward-looking gaps are superseded by [the current roadmap](ROADMAP.md) and [the current parity audit](audits/pro-college-parity-2026-11-01.md). Implementation/release milestones are complete as recorded there; remaining recommendations have explicit IDs and evidence levels.
+
 # GameCast visual polish — implementation plan
 
 Base: feature/management-ui-overhaul (not legacy Java main). Primary UI: src/DynastyManager.App/FoundationPage.GameDay.cs (MAUI), with src/DynastyManager.App/FoundationPage.LiveBoxScore.cs, src/DynastyManager.Core/Simulation/GameDayLivePresentation.cs and LiveFootballChoreography.cs.

@@ -1,3 +1,5 @@
+> **Status update — November 1, 2026:** Historical plan/audit retained for provenance. Its forward-looking gaps are superseded by [the current roadmap](ROADMAP.md) and [the current parity audit](audits/pro-college-parity-2026-11-01.md). Implementation/release milestones are complete as recorded there; remaining recommendations have explicit IDs and evidence levels.
+
 # Coordinator staff / GM completion audit
 
 Implement after the in-flight trade APK is accepted; keep application inputs stable for possible exact-APK test retries.

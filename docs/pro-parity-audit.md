@@ -1,3 +1,5 @@
+> **Status update — November 1, 2026:** Historical plan/audit retained for provenance. Its forward-looking gaps are superseded by [the current roadmap](ROADMAP.md) and [the current parity audit](audits/pro-college-parity-2026-11-01.md). Implementation/release milestones are complete as recorded there; remaining recommendations have explicit IDs and evidence levels.
+
 # Pro application parity audit — October 25, 2026
 
 The pro application is still a development preview, not a completed adaptation of the college application. This checklist distinguishes implemented changes from remaining work; a successful build alone does not demonstrate UI or animation correctness.

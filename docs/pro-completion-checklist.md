@@ -1,3 +1,5 @@
+> **Historical acceptance log:** See [current roadmap](ROADMAP.md) and [parity audit](audits/pro-college-parity-2026-11-01.md) for completed milestones and remaining work.
+
 ## Accepted Pro115 / College412 — guided offseason, compact overview and backfield corrections
 
 User scope: Pro roster FB order/identity audit, compact College-style overview with weekly tasks, automatic dedicated offseason screens, dense post-draft training camp, draft board/results/order/prospect details, yearly offer/team-room projections, manual HC offseason over-budget extensions with regular-season compliance preserved, contrasting FA actions/visible rival bids and optional non-destructive GM bidding help. Both apps: Settings naming, confirmed save/exit moved into Settings, default FB order beside HB, offseason card near overview top. Save enum IDs and signed contracts are preserved; old Pro RosterCuts value3 is presented as Training Camp, directly after Draft.

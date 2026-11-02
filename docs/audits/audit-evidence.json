@@ -1,0 +1,589 @@
+{
+  "date": "2026-11-01",
+  "baseline": "99254c77e1532257fedbc6011cc9b1181b06dcc3",
+  "auditType": "source/test audit; no new device or long-career run",
+  "focusedTests": {
+    "pro": {
+      "total": "41",
+      "executed": "41",
+      "passed": "41",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "college": {
+      "total": "43",
+      "executed": "43",
+      "passed": "43",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    }
+  },
+  "cleanup": {
+    "artifactsBefore": 101,
+    "artifactsAfter": 42,
+    "artifactBytesRemoved": 5775642225,
+    "cachesBefore": 24,
+    "cachesAfter": 4,
+    "cacheBytesRemoved": 6657766059,
+    "successfulDeletions": 88,
+    "removedRemoteBranches": [
+      "codex/pro-scouting-depth",
+      "codex/coach-history-attribution"
+    ],
+    "branchProof": "both ancestors of baseline main; local worktrees retained",
+    "retained": "all release assets, all non-APK evidence, final149/439 and College412 runs; successful logs and four caches",
+    "workflows": "College Android and Pro Football Android active; redundant Pro Android Branch Build disabled"
+  },
+  "cleanupOperations": [
+    {
+      "kind": "artifact",
+      "id": 13104225055,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13104090628,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13102696078,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13101220467,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13101215006,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13097565659,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13097113813,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13093851696,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13093711360,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13093488536,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13093392627,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13076135467,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13075571916,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13074978403,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13074974668,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13073702652,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13073666545,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13073276468,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13072878132,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13072856133,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13071989751,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13071477338,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13071334315,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13071141010,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13070438595,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13070307679,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13069598877,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13068823657,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13067994335,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13062051039,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13061037662,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13060569138,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13058955704,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13058145051,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13056640421,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13055934977,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13053578765,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13053139154,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13053048821,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13034763698,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13034728702,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13034229933,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13034206552,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13033849879,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13033459201,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13033418685,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13032906388,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13030103853,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13030039156,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13024884361,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13023655512,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13003188026,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 13002244520,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 12962065061,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 12959152937,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 12959137915,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 12948493646,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 12945439523,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "artifact",
+      "id": 12916863024,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 41330920931,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 41178456591,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 41149942131,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 41138825842,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 41020520434,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 40991032745,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 40990187380,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 40989983055,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "run",
+      "id": 40983806143,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9687848739,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9685241514,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9660249164,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9670483359,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9668729958,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9660318941,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9626512119,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9626519951,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9623663462,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9608292036,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9559107569,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9596201290,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9586739288,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9562557503,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9548955885,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9531906435,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9536256101,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9532034812,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9491511488,
+      "success": true,
+      "error": ""
+    },
+    {
+      "kind": "cache",
+      "id": 9484193888,
+      "success": true,
+      "error": ""
+    }
+  ]
+}

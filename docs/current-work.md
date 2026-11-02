@@ -590,3 +590,8 @@ College prestige and academics now use labeled progress bars without /99; the te
 ## Team-profile presentation APKs
 
 Runtime source0bf0989: removed redundant Pro History column, linked staff profiles, numeric defensive formation labels in both team profiles and College prestige/academics bars without denominators. Pro149 run41360960044 succeeds:401 tests,0 build errors,2 existing warnings; artifact13105995227 (pro-football-apk-149). College439 run41360962102 succeeds:760 tests,0 build warnings/errors; artifact13105261974 (dynasty-manager-build-439). Existing standard long-career exclusions apply; no new device acceptance claimed.
+
+
+## Roadmap/parity audit and GitHub hygiene — November 1, 2026
+
+Canonical completion status: ROADMAP.md. The30-area source matrix,12 prioritized findings and shared-code extraction plan are in audits/pro-college-parity-2026-11-01.md, with an HTML companion. New checks:41 Pro and43 Core/College passed; release401/760 counts are reused, not rerun here. No production edits, new APK, fresh rulebook certification, device walkthrough or extended-career acceptance claimed. Removed59 superseded APK artifacts,20 caches,9 artifact-free failed/cancelled runs and both merged remote feature branches. Release assets/non-APK evidence and dirty local worktrees retained. Redundant branch workflow disabled, primary Android workflows active. Exact accounting: audits/audit-evidence.json.

@@ -1,65 +1,39 @@
-# Dynasty Manager roadmap
+# Current roadmap — November 1, 2026
 
-Working continuation of the roadmap discussed in the "Dynasty Manager Roadmap" chat. Build 202's geography and Week 19 fixes were confirmed working by the user. Subsequent work is published through the GitHub development branch and APK workflow.
+Canonical status at main99254c7; supersedes outstanding-work wording in historical plans. Latest release: Pro149 / College439, [dual-app prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-01-staff-gamecast). Full [parity audit and recommendations](audits/pro-college-parity-2026-11-01.md), with a [standalone HTML report](audits/pro-college-parity-2026-11-01.html).
 
-| Priority | Area | Current status | Next exit criteria |
-|---|---|---|---|
-| 1 | Recruiting fixes | Shared multi-school HS/portal offer engine implemented; interest, effort, withdrawals and capacity drive decisions | Keep current save compatibility and single ownership across recruiting paths |
-| 2 | Recruiting balance | Expanded: six seeded careers, including 130-team leagues, games and prestige movement; see build-205-career-validation.md | Full-league, multiple-seed comparisons with changing results/coach strength and CPU peers |
-| 3 | Long-term dynasty health | Expanded: five/ten-year careers with weekly portal decisions, games, age/depth checks and annual save/load | Longer careers with games, deferred transfers, position age distributions and save recovery |
-| 4 | Interface polish | Build 223 flattens remaining Android control/scroll dividers, restructures recruit detail and allows every conference to be viewed | Continue refining presentation using device feedback |
-| 5 | Game-day control | Build 232 adds animated player/ball movement, visual play-call cards, Overview shortcuts and control of any league matchup | Continue animation polish, situational playcalling and special-teams depth |
-| 6 | Broader modernization | Future | Remaining position detail, CSV workflows, faces and presentation |
-| 7 | NIL and coaching budgets | Later; design backlog only | Separate NIL resources and coaching/staff budgets, sustainable multi-year commitments and recruiting/carousel integration |
+## Completed and released
 
-## Current delivery
+| Milestone | Delivered | Evidence |
+|---|---|---|
+| Management/UI foundation | Responsive shells, tables, actionable draft/retention views, Front Office groups, themes, profiles, staff-name links and rating bars | current-work.md; Pro149/College439 |
+| Shared live GameCast | Shared field, scorebug, menus, replay/control lifecycle, coordinator authority, compact landscape footer | current-work.md shared live acceptance; Football.Presentation/GameCastLivePage.cs |
+| Player ratings and positions | Canonical19 attributes/overall, K/P separation, FB roles, fit/conversion, editors and Pro save migration | shared ratings/position tests; release changelog |
+| Franchise depth | Staff/combine scouting, development, camp, ownership/career context and coordinator opposite-unit management | coordinator plan accepted Pro58; current-work.md |
+| Standings, analytics, news | NFL tiebreakers, career/draft comparisons, efficiency, factual league reviews and projections | current-work.md accepted user-selected batch |
+| College-to-Pro draft exchange | Export/share full classes, translated import, identity preservation, class completion and normal rookie contracts | PlayerExchangeTests; DraftClassExportTests |
+| Practical finance and trades | Real-roster defaults, estimates, cap/bonus/waiver/retention/GM/trade safeguards and future picks | pro-practical-finance-policy.md; current-work.md. Source-perfect auditing explicitly closed. |
+| Staff and team identity | Shared coaching/medical/scout attributes, lifecycle, strategies, team directories; College academics and Pro HC calibration | shared-staff-attributes.md; pro-coach-rating-verification.md |
+| Simulation foundation checks | Real/generated balance samples, personnel/stat accounting, Pro pacing and staff sensitivity | football-balance-audit.md; pro-pacing-audit.md; coach-rating verification |
+| Integration/archive/release | Shared work merged to main; Java retained under Archive; repository renamed; dual APK prerelease and full changelog published | releases/preview-2026-11-01.md |
 
-- Show an animated loading screen while recruit list calculations run off the UI thread; build visible rows in small batches.
-- Cancel outdated loads on navigation or a replacement request and prevent stale results from overwriting the new view.
-- Recognize CPU-signed recruits in visible interactions, assistance and manual actions, and prevent double-signing during resolution.
-- Add repeatable five-cycle diagnostics rather than assuming that a single working season proves balance.
+## Remaining, prioritized
 
-## Active roadmap: game-day expansion
+- **P1:** A01 College staff links; A02 actual scouting-department visibility; A03 opponent medical editor identity/authority; A04 exact-build UI acceptance.
+- **P1:** A05 league-rule conformance and live/fast-mode comparison. Validate scenarios before changing chosen policies.
+- **P2:** A06 explicit punter aging curve decision; A07 Pro custom plays and A08 portrait editor product decisions; A09 honest calibration provenance.
+- **P2:** A10 shared statistical-query contract; A11 audited Engine/College/Pro test ownership and test tiers.
+- **P3:** A12 bounded shared staff-lifecycle primitives; gradual College-specific core separation after tests.
+- Routine real-world data refreshes, playtesting and performance checks remain ongoing. A test count is not feature completeness.
 
-The user approved starting items 1–4 together. The first integrated delivery includes:
+## Release/validation status
 
-1. **Rules and situational AI:** untimed, paired college overtime possessions; separate XP/two-point attempts; forced two-point attempts from second OT and alternating tries from third OT; onside decisions; kneel/spike controls; pre-snap false starts/offside; hurry-up and late first-down clock stopping; CPU calls use the same situational advice as the user. Remaining: full penalty catalog/acceptance, defensive return scores, safeties, full two-minute/clock enforcement and richer special-teams animations.
-2. **Shared snap engine:** actual personnel, route assignments, coverage matchups, pass protection, QB awareness and staff game management now determine a probabilistic passing read before the throw. Separation, catch/interception risk and release timing feed the shared engine/viewer. Remaining: time-stepped spatial simulation, blocking collisions, true sequential progressions and calibrated run/option reads.
-3. **Play Editor:** copy catalog calls into a persisted library, edit offense formation/concept, slot alignments, route types and blocking; edit defensive rush/man/zone assignments and alignment. Created calls enter the same capped Custom playbooks. Remaining: freehand route waypoints, assignment targets, editing/deleting saved definitions and richer defensive art.
-4. **Starting library / NCAA 06 NEXT importer:** main-screen roster packs, per-setup defaults, add/edit/remove league setups, team/conference editing, explicit TGID mapping, preview and POCI recalculation. New dynasties select independent league and roster options. Variable team counts and 2/4/8/12 playoffs are supported with schedule validation; season length and broader postseason policies remain fixed. See starting-library-and-custom-leagues.md. First version consumes PLAY-table CSV with decoded names and displayed 1–99 ratings. Remaining: direct binary database/PS2 save parsing, automatic TEAM/PRLU extraction, export/round-trip and user-supplied real-file validation.
+Latest published APKs pass401 Pro and760 combined Core/College cases. Prior device and long-run evidence is scoped in testing-scope.md; the final presentation APKs do not claim a fresh all-screen walkthrough. Keep intentional league differences; do not reopen perfect-source finance or repeat already completed exchange/coordinator work because an older plan says pending.
 
-NIL and coaching budgets remain later additions. Recruiting and dynasty behavior continue through the existing shared systems.
+## Repository hygiene policy
 
-Competing offers are now a core engine feature (Build 204). CPU and user schools share persisted offers and one decision resolver. CPU direct signings and protected user targets have been removed. The next balance baseline must use this shared market; the original Build 203 report is historical.
+Retain permanent release assets/checksums, current accepted build runs, unique UI/performance evidence and recent useful caches. Delete superseded build-only APK artifacts and artifact-free failed/cancelled attempts after inventory. Delete remote branches only after ancestry verification; never discard dirty local worktrees. Keep both primary Android workflows. The additional branch-only build workflow is redundant and should be retired only when its pending local edit is resolved, not silently overwritten.
 
-Build 206 adds a selectable 138-team 2026 FBS structure with saved league configuration, modern conference game counts, original HS recruiting stars and a roster career-stats view. See build-206-modern-fbs-careers.md for limitations and validation.
+## Original College roadmap and unresolved design backlog
 
-Build 207 starts UI modernization and coaching controls. Drive-level playbooks and opening call sheets now affect the shared simulation. Full live per-play calling follows the snap-event layer; see build-207-coaching-ui.md.
-
-## Later economy additions
-
-NIL and coaching budgets are deferred while the UI, playcalling and career-history layers develop. Plan for separate NIL resources and school coaching/staff budgets, coach salaries/contracts/buyouts, multi-year affordability forecasts, and recruiting/transfer offer integration. Coaching preferences should influence spending. Avoid hard transfer/recruit signing caps or a money-only recruiting winner; preserve competition, player preferences and long-term roster health. This is a game-design backlog, not an implemented economy or a model of current NIL regulations.
-
-Build 208 adds coach career histories and an archive: user/CPU head coaches and other staff retain season results by identity through moves and departures. Head-coaching records are separate from team results earned in other staff roles.
-
-Builds 209–211 revise the initial UI after feedback: Home starts/loads careers, active dynasty navigation is separate, saves are grouped by dynasty, and short landscape windows keep recruiting controls beside the list. This remains an iterative UI, not a final visual design. See build-209-save-library-ui.md for scope and device validation.
-
-Builds 212–214 add school-color palettes for all 138 schools and organized grids for rankings, standings, postseason, schedules, rosters and recorded player statistics. Roster filters and player-detail controls, season/career statistics with paging, and responsive wide-screen headers continue the UI revision. See build-212-organized-team-grids.md.
-
-Builds 215–216 reorganize the active-career tabs as Overview / Roster / Coach / Recruit / Season, separate Settings, connect Overview cards to their reports, add factual generated headlines, sortable grid headings and reusable league-wide player/coach profiles. Initials avatars are placeholders; real portraits and live snap-by-snap viewing remain future work. See build-215-navigation-news-profiles.md.
-
-Build 217 adds persistent position-sensitive football skills, player-card ratings and aggregate passing/rushing simulation integration, plus upset/streak/shutout/blowout/postseason news from recorded outcomes. Detailed individual fatigue, penalties, catch/fumble events and snap-level effects remain work for the play-by-play engine. See build-217-skills-notable-news.md.
-
-Builds 218–219 establish the fresh-game boundary (schema 23): independent detailed skills drive position overall and passing/rushing performance directly; player creation and practice use the new model. Prior save formats require a new dynasty. See build-218-fresh-game-ratings.md.
-
-Build 220 organizes player profiles into character, physical and skill traits; adds starter/role roster filters and a drag-and-drop depth-chart organizer with button controls; links the Coaching Hub to that organizer; improves recruit-card hierarchy; and curates varied Overview headlines so injury reports do not crowd out notable results. See build-220-roster-recruit-news-polish.md.
-
-Build 221 removes the redundant injury-proneness display, adds class year to the depth organizer, clarifies the Exit Dynasty action, simplifies trait layouts and rebuilds recruit cards as scannable metric/status blocks. It also begins the next game-day milestone with persistent offensive/defensive formations, personnel-aware play definitions and a saved working playbook. See build-221-playbook-foundation-ui-polish.md.
-
-Build 222 expands every offensive formation to at least eight calls and every defensive formation to at least six calls, for 40 offensive and 30 defensive definitions. It removes generic border/table separators, applies the clean trait layout to coach profiles, and standardizes player class labels including permanent redshirt-history suffixes. See build-222-expanded-playbooks-class-labels.md.
-
-Build 223 follows device feedback: standings can switch among every conference, table scrollbars and Android picker/search underlines no longer appear as heavy dividers, recruit detail uses a metric-and-market layout, and every playbook call has readable field art. See build-223-recruit-standings-play-art.md.
-
-Build 225 moves regular-season, conference-title, bowl, playoff and interactive user games onto one snap engine. Sim Game, Watch Game and Play Game share playbooks, coaching, personnel packages, fatigue rotation and player event recording. See build-225-game-day-snap-engine.md.
-
-Build 232 animates every viewed snap, shows play art in the live call sheet, places Sim/Watch/Play beside the user's Overview matchup, and allows any CPU-versus-CPU game to be watched or played from either sideline. See build-232-animated-game-day.md.
+The original [build232-era roadmap](roadmap-history-build232.md) is preserved. Recruiting balance and long-term dynasty health remain ongoing validation rather than permanently completed tasks. Original design backlog remains: NIL resources and coaching/staff budgets, richer spatial/blocking/progression simulation, advanced play-editor authoring, and direct binary NCAA06/PS2 import/export. Old detailed exit criteria need fresh code verification before being called missing or complete. Modern CSV roster/league setup and illustrated profiles are implemented; CSV support does not imply binary database round-trip.
