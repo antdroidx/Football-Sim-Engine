@@ -2,6 +2,10 @@
 
 Last updated: November 2, 2026 (America/Los_Angeles). Final CI candidates: Pro160 / College448 at `d3ed91a`; approved scoped acceptance is complete with the limits recorded below. See `audits/parity-acceptance-current.json` for hashes, builds and per-APK evidence. This document is the model-independent continuation point; current status supersedes the historical checkpoints below.
 
+## Active follow-up
+
+The user has now authorized CPU roster safeguards/future planning, remaining officiating rules and validation-test refactoring. Resume from [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The completed parity batch below remains historical evidence.
+
 ## User-approved scope and preferences
 
 Proceed in this order:

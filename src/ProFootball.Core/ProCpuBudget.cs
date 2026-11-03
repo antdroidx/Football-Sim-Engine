@@ -21,6 +21,16 @@ public static class ProCpuBudget
         }
         return Math.Max(0,needed);
     }
+    public static int ContractYears(ProFranchise s,string team,ProPlayer player,long salary)
+    {
+        var contract=new ProContract(player.Football.PlayerId,team,s.Year,2,0,
+            Enumerable.Range(0,2).Select(i=>new ContractYear(s.Year+i,Math.Max(salary,ProFinance.Minimum(s,player,s.Year+i,practice:false)),0)).ToList());
+        var proposed=s with { Contracts=s.Contracts.Append(contract).ToList(), Players=s.Players.Select(p=>p.Football.PlayerId==player.Football.PlayerId?p with {Football=p.Football with {TeamName=team}}:p).ToList() };
+        var reserve=Math.Max(0,ProCpuRosterSafety.MinimumActive-ProRoster.Active(proposed,team))*ProFinance.Minimum(s,player,practice:false);
+        var bank=Math.Max(0,ProEconomy.Room(s,team)-ProEconomy.Pending(s,team)-salary-reserve);
+        return FutureRolloverNeed(proposed,team)<=Math.Max(FutureRolloverNeed(s,team),bank)?2:1;
+    }
+
     public static bool ReleaseKeepsFuturePlan(ProFranchise s,ProPlayer player,long plannedSpend=0)
     {
         var rows=ProContractInsights.Release(s,player.Football.PlayerId);
@@ -37,7 +47,7 @@ public static class ProCpuBudget
         {
             var needed=FutureRolloverNeed(s,team);var room=ProEconomy.Room(s,team);if(needed<=room)break;
             ProFranchise? best=null;double bestScore=0;
-            foreach(var player in s.Players.Where(p=>p.Football.TeamName==team&&!p.Retired&&!p.PracticeSquad&&!p.Reserve&&ProCpu.Need(s,team,p.Football.Position)==0))
+            foreach(var player in s.Players.Where(p=>p.Football.TeamName==team&&!p.Retired&&!p.PracticeSquad&&!p.Reserve&&ProCpu.StaffDepthSurvives(s,p)))
             {
                 var candidate=ProEconomy.Release(s,team,player.Football.PlayerId,false);var cashGain=ProEconomy.Room(candidate,team)-room;if(cashGain<=0)continue;
                 var improvement=cashGain+needed-FutureRolloverNeed(candidate,team);
