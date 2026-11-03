@@ -1,6 +1,13 @@
-# Parity continuation — release candidate
+# Pro162 & College450 — Parity, Roster Safeguards and Rules
 
-Draft changelog for the approved parity work since published main99254c7 (Pro149 / College439). Final acceptance and publication status belongs in the implementation handoff. Current Actions candidates are Pro160 and College448; these are CI artifacts until published as a release.
+Prerelease for November 2, 2026. Full changelog since `preview-2026-11-01-staff-gamecast` (Pro149 / College439, baseline `99254c7`). Includes all completed parity, editor, shared-code, roster-safety and supported additional-rules changes merged into main.
+
+## Downloads
+
+- **Pro Football Franchise Manager 0.1.162:** `Pro-Football-Franchise-Manager-0.1.162.apk`; package `antdroid.profootball.franchise`, version code162.
+- **College Football Dynasty Manager 0.20.450:** `College-Football-Dynasty-Manager-0.20.450.apk`; package `antdroid.cfbcoach.dev`, version code850.
+- Development-signed Debug APKs for Android sideloading, retaining their existing package identities. The College development package remains separate from `antdroid.cfbcoach`.
+- `SHA256SUMS.txt` and `release-manifest.json` identify the exact APKs and their successful GitHub Actions builds. The application source is unchanged from build commit `cb16217` (runtime `f4c3bbf`); subsequent commits update documentation only.
 
 ## Both games
 
@@ -42,20 +49,29 @@ Draft changelog for the approved parity work since published main99254c7 (Pro149
 - Establish Engine/College/Pro test ownership and explicit Fast/Balance/Career execution tiers. Device acceptance remains a separate exact-APK tier. Defer physical College.Core separation after evaluating dependency/save compatibility.
 - Add reproducible real/generated Simulate/Watch/Play comparison and production-loader device fixtures. Keep the roadmap, rules matrix and implementation handoff current.
 
-## Validation and artifacts
-
-The current candidate manifest, exact hashes, workflow links/counts and per-APK native acceptance boundaries are in [parity-acceptance-current.json](../audits/parity-acceptance-current.json). Pro160 and College448 package successfully; Pro retains two existing nullable warnings. Focused CI checks pass27 Pro,30 Engine and107 College/shared integration cases. Earlier unchanged-Core Pro153 attempt2 passes413 cases.
-
-The [768-game mode comparison](../audits/mode-conformance-results.md) passes across real/generated rosters, both leagues, all modes and CPU/controlled calls. Native defensive copy save/restart/reload/execution passes on Pro153. Native palette/staff/portrait checks and the current-build live-picker/safety acceptance are recorded separately in the manifest.
-
-One three-season CPU roster/cap case failed in Pro153 attempt1, passed three exact local repeats and passed the unchanged CI retry. Its root cause remains unconfirmed; it is retained as a lifecycle finding. No assertion was weakened or financial policy changed.
-
-Scoped native acceptance is complete; per-APK evidence and reuse boundaries are recorded in the manifest. This draft does not claim a published prerelease or a complete official-rule implementation.
-
-## Subsequent roster/rules follow-up (not yet a published release)
+## CPU roster safeguards and additional rules
 
 - Pro CPU cap repairs preserve minimum roster size and positional depth; affordable replacements commit atomically. Emergency recruitment reserves rookie money and uses legal restructures when possible. Optional contract length considers four-year funding.
 - Both games gain common live-ball penalty enforcement, league-specific DPI/grounding statistics, late-half runoff/timeout avoidance and untimed downs.
 - Correct return/impetus/momentum and foul safeties, defensive try returns and one-point safeties, credited scoring teams, safety kicks, displays and accounting. Punt landings inside the five no longer become early touchbacks.
 - Shared simulation/rules tests move from College to Engine, with a common fixture and CI guards against empty test selections.
-- Fresh 768-game cross-mode comparison passes. Final build/merge identities and limitations are tracked in the roster/rules handoff; prior APK acceptance is not reused as testing of these changes.
+- Fresh768-game cross-mode comparison passes; earlier APK evidence retains its exact-build scope.
+
+## Validation
+
+- Main Pro162: [run41574780264](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41574780264),419 Pro scoped regressions pass; APK packages with two existing nullable warnings and zero errors.
+- Main College450: [run41574780256](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41574780256),319 Engine Fast,12 Engine Balance and602 College checks pass; APK packages with zero warnings/errors.
+- A fresh768-game production comparison covers both leagues, real/generated rosters, CPU/controlled calls and Simulate/Watch/Play. CPU-delegated completed records agree across modes; personnel, clock bounds and target/coverage accounting pass. Controlled Play can differ because of timeout/kneel authority. This is bounded comparison evidence, not full statistical calibration.
+- Six focused CPU safeguards plus the original three-season financial invariant pass separately. Earlier overlapping test runs are not additional coverage.
+- Earlier exact-APK staff/palette/portrait/custom-play acceptance remains scoped to its recorded binaries in [the parity manifest](https://github.com/antdroidx/Football-Sim-Engine/blob/main/docs/audits/parity-acceptance-current.json). These final APKs have automated/build verification; no fresh full-device walkthrough is claimed.
+
+## Known limits and follow-ups
+
+- The reproduced destructive CPU cap-repair path is fixed. The original intermittent career failure's complete trace remains unavailable. No dead cap was forgiven, cap increased or roster assertion weakened; debt or market shortages can still make a minimum roster unaffordable.
+- Additional officiating implements the common-foul subset described above. It does not implement every personal/illegal-kick foul, post-possession-change foul combination or full referee/replay procedure. Automatic coaching policy selects penalties/runoff/timeouts with engine overrides; no new interactive penalty-decision screen.
+- A new full-device walkthrough and longer career/balance stress tests remain future validation work. Physical College.Core separation remains deferred after its compatibility evaluation.
+- Local cleanup remains deferred; unrelated local workflow/root changes are preserved. The older design backlog was excluded from this release scope.
+
+## Source and handoff
+
+[Full commit comparison](https://github.com/antdroidx/Football-Sim-Engine/compare/preview-2026-11-01-staff-gamecast...preview-2026-11-02-parity-rules) · [Implementation handoff](https://github.com/antdroidx/Football-Sim-Engine/blob/main/docs/ROSTER-RULES-VALIDATION-HANDOFF.md) · [Exact validation/build manifest](https://github.com/antdroidx/Football-Sim-Engine/blob/main/docs/audits/roster-rules-acceptance.json)
