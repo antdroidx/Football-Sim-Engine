@@ -756,11 +756,7 @@ public static class CpuRecruitingService
                 item.ProspectId) == position);
 
         var target =
-            DynastyRosterRules.TargetPositionCounts.TryGetValue(
-                position,
-                out var count)
-                ? count
-                : 1;
+            RosterPlanService.GetRosterTarget(state, position, state.UserTeamName);
 
         return Math.Max(
             0,
@@ -944,3 +940,5 @@ public static class CpuRecruitingService
             };
     }
 }
+
+

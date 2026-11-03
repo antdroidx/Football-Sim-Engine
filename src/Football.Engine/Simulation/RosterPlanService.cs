@@ -52,6 +52,39 @@ public static class RosterPlanService
         };
     }
 
+    public static int GetRosterTarget(
+        DynastyState state,
+        Position position,
+        string team,
+        TeamIdentity? identity = null)
+    {
+        identity ??= GetIdentity(state, team);
+        return position switch
+        {
+            Position.FB when identity.Offense is OffensivePlaybook.PowerRun or OffensivePlaybook.Flexbone => 1,
+            Position.FB => 0,
+            Position.QB => 3,
+            Position.OL => 11,
+            Position.RB => identity.Offense is OffensivePlaybook.PowerRun ? 5 : 4,
+            Position.WR => identity.Offense switch
+            {
+                OffensivePlaybook.AirRaid => 9,
+                OffensivePlaybook.Spread => 8,
+                OffensivePlaybook.PowerRun or OffensivePlaybook.Option or OffensivePlaybook.Flexbone => 6,
+                _ => 7
+            },
+            Position.TE => 2,
+            Position.CB => identity.Defense == DefensivePlaybook.Nickel ? 6 : 5,
+            Position.DE => identity.Defense == DefensivePlaybook.ThreeFour ? 3 : 4,
+            Position.DT => 4,
+            Position.OLB => identity.Defense == DefensivePlaybook.ThreeFour ? 4 : identity.Defense == DefensivePlaybook.Nickel ? 5 : 3,
+            Position.MLB => identity.Defense == DefensivePlaybook.ThreeFour ? 3 : 4,
+            Position.FS or Position.SS => 2,
+            Position.K => 1,
+            Position.P => identity.Offense is OffensivePlaybook.AirRaid or OffensivePlaybook.Spread ? 0 : 1,
+            _ => 2
+        };
+    }
     public static IReadOnlyDictionary<Position, int> GetPositionPriorities(
         OffensivePlaybook offense, DefensivePlaybook defense, DefensiveApproach approach)
     {
@@ -107,7 +140,7 @@ public static class RosterPlanService
         var identity = GetIdentity(state, team);
         var players = state.ActiveRoster.Where(item => item.TeamName.Equals(team, StringComparison.OrdinalIgnoreCase)).ToArray();
         var atPosition = players.Where(item => item.Position == player.Position).ToArray();
-        var target = DynastyRosterRules.TargetPositionCounts.GetValueOrDefault(player.Position, 2);
+        var target = GetRosterTarget(state, player.Position, team, identity);
         var starters = DynastyRosterRules.StarterPositionCounts.GetValueOrDefault(player.Position, 1);
         var starterGrade = atPosition.OrderByDescending(item => item.OverallRating)
             .ElementAtOrDefault(starters - 1)?.OverallRating ?? 55;
@@ -126,4 +159,6 @@ public static class RosterPlanService
 
     static double priorit(double value) => value;
 }
+
+
 

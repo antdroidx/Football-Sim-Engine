@@ -719,11 +719,7 @@ public static class RecruitPreferenceService
         var count = counts.GetValueOrDefault((teamName.ToUpperInvariant(), position));
 
         var target =
-            DynastyRosterRules.TargetPositionCounts.TryGetValue(
-                position,
-                out var targetCount)
-                ? targetCount
-                : Math.Max(1, count);
+            RosterPlanService.GetRosterTarget(state, position, teamName);
 
         var starterCount =
             DynastyRosterRules.StarterPositionCounts.TryGetValue(
@@ -818,3 +814,4 @@ public static class RecruitPreferenceService
             .Player.Position;
     }
 }
+

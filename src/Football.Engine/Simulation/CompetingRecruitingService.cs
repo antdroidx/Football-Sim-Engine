@@ -113,7 +113,7 @@ public static class CompetingRecruitingService
                 bool Useful(Prospect prospect) => capacity > 0 && (source == RecruitingSource.TransferPortal
                     ? plan.GetValue(prospect.Player) > 0
                     : counts.GetValueOrDefault(prospect.Player.Position) <
-                        DynastyRosterRules.TargetPositionCounts.GetValueOrDefault(prospect.Player.Position, 3));
+                        RosterPlanService.GetRosterTarget(state, prospect.Player.Position, team.Name));
                 foreach (var old in offers.Values.Where(item => item.SeasonYear == state.SeasonYear &&
                     item.Source == source && item.TeamName.Equals(team.Name, StringComparison.OrdinalIgnoreCase) &&
                     item.Status == RecruitingOfferStatus.Active).ToArray())
@@ -133,7 +133,7 @@ public static class CompetingRecruitingService
                 // performing the more expensive individual school-fit assessment.
                 var shortlist = available.Where(Useful).GroupBy(item => item.Player.Position).SelectMany(group =>
                 {
-                    var deficit = Math.Max(1, DynastyRosterRules.TargetPositionCounts.GetValueOrDefault(group.Key, 3) -
+                    var deficit = Math.Max(1, RosterPlanService.GetRosterTarget(state, group.Key, team.Name) -
                         counts.GetValueOrDefault(group.Key));
                     return group.OrderByDescending(prospect =>
                     {
@@ -161,7 +161,7 @@ public static class CompetingRecruitingService
                     var key = (state.SeasonYear, source, item.Prospect.Id, team.Name.ToUpperInvariant());
                     if (offers.TryGetValue(key, out var old) && old.Status == RecruitingOfferStatus.Active) continue;
                     var position = item.Prospect.Player.Position;
-                    var deficit = Math.Max(1, DynastyRosterRules.TargetPositionCounts.GetValueOrDefault(position, 3) - counts.GetValueOrDefault(position));
+                    var deficit = Math.Max(1, RosterPlanService.GetRosterTarget(state, position, team.Name) - counts.GetValueOrDefault(position));
                     if (targetCounts.GetValueOrDefault(position) >= (int)Math.Ceiling(deficit * 1.8)) continue;
                     var offer = new RecruitingOffer
                     {
@@ -354,4 +354,5 @@ public static class CompetingRecruitingService
                 .Select(item => new Prospect(RecruitingSource.TransferPortal, item.Player.PlayerId, item.Player, item.OriginTeamName)))
             .GroupBy(item => (item.Source, item.Id)).ToDictionary(group => group.Key, group => group.First());
 }
+
 

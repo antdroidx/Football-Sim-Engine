@@ -238,7 +238,7 @@ public static class ProCpu
 
         foreach (var team in teams)
         {
-            var claims = s.Waivers.Select(w => s.Players.Single(p => p.Football.PlayerId == w.PlayerId)).Where(p => !s.Waivers.Any(w=>w.PlayerId==p.Football.PlayerId&&w.OriginalContracts?.Any(c=>c.Team==team.Name)==true)&&Eligible(team.Name,p) && (!Staff(team.Name)||UnitCount(team.Name)<Target(team.Name)) && Need(s, team.Name, p.Football.Position) > 0 && ProRoster.CountForLimit(s, team.Name) < ProRoster.Limit(s) && ProEconomy.Room(s, team.Name) >= Math.Max(ProFinance.Minimum(s,p,practice:false), ProEconomy.MarketSalary(s,p))).OrderByDescending(p => p.Football.OverallRating).ToArray();
+            var claims = s.Waivers.Select(w => s.Players.Single(p => p.Football.PlayerId == w.PlayerId)).Where(p => !s.Waivers.Any(w=>w.PlayerId==p.Football.PlayerId&&w.OriginalContracts?.Any(c=>c.Team==team.Name)==true)&&Eligible(team.Name,p) && (!Staff(team.Name)||UnitCount(team.Name)<Target(team.Name)) && Need(s, team.Name, p.Football.Position) > 0 && ProRoster.CountForLimit(s, team.Name) < ProRoster.Limit(s) && ProEconomy.Room(s, team.Name) >= Math.Max(ProFinance.Minimum(s,p,practice:false), ProEconomy.MarketSalary(s,p))).OrderByDescending(p => ProRosterPlanService.AcquisitionScore(s,team.Name,p,ProEconomy.MarketSalary(s,p))).ThenBy(p => p.Football.PlayerId).ToArray();
             foreach(var claim in claims)
             {
                 try{s=Staff(team.Name)?ProRoster.ClaimStaff(s,team.Name,claim.Football.PlayerId):ProRoster.Claim(s,team.Name,claim.Football.PlayerId);break;}
@@ -290,7 +290,7 @@ public static class ProCpu
     public static ProFranchise Trim(ProFranchise s, string team,Func<ProPlayer,bool>? eligible=null)
     {
         while (ProRoster.Active(s, team) > 53)
-        { var p = s.Players.Where(p => p.Football.TeamName == team && !p.Reserve && !p.PracticeSquad && !p.Retired&&(eligible is null||eligible(p)&&StaffDepthSurvives(s,p))).OrderBy(p => ProCpuBudget.ReleaseKeepsFuturePlan(s,p)?0:1).ThenBy(p => Need(s, team, p.Football.Position) > 0 ? 1 : 0).ThenBy(p => p.Football.OverallRating).FirstOrDefault(); if(p is null)break; s = ProCpuRoster.RetainCut(s, team, p.Football.PlayerId); }
+        { var p = s.Players.Where(p => p.Football.TeamName == team && !p.Reserve && !p.PracticeSquad && !p.Retired&&(eligible is null||eligible(p)&&StaffDepthSurvives(s,p))).OrderBy(p => ProCpuBudget.ReleaseKeepsFuturePlan(s,p)?0:1).ThenBy(p => Need(s, team, p.Football.Position) > 0 ? 1 : 0).ThenBy(p => p.Football.OverallRating).ThenBy(p => ProRosterPlanService.Priority(s,team,p)).FirstOrDefault(); if(p is null)break; s = ProCpuRoster.RetainCut(s, team, p.Football.PlayerId); }
         return s;
     }
 }
@@ -341,6 +341,8 @@ public static class ProOffseason
         return s with { Phase = ProPhase.Preseason, Week = 1, OffseasonStep = OffseasonStep.Retention, Games = ProSchedule.Build(s.League, s.Year), TaggedTeams = [], Picks = s.Picks.Concat(ProEconomy.CreatePicks(s, s.Year + 1)).DistinctBy(p => p.Id).ToList() };
     }
 }
+
+
 
 
 
