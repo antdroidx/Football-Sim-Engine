@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -12,7 +13,7 @@ public sealed class CoinTossAndTurnoverTests
     [Fact]
     public void TossIsRepeatableCanFavorEitherSchoolAndDoesNotConsumeGameRandomness()
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Play);
+        var source = GameDayFixture.Session(GameDayMode.Play);
         var receivers = new HashSet<string>();
         for (var seed = 0; seed < 50; seed++)
         {
@@ -24,7 +25,7 @@ public sealed class CoinTossAndTurnoverTests
         }
         Assert.Equal(2, receivers.Count);
         var first = source.Random.Next();
-        var fresh = GameDayEngineTests.Session(GameDayMode.Play);
+        var fresh = GameDayFixture.Session(GameDayMode.Play);
         CoinTossService.Apply(fresh, CoinTossService.Toss(fresh.Game));
         Assert.Equal(first, fresh.Random.Next());
     }
@@ -33,7 +34,7 @@ public sealed class CoinTossAndTurnoverTests
     [InlineData("Home")][InlineData("Away")]
     public void SecondHalfKickoffGoesToTheOtherOpeningReceiver(string receiver)
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         CoinTossService.Apply(s, new(true, receiver, receiver, false));
         Assert.Equal(receiver, s.PossessionTeamName);
         s.KickoffPending = false; s.Quarter = 2; s.ClockSeconds = 0;
@@ -47,7 +48,7 @@ public sealed class CoinTossAndTurnoverTests
     [Fact]
     public void ReturnsIncludeDownedRecoveriesExplosiveGainsAndTouchdownsWithinFieldBounds()
     {
-        var session = GameDayEngineTests.Session(GameDayMode.Play);
+        var session = GameDayFixture.Session(GameDayMode.Play);
         var defender = session.Roster.First(p => p.TeamName == "Away" && p.Position == Position.CB) with { SpeedRating = 99, AgilityRating = 99 };
         var offense = session.Roster.Where(p => p.TeamName == "Home").Take(11).ToArray();
         var samples = Enumerable.Range(0, 1000).Select(seed => TurnoverReturnService.Resolve(Pick(25), defender, offense, OffensiveConcept.QuickPass, new Random(seed))).ToArray();
@@ -63,7 +64,7 @@ public sealed class CoinTossAndTurnoverTests
     [Fact]
     public void DefensiveTouchdownIsCreditedToDefenseAndSetsUpItsTry()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var defender = s.Roster.First(p => p.TeamName == "Away" && p.Position == Position.CB);
         var qb = s.Roster.First(p => p.TeamName == "Home" && p.Position == Position.QB);
         var snap = Pick() with { TurnoverYardLine = 60, ReturnYards = 60, BallEndYardLine = 0, Points = 6,
@@ -85,7 +86,7 @@ public sealed class CoinTossAndTurnoverTests
     [Fact]
     public void TouchbackAndReturnUseNewPossessionsCoordinateSystem()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         GameDayEngine.ApplyTurnoverReturn(s, Pick() with { TurnoverYardLine = 70, BallEndYardLine = 55, ReturnYards = 15 });
         Assert.Equal("Away", s.PossessionTeamName); Assert.Equal(45, s.YardLine);
         s.PossessionTeamName = "Home";
@@ -96,7 +97,7 @@ public sealed class CoinTossAndTurnoverTests
     [Fact]
     public void LiveBallOwnerChangesToRecoveringDefenderAndCommentaryDescribesReturn()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var defender = s.Roster.First(p => p.TeamName == "Away");
         var snap = Pick() with { TurnoverYardLine = 60, ReturnerId = defender.PlayerId, PrimaryDefenderId = defender.PlayerId,
             QuarterbackId = s.Roster.First(p => p.TeamName == "Home").PlayerId, ReturnYards = 20 };
@@ -107,7 +108,7 @@ public sealed class CoinTossAndTurnoverTests
     [Fact]
     public void OvertimeDefensiveScoreEndsGameWithoutAnUnnecessaryConversion()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         s.OvertimeRound = 1; s.Quarter = 5;
         GameDayEngine.ApplyTurnoverReturn(s, Pick() with { TurnoverYardLine = 25, BallEndYardLine = 0, ReturnYards = 25, Points = 6 });
         Assert.Equal(6, s.AwayScore); Assert.True(s.IsComplete); Assert.False(s.TryPending); Assert.False(s.KickoffPending);
@@ -116,7 +117,7 @@ public sealed class CoinTossAndTurnoverTests
     [Fact]
     public void ReturnAbilityChangesYardageAndRecordedReturnSurvivesSerialization()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var defender = s.Roster.First(p => p.TeamName == "Away");
         var fast = defender with { SpeedRating = 99, AgilityRating = 99 };
         var slow = defender with { SpeedRating = 40, AgilityRating = 40 };

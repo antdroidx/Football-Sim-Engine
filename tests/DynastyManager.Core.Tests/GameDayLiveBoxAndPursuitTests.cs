@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Seasons;
 using DynastyManager.Core.Simulation;
@@ -29,7 +30,7 @@ public class GameDayLiveBoxAndPursuitTests
     [Fact]
     public void LookingAtLiveStatsDoesNotAdvanceOrChangeTheSimulation()
     {
-        var first=GameDayEngineTests.Session(GameDayMode.Watch,includeOpeningKickoff:true);
+        var first=GameDayFixture.Session(GameDayMode.Watch,includeOpeningKickoff:true);
         var second=GameDayEngine.Start(first.Game,first.HomeProfile,first.AwayProfile,first.Roster,GameDayMode.Watch);
         var empty=GameDayEngine.BoxScore(first);Assert.Equal(0,empty.HomeStats.TotalYards);Assert.Empty(empty.Players);Assert.False(first.IsComplete);
         for(var i=0;i<35;i++)
@@ -48,7 +49,7 @@ public class GameDayLiveBoxAndPursuitTests
     [Fact]
     public void LiveScoreboardIncludesConversionsAndOvertimeInTheCorrectPeriod()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);s.Quarter=5;s.HomeScore=15;s.AwayScore=3;
+        var s=GameDayFixture.Session(GameDayMode.Play);s.Quarter=5;s.HomeScore=15;s.AwayScore=3;
         GameSnapEvent Event(int q,string offense,SnapOutcome outcome,int points=0)=>new() {Quarter=q,OffenseTeamName=offense,DefenseTeamName=offense=="Home"?"Away":"Home",OffensivePlayId="",DefensivePlayId="",Outcome=outcome,Points=points};
         s.Events.AddRange([Event(1,"Home",SnapOutcome.Touchdown),Event(1,"Home",SnapOutcome.ExtraPoint,1),Event(2,"Away",SnapOutcome.FieldGoal),Event(5,"Home",SnapOutcome.Touchdown),Event(5,"Home",SnapOutcome.TwoPointConversion,2)]);
         var box=GameDayEngine.BoxScore(s);Assert.Equal(5,box.Periods.Count);Assert.Equal(7,box.Periods[0].HomePoints);Assert.Equal(3,box.Periods[1].AwayPoints);Assert.Equal(8,box.Periods[4].HomePoints);
@@ -57,7 +58,7 @@ public class GameDayLiveBoxAndPursuitTests
     [Fact]
     public void TouchdownsAndInterceptionsDoNotInventDefensiveTackles()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);var qb=s.HomeRoster.First(p=>p.Position==Position.QB);
+        var s=GameDayFixture.Session(GameDayMode.Play);var qb=s.HomeRoster.First(p=>p.Position==Position.QB);
         var wr=s.HomeRoster.First(p=>p.Position==Position.WR);var rb=s.HomeRoster.First(p=>p.Position==Position.RB);var db=s.AwayRoster.First(p=>p.Position==Position.CB);
         GameSnapEvent Event(SnapOutcome outcome,bool pass,int yards)=>new() {Quarter=1,OffenseTeamName="Home",DefenseTeamName="Away",OffensivePlayId=pass?"off-spread-verts":"off-spread-zone",DefensivePlayId="",Outcome=outcome,Yards=yards,QuarterbackId=qb.PlayerId,TargetId=pass?wr.PlayerId:null,BallCarrierId=pass?null:rb.PlayerId,PrimaryDefenderId=db.PlayerId};
         s.Events.AddRange([Event(SnapOutcome.Touchdown,true,30),Event(SnapOutcome.Interception,true,0),Event(SnapOutcome.Run,false,-2)]);
@@ -66,7 +67,7 @@ public class GameDayLiveBoxAndPursuitTests
     }
     private static (DynastyPlayer[] Players,DefensivePlayDefinition Play) Defense()
     {
-        var roster=GameDayEngineTests.Session(GameDayMode.Play).AwayRoster;
+        var roster=GameDayFixture.Session(GameDayMode.Play).AwayRoster;
         var players=new[]{Position.DT,Position.MLB,Position.CB,Position.FS}.Select(position=>roster.First(p=>p.Position==position)).ToArray();
         var play=new DefensivePlayDefinition("test","Test front",DefensiveFormation.FourThree,DefensivePersonnel.BaseFourThree,DefensiveApproach.Balanced,"")
         {Assignments=[new(){Position=Position.DT,Depth=1,Lane=.5,Task=AssignmentTask.Rush},new(){Position=Position.MLB,Depth=6,Lane=.5,Task=AssignmentTask.Zone},new(){Position=Position.CB,Depth=5,Lane=.85,Task=AssignmentTask.Man},new(){Position=Position.FS,Depth=15,Lane=.5,Task=AssignmentTask.Zone}]};

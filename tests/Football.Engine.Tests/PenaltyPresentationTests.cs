@@ -1,16 +1,20 @@
+using Football.Testing;
+using static Football.Testing.GameDayFixture;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
 
+[Trait("Owner", "Engine")]
+[Trait("Category", "Fast")]
 public sealed class PenaltyPresentationTests
 {
     private static (GameDaySession Session, GameSnapEvent Snap) Foul(bool offense, string possession, int spot, int distance=7)
     {
         for(var seed=1;seed<=1000;seed++)
         {
-            var s=GameDayEngineTests.Session(GameDayMode.Play,includeOpeningKickoff:true,seed:seed);
+            var s=GameDayFixture.Session(GameDayMode.Play,includeOpeningKickoff:true,seed:seed);
             GameDayEngine.Step(s); s.PossessionTeamName=possession;s.YardLine=spot;s.Down=3;s.Distance=distance;s.ClockStopped=true;
             var snap=GameDayEngine.Step(s,"off-spread-zone");
             if(snap.Outcome==SnapOutcome.Penalty && (snap.PenalizedTeamName==possession)==offense)return(s,snap);

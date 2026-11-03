@@ -13,4 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Football.Engine\Football.Engine.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\GameDayFixture.cs" Link="Support\GameDayFixture.cs" />
+  </ItemGroup>
 </Project>

@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -11,7 +12,7 @@ public class GameDayCoachingTests
     [Fact]
     public void ManualQuarterbackActuallyPlaysNextSnapWithoutChangingSeasonRoster()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var depth = s.PossessionTeamName == s.Game.HomeTeamName ? s.HomeDepthChart : s.AwayDepthChart;
         var original = depth[Position.QB][0]; var backup = depth[Position.QB][1];
         Assert.True(GameDayCoachingService.Substitute(s, s.PossessionTeamName, backup.PlayerId));
@@ -27,8 +28,8 @@ public class GameDayCoachingTests
     [Fact]
     public void TalksHaveMixedReactionsAndDoNotConsumePlayRandomness()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
-        var comparison = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
+        var comparison = GameDayFixture.Session(GameDayMode.Play);
         var talk = GameDayCoachingService.Talk(s, s.Game.HomeTeamName, CoachTalkTone.Challenge)!;
         Assert.Contains(talk.Reactions, r => r.Change > 0);
         Assert.Contains(talk.Reactions, r => r.Change < 0);
@@ -40,7 +41,7 @@ public class GameDayCoachingTests
     [Fact]
     public void TalkReactionsFadeAndSurviveFinishedGameSerialization()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var talk = GameDayCoachingService.Talk(s, s.Game.HomeTeamName, CoachTalkTone.Encourage)!;
         var player = s.PlayersById[talk.Reactions.First(r => r.Change != 0).PlayerId];
         Assert.InRange(GameDayCoachingService.LivePlayerMorale(s, player, 50), 20, 85);
@@ -62,7 +63,7 @@ public class GameDayCoachingTests
     [Fact]
     public void WinningRunRecoversMoraleAndSeasonTalkEffectsExpire()
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Play);
+        var source = GameDayFixture.Session(GameDayMode.Play);
         var player = source.Roster.First(p => p.TeamName == "Home");
         var state = new DynastyState { DynastyName = "Morale", UserTeamName = "Home", SeasonYear = 2026, Week = 5,
             ActiveRoster = source.Roster,
@@ -84,7 +85,7 @@ public class GameDayCoachingTests
     [Fact]
     public void TalksRequireBreakAndShareOneUseAcrossAudiences()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var first = GameDayCoachingService.Talk(s, "Home", CoachTalkTone.Encourage, CoachTalkAudience.Offense)!;
         Assert.All(first.Reactions, r => Assert.True(GameDayCoachingService.IsOffense(s.PlayersById[r.PlayerId].Position)));
         Assert.Null(GameDayCoachingService.Talk(s, "Home", CoachTalkTone.Praise, CoachTalkAudience.Defense));
@@ -104,7 +105,7 @@ public class GameDayCoachingTests
     [Fact]
     public void DepthChartRecognizesAutomaticAndManuallySelectedQuarterbacks()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var qb = s.HomeDepthChart[Position.QB];
         Assert.Contains(qb[0].PlayerId, GameDayCoachingService.Starters(s, "Home"));
         Assert.DoesNotContain(qb[1].PlayerId, GameDayCoachingService.Starters(s, "Home"));
@@ -126,7 +127,7 @@ public class GameDayCoachingTests
     [Fact]
     public void SecondUnitChangesMultiplePositionsAndCanBeReversedWithoutChangingDepthChart()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var originalQb = s.HomeDepthChart[Position.QB][0].PlayerId;
         var backupQb = s.HomeDepthChart[Position.QB][1].PlayerId;
         GameDayCoachingService.Substitute(s, "Home", originalQb);
@@ -147,7 +148,7 @@ public class GameDayCoachingTests
     [Fact]
     public void SecondUnitWithThinDepthKeepsDistinctPlayersAndFillsGapsWithStarters()
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Play);
+        var source = GameDayFixture.Session(GameDayMode.Play);
         // Explicitly trim to three receivers; imported depth orders can be zero.
         var receivers = source.HomeDepthChart[Position.WR].Take(3).Select(p => p.PlayerId).ToHashSet();
         var roster = source.Roster.Where(p => p.TeamName != "Home" || p.Position != Position.WR || receivers.Contains(p.PlayerId)).ToArray();

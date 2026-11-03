@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -24,7 +25,7 @@ public class GameDaySituationalPolishTests
     [Fact]
     public void TrailingTeamsThrowMoreBeforeTheFinalThreeMinutesWithoutAbandoningEarlyRuns()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Simulate);
+        var s = GameDayFixture.Session(GameDayMode.Simulate);
         var plan = new TeamGamePlan { TeamName = "Home", Offense = OffensivePlaybook.PowerRun };
         int Runs(int deficit, int quarter, int clock)
         {
@@ -42,11 +43,11 @@ public class GameDaySituationalPolishTests
     [Fact]
     public void CpuEngineUsesSituationalAdviceAndExplicitUserCallsStillWin()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Simulate, seed: 123);
+        var s = GameDayFixture.Session(GameDayMode.Simulate, seed: 123);
         s.Quarter = 3; s.ClockSeconds = 600; s.AwayScore = 21; s.Down = 3; s.Distance = 4;
         var expected = GameDayRecommendationService.Recommend(s, s.HomeProfile.GamePlan!);
         Assert.Equal(expected.PlayId, GameDayEngine.Step(s).OffensivePlayId);
-        s = GameDayEngineTests.Session(GameDayMode.Play, seed: 123); s.Down = 3; s.Distance = 4;
+        s = GameDayFixture.Session(GameDayMode.Play, seed: 123); s.Down = 3; s.Distance = 4;
         Assert.Equal("off-spread-zone", GameDayEngine.Step(s, "off-spread-zone").OffensivePlayId);
     }
 
@@ -68,7 +69,7 @@ public class GameDaySituationalPolishTests
         var fair = 0; var returns = 0;
         for (var seed = 1; seed <= 100; seed++)
         {
-            var s = GameDayEngineTests.Session(GameDayMode.Play, seed: seed); s.YardLine = 30;
+            var s = GameDayFixture.Session(GameDayMode.Play, seed: seed); s.YardLine = 30;
             var snap = GameDayEngine.Step(s, "special-punt");
             if (snap.IsFairCatch)
             {
@@ -84,7 +85,7 @@ public class GameDaySituationalPolishTests
     [Fact]
     public void PatHasKickingPersonnelAndIsRecognizedByTheSharedAnimator()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play); s.TryPending = true;
+        var s = GameDayFixture.Session(GameDayMode.Play); s.TryPending = true;
         var snap = GameDayEngine.Step(s, "special-extra-point");
         Assert.True(GameDayAnimationPlanner.IsPlaceKick(snap)); Assert.Equal(97, snap.StartYardLine);
         Assert.Equal(11, snap.OffensePersonnel.Count); Assert.Equal(11, snap.DefensePersonnel.Count);
@@ -109,7 +110,7 @@ public class GameDaySituationalPolishTests
     [Fact]
     public void JerseyAssignmentPreservesImportedZeroAndDuplicatesAndIsStableAcrossReloadAndOrder()
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Play).HomeRoster.Select((p, i) => p with { JerseyNumber = i < 2 ? 0 : null }).ToArray();
+        var source = GameDayFixture.Session(GameDayMode.Play).HomeRoster.Select((p, i) => p with { JerseyNumber = i < 2 ? 0 : null }).ToArray();
         var first = PlayerJerseyService.Assign(source); var reverse = PlayerJerseyService.Assign(source.Reverse().ToArray());
         Assert.Equal(0, first[0].JerseyNumber); Assert.Equal(0, first[1].JerseyNumber);
         Assert.All(first, p => Assert.InRange(p.JerseyNumber!.Value, 0, 99));
@@ -126,7 +127,7 @@ public class GameDaySituationalPolishTests
             HasPlayed = true, HomeScore = 17, AwayScore = 24, AwayStats = new() { PassAttempts = 30, RushAttempts = 20, Turnovers = 2 } };
         var state = new DynastyState { DynastyName = "Test", UserTeamName = "Home", SeasonYear = 2026,
             Schedule = [game, game with { GameId = "future", HasPlayed = false }, game with { GameId = "old", SeasonYear = 2025 }],
-            ActiveRoster = GameDayEngineTests.Session(GameDayMode.Play).Roster };
+            ActiveRoster = GameDayFixture.Session(GameDayMode.Play).Roster };
         var report = OpponentScoutingService.Build(state, "Away");
         Assert.Equal(1, report.Games); Assert.Equal(1, report.Wins); Assert.Equal(0, report.Losses);
         Assert.Equal(24, report.PointsFor); Assert.Equal(17, report.PointsAgainst); Assert.Equal(.6, report.PassShare); Assert.Equal(2, report.Turnovers);

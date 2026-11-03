@@ -16,3 +16,7 @@ User-approved follow-up on November 2, 2026, on `codex/parity-roadmap-audit`. Pr
 1. Move shared simulation/rules validation out of the College project; extract a common fixture and preserve single test ownership, Fast/Balance/Career separation and CI discovery.
 2. Implement and verify live-ball enforcement, late-half runoff/untimed downs, return/foul/try safety boundaries in the production engine using current NFL/NCAA policies.
 3. Run focused related checks, compile both affected apps, document evidence/limits and push the branch. Any new APK must have its own identity; Pro160/College448 remain earlier accepted builds.
+
+## Validation ownership delivered
+
+Shared engine/rules tests moved from College into Engine with one assertion owner. A shared source-linked fixture removes the College test-class dependency without introducing a production dependency on test code. Engine now passes147 cases:135 Fast and12 Balance. The related25 legacy College clock/stat checks pass against the extracted fixture. CI runs Fast and Balance as separate steps, and shared-fixture edits trigger it. The original financial invariant is explicitly Career/Pro; broad-suite inclusion is unchanged. The tier runner checks fresh TRX counters so an empty explicit selection cannot appear green.

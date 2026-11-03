@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -7,14 +8,14 @@ public class FullbackRoleTests
     [Fact] public void MarkerRoleSupportsOldMissingPersonnelAndDoesNotChangeNaturalPosition()
     {
         Assert.Null(BackfieldRoles.MarkerRole(null,null));
-        var player=GameDayEngineTests.Session(GameDayMode.Play).Roster.First(p=>p.Position==Position.TE);
+        var player=GameDayFixture.Session(GameDayMode.Play).Roster.First(p=>p.Position==Position.TE);
         Assert.Same(player,BackfieldRoles.MarkerRole(player,null));
         Assert.Equal(Position.FB,BackfieldRoles.MarkerRole(player,player.PlayerId)!.Position);
         Assert.Equal(Position.TE,player.Position);
     }
     [Fact] public void LeadBlockerQualityAffectsTheRunMatchup()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);var template=source.HomeRoster.First(p=>p.Position==Position.RB);
+        var source=GameDayFixture.Session(GameDayMode.Play);var template=source.HomeRoster.First(p=>p.Position==Position.RB);
         var fb=template with {Position=Position.FB,Skills=(template.Skills??new PlayerSkillRatings()) with {RunBlocking=99}};
         var weak=fb with {Skills=fb.Skills! with {RunBlocking=1}};
         Assert.True(GameDayMatchupService.PersonnelAdvantage(source.HomeRoster.Append(fb).ToArray(),source.AwayRoster,false)>
@@ -22,7 +23,7 @@ public class FullbackRoleTests
     }
     [Fact] public void ImportedCodeTwoIsFullbackAndOldNumericPositionsStayStable()
     {
-        var player=GameDayEngineTests.Session(GameDayMode.Play).Roster.First(p=>p.Position==Position.RB);
+        var player=GameDayFixture.Session(GameDayMode.Play).Roster.First(p=>p.Position==Position.RB);
         var fields=Ncaa06RosterRatings.Export(player).ToDictionary(x=>x.Key,x=>x.Value);fields["PPOS"]=2;
         var fb=Ncaa06RosterRatings.Apply(player,fields);
         Assert.Equal(Position.FB,fb.Position);Assert.Equal(2,Ncaa06RatingService.PositionCode(fb));
@@ -34,7 +35,7 @@ public class FullbackRoleTests
     [InlineData("off-flexbone-dive",true)]
     public void HandoffsUseTheIntendedBack(string playId,bool useFb)
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);
+        var source=GameDayFixture.Session(GameDayMode.Play);
         var template=source.Roster.First(p=>p.TeamName==source.Game.HomeTeamName&&p.Position==Position.RB);
         var fb=template with {PlayerId=Guid.NewGuid(),Position=Position.FB,NcaaPositionCode=2,DepthChartOrder=1};
         var roster=source.Roster.Append(fb).ToArray();
@@ -47,7 +48,7 @@ public class FullbackRoleTests
     }
     [Fact] public void TeamsWithoutFullbacksUseATightEndWithoutChangingHisRosterPosition()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);
+        var source=GameDayFixture.Session(GameDayMode.Play);
         var roster=source.Roster.Where(p=>p.Position!=Position.FB).ToArray();
         var play=PlaybookCatalog.OffensivePlays.Single(p=>p.Id=="off-iform-screen");
         var selected=PersonnelRotationService.SelectOffense(roster,source.Game.HomeTeamName,play.Personnel,new(),new Random(7));

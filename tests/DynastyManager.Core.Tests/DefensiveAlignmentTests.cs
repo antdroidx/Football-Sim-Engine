@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -12,7 +13,7 @@ public class DefensiveAlignmentTests
     [InlineData(DefensiveFormation.Dime,4,1)]
     public void DefaultPackagesHaveDistinctSymmetricStarts(DefensiveFormation formation,int corners,int linebackers)
     {
-        var roster=GameDayEngineTests.Session(GameDayMode.Play).AwayRoster;
+        var roster=GameDayFixture.Session(GameDayMode.Play).AwayRoster;
         var players=roster.Where(p=>p.Position==Position.DE).Take(2)
             .Concat(roster.Where(p=>p.Position==Position.DT).Take(2))
             .Concat(roster.Where(p=>p.Position is Position.MLB or Position.OLB).Take(linebackers))
@@ -34,7 +35,7 @@ public class DefensiveAlignmentTests
     [Fact]
     public void MiddleLinebackerStaysInsideTheOutsideLinebackers()
     {
-        var roster=GameDayEngineTests.Session(GameDayMode.Play).AwayRoster;
+        var roster=GameDayFixture.Session(GameDayMode.Play).AwayRoster;
         var middle=roster.First(p=>p.Position==Position.MLB);
         var outside=roster.Where(p=>p.Position==Position.OLB).Take(2).ToArray();
         var players=outside.Append(middle).ToArray();
@@ -47,7 +48,7 @@ public class DefensiveAlignmentTests
     [Fact]
     public void PartialCustomAssignmentsDoNotShiftOtherPlayersIntoTheSameSlot()
     {
-        var corners=GameDayEngineTests.Session(GameDayMode.Play).AwayRoster.Where(p=>p.Position==Position.CB).Take(3).ToArray();
+        var corners=GameDayFixture.Session(GameDayMode.Play).AwayRoster.Where(p=>p.Position==Position.CB).Take(3).ToArray();
         var play=new DefensivePlayDefinition("test","Test",DefensiveFormation.Nickel,DefensivePersonnel.Nickel,DefensiveApproach.Balanced,"")
         {Assignments=[new(){Position=Position.CB,RoleIndex=0,Depth=5,Lane=.14,Task=AssignmentTask.Man}]};
         var starts=DefensivePursuitService.Alignments(corners,play);
@@ -59,7 +60,7 @@ public class DefensiveAlignmentTests
     [Fact]
     public void CustomBlitzOnlyMakesTheAssignedRoleARusher()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);var dt=s.AwayRoster.First(p=>p.Position==Position.DT);
+        var s=GameDayFixture.Session(GameDayMode.Play);var dt=s.AwayRoster.First(p=>p.Position==Position.DT);
         var corners=s.AwayRoster.Where(p=>p.Position==Position.CB).Take(2).ToArray();
         var defenders=new[]{dt}.Concat(corners).ToArray();
         var play=new DefensivePlayDefinition("corner-blitz","Corner blitz",DefensiveFormation.Nickel,DefensivePersonnel.Nickel,DefensiveApproach.Pressure,"")

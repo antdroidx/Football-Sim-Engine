@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -124,7 +125,7 @@ public class DepthChartAssignmentTests
     [Fact]
     public void GameSessionUsesAssignedRoleAndSpecialistStatsFollowActualKicker()
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Play);
+        var source = GameDayFixture.Session(GameDayMode.Play);
         var receiver = source.Roster.First(p => p.TeamName == "Home" && p.Position == Position.WR);
         var kicker = Player(19); var punter = Player(20);
         var state = State(source.Roster.Concat(new[] { kicker, punter }).ToArray());

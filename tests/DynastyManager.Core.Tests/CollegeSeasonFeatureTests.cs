@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -240,7 +241,7 @@ public sealed class CollegeSeasonFeatureTests
     [Fact]
     public void HighlightTapeRetainsParticipantsAndNeverChangesTheGame()
     {
-        var session=GameDayEngineTests.Session(GameDayMode.Simulate,includeOpeningKickoff:true);GameDayEngine.SimulateToEnd(session);
+        var session=GameDayFixture.Session(GameDayMode.Simulate,includeOpeningKickoff:true);GameDayEngine.SimulateToEnd(session);
         var result=GameDayEngine.Finish(session);var score=session.HomeScore;var before=JsonSerializer.Serialize(result);
         Assert.InRange(result.Highlights.Count,1,5);Assert.NotEmpty(result.HighlightPlayers);
         var ids=result.HighlightPlayers.Select(p=>p.PlayerId).ToHashSet();

@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -27,7 +28,7 @@ public class GameDayLivePolishTests
     [Fact]
     public void UserTimeoutIsRecordedWithoutAdvancingClockDownOrStats()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play); s.ClockStopped = false;
+        var s = GameDayFixture.Session(GameDayMode.Play); s.ClockStopped = false;
         var before = GameDayEngine.BoxScore(s); var clock = s.ClockSeconds; var spot = s.YardLine;
         Assert.True(GameDayEngine.TryCallTimeout(s, "Home"));
         var e = Assert.Single(s.Events);
@@ -44,7 +45,7 @@ public class GameDayLivePolishTests
     [Fact]
     public void CpuTimeoutIsItsOwnVisibleEventBeforeTheNextSnap()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play); s.ControlledTeamName = "Home";
+        var s = GameDayFixture.Session(GameDayMode.Play); s.ControlledTeamName = "Home";
         s.TwoMinuteTimeoutHalf = 2; s.Quarter = 4; s.ClockSeconds = 60; s.HomeScore = 7; s.ClockStopped = false;
         var e = GameDayEngine.Step(s);
         Assert.Equal(SnapOutcome.ClockStoppage, e.Outcome); Assert.Equal("Away", e.TimeoutTeamName);
@@ -57,7 +58,7 @@ public class GameDayLivePolishTests
     [InlineData(2, 0, 0)] [InlineData(2, 14, 0)] [InlineData(4, 0, 7)] [InlineData(4, 0, 0)]
     public void FinalHeaveIsRecommendedBeforeHalfOrGameRatherThanPunting(int quarter, int home, int away)
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play); s.Quarter = quarter; s.ClockSeconds = 3;
+        var s = GameDayFixture.Session(GameDayMode.Play); s.Quarter = quarter; s.ClockSeconds = 3;
         s.YardLine = 45; s.Down = 4; s.HomeScore = home; s.AwayScore = away;
         var advice = GameDayRecommendationService.Recommend(s, s.HomeProfile.GamePlan!);
         Assert.Equal("Hail Mary", advice.Play?.Name);
@@ -67,13 +68,13 @@ public class GameDayLivePolishTests
     [Fact]
     public void CpuUsesEndOfHalfHeaveAndDoesNotOverrideUserCallsOrCustomRestrictions()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Watch); s.Quarter = 2; s.ClockSeconds = 2; s.YardLine = 45; s.Down = 2; s.ClockStopped = true;
+        var s = GameDayFixture.Session(GameDayMode.Watch); s.Quarter = 2; s.ClockSeconds = 2; s.YardLine = 45; s.Down = 2; s.ClockStopped = true;
         s.TwoMinuteTimeoutHalf = 1;
         Assert.Equal("Hail Mary", GameDayRecommendationService.Recommend(s, GamePlanService.Normalize(s.HomeProfile.GamePlan!)).Play?.Name);
         var heaveSnap = GameDayEngine.Step(s);
         Assert.True(heaveSnap.OffensivePlayId.Contains("hail-mary"), $"{heaveSnap.OffensivePlayId}; q{heaveSnap.Quarter}; clock{heaveSnap.ClockSeconds}; spot{heaveSnap.StartYardLine}; {heaveSnap.Outcome}");
         var plan = s.HomeProfile.GamePlan! with { Offense = OffensivePlaybook.Custom, CustomOffensivePlayIds = ["off-spread-zone"] };
-        var fresh = GameDayEngineTests.Session(GameDayMode.Play); fresh.Quarter = 2; fresh.ClockSeconds = 2; fresh.YardLine = 45;
+        var fresh = GameDayFixture.Session(GameDayMode.Play); fresh.Quarter = 2; fresh.ClockSeconds = 2; fresh.YardLine = 45;
         Assert.NotEqual("Hail Mary", GameDayRecommendationService.Recommend(fresh, plan).Play?.Name);
     }
 
@@ -83,7 +84,7 @@ public class GameDayLivePolishTests
         GameDaySession? found = null; GameSnapEvent? e = null;
         for (var seed = 1; seed <= 1000 && e is null; seed++)
         {
-            var s = GameDayEngineTests.Session(GameDayMode.Play, seed: seed);
+            var s = GameDayFixture.Session(GameDayMode.Play, seed: seed);
             var snap = GameDayEngine.Step(s, "off-spread-verts");
             if (snap.IsPassBreakup) { found = s; e = snap; }
         }

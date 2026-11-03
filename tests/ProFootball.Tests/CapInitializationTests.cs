@@ -97,7 +97,7 @@ public sealed class CapInitializationTests
         Assert.Equal(0,ProEconomy.Room(changed,s.UserTeam));Assert.Equal(0,ProEconomy.BonusCharge(contract,2026));Assert.Equal(1_000_000,ProEconomy.BonusCharge(contract,2027));Assert.Equal(2027,contract.LastChangedYear);Assert.Equal(ProContractInsights.Seasons(projected),ProContractInsights.Seasons(contract));
         Assert.Throws<InvalidOperationException>(()=>ProEconomy.Extend(changed,s.UserTeam,p.Football.PlayerId,1,salary,0));
     }
-    [Fact] public void ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets()
+    [Fact, Trait("Category", "Career"), Trait("Owner", "Pro")] public void ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets()
     {
         var s=ProLeagueService.Create("Seattle Seahawks",sourcedContracts:true,preserveLegacyPracticeForAudit:true) with{Id=Guid.Parse("53120000-0000-0000-0000-000000000001")};
         s=s with{AutoManageRookieOptions=true};

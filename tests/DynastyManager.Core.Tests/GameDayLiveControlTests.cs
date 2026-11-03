@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -8,7 +9,7 @@ public class GameDayLiveControlTests
 {
     static GameDayLiveControl Create(FootballRules? rules = null)
     {
-        var session = GameDayEngineTests.Session(GameDayMode.Play);
+        var session = GameDayFixture.Session(GameDayMode.Play);
         if (rules is not null) session = GameDayEngine.Start(session.Game, session.HomeProfile, session.AwayProfile, session.Roster, GameDayMode.Play, rules: rules);
         session.PossessionTeamName = session.Game.HomeTeamName;
         session.ControlledTeamName = session.PossessionTeamName;

@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -9,14 +10,14 @@ public class GameConditionsAndAwardsTests
 {
     private static GameDaySession Session(GameWeather weather, int seed = 7123, GameDayMode mode = GameDayMode.Play)
     {
-        var s = GameDayEngineTests.Session(mode, seed:seed);
+        var s = GameDayFixture.Session(mode, seed:seed);
         var result = GameDayEngine.Start(s.Game with { Weather=weather },s.HomeProfile,s.AwayProfile,s.Roster,mode);
         result.KickoffPending=false; return result;
     }
     [Fact]
     public void WeatherIsRepeatableStoredAndOverridesAreNormalized()
     {
-        var game = GameDayEngineTests.Session(GameDayMode.Play).Game with { HomeTeamName="Washington", Week=10 };
+        var game = GameDayFixture.Session(GameDayMode.Play).Game with { HomeTeamName="Washington", Week=10 };
         Assert.Equal(GameWeatherService.ForGame(game),GameWeatherService.ForGame(game));
         var indoor = GameWeatherService.ForGame(game with { HomeTeamName="Syracuse" });
         Assert.True(indoor.Indoors);Assert.Equal(0,indoor.WindMph);
@@ -49,7 +50,7 @@ public class GameConditionsAndAwardsTests
     [Fact]
     public void WeatherActuallyChangesSeededPassResultsAndAllThreeModesStayIdentical()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);
+        var source=GameDayFixture.Session(GameDayMode.Play);
         GameDaySession Start(int seed,GameWeather w,GameDayMode mode)=>GameDayEngine.Start(source.Game with {SimulationSeed=seed,Weather=w},source.HomeProfile,source.AwayProfile,source.Roster,mode);
         var clearWins=0;var stormWins=0;
         for(var seed=1;seed<=400;seed++)
@@ -75,7 +76,7 @@ public class GameConditionsAndAwardsTests
     [Fact]
     public void KickReturnsCanBreakPastMidfieldAndScoreWithMatchingStatsAndConversion()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);var crossed=0;GameDaySession? scored=null;
+        var source=GameDayFixture.Session(GameDayMode.Play);var crossed=0;GameDaySession? scored=null;
         for(var seed=1;seed<=2000 && (scored is null || crossed==0);seed++)
         {
             var s=GameDayEngine.Start(source.Game with{SimulationSeed=seed,Weather=new()},source.HomeProfile,source.AwayProfile,source.Roster,GameDayMode.Play);
@@ -105,7 +106,7 @@ public class GameConditionsAndAwardsTests
     [Fact]
     public void SustainedTeamMoraleHasASmallerPositiveOrNegativeDevelopmentEffect()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);
+        var source=GameDayFixture.Session(GameDayMode.Play);
         var state=new DynastyState{DynastyName="Training",UserTeamName="Home",SeasonYear=2026,Phase=SeasonPhase.Offseason,ActiveRoster=source.HomeRoster};
         ScheduledGame G(int week,bool win)=>source.Game with{GameId=$"week-{week}",Week=week,HasPlayed=true,HomeScore=win?30:10,AwayScore=win?10:30};
         var wins=state with{Schedule=Enumerable.Range(1,4).Select(w=>G(w,true)).ToArray()};
@@ -121,7 +122,7 @@ public class GameConditionsAndAwardsTests
     [Fact]
     public void PlayerOfGameCanRecognizeDefenseAndSurvivesSeasonArchival()
     {
-        var game=GameDayEngineTests.Session(GameDayMode.Play).Game with{HasPlayed=true,HomeScore=21,AwayScore=7};
+        var game=GameDayFixture.Session(GameDayMode.Play).Game with{HasPlayed=true,HomeScore=21,AwayScore=7};
         var db=new PlayerSeasonStatLine{PlayerId=Guid.NewGuid(),PlayerName="Impact Corner",TeamName="Home",Position=Position.CB,Interceptions=3,PassesDefended=4,Tackles=5,Games=1};
         var qb=new PlayerSeasonStatLine{PlayerId=Guid.NewGuid(),PlayerName="Quarterback",TeamName="Home",Position=Position.QB,PassYards=150,PassingTouchdowns=1,Games=1};
         var award=PlayerOfGameService.Select(game,[qb,db]);Assert.NotNull(award);Assert.Equal(db.PlayerId,award.PlayerId);Assert.Contains("PBU",award.Summary);

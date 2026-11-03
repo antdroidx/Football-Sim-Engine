@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -10,7 +11,7 @@ public class GameDayClockAndYacTests
     [InlineData(58,"Away 42")] [InlineData(99,"Away 1")]
     public void BallOnUsesConventionalTeamAndYardLine(int spot,string expected)
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);s.YardLine=spot;
+        var s=GameDayFixture.Session(GameDayMode.Play);s.YardLine=spot;
         Assert.Equal(expected,GameDayEngine.BallOn(s));
         s.PossessionTeamName="Away";
         Assert.Equal(expected.Replace("Home","TEMP").Replace("Away","Home").Replace("TEMP","Away"),GameDayEngine.BallOn(s));
@@ -20,7 +21,7 @@ public class GameDayClockAndYacTests
     [InlineData(true, 36, 39)]
     public void NormalPacingUsesLeagueRulesAndRespectsStoppedClock(bool pro, int minimum, int maximum)
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Play);
+        var source = GameDayFixture.Session(GameDayMode.Play);
         var plan = source.HomeProfile.GamePlan! with { Tempo = OffensiveTempo.Normal };
         foreach (var stopped in new[] { false, true })
         {
@@ -43,7 +44,7 @@ public class GameDayClockAndYacTests
     public void LeaguePacingKeepsExplicitTemposAndAdministrativePlayClock(
         bool pro, OffensiveTempo tempo, int minimum, int maximum)
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Play);
+        var source = GameDayFixture.Session(GameDayMode.Play);
         var plan = source.HomeProfile.GamePlan! with { Tempo = tempo };
         var s = GameDayEngine.Start(source.Game, source.HomeProfile with { GamePlan = plan },
             source.AwayProfile, source.Roster, GameDayMode.Play,
@@ -58,7 +59,7 @@ public class GameDayClockAndYacTests
     public void IncompletionConsumesPriorRunoffButNextSnapStartsStopped()
     {
         for(var seed=1;seed<1000;seed++) {
-            var s=GameDayEngineTests.Session(GameDayMode.Play,seed:seed);
+            var s=GameDayFixture.Session(GameDayMode.Play,seed:seed);
             s.PlayClockSeconds=40;
             var snap=GameDayEngine.Step(s,"off-spread-verts");
             if(snap.Outcome!=SnapOutcome.Incompletion)continue;
@@ -74,7 +75,7 @@ public class GameDayClockAndYacTests
     [Fact]
     public void ExpiredClockDoesNotCreateAPhantomSnapOrStat()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);s.Quarter=4;s.ClockSeconds=5;
+        var s=GameDayFixture.Session(GameDayMode.Play);s.Quarter=4;s.ClockSeconds=5;
         s.TwoMinuteTimeoutHalf=2;s.HomeScore=7;s.AwayTimeouts=0;
         var snap=GameDayEngine.Step(s,"off-spread-zone");
         Assert.Equal(SnapOutcome.ClockStoppage,snap.Outcome);Assert.True(s.IsComplete);
@@ -85,7 +86,7 @@ public class GameDayClockAndYacTests
     [Fact]
     public void TwoMinuteTimeoutOccursOnceAndPreservesTheDown()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);s.Quarter=2;s.ClockSeconds=125;
+        var s=GameDayFixture.Session(GameDayMode.Play);s.Quarter=2;s.ClockSeconds=125;
         var snap=GameDayEngine.Step(s,"off-spread-zone");
         Assert.Equal(SnapOutcome.ClockStoppage,snap.Outcome);Assert.Equal(120,s.ClockSeconds);
         Assert.Equal(1,s.Down);Assert.Equal(3,s.HomeTimeouts);Assert.Equal(25,s.PlayClockSeconds);
@@ -95,7 +96,7 @@ public class GameDayClockAndYacTests
     [Fact]
     public void LateFirstDownRestartsOnReadyWithoutGivingAwayAWholeSnapOfRunoff()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);s.Quarter=4;s.ClockSeconds=100;s.TwoMinuteTimeoutHalf=2;
+        var s=GameDayFixture.Session(GameDayMode.Play);s.Quarter=4;s.ClockSeconds=100;s.TwoMinuteTimeoutHalf=2;
         s.ClockStopped=true;s.ClockRestartsOnReady=true;s.AwayScore=7;s.PlayClockSeconds=40;
         var snap=GameDayEngine.Step(s,"off-spread-zone");
         Assert.InRange(s.LastPreSnapSeconds,8,16);
@@ -104,7 +105,7 @@ public class GameDayClockAndYacTests
     [Fact]
     public void TempoIsPersistedAndAdaptsToLateScore()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);
+        var source=GameDayFixture.Session(GameDayMode.Play);
         var plan=source.HomeProfile.GamePlan! with {Tempo=OffensiveTempo.ChewClock};
         var s=GameDayEngine.Start(source.Game,source.HomeProfile with {GamePlan=plan},source.AwayProfile,source.Roster,GameDayMode.Play);
         s.KickoffPending=false;s.PlayClockSeconds=40;
@@ -118,7 +119,7 @@ public class GameDayClockAndYacTests
     [Fact]
     public void SacksAndNegativeCompletionsReconcileWithNcaaTeamAndPlayerTotals()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);
+        var s=GameDayFixture.Session(GameDayMode.Play);
         var qb=s.HomeRoster.First(p=>p.Position==Position.QB);var wr=s.HomeRoster.First(p=>p.Position==Position.WR);
         var defender=s.AwayRoster.First(p=>p.Position==Position.DE);
         GameSnapEvent Snap(SnapOutcome outcome,int yards)=>new() {Sequence=s.Events.Count+1,PossessionNumber=1,Quarter=1,
@@ -135,7 +136,7 @@ public class GameDayClockAndYacTests
     [Fact]
     public void YacHasAnExplosiveTailRespondsToRatingsAndStopsAtTheGoalLine()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);var wr=s.HomeRoster.First(p=>p.Position==Position.WR);
+        var s=GameDayFixture.Session(GameDayMode.Play);var wr=s.HomeRoster.First(p=>p.Position==Position.WR);
         var fast=wr with {SpeedRating=99,AgilityRating=99,Skills=new(){Acceleration=99,BreakTackle=99}};
         var slow=wr with {SpeedRating=40,AgilityRating=40,Skills=new(){Acceleration=40,BreakTackle=40}};
         var defender=s.AwayRoster.First(p=>p.Position==Position.CB);
@@ -149,7 +150,7 @@ public class GameDayClockAndYacTests
     [Fact]
     public void FullGameReceivingAndYacTotalsAgreeAcrossPlayerTeamAndSnapStats()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Simulate,includeOpeningKickoff:true);
+        var s=GameDayFixture.Session(GameDayMode.Simulate,includeOpeningKickoff:true);
         GameDayEngine.SimulateToEnd(s);var game=GameDayEngine.Finish(s);
         foreach(var (name,stats) in new[]{("Home",game.HomeStats!),("Away",game.AwayStats!)}) {
             var players=game.PlayerStats.Where(p=>p.TeamName==name).ToArray();

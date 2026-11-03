@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -24,7 +25,7 @@ public class GameDayExpansionTests
     {
         for (var seed = 1; seed <= 30; seed++)
         {
-            var s = GameDayEngineTests.Session(GameDayMode.Simulate, includeOpeningKickoff: true, seed: seed);
+            var s = GameDayFixture.Session(GameDayMode.Simulate, includeOpeningKickoff: true, seed: seed);
             GameDayEngine.SimulateToEnd(s);
             foreach (var team in new[] { "Home", "Away" })
             {
@@ -45,7 +46,7 @@ public class GameDayExpansionTests
         GameDaySession? penalized = null;
         for (var seed = 1; seed <= 100 && penalized is null; seed++)
         {
-            var s = GameDayEngineTests.Session(GameDayMode.Play, includeOpeningKickoff: true, seed: seed);
+            var s = GameDayFixture.Session(GameDayMode.Play, includeOpeningKickoff: true, seed: seed);
             GameDayEngine.Step(s);
             if (GameDayEngine.Step(s, "off-spread-zone").Outcome == SnapOutcome.Penalty) penalized = s;
         }
@@ -57,7 +58,7 @@ public class GameDayExpansionTests
     [Fact]
     public void TiedRegulationStartsUntimedOvertimeWithoutInventedPoints()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         s.Quarter = 4; s.ClockSeconds = 1; s.TwoMinuteTimeoutHalf = 2; s.Down = 1;
         GameDayEngine.Step(s, "special-kneel");
         Assert.Equal(1, s.OvertimeRound); Assert.Equal(0, s.ClockSeconds);
@@ -72,7 +73,7 @@ public class GameDayExpansionTests
     [Fact]
     public void OvertimeGivesBothTeamsAChanceAndAlternatesTwoPointTries()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         s.OvertimeRound = 3; s.Quarter = 7; s.ClockSeconds = 0;
         s.TryPending = true; s.OvertimeFirstTeam = s.PossessionTeamName;
         var first = GameDayEngine.Step(s, "special-extra-point");
@@ -87,7 +88,7 @@ public class GameDayExpansionTests
     [Fact]
     public void SecondOvertimeRequiresTwoEvenWhenUserRequestsAnExtraPoint()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         s.OvertimeRound = 2; s.Quarter = 6; s.TryPending = true; s.OvertimeFirstTeam = s.PossessionTeamName;
         var snap = GameDayEngine.Step(s, "special-extra-point");
         Assert.Contains(snap.Outcome, new[] { SnapOutcome.TwoPointConversion, SnapOutcome.FailedTwoPointConversion });
@@ -100,7 +101,7 @@ public class GameDayExpansionTests
         GameDaySession? scored = null;
         for (var seed = 1; seed < 200 && scored is null; seed++)
         {
-            var s = GameDayEngineTests.Session(GameDayMode.Play, seed: seed); s.YardLine = 99; s.Distance = 1;
+            var s = GameDayFixture.Session(GameDayMode.Play, seed: seed); s.YardLine = 99; s.Distance = 1;
             if (GameDayEngine.Step(s, "off-spread-zone").Outcome == SnapOutcome.Touchdown) scored = s;
         }
         Assert.NotNull(scored); Assert.Equal(6, scored.HomeScore); Assert.True(scored.TryPending);
@@ -112,7 +113,7 @@ public class GameDayExpansionTests
     [Fact]
     public void SpikeCostsDownAndAttemptWhileKneelCostsYard()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var spike = GameDayEngine.Step(s, "special-spike");
         Assert.Equal(SnapOutcome.Spike, spike.Outcome); Assert.Equal(2, s.Down); Assert.True(s.ClockStopped);
         var prior = s.ClockSeconds;
@@ -127,7 +128,7 @@ public class GameDayExpansionTests
         var recovered = 0;
         for (var seed = 1; seed <= 100; seed++)
         {
-            var s = GameDayEngineTests.Session(GameDayMode.Play, includeOpeningKickoff: true, seed: seed);
+            var s = GameDayFixture.Session(GameDayMode.Play, includeOpeningKickoff: true, seed: seed);
             s.OnsideKickRequested = true;
             var snap = GameDayEngine.Step(s);
             Assert.True(snap.IsOnsideKick); Assert.Null(snap.ReturnerId);
@@ -141,7 +142,7 @@ public class GameDayExpansionTests
     [Fact]
     public void CreatedPlaySurvivesSerializationAndRunsInEngineAndStats()
     {
-        var original = GameDayEngineTests.Session(GameDayMode.Play);
+        var original = GameDayFixture.Session(GameDayMode.Play);
         var custom = PlaybookCatalog.OffensivePlays.First(p => p.Concept == OffensiveConcept.QuickPass) with
         { Id = "custom-curls", Name = "My Curls", Assignments = [new() { Position = Position.WR, RoleIndex = 0, Route = "Curls", Lane = .2 }] };
         var plan = original.HomeProfile.GamePlan! with { Offense = OffensivePlaybook.Custom, CreatedOffensivePlays = [custom], CustomOffensivePlayIds = [custom.Id] };
@@ -170,7 +171,7 @@ public class GameDayExpansionTests
     [Fact]
     public void ProtectionAndPassRatingsChangeReadsUsingTheSameRandomSequence()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var play = PlaybookCatalog.OffensivePlays.First(p => p.Concept == OffensiveConcept.QuickPass);
         var defense = PlaybookCatalog.DefensivePlays.First();
         var strong = s.HomeRoster.Select(p => p with { SpeedRating = 95, AgilityRating = 95, AwarenessRating = 95,
@@ -186,7 +187,7 @@ public class GameDayExpansionTests
     [Fact]
     public void PlayersAssignedToBlockAreNotPassingTargets()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var play = PlaybookCatalog.OffensivePlays.First(p => p.Concept == OffensiveConcept.QuickPass) with
         {
             Assignments = s.HomeRoster.Where(p => p.Position is Position.WR or Position.TE or Position.RB)

@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -7,7 +8,7 @@ public class DetailedStatisticsTests
 {
     [Fact] public void SnapsBlockingTargetsPressureAndCoverageReconcileFromActualEvents()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Simulate,seed:724);GameDayEngine.SimulateToEnd(s);var box=GameDayEngine.Finish(s);
+        var s=GameDayFixture.Session(GameDayMode.Simulate,seed:724);GameDayEngine.SimulateToEnd(s);var box=GameDayEngine.Finish(s);
         foreach(var line in box.PlayerStats)
         {
             Assert.Equal(s.Events.Count(e=>GameDayEngine.IsScrimmage(e)&&e.OffensePersonnel.Contains(line.PlayerId)),line.OffensiveSnaps);
@@ -24,7 +25,7 @@ public class DetailedStatisticsTests
     }
     [Fact] public void ProtectionIsAnActualMatchupAndUnblockedRushersHaveNoInventedSackLiability()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);
+        var s=GameDayFixture.Session(GameDayMode.Play);
         var blocker=s.HomeRoster.First(p=>p.Position==Position.OL) with {StrengthRating=75,Skills=new(){PassBlocking=99}};
         var weak=blocker with {Skills=new(){PassBlocking=1}};var rusher=s.AwayRoster.First(p=>p.Position==Position.DE);
         int Losses(DynastyPlayer b)=>Enumerable.Range(0,1000).Count(seed=>BlockMatchupService.Resolve([b],[rusher],3.1,true,new Random(seed)).PressureRushers.Count>0);
@@ -43,13 +44,13 @@ public class DetailedStatisticsTests
     }
     [Fact] public void SpikeIsPassAttemptAndKneelIsRushWithoutFakeBlockingChances()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);GameDayEngine.Step(s,"special-spike");GameDayEngine.Step(s,"special-kneel");s.IsComplete=true;
+        var s=GameDayFixture.Session(GameDayMode.Play);GameDayEngine.Step(s,"special-spike");GameDayEngine.Step(s,"special-kneel");s.IsComplete=true;
         var box=GameDayEngine.Finish(s);var qb=box.PlayerStats.Single(p=>p.Position==Position.QB);
         Assert.Equal(1,qb.PassAttempts);Assert.Equal(1,qb.RushAttempts);Assert.Equal(0,qb.Dropbacks);Assert.Equal(0,box.PlayerStats.Sum(p=>p.PassBlockSnaps+p.RunBlockSnaps));Assert.Equal(1,box.HomeStats!.PassAttempts);
     }
     [Fact] public void PenaltiesAndSpecialTeamMetricsComeFromTheRecordedPlay()
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Play);var kicker=s.HomeRoster.First(p=>p.Position==Position.QB);var ol=s.HomeRoster.First(p=>p.Position==Position.OL);
+        var s=GameDayFixture.Session(GameDayMode.Play);var kicker=s.HomeRoster.First(p=>p.Position==Position.QB);var ol=s.HomeRoster.First(p=>p.Position==Position.OL);
         s.Events.Add(new(){StatsVersion=1,OffenseTeamName="Home",DefenseTeamName="Away",OffensivePlayId="",DefensivePlayId="",Outcome=SnapOutcome.FieldGoal,KickerId=kicker.PlayerId,StartYardLine=60});
         s.Events.Add(new(){StatsVersion=1,OffenseTeamName="Home",DefenseTeamName="Away",OffensivePlayId="",DefensivePlayId="",Outcome=SnapOutcome.Punt,KickerId=kicker.PlayerId,StartYardLine=40,KickLandingYardLine=96,IsTouchback=true});
         s.Events.Add(new(){StatsVersion=1,OffenseTeamName="Home",DefenseTeamName="Away",OffensivePlayId="",DefensivePlayId="",Outcome=SnapOutcome.Penalty,PenalizedPlayerId=ol.PlayerId,PenalizedTeamName="Home",PenaltyYards=5});

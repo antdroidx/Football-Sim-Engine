@@ -1,17 +1,20 @@
+using Football.Testing;
+using static Football.Testing.GameDayFixture;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
 
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
 
 [Trait("Category", "Fast")]
+[Trait("Owner", "Engine")]
 public sealed class DynamicKickoffTests
 {
     [Theory]
     [InlineData(35)] [InlineData(20)] [InlineData(50)]
     public void ProductionProKicksRecordBothFlightKindsAndAwardTheCorrectSpot(int from)
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Simulate);
+        var source = GameDayFixture.Session(GameDayMode.Simulate);
         var kinds = new HashSet<bool>();
         for (var seed = 0; seed < 64; seed++)
         {

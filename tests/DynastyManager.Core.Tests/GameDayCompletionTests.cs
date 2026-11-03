@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -48,7 +49,7 @@ public sealed class GameDayCompletionTests
     [Fact]
     public async Task SimulatedRemainderRetainsExistingPlaysAndSavesFinishedStatsOnce()
     {
-        var session = GameDayEngineTests.Session(GameDayMode.Play);
+        var session = GameDayFixture.Session(GameDayMode.Play);
         GameDayEngine.Step(session, "off-spread-verts");
         var opening = session.Events.ToArray();
         await Task.Run(() => GameDayEngine.SimulateToEnd(session));

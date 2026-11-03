@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -19,7 +20,7 @@ public sealed class CollegeStatGamesTests
     [InlineData(false)] [InlineData(true)]
     public void KickoffPreviewAndEventUseTheSameSpecialistsAndElevenPlayers(bool onside)
     {
-        var s=GameDayEngineTests.Session(GameDayMode.Watch,includeOpeningKickoff:true);
+        var s=GameDayFixture.Session(GameDayMode.Watch,includeOpeningKickoff:true);
         s.OnsideKickRequested=onside;
         var receiving=GameDayEngine.KickoffUnit(s,true).Select(p=>p.PlayerId).ToArray();
         var kicking=GameDayEngine.KickoffUnit(s,false).Select(p=>p.PlayerId).ToArray();

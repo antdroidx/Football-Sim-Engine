@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -109,8 +110,8 @@ public sealed class UserCoachCareerTests
     [Fact]
     public void CoordinatorCannotInjectAnOffSidePlayIntoTheEngine()
     {
-        var manual = GameDayEngineTests.Session(GameDayMode.Play);
-        var automatic = GameDayEngineTests.Session(GameDayMode.Play);
+        var manual = GameDayFixture.Session(GameDayMode.Play);
+        var automatic = GameDayFixture.Session(GameDayMode.Play);
         if (manual.KickoffPending) { GameDayEngine.Step(manual); GameDayEngine.Step(automatic); }
         manual.ControlledTeamName = manual.PossessionTeamName;
         automatic.ControlledTeamName = automatic.PossessionTeamName;
@@ -204,7 +205,7 @@ public sealed class UserCoachCareerTests
     [Fact]
     public void CoordinatorTalkOnlyReactsOnTheirSideAndCannotSubstituteOtherSide()
     {
-        var session = GameDayEngineTests.Session(GameDayMode.Play);
+        var session = GameDayFixture.Session(GameDayMode.Play);
         session.ControlledTeamName = session.Game.HomeTeamName;
         session.UserCoachRole = StaffRole.DefensiveCoordinator;
         var talk = GameDayCoachingService.Talk(session, session.ControlledTeamName, CoachTalkTone.Encourage, CoachTalkAudience.Team)!;

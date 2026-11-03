@@ -1,3 +1,4 @@
+using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
@@ -46,7 +47,7 @@ public sealed class DeepCoverageAndKickoffTests
     [Fact]
     public void TouchbackStaysInEndZoneVisuallyAndAwards25WithoutAReturnOrClockRunoff()
     {
-        var found = false; var source = GameDayEngineTests.Session(GameDayMode.Play);
+        var found = false; var source = GameDayFixture.Session(GameDayMode.Play);
         for (var seed = 0; seed < 100 && !found; seed++)
         {
             var s = GameDayEngine.Start(source.Game with { SimulationSeed = seed }, source.HomeProfile, source.AwayProfile, source.Roster, GameDayMode.Play);
@@ -68,7 +69,7 @@ public sealed class DeepCoverageAndKickoffTests
     [Fact]
     public void OutsideReceiversAreMatchedToCornersInsteadOfCyclingThroughLinebackers()
     {
-        var s = GameDayEngineTests.Session(GameDayMode.Play);
+        var s = GameDayFixture.Session(GameDayMode.Play);
         var offense = s.HomeRoster.Where(p => p.Position is Position.QB or Position.WR).Take(8).ToArray();
         var defense = s.AwayRoster.Where(p => p.Position is Position.CB or Position.MLB or Position.FS).Take(14).ToArray();
         var play = PlaybookCatalog.OffensivePlays.First(p => p.Concept == OffensiveConcept.DeepPass);

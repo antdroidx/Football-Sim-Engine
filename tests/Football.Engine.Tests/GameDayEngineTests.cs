@@ -1,9 +1,13 @@
+using Football.Testing;
+using static Football.Testing.GameDayFixture;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
 
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
 
+[Trait("Owner", "Engine")]
+[Trait("Category", "Fast")]
 public class GameDayEngineTests
 {
     [Theory]
@@ -72,49 +76,6 @@ public class GameDayEngineTests
         Assert.Contains(interception.PrimaryDefenderId!.Value, interception.DefensePersonnel);
         Assert.Contains(pickedSession!.PlayersById[interception.PrimaryDefenderId.Value].Position,
             new[] { Position.CB, Position.FS, Position.SS, Position.MLB, Position.OLB });
-    }
-
-    [Theory]
-    [Trait("Category", "Balance")]
-    [InlineData(false, 7123)] [InlineData(false, 19)] [InlineData(false, 41)]
-    [InlineData(false, 73)] [InlineData(false, 103)] [InlineData(false, 211)]
-    [InlineData(true, 7123)] [InlineData(true, 19)] [InlineData(true, 41)]
-    [InlineData(true, 73)] [InlineData(true, 103)] [InlineData(true, 211)]
-    public void SimWatchAndCpuDelegatedPlayProduceTheSameStats(bool professional, int seed)
-    {
-        var source = Session(GameDayMode.Simulate, includeOpeningKickoff: true, seed: seed);
-        var games = new List<ScheduledGame>();
-        var events = new List<GameSnapEvent[]>();
-        foreach (var mode in Enum.GetValues<GameDayMode>())
-        {
-            var session = GameDayEngine.Start(source.Game, source.HomeProfile, source.AwayProfile, source.Roster, mode,
-                rules: professional ? FootballRules.Professional : FootballRules.College);
-            // No user calls or controlled school: all three modes delegate identical decisions to CPU.
-            GameDayEngine.SimulateToEnd(session);
-            games.Add(GameDayEngine.Finish(session));
-            events.Add(session.Events.ToArray());
-        }
-        foreach (var other in events.Skip(1))
-        {
-            Assert.Equal(events[0].Length, other.Length);
-            foreach (var (expected, actual) in events[0].Zip(other))
-            {
-                Assert.Equal(expected.Outcome, actual.Outcome);
-                Assert.Equal(expected.Quarter, actual.Quarter);
-                Assert.Equal(expected.ClockSeconds, actual.ClockSeconds);
-                Assert.Equal(expected.OffensePersonnel, actual.OffensePersonnel);
-                Assert.Equal(expected.DefensePersonnel, actual.DefensePersonnel);
-                Assert.Equal(expected.PreSnapSeconds, actual.PreSnapSeconds);
-                Assert.Equal(expected.LiveBallSeconds, actual.LiveBallSeconds);
-            }
-        }
-        foreach (var game in games.Skip(1))
-        {
-            Assert.Equal(games[0].HomeScore, game.HomeScore);
-            Assert.Equal(games[0].AwayStats, game.AwayStats);
-            Assert.Equal(games[0].HomeStats, game.HomeStats);
-            Assert.Equal(games[0].PlayerStats.OrderBy(p => p.PlayerId), game.PlayerStats.OrderBy(p => p.PlayerId));
-        }
     }
 
     [Fact]
@@ -411,39 +372,4 @@ public class GameDayEngineTests
         Assert.True(GameDayEngine.Step(session, "off-single-flood").IsBootleg);
     }
 
-    internal static GameDaySession Session(GameDayMode mode, bool includeOpeningKickoff = false, int seed = 7123, bool neutral = false)
-    {
-        var homePlan = new TeamGamePlan { TeamName = "Home", Offense = OffensivePlaybook.Spread,
-            OffensiveFormation = OffensiveFormation.ShotgunSpread, DefensiveFormation = DefensiveFormation.Nickel };
-        var awayPlan = homePlan with { TeamName = "Away" };
-        var session = GameDayEngine.Start(new ScheduledGame { GameId = "game-day", SeasonYear = 2026, Week = 1,
-                HomeTeamName = "Home", AwayTeamName = "Away", SimulationSeed = seed, IsNeutralSite = neutral },
-            Profile("Home", homePlan), Profile("Away", awayPlan), Roster(), mode);
-        session.PossessionTeamName = "Home"; session.OpeningReceivingTeam = "Home"; session.KickoffTeamName = "Away";
-        session.KickoffPending = includeOpeningKickoff;
-        return session;
-    }
-
-    private static TeamSimulationProfile Profile(string team, TeamGamePlan plan) => new()
-    {
-        TeamName = team, PassOffenseRating = 78, RushOffenseRating = 76,
-        PassDefenseRating = 75, RushDefenseRating = 75, SpecialTeamsRating = 75, GamePlan = plan
-    };
-
-    private static DynastyPlayer[] Roster()
-    {
-        var players = new List<DynastyPlayer>();
-        foreach (var team in new[] { "Home", "Away" })
-        foreach (var (position, count) in new[] { (Position.QB, 2), (Position.RB, 4), (Position.WR, 7),
-                     (Position.TE, 4), (Position.OL, 10), (Position.DE, 5), (Position.DT, 5),
-                     (Position.OLB, 5), (Position.MLB, 4), (Position.CB, 7), (Position.FS, 4), (Position.SS, 4) })
-        for (var i = 1; i <= count; i++) players.Add(new DynastyPlayer
-        {
-            PlayerId = Guid.NewGuid(), FullName = $"{team} {position} {i}", TeamName = team, Position = position,
-            ClassYear = 2, TalentLevel = 75, OverallRating = 85 - i, PotentialRating = 90,
-            SpeedRating = 75, StrengthRating = 75, AgilityRating = 75, AwarenessRating = 75,
-            InjuryRating = 80, DepthChartOrder = i
-        });
-        return players.ToArray();
-    }
 }

@@ -33,4 +33,7 @@
     <None Include="..\..\src\DynastyManager.Data\Resources\Legacy\roster.csv" Link="TestData\roster.csv" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\src\DynastyManager.Data\Resources\Legacy\coach.csv" Link="TestData\coach.csv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\GameDayFixture.cs" Link="Support\GameDayFixture.cs" />
+  </ItemGroup>
 </Project>

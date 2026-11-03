@@ -1,3 +1,4 @@
+using Football.Testing;
 using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
@@ -52,7 +53,7 @@ public class CareerAndPresentationPolishTests(ITestOutputHelper output)
     [Fact]
     public void BrokenTacklesAreRecordedByTheEngineWithoutReplayRerolls()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);GameSnapEvent? broken=null;
+        var source=GameDayFixture.Session(GameDayMode.Play);GameSnapEvent? broken=null;
         for(var seed=0;seed<300 && broken is null;seed++)
         {
             var s=GameDayEngine.Start(source.Game with {SimulationSeed=seed},source.HomeProfile,source.AwayProfile,source.Roster,GameDayMode.Play);
@@ -66,7 +67,7 @@ public class CareerAndPresentationPolishTests(ITestOutputHelper output)
     [Fact]
     public void SeasonBaselineSurvivesTrainingAndSaveButResetsNextYear()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);
+        var source=GameDayFixture.Session(GameDayMode.Play);
         var state=PlayerRatingService.EnsureProfiles(new DynastyState{DynastyName="Baseline",UserTeamName="Home",SeasonYear=2026,Phase=SeasonPhase.RegularSeason,ActiveRoster=source.HomeRoster});
         var baseline=state.ActiveRoster.ToDictionary(p=>p.PlayerId,p=>p.OverallRating);
         foreach(var week in new[]{3,6,9,12})
@@ -83,7 +84,7 @@ public class CareerAndPresentationPolishTests(ITestOutputHelper output)
     [Fact]
     public void InjuryAndIndividualPerformanceAffectMoraleWithoutChangingRatings()
     {
-        var source=GameDayEngineTests.Session(GameDayMode.Play);var p=source.HomeRoster.First();
+        var source=GameDayFixture.Session(GameDayMode.Play);var p=source.HomeRoster.First();
         var state=new DynastyState{DynastyName="Morale",UserTeamName="Home",SeasonYear=2026,ActiveRoster=source.HomeRoster};
         var morale=GameMoraleService.PlayerMorale(state,p);
         var injured=p with {CurrentInjury=new PlayerInjury{WeeksRemaining=3,Severity=InjurySeverity.Moderate}};

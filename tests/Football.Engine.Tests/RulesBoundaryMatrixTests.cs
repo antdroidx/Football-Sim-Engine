@@ -1,15 +1,18 @@
+using Football.Testing;
+using static Football.Testing.GameDayFixture;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
 
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
 
 [Trait("Category", "Fast")]
+[Trait("Owner", "Engine")]
 public sealed class RulesBoundaryMatrixTests
 {
     static GameDaySession Session(bool pro, int seed = 7123)
     {
-        var source = GameDayEngineTests.Session(GameDayMode.Play, seed: seed);
+        var source = GameDayFixture.Session(GameDayMode.Play, seed: seed);
         var session = GameDayEngine.Start(source.Game, source.HomeProfile, source.AwayProfile, source.Roster,
             GameDayMode.Play, rules: pro ? FootballRules.Professional : FootballRules.College);
         session.PossessionTeamName = "Home";
