@@ -109,7 +109,21 @@ public static class ProRosterPlanService
     public static double Fit(ProFranchise state, string team, ProPlayer player) =>
         RosterPlanService.GetFit(Bridge(state), team, player.Football);
 
-    public static double Priority(ProFranchise state, string team, ProPlayer player)
+    public static double CapEfficiency(ProFranchise state, ProPlayer player, long annualSalary)
+    {
+        var priority = GetPositionPriorities(state, player.Football.TeamName, player.Football.Position) / 100d;
+        var ageCurve = player.Age <= 25 ? 1.15 : player.Age <= 30 ? 1.00 : Math.Max(.65, 1 - (player.Age - 30)*.035);
+        var value = (player.Football.OverallRating + player.Football.PotentialRating*.35) * ageCurve / 1.35d;
+        var costIndex = 40 + 60*Math.Log10(1 + annualSalary/1_000_000d);
+        return Math.Clamp(value / Math.Max(1, costIndex) * priority * 100d, 1, 100);
+    }
+
+    public static double AcquisitionScore(ProFranchise state, string team, ProPlayer player, long annualSalary, bool isDraft = false)
+    {
+        var priority = Priority(state, team, player);
+        var efficiency = CapEfficiency(state, player, isDraft ? Math.Min(annualSalary, 5_000_000) : annualSalary);
+        return priority*.68 + efficiency*.32;
+    }    public static double Priority(ProFranchise state, string team, ProPlayer player)
     {
         var plan = CreatePlan(state, team);
         return plan.Priority(player);
@@ -174,6 +188,7 @@ public sealed class ProRosterPlan
             positional * need * 8 + headroom*upside, 1, 100);
     }
 }
+
 
 
 

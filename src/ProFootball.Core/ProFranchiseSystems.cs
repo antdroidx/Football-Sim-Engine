@@ -262,7 +262,7 @@ public static class ProCpu
                 var budget = Math.Min(room - ProEconomy.Pending(s, team.Name), Math.Min(room / remaining * 2, room - (remaining - 1) * minimum));
                 var needs = Enum.GetValues<Position>().ToDictionary(p => p, p => Need(s, team.Name, p));
                 var candidate = s.Players.Where(p => p.Football.TeamName == "Free agent" && !p.Retired && ProReserve.MedicallyAvailable(s,p) && Eligible(team.Name,p) && !s.Waivers.Any(w => w.PlayerId == p.Football.PlayerId) && !s.Bids.Any(b => b.Team == team.Name && b.PlayerId == p.Football.PlayerId) && SigningSalary(s,p) <= budget)
-                    .OrderByDescending(p => ProRosterPlanService.Priority(s,team.Name,p)).ThenBy(p => p.Football.PlayerId).FirstOrDefault();
+                    .OrderByDescending(p => ProRosterPlanService.AcquisitionScore(s,team.Name,p,SigningSalary(s,p))).ThenBy(p => p.Football.PlayerId).FirstOrDefault();
                 if (candidate is null)
                 {
                     if(count<45){var beforeRepair=s;s=Repair(s,team.Name,reserve+remaining*minimum);repairedBudget|=!s.Contracts.SequenceEqual(beforeRepair.Contracts);}
@@ -341,6 +341,8 @@ public static class ProOffseason
         return s with { Phase = ProPhase.Preseason, Week = 1, OffseasonStep = OffseasonStep.Retention, Games = ProSchedule.Build(s.League, s.Year), TaggedTeams = [], Picks = s.Picks.Concat(ProEconomy.CreatePicks(s, s.Year + 1)).DistinctBy(p => p.Id).ToList() };
     }
 }
+
+
 
 
 
