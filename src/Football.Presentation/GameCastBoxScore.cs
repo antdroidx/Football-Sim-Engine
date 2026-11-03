@@ -84,7 +84,7 @@ public static class GameCastBoxScore
         Total("Punts (Avg)",s=>$"{s.Punts} ({Average(s.PuntYards,s.Punts)})");
         Total("Kick returns / yards",s=>$"{s.KickReturns} / {s.KickReturnYards}");
         Total("Punt returns / yards",s=>$"{s.PuntReturns} / {s.PuntReturnYards}");
-        teamHost.Children.Add(SectionTitle("Team comparison","Recorded snaps in this game · sacks count toward rushing losses"));
+        teamHost.Children.Add(SectionTitle("Team comparison","Recorded snaps in this game"));
         teamHost.Children.Add(DataTable([("Statistic",160),(box.AwayTeamName,98),(box.HomeTeamName,98)],totals));
         var team = new Picker {Title="Team",ItemsSource=new[]{"Both teams",box.AwayTeamName,box.HomeTeamName},SelectedIndex=0};
         var category = new Picker {Title="Statistics",ItemsSource=PlayerStatCatalog.Categories,SelectedIndex=0};
