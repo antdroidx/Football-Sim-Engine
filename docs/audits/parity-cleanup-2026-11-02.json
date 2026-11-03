@@ -1,0 +1,77 @@
+{
+  "date": "2026-11-02",
+  "reason": "superseded parity build-only APK artifacts; latest159/447, full153 regression record and previous permanent releases retained",
+  "bytes": 1025437709,
+  "artifacts": [
+    {
+      "id": 13170841959,
+      "name": "pro-football-apk-158",
+      "bytes": 89973453,
+      "run": 41504357327
+    },
+    {
+      "id": 13169833114,
+      "name": "dynasty-manager-build-446",
+      "bytes": 91322596,
+      "run": 41504319109
+    },
+    {
+      "id": 13169491537,
+      "name": "dynasty-manager-build-445",
+      "bytes": 91322596,
+      "run": 41502505696
+    },
+    {
+      "id": 13167688411,
+      "name": "pro-football-apk-157",
+      "bytes": 89973453,
+      "run": 41500175039
+    },
+    {
+      "id": 13166459226,
+      "name": "pro-football-apk-156",
+      "bytes": 89969357,
+      "run": 41498375895
+    },
+    {
+      "id": 13166431540,
+      "name": "pro-football-apk-155",
+      "bytes": 89969357,
+      "run": 41495353654
+    },
+    {
+      "id": 13166002329,
+      "name": "dynasty-manager-build-444",
+      "bytes": 91322596,
+      "run": 41494626705
+    },
+    {
+      "id": 13163521466,
+      "name": "dynasty-manager-build-443",
+      "bytes": 91322596,
+      "run": 41488693966
+    },
+    {
+      "id": 13161805763,
+      "name": "pro-football-apk-152",
+      "bytes": 104468748,
+      "run": 41483346127
+    },
+    {
+      "id": 13161090351,
+      "name": "pro-football-apk-151",
+      "bytes": 104470361,
+      "run": 41482424285
+    },
+    {
+      "id": 13160560847,
+      "name": "dynasty-manager-build-440",
+      "bytes": 91322596,
+      "run": 41481512750
+    }
+  ],
+  "status": "deleted",
+  "localCleanup": "deferred; no local files removed",
+  "branches": "only main and active codex/parity-roadmap-audit; both retained",
+  "workflows": "primary College/Pro workflows retained; unrelated branch-workflow edit preserved"
+}

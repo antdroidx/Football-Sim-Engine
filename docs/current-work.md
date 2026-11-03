@@ -1,3 +1,9 @@
+## Current parity continuation — November 2, 2026
+
+Final candidates Pro160 / College448, runtime `d3ed91a`, are on `codex/parity-roadmap-audit`. CI passes27 Pro,30 Engine and107 College/shared cases; both APKs package (Pro retains2 existing nullable warnings). The768-game mode comparison, specialist cohorts, annual staff characterization and exact-APK native evidence have separate scopes; overlapping counts are not added together. See [the completion report](audits/parity-completion-2026-11-02.md), [exact manifest](audits/parity-acceptance-current.json) and [full draft changelog](releases/preview-2026-11-02-parity.md).
+
+Historical pending notes below are superseded by the current handoff/report, not deleted evidence. Explicit officiating extensions and the intermittent three-season CPU cap/roster finding remain documented. No main merge or prerelease was published in this branch batch. Remote artifact cleanup reclaimed1,025,437,709 bytes; local cleanup and the unrelated workflow edit remain deferred/preserved.
+
 ## Active parity continuation — November 2, 2026
 
 Feature branch runtime5239013 adds dynamic Pro kickoffs, shared phase/task and staff-link contracts, competition-aware statistical queries and canonical specialist adapters. The768-game real/generated CPU/controlled comparison passes; focused timeout/penalty/safety checks pass71 cases. CPU kneels now retain CPU call provenance. See [current handoff](IMPLEMENTATION-HANDOFF.md) and [mode report](audits/mode-conformance-results.md).

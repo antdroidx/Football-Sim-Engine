@@ -1,6 +1,6 @@
-# Current roadmap — November 1, 2026
+# Current roadmap — November 2, 2026
 
-Canonical status at main99254c7; supersedes outstanding-work wording in historical plans. Latest release: Pro149 / College439, [dual-app prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-01-staff-gamecast). Full [parity audit and recommendations](audits/pro-college-parity-2026-11-01.md), with a [standalone HTML report](audits/pro-college-parity-2026-11-01.html).
+Published baseline at main99254c7; active parity continuation is on `codex/parity-roadmap-audit`. This supersedes outstanding-work wording in historical plans. Latest release: Pro149 / College439, [dual-app prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-01-staff-gamecast). Full [parity audit and recommendations](audits/pro-college-parity-2026-11-01.md), with a [standalone HTML report](audits/pro-college-parity-2026-11-01.html).
 
 ## Completed and released
 
@@ -19,16 +19,17 @@ Canonical status at main99254c7; supersedes outstanding-work wording in historic
 
 [Active implementation handoff](IMPLEMENTATION-HANDOFF.md) records the approved sequence, checkpoints and model-resume instructions.
 
-## Remaining, prioritized
+## Approved parity continuation
 
-- **P1 — Device acceptance:** staff links, editors, portraits, palette and safety/kickoff changes are implemented. Complete the final exact-APK role/theme/orientation/extreme-rating matrix and defensive play save/restart/reload/execution. Prior accepted device checks remain scoped to their APK hashes.
-- **P1 — A05:** ordinary safeties/free kicks and modern Pro dynamic kickoff behavior are implemented. Timeout/expiry/two-point/onside/penalty boundary tests pass; the768-game real/generated CPU/controlled mode comparison passes. Live-ball penalties, runoff/untimed-down and return/try safety exceptions still need production coverage. See [rules matrix](audits/rules-conformance-matrix.md).
-- **A06–A08:** P/K aging policy and multi-year cohorts pass. Custom plays and persisted coach portraits are implemented; remaining device acceptance is above. A09 remains developer-only.
-- **Shared work delivered:** A10 scope/competition/deduplication contracts and league adapters; shared phase-validation/task layout; stable-ID staff-name link components; canonical specialist/fullback adapters; A12 attribute bounds with annual staff characterization. Further extraction is optional when it removes matching behavior, not a requirement to merge league policies.
-- **A11:** Engine/College/Pro ownership and explicit Fast/Balance/Career runner are established; major historical College career/calibration classes are tagged. Legacy ownership migration is incremental. Device is a separate exact-APK tier.
-- **College.Core evaluation:** completed; physical separation deferred to avoid assembly/save migration before dependency ownership is clearer.
-- **Integration/release:** branch changes and final build/device evidence must be accepted before integration/release. Preserve the unrelated workflow edit and deferred local cleanup.
-- Routine data refreshes, playtesting and performance checks remain ongoing.
+- **Staff, editors and portraits:** implemented and device-verified; profile identity/permission, Save/restart/reload/Back and offensive/defensive custom calls are covered. Exact-APK evidence remains separately identified.
+- **Palette and analytics:** range colors shared across rating bars and quality comparisons, with light/dark variants; signed efficiency metrics honor their quality callback and lower-is-better direction.
+- **A05 scenarios:** timeout/expiry, onside recoveries, modern Pro kickoff setup/touchbacks, ordinary safety/free-kick, current two-point policy and dead-ball penalty accounting covered. The768-game real/generated CPU/controlled mode comparison passes. See the [rules matrix](audits/rules-conformance-matrix.md) for explicit unsupported officiating exceptions and calibration limits.
+- **A06:** P/K policy and multi-year cohort validation complete.
+- **Shared code:** A10 competition/scope/dedup adapters, phase results/task UI, staff-name components, canonical specialist/fullback adapters, and A12 bounded arithmetic with annual characterization delivered.
+- **A11:** ownership and Fast/Balance/Career execution established; Device remains an exact-APK tier. Further legacy-fixture migration is incremental maintenance.
+- **College.Core:** evaluation complete; physical separation deferred for compatibility/ownership reasons.
+- **Repository:** final candidate APKs and draft full changelog are available from the active branch. Main/publication remains outside this implementation batch; preserve unrelated work and defer local cleanup.
+- One intermittent three-season CPU roster/cap regression remains an unconfirmed lifecycle finding; successful repeats do not establish its cause. Routine data refresh, playtesting and wider career/balance validation remain ongoing.
 
 ## Release/validation status
 

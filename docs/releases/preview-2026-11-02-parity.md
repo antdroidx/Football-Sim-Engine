@@ -1,6 +1,6 @@
 # Parity continuation — release candidate
 
-Draft changelog for the approved parity work since published main99254c7 (Pro149 / College439). Final acceptance and publication status belongs in the implementation handoff. Current Actions candidates are Pro156 and College444; these are CI artifacts until published as a release.
+Draft changelog for the approved parity work since published main99254c7 (Pro149 / College439). Final acceptance and publication status belongs in the implementation handoff. Current Actions candidates are Pro160 and College448; these are CI artifacts until published as a release.
 
 ## Both games
 
@@ -14,6 +14,9 @@ Draft changelog for the approved parity work since published main99254c7 (Pro149
 - Preserve the punt-touchback banner at receiving20; kickoff banners use the actual awarded spot.
 - Share special-teams selection between kickoff huddles and the actual kick event. Preserve11 unique personnel per unit.
 - Retain CPU provenance for automatically called kneels.
+- Remove the College-only sack-accounting caption from the shared box score; league calculations remain separate.
+- Record elapsed pre-snap time on dead-ball foul events, matching the game clock without crediting a scrimmage attempt or yardage.
+- Honor metric-specific quality colors for signed analytics values, including lower-is-better metrics and intermediate comparison values.
 
 ## Pro
 
@@ -25,7 +28,8 @@ Draft changelog for the approved parity work since published main99254c7 (Pro149
 
 ## College
 
-- Improve staff/scout profile navigation and narrow-screen scouting layouts.
+- Improve staff/scout profile navigation and narrow-screen scouting layouts. Include the separately stored user head coach/coordinator in the program directory without duplicate roles.
+- Use canonical coaching attributes for Leadership/Development summary tiles so they agree with the Attributes view.
 - Keep all opponent staff portraits read-only; own staff and user-coach appearance remain customizable.
 - Retain separate conference-title, bowl/playoff, recruiting and season rules rather than adopting Pro policy.
 
@@ -40,10 +44,10 @@ Draft changelog for the approved parity work since published main99254c7 (Pro149
 
 ## Validation and artifacts
 
-The current candidate manifest, exact hashes, workflow links/counts and per-APK native acceptance boundaries are in [parity-acceptance-current.json](../audits/parity-acceptance-current.json). Pro156 and College444 package successfully; Pro retains two existing nullable warnings. Focused CI checks pass27 Pro,30 Engine and103 College/shared integration cases. Earlier unchanged-Core Pro153 attempt2 passes413 cases.
+The current candidate manifest, exact hashes, workflow links/counts and per-APK native acceptance boundaries are in [parity-acceptance-current.json](../audits/parity-acceptance-current.json). Pro160 and College448 package successfully; Pro retains two existing nullable warnings. Focused CI checks pass27 Pro,30 Engine and107 College/shared integration cases. Earlier unchanged-Core Pro153 attempt2 passes413 cases.
 
 The [768-game mode comparison](../audits/mode-conformance-results.md) passes across real/generated rosters, both leagues, all modes and CPU/controlled calls. Native defensive copy save/restart/reload/execution passes on Pro153. Native palette/staff/portrait checks and the current-build live-picker/safety acceptance are recorded separately in the manifest.
 
 One three-season CPU roster/cap case failed in Pro153 attempt1, passed three exact local repeats and passed the unchanged CI retry. Its root cause remains unconfirmed; it is retained as a lifecycle finding. No assertion was weakened or financial policy changed.
 
-Native acceptance is ongoing. This draft does not claim a published prerelease or a complete official-rule implementation.
+Scoped native acceptance is complete; per-APK evidence and reuse boundaries are recorded in the manifest. This draft does not claim a published prerelease or a complete official-rule implementation.

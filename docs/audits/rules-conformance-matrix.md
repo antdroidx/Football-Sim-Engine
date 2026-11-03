@@ -18,17 +18,17 @@ These links record the rules currently in effect for the implementation. Gamepla
 | Regular-season tie | Resolved by overtime rounds | Tie possible when overtime expires | Regular overtime expiry test | Locked |
 | Postseason tie | Resolved by overtime rounds | Additional overtime periods after expiry | Postseason expiry test | Locked |
 | Overtime defensive score | Ends the possession/game without an unnecessary try | Immediate winner during overtime | Existing turnover tests | Locked |
-| First-down clock | Stops late in each half / two-minute handling | Does not automatically stop on a first down | Rule flag plus shared clock tests | Separate behavior locked; full clock matrix remains |
+| First-down clock | Stops late in each half / two-minute handling | Does not automatically stop on a first down | Rule flag plus shared clock tests | Separate behavior locked; expanded timeout/expiry boundaries pass |
 | Sack accounting | Included in rushing totals under College adapter | Excluded from rushing; sack yardage retained separately | New Pro sack test | Locked |
-| Kickoff touchback spot | 25-yard line | 35-yard line under professional adapter | Existing kickoff tests | Locked to current game policy |
-| Kickoff recovery | User can request; CPU onside logic is situational | User can request; CPU logic is situational | Existing kickoff tests | Needs broader recovery/formation coverage |
+| Kickoff touchback spot |25-yard line | Untouched end-zone35; landing-zone bounce/end-zone20; midfield-origin20 | DynamicKickoff policy/origin tests | Locked to implemented league policy |
+| Kickoff recovery | User can request; CPU onside logic is situational | User can request; CPU logic is situational |64 seeds/league, both recoveries; shared alignment/origin checks | Covered within implemented policy |
 | Extra point | 20-yard attempt | 33-yard attempt | Existing foundation test | Locked |
 | Postseason flag | College postseason services pass their phase | Pro playoff games set `Postseason=true` | Existing foundation plus new overtime test | Covered at engine boundary |
-| Ordinary scrimmage safety | Defense gets2; conceding team free-kicks from20 outside overtime/half-end exceptions | Same core scoring/free-kick behavior | `SafetyRulesTests`25 cases; source36fc92c | Implemented; exact-APK banner/kick acceptance pending |
+| Ordinary scrimmage safety | Defense gets2; conceding team free-kicks from20 outside overtime/half-end exceptions | Same core scoring/free-kick behavior | `SafetyRulesTests`25 cases; source36fc92c | Engine scenarios pass; Pro159 banner/free-kick/box verified on device |
 
-## Production-path checks still required
+## Production-path checks (completed by the November 2 report below)
 
-The production entry points are `GameDayEngine.Start` for live/watched/user games and `GameDayMode.Simulate` for simulated games; all use the same engine and rule adapter. The next comparison must verify:
+The production entry points are `GameDayEngine.Start` for live/watched/user games and `GameDayMode.Simulate` for simulated games; all use the same engine and rule adapter. The completed768-game comparison verifies the following boundaries:
 
 1. Equivalent seeded personnel and rules produce compatible event categories and accounting across Simulate, Watch, and Play.
 2. Personnel eligibility and rotation do not differ merely because the viewing mode differs.
@@ -38,14 +38,14 @@ The production entry points are `GameDayEngine.Start` for live/watched/user game
 
 Statistical outcomes should not be required to be byte-identical across Play and Simulate because interactive calls and random consumption differ. Inputs, legal outcomes and reconciliation should agree.
 
-## Remaining rule risk
+## Rule-system limitations beyond this bounded scenario batch
 
-- Full timeout and period-expiry combinations.
-- Kickoff setup/onside eligibility and dynamic touchback details.
+- Exhaustive official-rule combinations beyond the timeout/period matrix below.
+- Illegal-kick and impetus exceptions beyond the implemented dynamic setup/touchback policy.
 - Complete penalty timing/enforcement.
 - Return/foul/try-generated safeties and complete free-kick formation/flight behavior beyond the implemented scrimmage path.
-- Two-point decision completeness in all score/time combinations.
-- Full live-versus-fast distribution comparison.
+- An optimized two-point decision model beyond characterization of the current score/time policy.
+- Broader balance calibration beyond the completed768-game production comparison.
 
 These are explicit follow-ups, not assumptions that current behavior is incorrect. Any correction needs a focused failing scenario and a cited policy.
 
@@ -76,3 +76,10 @@ Policy source: [official2026 NFL PDF](https://static.www.nfl.com/image/upload/fl
 [768-game production report](mode-conformance-results.md) now covers both leagues, real/generated rosters, all three modes and CPU/explicit user-call policies. Personnel counts/uniqueness, clock bounds and target accounting pass. CPU completed-game records agree across modes. Controlled results retain intended timeout/kneel authority. CPU kneel provenance was corrected. This supersedes the earlier CPU-only distribution gap.
 
 Expanded boundary tests cover exhausted/unknown-team timeouts and expiry in all four periods plus ready-for-play restarts for both sides/leagues. The focused rules/penalty/safety set passes71 cases. Current two-point policy, not an optimal decision model, is exhaustively characterized across the listed score/time grid. Ordinary safeties/free kicks are covered; live-ball fouls/runoff/untimed-down and return/try safety exceptions remain explicit unsupported cases rather than silently passing scenarios.
+
+
+## Final penalty-accounting follow-up
+
+Four additional running-clock foul cases (College/Pro, offense/defense) first failed because the event omitted elapsed pre-snap seconds.5f7a8f4 fixes the event record without changing enforcement or clock policy. The focused clock/penalty selection passes68 cases; final College parity CI includes107 scenarios. First downs awarded by the existing defensive penalty do not create a rushing/passing attempt or yardage. The model has no team first-down total field; no new statistic is claimed.
+
+The originally requested broader timeout, expiry, onside/recovery, formation/touchback, ordinary safety/free-kick, two-point-policy and dead-ball penalty scenarios are covered. This is not a complete officiating engine: live-ball fouls, late-half runoff/untimed-down and return/try safety exceptions remain explicitly unsupported extensions. Historical pending statements above are checkpoint history, superseded by the later implementation and acceptance entries.

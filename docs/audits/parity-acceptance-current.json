@@ -1,31 +1,38 @@
 {
-  "status": "in_progress",
+  "status": "complete_with_documented_limits",
   "date": "2026-11-02",
   "branch": "codex/parity-roadmap-audit",
-  "runtime": "730d751",
+  "runtime": "d3ed91a",
   "workflowFix": "470caf5",
   "apps": {
     "Pro": {
-      "build": 156,
-      "run": 41498375895,
-      "artifact": 13166459226,
-      "sha256": "23dae56791e929d6c5610d5b49f2f48b254ba8d16075dac1b88d9b6664ac0b49",
+      "build": 160,
+      "run": 41560752104,
+      "artifact": 13196404017,
+      "sha256": "e84234fb1edde9001733a2885ae3c25aaf39960631826b304d67d20a42b00719",
       "tests": {
         "ProFast": 27
       },
       "package": "antdroid.profootball.franchise",
-      "runtime": "8a4feb2"
+      "runtime": "d3ed91a",
+      "warnings": 2,
+      "version": "0.1.160",
+      "url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41560752104/artifacts/13196404017"
     },
     "College": {
-      "build": 444,
-      "run": 41494626705,
-      "artifact": 13166002329,
-      "sha256": "d2db41c68bfed414c6553b3db10bbc4ccf645b0d8f21df2577d3a3742e2abf9c",
+      "build": 448,
+      "run": 41560740255,
+      "artifact": 13196798689,
+      "sha256": "76e073964bc68ec876c99a1b7164a19e938c38259b3d5f653e0cf1823ba2fc18",
       "tests": {
         "Engine": 30,
-        "CollegeParity": 103
+        "CollegeParity": 107
       },
-      "package": "antdroid.cfbcoach.dev"
+      "package": "antdroid.cfbcoach.dev",
+      "warnings": 0,
+      "version": "0.20.448",
+      "runtime": "d3ed91a",
+      "url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41560740255/artifacts/13196798689"
     }
   },
   "nativeEvidence": {
@@ -52,8 +59,36 @@
       "portrait save reproduced duplicate profile on Back"
     ],
     "Pro156": [
-      "installed; one-step Back after portrait Save returns to directory",
-      "restart/opponent/live-picker/safety checks in progress"
+      "portrait Save returns to directory with one Back",
+      "Buzz cut/Stubble persist after full process restart/reload",
+      "all nine opponent coaching/medical/scouting entries dark portrait/landscape; correct identity and read-only permissions"
+    ],
+    "Pro157": [
+      "all nine opponent entries light portrait",
+      "OVR30/76.6/98 roster comparison shows red/green/violet in light/dark; dark landscape",
+      "production-game advanced efficiency chart inspected; signed callback/scale issue found and fixed in38ae6e2"
+    ],
+    "Pro158": [
+      "active-book picker excludes stock Cover 3 Buzz and includes saved Cover 3 Buzz Custom",
+      "custom defense called; Q1 14:54 LAC36 to14:50 LAC46,10-yard completion; no error"
+    ],
+    "Pro159": [
+      "SAFETY banner credits Los Angeles; subsequent score0-2",
+      "free kick huddle/flight starts at Seattle own20; return28 yards to LAC32",
+      "live box score Q1 points SEA7/LAC2 match score and team totals",
+      "signed efficiency quality callback honored; lower-is-better sack rate direction; light portrait/landscape"
+    ],
+    "College447": [
+      "canonical summary Leadership0/Development49 matches Attributes; portrait/landscape",
+      "user head-coach profile identity retained after upgrade"
+    ],
+    "College448": [
+      "installed final0.20.448 package; preseason to Week1 phase transition",
+      "active-book picker opened; Levels executed at WASH25; Q1 15:00 to14:56, incompletion",
+      "live box records one pass attempt and corrected neutral caption"
+    ],
+    "Pro160": [
+      "final0.1.160 upgrade/install and launcher screenshot pass"
     ]
   },
   "modeComparison": {
@@ -69,20 +104,30 @@
     "unchangedCiRetry": "attempt2 passed413",
     "rootCause": "unconfirmed; not claimed fixed"
   },
-  "remaining": [
-    "finish Pro opponent themes/orientations and full-restart portrait confirmation",
-    "verify active-book-only live picker on Pro156 / shared College444",
-    "verify exact-APK safety banner/score/free kick and box views",
-    "final acceptance documentation and authorized repository/release follow-through"
-  ],
+  "remaining": [],
   "preserved": [
     "unrelated dirty .github/workflows/pro-android-branch.yml",
     "dirty root worktree",
-    "deferred local cleanup"
+    "deferred local cleanup",
+    "original AVD; QA runs in read-only disposable clone"
   ],
   "integration": {
     "main": "99254c77e1532257fedbc6011cc9b1181b06dcc3",
     "merged": false,
     "publishedPrerelease": false
+  },
+  "packagingDifference": "38ae6e2 to d3ed91a changes only the shared box-score caption; other native evidence retains its exact APK identity",
+  "excludedOrDeferred": [
+    "Older Design Backlog",
+    "new main merge or prerelease publication in this branch batch",
+    "local cleanup",
+    "College.Core physical split after completed evaluation",
+    "officiating extensions beyond the documented scenario policy"
+  ],
+  "cleanup": "parity-cleanup-2026-11-02.json",
+  "qaEnvironment": {
+    "device": "read-only disposable emulator-5580 clone",
+    "shutdown": true,
+    "originalAvdPreserved": true
   }
 }

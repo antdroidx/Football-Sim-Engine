@@ -1,4 +1,4 @@
-# Production mode comparison — November 2, 2026
+# Production mode comparison â€” November 2, 2026
 
 32 games per cell, 768 completed games total. Fixed seeds; real and generated rosters from the production adapters. This is a bounded comparison, not a balance calibration.
 
