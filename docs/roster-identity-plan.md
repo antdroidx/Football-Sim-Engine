@@ -10,3 +10,7 @@ Remaining milestones:
 - deeper cap/roster planning for extensions, cuts and trades;
 - staff-adapted philosophy changes and UI display;
 - long-term roster audits.
+## Verification baseline
+- Pro: 70 focused tests covering identity/depth/market/scouting/CPU movement and staff balance passed locally.
+- College: 55 focused recruiting/portal/depth/roster tests passed locally.
+
