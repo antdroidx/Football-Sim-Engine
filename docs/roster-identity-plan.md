@@ -10,9 +10,10 @@ The same identity model powers both games. Pro decisions keep existing salary-ca
 
 ## Current behavior
 - Pro acquisition score blends roster priority and cap efficiency.
+- Pro trade value blends standard value, cap surplus, positional need and identity fit.
 - waiver claims rank by acquisition score rather than raw OVR.
 - draft picks and free agencies use fit/need-weighted priority.
-- trade markets rank interested teams by priority plus current trade value.
+- trade markets rank interested teams by priority and value.
 - recruiting target counts reflect the team's offensive/defensive identity.
 
 ## Next work
