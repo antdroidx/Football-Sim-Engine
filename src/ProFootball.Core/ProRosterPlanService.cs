@@ -41,7 +41,7 @@ public static class ProRosterPlanService
             ZoneOrProtectTendency = (int)Math.Round((1-pressure) * 100),
             TalentVersusFit = attributes is null ? .55 : Math.Clamp(.50 + (attributes.OffensePlaycalling - 65)*.005, .35, .75),
             DevelopmentalUpside = attributes is null ? .35 : Math.Clamp(.25 + attributes.Development*.25/100d, .20, .55),
-            PositionPriorities = RosterPlanService.GetPositionPriorities(offense, defense, approach)
+            PositionPriorities = StaffWeightedPriorities(state, team, RosterPlanService.GetPositionPriorities(offense, defense, approach))
         };
     }
 
@@ -105,6 +105,43 @@ public static class ProRosterPlanService
         var active = Active(state, team).Where(item => item.Football.CurrentInjury is null && item.Football.Position == position).Count();
         return Math.Max(0, GetPositionTarget(state, position, team) - active);
     }
+
+    private static int GetPositionStaffRating(ProFranchise state, string team, Position position)
+    {
+        var club = state.League.Teams.FirstOrDefault(item => item.Name.Equals(team, StringComparison.OrdinalIgnoreCase));
+        if (club is null) return 65;
+        var coaches = state.Coaches.Where(item => item.TeamId == club.Id && !item.Vacant).ToArray();
+        var head = coaches.FirstOrDefault(item => item.Role == StaffRole.HeadCoach);
+        var role = position switch
+        {
+            Position.K or Position.P => StaffRole.SpecialTeamsCoordinator,
+            Position.QB or Position.RB or Position.FB or Position.WR or Position.TE or Position.OL => StaffRole.OffensiveCoordinator,
+            _ => StaffRole.DefensiveCoordinator
+        };
+
+        int Rating(ProCoach? coach) => coach is null ? 65 : position switch
+        {
+            Position.K or Position.P => ProStaff.Profile(coach).Attributes.SpecialTeams,
+            Position.QB or Position.RB or Position.FB or Position.WR or Position.TE or Position.OL => ProStaff.Profile(coach).Attributes.OffensePlaycalling,
+            _ => ProStaff.Profile(coach).Attributes.DefenseScheme
+        };
+
+        var coordinator = coaches.FirstOrDefault(item => item.Role == role);
+        var coordinatorRating = Rating(coordinator);
+        if (head is null) return coordinatorRating;
+        var headRating = Rating(head);
+        return (int)Math.Round(coordinatorRating * .8 + headRating * .2);
+    }
+
+    private static IReadOnlyDictionary<Position, int> StaffWeightedPriorities(
+        ProFranchise state, string team, IReadOnlyDictionary<Position, int> priorities) => priorities.ToDictionary(
+            pair => pair.Key,
+            pair =>
+            {
+                var staff = GetPositionStaffRating(state, team, pair.Key);
+                var influence = Math.Clamp(1 + (staff - 65) / 90d, .75, 1.35);
+                return Math.Clamp((int)Math.Round(pair.Value * influence), 40, 180);
+            });
 
     public static double Fit(ProFranchise state, string team, ProPlayer player) =>
         RosterPlanService.GetFit(Bridge(state), team, player.Football);
@@ -188,6 +225,7 @@ public sealed class ProRosterPlan
             positional * need * 8 + headroom*upside, 1, 100);
     }
 }
+
 
 
 
