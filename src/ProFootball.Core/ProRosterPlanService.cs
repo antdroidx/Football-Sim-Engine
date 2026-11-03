@@ -22,6 +22,10 @@ public static class ProRosterPlanService
         var offense = plan?.Offense ?? identity?.Offense ?? OffensivePlaybook.Balanced;
         var defense = plan?.Defense ?? identity?.Defense ?? DefensivePlaybook.Balanced;
         var approach = plan?.Approach ?? DefensiveApproach.Balanced;
+        (offense, defense) = RosterPlanService.AdaptToPersonnel(
+            offense,
+            defense,
+            RosterPlanService.PersonnelProfile(Active(state, team).Select(item => item.Football).ToArray()));
         var attributes = head is null ? null : ProStaff.Profile(head).Attributes;
         var pressure = approach switch
         {
@@ -225,6 +229,8 @@ public sealed class ProRosterPlan
             positional * need * 8 + headroom*upside, 1, 100);
     }
 }
+
+
 
 
 

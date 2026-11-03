@@ -3,8 +3,8 @@ using DynastyManager.Core.Models;
 namespace DynastyManager.Core.Simulation;
 
 /// <summary>
-/// A derived roster-building identity. The plan is intentionally small and immutable:
-/// schemes produce positional weights, while talent/fit and resource rules decide candidates.
+/// Derived identity used by both games. Team game plans stay authoritative;
+/// personnel shape adapts the current building identity only, not the saved plan.
 /// </summary>
 public sealed record TeamIdentity
 {
@@ -19,10 +19,17 @@ public sealed record TeamIdentity
     public IReadOnlyDictionary<Position, int> PositionPriorities { get; init; } = new Dictionary<Position, int>();
 }
 
-/// <summary>Deterministic identity-derived positional priorities and player values.</summary>
+public sealed record PersonnelProfile(double PassRatio, double RunRatio, double CoverageRatio, double EdgeRatio);
+
+/// <summary>
+/// Deterministic identity-derived positional priorities and player values.
+/// </summary>
 public static class RosterPlanService
 {
-    public static TeamIdentity GetIdentity(DynastyState state, string team)
+    public static TeamIdentity GetIdentity(
+        DynastyState state,
+        string team,
+        IReadOnlyList<DynastyPlayer>? roster = null)
     {
         var plan = state.TeamGamePlans.LastOrDefault(item => item.TeamName.Equals(team, StringComparison.OrdinalIgnoreCase));
         var head = StaffManagementService.GetStaff(state, team, StaffRole.HeadCoach);
@@ -30,6 +37,8 @@ public static class RosterPlanService
         var offense = plan?.Offense ?? OffensivePlaybook.Balanced;
         var defense = plan?.Defense ?? DefensivePlaybook.Balanced;
         var approach = plan?.Approach ?? DefensiveApproach.Balanced;
+        var shapes = PersonnelProfile(roster ?? RosterShapes(state, team));
+        (offense, defense) = AdaptToPersonnel(offense, defense, shapes);
         var pressure = approach switch
         {
             DefensiveApproach.Pressure => .82,
@@ -50,6 +59,49 @@ public static class RosterPlanService
             DevelopmentalUpside = head is null ? .35 : Math.Clamp(.25 + (coaching.Development / 100d) * .25, .20, .55),
             PositionPriorities = GetPositionPriorities(offense, defense, approach)
         };
+    }
+
+    public static PersonnelProfile PersonnelProfile(IReadOnlyList<DynastyPlayer> roster)
+    {
+        return new(
+            ShapeRatio(roster, Position.WR, Position.TE),
+            ShapeRatio(roster, Position.RB, Position.FB, Position.OL),
+            ShapeRatio(roster, Position.CB, Position.FS, Position.SS),
+            ShapeRatio(roster, Position.DE, Position.OLB));
+    }
+
+    public static (OffensivePlaybook Offense, DefensivePlaybook Defense) AdaptToPersonnel(
+        OffensivePlaybook offense, DefensivePlaybook defense, PersonnelProfile shapes)
+    {
+        if (shapes.PassRatio > shapes.RunRatio * 1.2 && shapes.PassRatio > 1.15 &&
+            offense is OffensivePlaybook.PowerRun or OffensivePlaybook.Option or OffensivePlaybook.Flexbone)
+            offense = OffensivePlaybook.Spread;
+        else if (shapes.RunRatio > shapes.PassRatio * 1.2 && shapes.RunRatio > 1.15 &&
+                 offense is OffensivePlaybook.AirRaid or OffensivePlaybook.Spread)
+            offense = OffensivePlaybook.PowerRun;
+
+        if (shapes.CoverageRatio > shapes.EdgeRatio * 1.2 && shapes.CoverageRatio > 1.15 &&
+            defense is DefensivePlaybook.ThreeFour or DefensivePlaybook.FourThree)
+            defense = DefensivePlaybook.Nickel;
+        else if (shapes.EdgeRatio > shapes.CoverageRatio * 1.2 && shapes.EdgeRatio > 1.15 &&
+                 defense is DefensivePlaybook.Nickel or DefensivePlaybook.FourThree)
+            defense = DefensivePlaybook.ThreeFour;
+
+        return (offense, defense);
+    }
+
+    private static IReadOnlyList<DynastyPlayer> RosterShapes(DynastyState state, string team)
+    {
+        return state.ActiveRoster
+            .Where(item => item.TeamName.Equals(team, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+    }
+
+    private static double ShapeRatio(IReadOnlyList<DynastyPlayer> roster, params Position[] positions)
+    {
+        var count = roster.Count(item => positions.Contains(item.Position));
+        var target = positions.Sum(position => DynastyRosterRules.TargetPositionCounts.GetValueOrDefault(position, 1));
+        return target <= 0 ? 0 : count / (double)target;
     }
 
     public static int GetRosterTarget(
@@ -85,6 +137,7 @@ public static class RosterPlanService
             _ => 2
         };
     }
+
     public static IReadOnlyDictionary<Position, int> GetPositionPriorities(
         OffensivePlaybook offense, DefensivePlaybook defense, DefensiveApproach approach)
     {
@@ -159,6 +212,3 @@ public static class RosterPlanService
 
     static double priorit(double value) => value;
 }
-
-
-
