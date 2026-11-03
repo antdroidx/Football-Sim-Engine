@@ -5,6 +5,12 @@ namespace ProFootball.App;
 
 public sealed partial class FranchisePage
 {
+    static string RosterPriorityText(ProFranchise state, string team)
+    {
+        var priorities=ProRosterPlanService.GetIdentity(state,team).PositionPriorities
+            .OrderByDescending(p=>p.Value).Take(8);
+        return string.Join(", ",priorities.Select(p=>p.Key.DisplayName()+" "+p.Value));
+    }
     static string RoleName(StaffRole role) => role switch { StaffRole.HeadCoach => "Head coach", StaffRole.OffensiveCoordinator => "Offensive coordinator", StaffRole.DefensiveCoordinator => "Defensive coordinator", StaffRole.SpecialTeamsCoordinator => "Special teams coordinator", StaffRole.MedicalTrainingDirector => "Medical director", StaffRole.StrengthConditioningDirector => "Strength & conditioning", StaffRole.ChiefScout => "Chief scout", _ => role.ToString() };
     static string Money(long value) => "$" + (value / 1_000_000d).ToString("0.00") + "m";
     View Link(string text, Func<Task> action) { var b = Action(text, action); b.BackgroundColor = Colors.Transparent; b.BorderWidth=0; b.TextColor=DynastyTheme.Accent; b.FontSize = 12; b.Padding = 4; return b; }
@@ -144,3 +150,5 @@ public sealed partial class FranchisePage
         return ShowPage("Trade history", rows.Length == 0 ? Text("No completed trades yet.") : new VerticalStackLayout { Spacing = 12, Children = { } }, Panel("Completed deals", rows));
     }
 }
+
+

@@ -16,7 +16,10 @@ The same identity model powers both games. Pro decisions keep existing salary-ca
 - trade markets rank interested teams by priority and value.
 - recruiting target counts reflect the team's offensive/defensive identity.
 
+## Staff UI
+- Front Office > Staff now shows a compact priority strip for the team's highest positional weights.
+
 ## Next work
 - deeper cap/roster planning for extensions, cuts and trades;
-- staff-adapted philosophy changes and UI display;
+- staff-adapted philosophy changes;
 - long-term roster audits.
