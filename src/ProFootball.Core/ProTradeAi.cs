@@ -125,7 +125,7 @@ public static class ProTradeAi
             }
             else if(!SafeDeparture(s,p))continue;
             foreach(var buyer in s.League.Teams.Where(t=>t.Name!=seller&&t.Name!=s.UserTeam&&!used.Contains(t.Name))
-                .OrderByDescending(t=>ProCpu.Need(s,t.Name,p.Football.Position)).ThenBy(t=>t.Id).Take(6))
+                .OrderByDescending(t=>ProRosterPlanService.Priority(s,t.Name,p)).ThenBy(t=>t.Id).Take(6))
             {
                 if(!Upgrade(s,p,buyer.Name))continue;
                 var picks=Package(s,p,buyer.Name);if(picks.Count==0||!CanExecute(s,buyer.Name,p,picks))continue;
@@ -141,4 +141,5 @@ public static class ProTradeAi
         return RefreshOffers(s);
     }
 }
+
 

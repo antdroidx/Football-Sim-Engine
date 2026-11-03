@@ -25,7 +25,7 @@ public static class ProRetention
     static ProFranchise Negotiate(ProFranchise s,string team,bool staffUnit)
     {
         if(s.Phase==ProPhase.Offseason&&s.OffseasonStep!=OffseasonStep.Retention)throw new InvalidOperationException("Use the retention stage for offseason negotiations.");
-        foreach(var p in Expiring(s,team).Where(p=>!s.LetExpire.Contains(p.Football.PlayerId)&&(team!=s.UserTeam||s.Career?.Unemployed==true||(ProCareer.Controls(s,p.Football.Position)!=staffUnit))))
+        foreach(var p in Expiring(s,team).Where(p=>!s.LetExpire.Contains(p.Football.PlayerId)&&(team!=s.UserTeam||s.Career?.Unemployed==true||(ProCareer.Controls(s,p.Football.Position)!=staffUnit))).OrderByDescending(p=>ProRosterPlanService.Priority(s,team,p)).ThenBy(p=>p.Football.PlayerId))
         {
             if(ExtensionIssue(s,p) is not null)continue;
             var terms=ProOfferTerms.AgentDemand(s,p,true);var c=s.Contracts.Last(c=>c.Active&&c.PlayerId==p.Football.PlayerId);
@@ -50,3 +50,4 @@ public static class ProRetention
         return s;
     }
 }
+
