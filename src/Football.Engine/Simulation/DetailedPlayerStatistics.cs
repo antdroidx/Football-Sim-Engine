@@ -7,6 +7,8 @@ public static class DetailedPlayerStatistics
         if(snap.StatsVersion<1)return;
         bool Known(Guid id)=>session.PlayersById.ContainsKey(id);
         void Add(Guid id,string key,int amount=1){if(Known(id))save(PlayerStatTotals.Increment(line(id),key,amount));}
+        if(snap.PenalizedPlayerId is Guid penalized){Add(penalized,"Penalties");Add(penalized,"PenaltyYards",snap.StatisticalPenaltyYards??snap.PenaltyYards??0);}
+        snap=GameDayStatistics.Project(snap);
         var scrimmage=GameDayEngine.IsScrimmage(snap);
         if(scrimmage)
         {
@@ -15,7 +17,7 @@ public static class DetailedPlayerStatistics
         }
         else if(snap.Outcome is not (SnapOutcome.ClockStoppage or SnapOutcome.Penalty))
             foreach(var id in snap.OffensePersonnel.Concat(snap.DefensePersonnel).Distinct())Add(id,"SpecialTeamsSnaps");
-        if(snap.PenalizedPlayerId is Guid penalized){Add(penalized,"Penalties");Add(penalized,"PenaltyYards",snap.PenaltyYards??0);}
+        if(snap.Outcome==SnapOutcome.Penalty)return;
         foreach(var block in snap.Blocks)
         {
             Add(block.BlockerId,block.PassBlock?"PassBlockSnaps":"RunBlockSnaps");

@@ -25,12 +25,18 @@ public static class ProCpuRosterSafety
         var prices = Candidates(s).Select(p => ProCpu.SigningSalary(s,p,1)).Order().Take(slots).ToArray();
         // An exhausted market is a real deficit, not permission to invent free players or cap room.
         var cost = prices.Length < slots ? long.MaxValue : prices.Sum();
-        return new(active,MinimumActive,cost,Math.Max(0,ProEconomy.Room(s,team)-ProEconomy.Pending(s,team)),
+        return new(active,MinimumActive,cost,Math.Max(0,ProEconomy.Room(s,team)-ProEconomy.Pending(s,team)-RookieReserve(s,team)),
             Enum.GetValues<Position>().ToDictionary(p => p,p => ProCpu.Need(s,team,p)));
     }
 
     public static ProFranchise EnsureMinimum(ProFranchise s, string team, Func<ProPlayer,bool>? eligible = null)
     {
+        if(ProRoster.Active(s,team)<MinimumActive)
+        {
+            var health=Health(s,team);
+            if(health.CheapestFill!=long.MaxValue && health.FundingShortfall>0)
+                s=ProCpuBudget.Relieve(s,team,health.CheapestFill+RookieReserve(s,team)+ProEconomy.Pending(s,team),eligible);
+        }
         for (var attempt=0; attempt<53 && ProRoster.Active(s,team)<53; attempt++)
         {
             var active=ProRoster.Active(s,team);

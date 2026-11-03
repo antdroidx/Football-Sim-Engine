@@ -34,6 +34,7 @@ public static partial class GameDayEngine
     private static GameSnapEvent? PrepareSnap(GameDaySession session, bool spike, bool quickShot = false)
     {
         session.LastPreSnapSeconds = 0;
+        if(session.UntimedDownPending)return null;
         if (session.OvertimeRound > 0 && !session.Rules.TimedOvertime) return null;
         if (CheckTwoMinuteTimeout(session)) return ClockEvent(session, "Two-minute timeout.");
         if (session.ClockSeconds <= 0) { var end = ClockEvent(session, "The period ends before another snap."); AdvanceQuarter(session); return end; }

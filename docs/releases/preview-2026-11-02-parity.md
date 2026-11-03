@@ -51,3 +51,11 @@ The [768-game mode comparison](../audits/mode-conformance-results.md) passes acr
 One three-season CPU roster/cap case failed in Pro153 attempt1, passed three exact local repeats and passed the unchanged CI retry. Its root cause remains unconfirmed; it is retained as a lifecycle finding. No assertion was weakened or financial policy changed.
 
 Scoped native acceptance is complete; per-APK evidence and reuse boundaries are recorded in the manifest. This draft does not claim a published prerelease or a complete official-rule implementation.
+
+## Subsequent roster/rules follow-up (not yet a published release)
+
+- Pro CPU cap repairs preserve minimum roster size and positional depth; affordable replacements commit atomically. Emergency recruitment reserves rookie money and uses legal restructures when possible. Optional contract length considers four-year funding.
+- Both games gain common live-ball penalty enforcement, league-specific DPI/grounding statistics, late-half runoff/timeout avoidance and untimed downs.
+- Correct return/impetus/momentum and foul safeties, defensive try returns and one-point safeties, credited scoring teams, safety kicks, displays and accounting. Punt landings inside the five no longer become early touchbacks.
+- Shared simulation/rules tests move from College to Engine, with a common fixture and CI guards against empty test selections.
+- Fresh 768-game cross-mode comparison passes. Final build/merge identities and limitations are tracked in the roster/rules handoff; prior APK acceptance is not reused as testing of these changes.

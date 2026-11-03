@@ -13,6 +13,7 @@ public static class GameDayCommentaryService
     public static PenaltyPresentation? Penalty(GameSnapEvent snap)
     {
         if (snap.Outcome != SnapOutcome.Penalty) return null;
+        if(snap.IsOffsettingPenalty)return new("Both teams","Offsetting fouls",0);
         var delta = snap.BallEndYardLine - snap.StartYardLine;
         var team = snap.PenalizedTeamName ?? (delta > 0 ? snap.DefenseTeamName : delta < 0 ? snap.OffenseTeamName : "Team not recorded");
         var foul = snap.PenaltyName ?? (snap.Description?.Contains("offside", StringComparison.OrdinalIgnoreCase) == true ? "Offside" :
@@ -20,7 +21,12 @@ public static class GameDayCommentaryService
         return new(team, foul, snap.PenaltyYards ?? Math.Abs(delta));
     }
 
-    public static string Describe(GameSnapEvent snap, IReadOnlyDictionary<Guid, DynastyPlayer> players)
+    public static string Describe(GameSnapEvent snap, IReadOnlyDictionary<Guid, DynastyPlayer> players) =>
+        DescribePlay(snap,players)+(snap.DeclinedPenaltyName is not null?$" Penalty declined: {snap.DeclinedPenaltyName}.":"")+
+        (snap.ClockRunoffSeconds>0?$" {snap.ClockRunoffSeconds}-second clock runoff.":"")+
+        (snap.RunoffAvoidedByTimeoutTeam is not null?$" {snap.RunoffAvoidedByTimeoutTeam} uses a timeout to avoid the runoff.":"");
+
+    private static string DescribePlay(GameSnapEvent snap, IReadOnlyDictionary<Guid, DynastyPlayer> players)
     {
         string Name(Guid? id, string fallback) => id is Guid value && players.TryGetValue(value, out var player)
             ? player.FullName : fallback;
@@ -33,7 +39,11 @@ public static class GameDayCommentaryService
         var gain = YardPhrase(snap.Yards);
 
         if (snap.IsSafety)
-            return $"SAFETY! {snap.OffenseTeamName} is down in its own end zone. {snap.DefenseTeamName} scores two points.";
+            return $"{(snap.IsTry?"ONE-POINT SAFETY":"SAFETY")}! {snap.SafetyConcedingTeamName??snap.OffenseTeamName} concedes a safety{(snap.PenaltyName is not null?$" for {snap.PenaltyName.ToLowerInvariant()}":"")}. {snap.ScoringTeamName} scores {(snap.IsTry?"one point":"two points")}.";
+        if(snap.IsTry && snap.TryScoredByDefense && snap.Points==2)
+            return $"{snap.DefenseTeamName} returns the try for two points!";
+        if(snap.IsMomentumException)
+            return $"{returner}'s original momentum carries the ball into the end zone. Ball at the possession spot.";
 
         if (snap.TurnoverYardLine.HasValue)
         {

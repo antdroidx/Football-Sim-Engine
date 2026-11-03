@@ -3,7 +3,7 @@ namespace DynastyManager.Core.Simulation;
 
 public static class TurnoverReturnService
 {
-    public static GameSnapEvent Resolve(GameSnapEvent snap, DynastyPlayer returner, IReadOnlyList<DynastyPlayer> offense, OffensiveConcept concept, Random random)
+    public static GameSnapEvent Resolve(GameSnapEvent snap, DynastyPlayer returner, IReadOnlyList<DynastyPlayer> offense, OffensiveConcept concept, Random random, FootballRules? rules=null)
     {
         if (snap.Outcome is not (SnapOutcome.Interception or SnapOutcome.Fumble)) return snap;
         var interception = snap.Outcome == SnapOutcome.Interception;
@@ -17,8 +17,13 @@ public static class TurnoverReturnService
         var yards = touchback || random.NextDouble() < (interception ? .25 : .62) ? 0 : Math.Max(1, (int)(random.Next(2, 19) + (skill - pursuit) * .3));
         if (yards > 0 && random.NextDouble() < Math.Clamp(.04 + (skill - pursuit) * .003, .01, .15)) yards += random.Next(20, 81);
         yards = Math.Min(spot, yards);
-        return snap with { TurnoverYardLine = spot, BallEndYardLine = spot - yards, ReturnYards = yards,
+        var trajectory=touchback?null:GoalLineService.Return(rules??FootballRules.College,100-spot,yards,random);
+        if(trajectory is not null)yards=trajectory.Yards;
+        var safety=trajectory?.Ruling.Disposition==GoalLineDisposition.Safety;
+        return snap with {IsSafety=safety,SafetyConcedingTeamName=safety?snap.DefenseTeamName:null,
+            IsMomentumException=trajectory?.Ruling.Disposition==GoalLineDisposition.MomentumException,
+            ReturnerProvidedImpetus=trajectory?.OwnImpetus??false, TurnoverYardLine = spot, BallEndYardLine = spot - yards, ReturnYards = yards,
             ReturnerId = returner.PlayerId, ReturnTacklerId = yards < spot && !touchback ? tackler?.PlayerId : null,
-            IsTouchback = touchback, LiveBallSeconds = snap.LiveBallSeconds + (int)Math.Ceiling(yards / 7d), Points = yards >= spot ? 6 : 0 };
+            IsTouchback = touchback, LiveBallSeconds = snap.LiveBallSeconds + (int)Math.Ceiling(yards / 7d), Points = safety?2:yards >= spot ? 6 : 0 };
     }
 }

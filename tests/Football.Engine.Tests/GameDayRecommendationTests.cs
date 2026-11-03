@@ -2,8 +2,9 @@ using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
 
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
 
+[Trait("Owner","Engine"),Trait("Category","Fast")]
 public class GameDayRecommendationTests
 {
     private static readonly TeamGamePlan Plan = new() { TeamName = "Home", Offense = OffensivePlaybook.Balanced };

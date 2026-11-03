@@ -24,7 +24,7 @@ public static class LiveFootballChoreography
             name.Contains("Tampa", StringComparison.OrdinalIgnoreCase) || defense.Approach == DefensiveApproach.ProtectPass;
     }
 
-    public static string NotificationTeam(GameSnapEvent snap) => snap.IsSafety || snap.Outcome is SnapOutcome.Interception or SnapOutcome.Fumble ||
+    public static string NotificationTeam(GameSnapEvent snap) => snap.IsSafety || snap.IsTry && snap.Points>0 ? snap.ScoringTeamName : snap.Outcome is SnapOutcome.Interception or SnapOutcome.Fumble ||
         snap.Outcome == SnapOutcome.Punt && (snap.IsTouchback || snap.Points >= 6) ? snap.DefenseTeamName : snap.OffenseTeamName;
 
     public static int KickLandingYardLine(GameSnapEvent snap) => snap.IsTouchback

@@ -4,7 +4,7 @@ Last updated: November 2, 2026 (America/Los_Angeles). Final CI candidates: Pro16
 
 ## Active follow-up
 
-The user has now authorized CPU roster safeguards/future planning, remaining officiating rules and validation-test refactoring. Resume from [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The completed parity batch below remains historical evidence.
+The user has now authorized CPU roster safeguards/future planning, remaining officiating rules and validation-test refactoring, followed by merge to main after validation. Resume from [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The completed parity batch below remains historical evidence.
 
 ## User-approved scope and preferences
 
@@ -22,7 +22,7 @@ This is the full continuation scope, not just the first four implementation batc
 
 **Usage constraint:** Keep checks small and specific to changed locations. Do not launch broad suites, long simulations, APK builds or device runs for display-text-only edits. Broader checks remain appropriate when the actual approved rules/lifecycle changes require them.
 
-**Local cleanup is deferred.** Preserve files until the user authorizes resuming it. No new main merge or release is authorized for this implementation batch.
+**Local cleanup is deferred.** Preserve files until the user authorizes resuming it. The subsequent user instruction authorizes merge to main after completion and validation. A new prerelease is not being published in this follow-up.
 
 ## Working checkout
 
@@ -52,7 +52,7 @@ This table supersedes the historical checkpoints below. Stay within the approved
 | Phase contracts | Shared validation/blocker/task contracts and task UI implemented; host transitions, authority and saved phase enums preserved. |
 | Rating/physical/position adapters | Canonical FB/K/P code delegation; specialist, physical, conversion, imported identity and idempotence cases covered. |
 | College.Core evaluation | Complete: defer physical split until dependency/test ownership supports a compatible migration. No assembly rename performed. |
-| Repository/release | Final CI APKs produced; changelog and acceptance manifest maintained. Keep current branch, prior permanent release assets, unrelated dirty workflow and deferred local cleanup. No main merge/publication in this batch. |
+| Repository/release | Final CI APKs produced; changelog and acceptance manifest maintained. Keep current branch, prior permanent release assets, unrelated dirty workflow and deferred local cleanup. Follow-up merge is now authorized after validation; see the active follow-up for current build/integration status. |
 
 ## What changed and where
 

@@ -1,0 +1,269 @@
+{
+  "GamesPerCell": 32,
+  "Rows": [
+    {
+      "League": "College",
+      "Roster": "Real",
+      "Mode": "Simulate",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 23.765625,
+      "Yards": 355.5625,
+      "Events": 171.3125,
+      "UserCalls": 0
+    },
+    {
+      "League": "College",
+      "Roster": "Real",
+      "Mode": "Watch",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 23.765625,
+      "Yards": 355.5625,
+      "Events": 171.3125,
+      "UserCalls": 0
+    },
+    {
+      "League": "College",
+      "Roster": "Real",
+      "Mode": "Play",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 23.765625,
+      "Yards": 355.5625,
+      "Events": 171.3125,
+      "UserCalls": 0
+    },
+    {
+      "League": "College",
+      "Roster": "Real",
+      "Mode": "Simulate",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.9375,
+      "Yards": 358.3125,
+      "Events": 168.78125,
+      "UserCalls": 2287
+    },
+    {
+      "League": "College",
+      "Roster": "Real",
+      "Mode": "Watch",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.9375,
+      "Yards": 358.3125,
+      "Events": 168.78125,
+      "UserCalls": 2287
+    },
+    {
+      "League": "College",
+      "Roster": "Real",
+      "Mode": "Play",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.265625,
+      "Yards": 351.609375,
+      "Events": 164.65625,
+      "UserCalls": 2245
+    },
+    {
+      "League": "College",
+      "Roster": "Generated",
+      "Mode": "Simulate",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 23.625,
+      "Yards": 359.640625,
+      "Events": 168.6875,
+      "UserCalls": 0
+    },
+    {
+      "League": "College",
+      "Roster": "Generated",
+      "Mode": "Watch",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 23.625,
+      "Yards": 359.640625,
+      "Events": 168.6875,
+      "UserCalls": 0
+    },
+    {
+      "League": "College",
+      "Roster": "Generated",
+      "Mode": "Play",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 23.625,
+      "Yards": 359.640625,
+      "Events": 168.6875,
+      "UserCalls": 0
+    },
+    {
+      "League": "College",
+      "Roster": "Generated",
+      "Mode": "Simulate",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 24.703125,
+      "Yards": 363.21875,
+      "Events": 168.65625,
+      "UserCalls": 2178
+    },
+    {
+      "League": "College",
+      "Roster": "Generated",
+      "Mode": "Watch",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 24.703125,
+      "Yards": 363.21875,
+      "Events": 168.65625,
+      "UserCalls": 2178
+    },
+    {
+      "League": "College",
+      "Roster": "Generated",
+      "Mode": "Play",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 24.5625,
+      "Yards": 360.0625,
+      "Events": 163.59375,
+      "UserCalls": 2191
+    },
+    {
+      "League": "Pro",
+      "Roster": "Real",
+      "Mode": "Simulate",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 25.46875,
+      "Yards": 363.078125,
+      "Events": 181.40625,
+      "UserCalls": 0
+    },
+    {
+      "League": "Pro",
+      "Roster": "Real",
+      "Mode": "Watch",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 25.46875,
+      "Yards": 363.078125,
+      "Events": 181.40625,
+      "UserCalls": 0
+    },
+    {
+      "League": "Pro",
+      "Roster": "Real",
+      "Mode": "Play",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 25.46875,
+      "Yards": 363.078125,
+      "Events": 181.40625,
+      "UserCalls": 0
+    },
+    {
+      "League": "Pro",
+      "Roster": "Real",
+      "Mode": "Simulate",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.453125,
+      "Yards": 359.03125,
+      "Events": 177.4375,
+      "UserCalls": 2395
+    },
+    {
+      "League": "Pro",
+      "Roster": "Real",
+      "Mode": "Watch",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.453125,
+      "Yards": 359.03125,
+      "Events": 177.4375,
+      "UserCalls": 2395
+    },
+    {
+      "League": "Pro",
+      "Roster": "Real",
+      "Mode": "Play",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.71875,
+      "Yards": 364.453125,
+      "Events": 173.875,
+      "UserCalls": 2381
+    },
+    {
+      "League": "Pro",
+      "Roster": "Generated",
+      "Mode": "Simulate",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 22.3125,
+      "Yards": 348.90625,
+      "Events": 181.34375,
+      "UserCalls": 0
+    },
+    {
+      "League": "Pro",
+      "Roster": "Generated",
+      "Mode": "Watch",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 22.3125,
+      "Yards": 348.90625,
+      "Events": 181.34375,
+      "UserCalls": 0
+    },
+    {
+      "League": "Pro",
+      "Roster": "Generated",
+      "Mode": "Play",
+      "Controlled": false,
+      "Games": 32,
+      "Points": 22.3125,
+      "Yards": 348.90625,
+      "Events": 181.34375,
+      "UserCalls": 0
+    },
+    {
+      "League": "Pro",
+      "Roster": "Generated",
+      "Mode": "Simulate",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.234375,
+      "Yards": 350.78125,
+      "Events": 181.03125,
+      "UserCalls": 2530
+    },
+    {
+      "League": "Pro",
+      "Roster": "Generated",
+      "Mode": "Watch",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.234375,
+      "Yards": 350.78125,
+      "Events": 181.03125,
+      "UserCalls": 2530
+    },
+    {
+      "League": "Pro",
+      "Roster": "Generated",
+      "Mode": "Play",
+      "Controlled": true,
+      "Games": 32,
+      "Points": 23.59375,
+      "Yards": 352.9375,
+      "Events": 178.03125,
+      "UserCalls": 2548
+    }
+  ]
+}

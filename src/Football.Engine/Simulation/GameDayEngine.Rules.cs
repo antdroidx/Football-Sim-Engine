@@ -4,23 +4,34 @@ namespace DynastyManager.Core.Simulation;
 
 public static partial class GameDayEngine
 {
-    private static void AwardSafety(GameDaySession session, bool homeOnOffense)
+    private static void AwardSafety(GameDaySession session, bool homeOnOffense) =>
+        AwardSafetyAgainst(session,homeOnOffense?session.Game.HomeTeamName:session.Game.AwayTeamName,false);
+
+    private static void AwardSafetyAgainst(GameDaySession session,string conceding,bool returnSafety)
     {
-        var snap = session.Events[^1];
-        session.Events[^1] = snap with { IsSafety = true, Points = 2, BallEndYardLine = 0, Yards = -snap.StartYardLine };
-        if (homeOnOffense) session.AwayScore += 2; else session.HomeScore += 2;
-        session.TryPending = false; session.OnsideKickRequested = false;
-        session.ClockStopped = true; session.ClockRestartsOnReady = false; session.PlayClockSeconds = 25;
-        session.KickoffPending = session.SafetyKickPending = false;
-        if (session.OvertimeRound > 0) { session.IsComplete = true; return; }
-        session.KickoffTeamName = snap.OffenseTeamName;
-        session.PossessionTeamName = snap.DefenseTeamName;
-        session.PossessionNumber++; session.Down = 1; session.Distance = 10;
-        session.YardLine = 20;
-        session.KickoffPending = session.SafetyKickPending = true;
+        var snap=session.Events[^1];
+        var scoring=conceding==session.Game.HomeTeamName?session.Game.AwayTeamName:session.Game.HomeTeamName;
+        session.Events[^1]=snap with {IsSafety=true,Points=2,SafetyConcedingTeamName=conceding,
+            BallEndYardLine=conceding==snap.OffenseTeamName?0:100,
+            Yards=returnSafety?snap.Yards:-snap.StartYardLine};
+        if(scoring==session.Game.HomeTeamName)session.HomeScore+=2;else session.AwayScore+=2;
+        session.TryPending=false;session.OnsideKickRequested=false;
+        session.ClockStopped=true;session.ClockRestartsOnReady=false;session.PlayClockSeconds=25;
+        session.KickoffPending=session.SafetyKickPending=false;
+        if(session.OvertimeRound>0)
+        {
+            if(!session.Rules.TimedOvertime && scoring==snap.OffenseTeamName)EndOvertimePossession(session);
+            else session.IsComplete=true;
+            return;
+        }
+        session.KickoffTeamName=conceding;session.PossessionTeamName=scoring;
+        session.PossessionNumber++;session.Down=1;session.Distance=10;session.YardLine=20;
+        session.KickoffPending=session.SafetyKickPending=true;
     }
 
-    public static bool IsScrimmage(GameSnapEvent snap) => snap.Outcome is SnapOutcome.Run or SnapOutcome.Completion or
+    private static bool RequiresTry(GameDaySession s) => s.Quarter!=4 || s.ClockSeconds>0 || Math.Abs(s.HomeScore-s.AwayScore)<=2;
+
+    public static bool IsScrimmage(GameSnapEvent snap) => !snap.IsTry && (snap.StatisticalOutcome??snap.Outcome) is SnapOutcome.Run or SnapOutcome.Completion or
         SnapOutcome.Incompletion or SnapOutcome.Sack or SnapOutcome.Turnover or SnapOutcome.Touchdown or
         SnapOutcome.Interception or SnapOutcome.Fumble or SnapOutcome.Scramble or SnapOutcome.Kneel or SnapOutcome.Spike;
 
@@ -74,7 +85,7 @@ public static partial class GameDayEngine
             Sequence = session.Events.Count + 1, PossessionNumber = session.PossessionNumber,
             Quarter = session.Quarter, ClockSeconds = session.ClockSeconds,
             OffenseTeamName = session.PossessionTeamName, DefenseTeamName = home ? session.Game.AwayTeamName : session.Game.HomeTeamName,
-            OffensivePlayId = string.Empty, DefensivePlayId = string.Empty, StartYardLine = 97,
+            OffensivePlayId = string.Empty, DefensivePlayId = string.Empty, IsTry=true, StartYardLine = two?97:117-session.Rules.ExtraPointDistance,
             BallEndYardLine = made ? 100 : 97, Down = 0, Distance = 3, KickerId = two ? null : kicker?.PlayerId,
             CallSource = choice is null ? PlayCallSource.Cpu : PlayCallSource.User,
             Outcome = two ? made ? SnapOutcome.TwoPointConversion : SnapOutcome.FailedTwoPointConversion
@@ -83,8 +94,22 @@ public static partial class GameDayEngine
             DefensePersonnel = defenseUnit.Select(p => p.PlayerId).ToArray(),
             Points = made ? two ? 2 : 1 : 0
         };
-        session.Events.Add(snap);
-        if (home) session.HomeScore += snap.Points; else session.AwayScore += snap.Points;
+        if(!made)
+        {
+            var returner=defenseUnit.OrderByDescending(p=>p.SpeedRating).FirstOrDefault();
+            snap=TryReturnService.ResolveFailure(snap with {ReturnerId=returner?.PlayerId,
+                QuarterbackId=offenseUnit.FirstOrDefault(p=>p.Position==Position.QB)?.PlayerId},session.Rules,
+                new Random(unchecked(session.Game.SimulationSeed*397 ^ snap.Sequence*7919 ^ 0x7A1)));
+            if(!snap.TurnoverYardLine.HasValue)snap=snap with {ReturnerId=null};
+        }
+        return ApplyTryResult(session,snap);
+    }
+
+    public static GameSnapEvent ApplyTryResult(GameDaySession session,GameSnapEvent snap)
+    {
+        if(session.IsComplete || !session.TryPending)throw new InvalidOperationException("No try is pending.");
+        snap=snap with {IsTry=true};session.Events.Add(snap);
+        if(snap.ScoringTeamName==session.Game.HomeTeamName)session.HomeScore+=snap.Points;else session.AwayScore+=snap.Points;
         session.TryPending = false;
         ChangePossession(session, 25);
         if (!session.IsComplete && (session.OvertimeRound == 0 || session.Rules.TimedOvertime)) QueueKickoff(session, snap.OffenseTeamName);
@@ -95,6 +120,7 @@ public static partial class GameDayEngine
     private static GameSnapEvent ClockPlay(GameDaySession session, bool spike, bool userCalled = true)
     {
         if (session.OvertimeRound > 0 && !session.Rules.TimedOvertime) throw new InvalidOperationException("Clock plays are unavailable in untimed overtime.");
+        var untimed=session.UntimedDownPending;session.UntimedDownPending=false;
         var home = session.PossessionTeamName == session.Game.HomeTeamName;
         var offense=GameDayCoachingService.ApplySubstitutions(session,PersonnelRotationService.SelectOffense(home?session.HomeDepthChart:session.AwayDepthChart,session.PossessionTeamName,OffensivePersonnel.Twelve,home?session.HomeFatigue:session.AwayFatigue,session.Random));
         var defense=GameDayCoachingService.ApplySubstitutions(session,PersonnelRotationService.SelectDefense(home?session.AwayDepthChart:session.HomeDepthChart,home?session.Game.AwayTeamName:session.Game.HomeTeamName,DefensivePersonnel.BaseFourThree,home?session.AwayFatigue:session.HomeFatigue,session.Random));
@@ -108,7 +134,7 @@ public static partial class GameDayEngine
             OffensivePlayId = string.Empty, DefensivePlayId = string.Empty, CallSource = userCalled ? PlayCallSource.User : PlayCallSource.Cpu,
             Down = session.Down, Distance = session.Distance, StartYardLine = session.YardLine,
             BallEndYardLine = session.YardLine - (spike ? 0 : 1), Yards = spike ? 0 : -1,
-            QuarterbackId = qb?.PlayerId, BallCarrierId = spike ? null : qb?.PlayerId,
+            QuarterbackId = qb?.PlayerId, BallCarrierId = spike ? null : qb?.PlayerId, IsUntimedDown=untimed,
             PreSnapSeconds = session.LastPreSnapSeconds, LiveBallSeconds = spike ? 2 : 4,
             OffensePersonnel=offense.PlayerIds,DefensePersonnel=defense.PlayerIds,
             Outcome = spike ? SnapOutcome.Spike : SnapOutcome.Kneel
@@ -180,11 +206,17 @@ public static partial class GameDayEngine
             PenalizedTeamName = penalizedTeam, PenaltyName = foul, PenaltyYards = enforced,
             Outcome = SnapOutcome.Penalty, Description = $"{foul} on {penalizedTeam}: {enforced} yards."
         };
+        var running=!session.ClockStopped||session.ClockRestartsOnReady;
         session.YardLine += yards; session.Distance -= yards;
         if (session.Distance <= 0) { session.Down = 1; session.Distance = Math.Min(10, 100 - session.YardLine); }
         session.ClockRestartsOnReady = !session.ClockStopped || session.ClockRestartsOnReady;
         session.ClockStopped = true; session.PlayClockSeconds = 25; session.Events.Add(snap);
-        return snap;
+        ApplyFoulRunoff(session,penalizedTeam,true,running);
+        var offenseMargin=session.PossessionTeamName==session.Game.HomeTeamName?session.HomeScore-session.AwayScore:session.AwayScore-session.HomeScore;
+        if(!offense && session.Quarter is 2 or 4 && session.ClockSeconds<=120 && offenseMargin<=0)
+            session.ClockRestartsOnReady=false;
+        AdvanceQuarter(session);
+        return session.Events[^1];
     }
 
     private static void StartProfessionalOvertime(GameDaySession session)

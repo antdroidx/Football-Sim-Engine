@@ -4,6 +4,10 @@ namespace DynastyManager.Core.Simulation;
 
 public static class GameDayLivePresentation
 {
+    public static string? ScoreHeadline(GameSnapEvent snap) => snap.IsSafety
+        ? snap.IsTry?"ONE-POINT SAFETY":"SAFETY"
+        : snap.IsTry && snap.TryScoredByDefense && snap.Points==2?"TWO-POINT RETURN":null;
+
     // Replays consume only a recorded event: no random calls or simulation steps.
     public static bool InstantReplay(GameSnapEvent snap) => snap.Outcome == SnapOutcome.Kickoff
         ? !snap.IsOnsideKick && !snap.IsTouchback && !snap.IsFairCatch && snap.ReturnYards > 0 && snap.BallEndYardLine > 50

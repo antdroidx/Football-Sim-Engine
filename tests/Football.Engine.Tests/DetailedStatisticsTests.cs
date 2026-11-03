@@ -3,7 +3,8 @@ using System.Text.Json;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
+[Trait("Owner","Engine"),Trait("Category","Fast")]
 public class DetailedStatisticsTests
 {
     [Fact] public void SnapsBlockingTargetsPressureAndCoverageReconcileFromActualEvents()
@@ -13,15 +14,15 @@ public class DetailedStatisticsTests
         {
             Assert.Equal(s.Events.Count(e=>GameDayEngine.IsScrimmage(e)&&e.OffensePersonnel.Contains(line.PlayerId)),line.OffensiveSnaps);
             Assert.Equal(s.Events.Count(e=>GameDayEngine.IsScrimmage(e)&&e.DefensePersonnel.Contains(line.PlayerId)),line.DefensiveSnaps);
-            Assert.Equal(s.Events.SelectMany(e=>e.Blocks).Count(b=>b.BlockerId==line.PlayerId&&b.PassBlock),line.PassBlockSnaps);
+            Assert.Equal(s.Events.Select(GameDayStatistics.Project).Where(GameDayEngine.IsScrimmage).SelectMany(e=>e.Blocks).Count(b=>b.BlockerId==line.PlayerId&&b.PassBlock),line.PassBlockSnaps);
             Assert.InRange(line.PassBlockWins,0,line.PassBlockSnaps);Assert.InRange(line.RunBlockWins,0,line.RunBlockSnaps);
             Assert.InRange(line.SacksAllowed,0,line.PressuresAllowed);Assert.InRange(line.CoverageReceptions,0,line.CoverageTargets);
             Assert.InRange(line.TrackedReceptions,0,line.Targets);Assert.Equal(1,line.TrackedGames);
         }
-        Assert.All(s.Events.Where(e=>e.Outcome==SnapOutcome.Sack),e=>{Assert.NotEmpty(e.PressureRushers);Assert.Contains(e.PrimaryDefenderId!.Value,e.PressureRushers);});
+        Assert.All(s.Events.Select(GameDayStatistics.Project).Where(e=>e.Outcome==SnapOutcome.Sack),e=>{Assert.NotEmpty(e.PressureRushers);Assert.Contains(e.PrimaryDefenderId!.Value,e.PressureRushers);});
         Assert.Equal(box.PlayerStats.Sum(p=>p.Targets),box.PlayerStats.Sum(p=>p.CoverageTargets));
         Assert.Equal(box.PlayerStats.Sum(p=>p.TrackedReceptions),box.PlayerStats.Sum(p=>p.CoverageReceptions));
-        Assert.Equal(s.Events.Count(e=>e.Outcome==SnapOutcome.Sack),box.PlayerStats.Sum(p=>p.TimesSacked));
+        Assert.Equal(s.Events.Select(GameDayStatistics.Project).Count(e=>e.Outcome==SnapOutcome.Sack),box.PlayerStats.Sum(p=>p.TimesSacked));
     }
     [Fact] public void ProtectionIsAnActualMatchupAndUnblockedRushersHaveNoInventedSackLiability()
     {

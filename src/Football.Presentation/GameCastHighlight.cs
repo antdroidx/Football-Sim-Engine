@@ -13,8 +13,7 @@ public static class GameCastHighlight
         Func<string, Color> teamColor, string? period = null)
     {
         var game = session.Game;
-        var headline = period ?? (snap.IsSafety ? "SAFETY"
-            : snap.IsTouchback
+        var headline = period ?? GameDayLivePresentation.ScoreHeadline(snap) ?? (snap.IsTouchback
             ? $"TOUCHBACK\nBall at {(snap.Outcome == SnapOutcome.Kickoff ? snap.BallEndYardLine > 0 ? snap.BallEndYardLine : session.Rules.KickoffTouchbackYardLine : 20)}"
             : snap.Points >= 6 ? "TOUCHDOWN"
             : snap.Outcome == SnapOutcome.ClockStoppage
@@ -22,10 +21,10 @@ public static class GameCastHighlight
                 : GameDayAnimationPlanner.OutcomeHeadline(snap.Outcome));
         if (headline is null) return;
         var penalty = GameDayCommentaryService.Penalty(snap);
-        var team = snap.TimeoutTeamName ?? penalty?.TeamName ?? LiveFootballChoreography.NotificationTeam(snap);
+        var team = snap.IsSafety?snap.ScoringTeamName:snap.TimeoutTeamName ?? penalty?.TeamName ?? LiveFootballChoreography.NotificationTeam(snap);
         text.Text = snap.TimeoutTeamName is not null && period is null
             ? $"TIMEOUT\n{snap.TimeoutTeamName}\n{(team == game.HomeTeamName ? snap.HomeTimeoutsRemaining : snap.AwayTimeoutsRemaining)} remaining"
-            : period is null ? penalty?.Banner ?? $"{headline}\n{team}" : $"{headline}\n{game.AwayTeamName} {session.AwayScore} - {session.HomeScore} {game.HomeTeamName}";
+            : period is null ? snap.IsSafety?$"{headline}\n{team}":penalty?.Banner ?? $"{headline}\n{team}" : $"{headline}\n{game.AwayTeamName} {session.AwayScore} - {session.HomeScore} {game.HomeTeamName}";
         var color = teamColor(team);
         highlight.BackgroundColor = color;
         text.TextColor = color.Red * .2126 + color.Green * .7152 + color.Blue * .0722 > .55 ? Colors.Black : Colors.White;

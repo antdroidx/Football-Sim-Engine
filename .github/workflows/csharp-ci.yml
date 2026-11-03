@@ -12,6 +12,7 @@ on:
       - 'tests/DynastyManager.Core.Tests/**'
       - 'tests/Football.Engine.Tests/**'
       - 'tests/Shared/**'
+      - 'build/test-tier.ps1'
       - 'build/android-*.py'
       - 'build/college-*.py'
       - 'global.json'
@@ -97,9 +98,11 @@ jobs:
         run: dotnet restore CollegeFootballDynastyManager.sln
 
       - name: Run shared engine fast tests
-        run: dotnet test tests/Football.Engine.Tests/Football.Engine.Tests.csproj -c Release --no-restore --filter 'Category=Fast'
+        shell: pwsh
+        run: ./build/test-tier.ps1 -Owner Engine -Tier Fast
       - name: Run shared engine mode comparisons
-        run: dotnet test tests/Football.Engine.Tests/Football.Engine.Tests.csproj -c Release --no-restore --filter 'Category=Balance'
+        shell: pwsh
+        run: ./build/test-tier.ps1 -Owner Engine -Tier Balance
 
       - name: Run combined Core / College tests
         env:

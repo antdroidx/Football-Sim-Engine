@@ -67,4 +67,23 @@ public sealed class CpuRosterSafeguardTests
         Assert.Equal(1,ProCpuBudget.ContractYears(s,s.UserTeam,player,5_000_000));
     }
 
+    [Theory]
+    [InlineData(0,0)]
+    [InlineData(1_250_000,1_250_000)]
+    public void LegalRestructureCanFundTheMissingMinimumSlotWithoutCuttingAnyone(long room,long rookieReserve)
+    {
+        var s=Setup(44,room);
+        if(rookieReserve>0)s=s with {UnsignedRookies=[new(Guid.NewGuid(),s.UserTeam,s.Year,1,rookieReserve,0)]};
+        var p=s.Players[0] with {Experience=8,CreditedSeasons=8,RookieYear=2018};
+        s=s with {Players=s.Players.Select(x=>x.Football.PlayerId==p.Football.PlayerId?p:x).ToList(),
+            SalaryCap=s.SalaryCap+28_000_000,
+            Contracts=s.Contracts.Select(c=>c.PlayerId==p.Football.PlayerId?new ProContract(c.PlayerId,c.Team,2025,3,0,
+                [new(2025,30_000_000,0),new(2026,30_000_000,0),new(2027,30_000_000,0)]):c).ToList()};
+        var next=ProCpuRosterSafety.EnsureMinimum(s,s.UserTeam);
+        Assert.Equal(45,ProRoster.Active(next,s.UserTeam));Assert.True(ProEconomy.Room(next,s.UserTeam)>=0);
+        Assert.Empty(next.DeadCap);Assert.Equal(s.UserTeam,next.Players[0].Football.TeamName);
+        Assert.True(next.Contracts.First().SigningBonus>0);
+        Assert.True(ProEconomy.Room(next,s.UserTeam)>=rookieReserve);
+    }
+
 }

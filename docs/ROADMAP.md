@@ -28,8 +28,8 @@ Published baseline at main99254c7; active parity continuation is on `codex/parit
 - **Shared code:** A10 competition/scope/dedup adapters, phase results/task UI, staff-name components, canonical specialist/fullback adapters, and A12 bounded arithmetic with annual characterization delivered.
 - **A11:** ownership and Fast/Balance/Career execution established; Device remains an exact-APK tier. Further legacy-fixture migration is incremental maintenance.
 - **College.Core:** evaluation complete; physical separation deferred for compatibility/ownership reasons.
-- **Repository:** final candidate APKs and draft full changelog are available from the active branch. Main/publication remains outside this implementation batch; preserve unrelated work and defer local cleanup.
-- One intermittent three-season CPU roster/cap regression remains an unconfirmed lifecycle finding; successful repeats do not establish its cause. Routine data refresh, playtesting and wider career/balance validation remain ongoing.
+- **Repository:** final candidate APKs and draft full changelog are available from the active branch. Follow-up merge to main is now authorized after validation; a new prerelease is not being published; preserve unrelated work and defer local cleanup.
+- The follow-up reproduces and fixes a destructive CPU cap-repair path, adds minimum-roster/rookie reserves and future-contract safeguards. Its full original intermittent career trace remains unavailable; see [the active follow-up](ROSTER-RULES-VALIDATION-HANDOFF.md). Routine data refresh, playtesting and wider career/balance validation remain ongoing.
 
 ## Release/validation status
 

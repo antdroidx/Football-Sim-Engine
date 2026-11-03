@@ -38,7 +38,7 @@ The production entry points are `GameDayEngine.Start` for live/watched/user game
 
 Statistical outcomes should not be required to be byte-identical across Play and Simulate because interactive calls and random consumption differ. Inputs, legal outcomes and reconciliation should agree.
 
-## Rule-system limitations beyond this bounded scenario batch
+## Historical limitations before the roster/rules follow-up (superseded below)
 
 - Exhaustive official-rule combinations beyond the timeout/period matrix below.
 - Illegal-kick and impetus exceptions beyond the implemented dynamic setup/touchback policy.
@@ -83,3 +83,11 @@ Expanded boundary tests cover exhausted/unknown-team timeouts and expiry in all 
 Four additional running-clock foul cases (College/Pro, offense/defense) first failed because the event omitted elapsed pre-snap seconds.5f7a8f4 fixes the event record without changing enforcement or clock policy. The focused clock/penalty selection passes68 cases; final College parity CI includes107 scenarios. First downs awarded by the existing defensive penalty do not create a rushing/passing attempt or yardage. The model has no team first-down total field; no new statistic is claimed.
 
 The originally requested broader timeout, expiry, onside/recovery, formation/touchback, ordinary safety/free-kick, two-point-policy and dead-ball penalty scenarios are covered. This is not a complete officiating engine: live-ball fouls, late-half runoff/untimed-down and return/try safety exceptions remain explicitly unsupported extensions. Historical pending statements above are checkpoint history, superseded by the later implementation and acceptance entries.
+
+## Roster/rules follow-up — November 2, 2026
+
+The earlier open live-ball/runoff/return/try-safety notes are superseded for the supported common-foul subset by `LiveBallPenaltyRulesTests` and `GoalLineAndTryRulesTests`, now owned by Engine. Implemented: holding, DPI, grounding, illegal forward passes; accepted/declined and supported offsetting outcomes; league-specific distances/statistics; runoff/timeout avoidance and untimed downs; impetus/momentum, return/foul safeties, failed-try returns/one-point safeties, half-end safety kicks and overtime opportunities. Final Engine validation passes 331 cases. The fresh 768-game mode report is `roster-rules-mode-conformance.json`.
+
+Automatic coaching policy selects penalties/runoff/timeouts with explicit engine overrides; there is no new penalty-decision UI. The model does not implement all personal/illegal-kick fouls, post-change-of-possession foul combinations or full replay/officiating procedures. Broad calibration and a fresh all-screen exact-APK matrix are not claimed. Earlier APK evidence remains tied to its original hashes.
+
+Policy references: [official 2026 NFL rulebook](https://operations.nfl.com/rules-officiating/2026-nfl-rulebook), [NFL statistical guide](https://www.nflgsis.com/gsis/documentation/stadiumguides/guide_for_statisticians.pdf), [NCAA statistical manual](https://fs.ncaa.org/Docs/stats/Stats_Manuals/Football.pdf), [NCAA rules record](https://ncaa.soutronglobal.net/Public/Default/en-US/RecordView/Index/60556) and officials' published [Rule 3](https://www.sdcfoa.org/ncaa/rule-3-periods-time-factors-and-substitutions-1), [Rule 8](https://www.sdcfoa.org/ncaa/rule-8-scoring), [Rule 10](https://www.sdcfoa.org/ncaa/rule-10-penalty-enforcement).

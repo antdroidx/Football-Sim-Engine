@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 namespace DynastyManager.Core.Models;
 
 public enum GameDayMode { Simulate, Watch, Play }
@@ -20,12 +21,44 @@ public sealed record GameSnapEvent
     public Guid? FullbackId { get; init; }
     public int? TurnoverYardLine { get; init; }
     public Guid? ReturnTacklerId { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool IsTry { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool TryScoredByDefense { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool ReturnFumbleRecoveredByOffense { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool IsMomentumException { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool ReturnerProvidedImpetus { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? SafetyConcedingTeamName { get; init; }
     public bool DefensiveScore => TurnoverYardLine.HasValue && Points >= 6;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public SnapOutcome? StatisticalOutcome { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int StatisticalYards { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int? StatisticalPenaltyYards { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool IsLiveBallPenalty { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool IsOffsettingPenalty { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool IsUntimedDown { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int ClockRunoffSeconds { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? RunoffAvoidedByTimeoutTeam { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? DeclinedPenaltyName { get; init; }
     public bool IsSafety { get; init; }
     public bool IsSafetyKick { get; init; }
     public bool UsesDynamicKickoff { get; init; }
     public bool KickTouchedLandingZone { get; init; }
-    public string ScoringTeamName => IsSafety || DefensiveScore ? DefenseTeamName : OffenseTeamName;
+    public string ScoringTeamName => IsSafety
+        ? (SafetyConcedingTeamName ?? OffenseTeamName) == OffenseTeamName ? DefenseTeamName : OffenseTeamName
+        : DefensiveScore || IsTry && TryScoredByDefense ? DefenseTeamName : OffenseTeamName;
     public bool BrokeTackle { get; init; }
     public int Sequence { get; init; }
     public int PossessionNumber { get; init; }
@@ -134,6 +167,8 @@ public sealed class GameDaySession
     public int LastPreSnapSeconds { get; set; }
     public int TwoMinuteTimeoutHalf { get; set; }
     public bool IsComplete { get; set; }
+    public bool UntimedSafetyKickPending { get; set; }
+    public bool UntimedDownPending { get; set; }
     public bool TryPending { get; set; }
     public bool OnsideKickRequested { get; set; }
     public int OvertimeRound { get; set; }

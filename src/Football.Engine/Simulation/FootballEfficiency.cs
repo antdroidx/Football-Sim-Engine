@@ -8,7 +8,7 @@ public static class FootballEfficiency
 {
     public static PlayEfficiency Capture(IEnumerable<GameSnapEvent> source)
     {
-        var plays=source.Where(e=>e.Outcome is SnapOutcome.Run or SnapOutcome.Completion or SnapOutcome.Incompletion or SnapOutcome.Sack or SnapOutcome.Turnover or SnapOutcome.Touchdown or SnapOutcome.Interception or SnapOutcome.Fumble or SnapOutcome.Scramble).ToArray();
+        var plays=source.Select(GameDayStatistics.Project).Where(e=>e.Outcome is SnapOutcome.Run or SnapOutcome.Completion or SnapOutcome.Incompletion or SnapOutcome.Sack or SnapOutcome.Turnover or SnapOutcome.Touchdown or SnapOutcome.Interception or SnapOutcome.Fumble or SnapOutcome.Scramble).ToArray();
         bool Success(GameSnapEvent e)=>e.Outcome is not (SnapOutcome.Turnover or SnapOutcome.Interception or SnapOutcome.Fumble) &&
             (!e.DefensiveScore && (e.Outcome==SnapOutcome.Touchdown || e.Yards>=Math.Max(1,e.Distance)*(e.Down==1?.4:e.Down==2?.6:1)));
         return new(plays.Length,plays.Sum(e=>e.Yards),plays.Count(Success),plays.Count(e=>e.Down==3),plays.Count(e=>e.Down==3&&Success(e)),plays.Where(e=>e.Outcome==SnapOutcome.Sack).Sum(e=>Math.Max(0,-e.Yards)));

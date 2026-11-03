@@ -55,3 +55,7 @@ The existing APK workflows now offer an opt-in `parity` scope. College CI owns t
 
 
 The approved shared-code batch is complete at these boundaries. Moving every legacy simulation fixture or every page into a common library is not required: further moves should follow a concrete ownership/duplication benefit. The College.Core evaluation is complete with the physical split deferred.
+
+## Roster/rules ownership follow-up
+
+Fourteen shared simulation/rules fixtures now belong to Engine, using the source-linked `tests/Shared/GameDayFixture.cs`. CPU mode comparisons are separately Balance; other Engine scenarios are Fast. Final discovery/execution: 319 Fast + 12 Balance = 331. Related College checks pass 99 cases. Pro keeps the financial career invariant; the tier runner fails explicit zero-test selections using fresh TRX counters, and CI calls it directly. No new test project/package or production test-code dependency. See `../ROSTER-RULES-VALIDATION-HANDOFF.md` for final delivery status.

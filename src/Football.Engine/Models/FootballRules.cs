@@ -3,7 +3,13 @@ namespace DynastyManager.Core.Models;
 public sealed record FootballRules
 {
     public static FootballRules College { get; } = new();
-    public static FootballRules Professional { get; } = new() { DynamicKickoff = true, NormalPreSnapMinimumSeconds = 36, NormalPreSnapMaximumSeconds = 39, RunGainOffset = -.9, SacksCountAsRushing = false, BasePassingBias = 1.45, TimedOvertime = true, HashMarkFraction = 70.75 / 160, StopClockOnFirstDown = false, ExtraPointDistance = 33, KickoffTouchbackYardLine = 35 };
+    public static FootballRules Professional { get; } = new() { DynamicKickoff = true, MomentumExceptionInsideFiveOnly = false, DefensivePassInterferenceIsSpotFoul = true, ExtendAllPeriodsForDefensiveFoul = true, OffensiveLiveBallFoulExtendsHalf = false, DefensiveFoulCanCauseRunoff = false, GroundingMinimumTenYards = true, NormalPreSnapMinimumSeconds = 36, NormalPreSnapMaximumSeconds = 39, RunGainOffset = -.9, SacksCountAsRushing = false, BasePassingBias = 1.45, TimedOvertime = true, HashMarkFraction = 70.75 / 160, StopClockOnFirstDown = false, ExtraPointDistance = 33, KickoffTouchbackYardLine = 35 };
+    public bool DefensivePassInterferenceIsSpotFoul { get; init; }
+    public bool ExtendAllPeriodsForDefensiveFoul { get; init; }
+    public bool OffensiveLiveBallFoulExtendsHalf { get; init; } = true;
+    public bool DefensiveFoulCanCauseRunoff { get; init; } = true;
+    public bool GroundingMinimumTenYards { get; init; }
+    public bool MomentumExceptionInsideFiveOnly { get; init; } = true;
     public bool DynamicKickoff { get; init; }
     public int NormalPreSnapMinimumSeconds { get; init; } = 31;
     public int NormalPreSnapMaximumSeconds { get; init; } = 37;

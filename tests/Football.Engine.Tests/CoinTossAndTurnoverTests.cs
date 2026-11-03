@@ -2,8 +2,9 @@ using Football.Testing;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
 
+[Trait("Owner","Engine"),Trait("Category","Fast")]
 public sealed class CoinTossAndTurnoverTests
 {
     private static GameSnapEvent Pick(int spot = 50) => new() { Sequence = 1, Quarter = 1, ClockSeconds = 800,

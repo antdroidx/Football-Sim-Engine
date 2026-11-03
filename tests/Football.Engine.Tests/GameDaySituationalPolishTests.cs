@@ -4,8 +4,9 @@ using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Xunit;
 
-namespace DynastyManager.Core.Tests;
+namespace Football.Engine.Tests;
 
+[Trait("Owner","Engine"),Trait("Category","Fast")]
 public class GameDaySituationalPolishTests
 {
     private static bool Run(OffensivePlayDefinition p) => p.Concept is OffensiveConcept.InsideRun or OffensiveConcept.OutsideRun;
