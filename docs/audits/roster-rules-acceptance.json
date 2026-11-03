@@ -1,5 +1,5 @@
 {
-  "status": "verified_branch_awaiting_main_integration",
+  "status": "merged_and_main_builds_verified_with_documented_limits",
   "date": "2026-11-02",
   "branch": "codex/parity-roadmap-audit",
   "runtime": "f4c3bbf2b6f37694f49dc3f3c796474dbb38300c",
@@ -48,5 +48,40 @@
     "Original intermittent career failure full trace remains unavailable; reproduced destructive repair path fixed.",
     "Twenty-year calibration not repeated.",
     "No new prerelease; local cleanup deferred; unrelated workflow and dirty root preserved."
-  ]
+  ],
+  "mainIntegration": "cb16217993784bbd8e65ce07f88664c84806e38e",
+  "mainApps": {
+    "College": {
+      "version": "0.20.450",
+      "versionCode": 850,
+      "package": "antdroid.cfbcoach.dev",
+      "run": 41574780256,
+      "artifact": 13203252001,
+      "source": "cb16217993784bbd8e65ce07f88664c84806e38e",
+      "runtime": "f4c3bbf2b6f37694f49dc3f3c796474dbb38300c",
+      "sha256": "bd018f75304924da96747ce3058b3762262ff2f34b3231eb959521a7f4330c88",
+      "tests": {
+        "EngineFast": 319,
+        "EngineBalance": 12,
+        "CollegeScoped": 602
+      },
+      "warnings": 0,
+      "url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41574780256/artifacts/13203252001"
+    },
+    "Pro": {
+      "version": "0.1.162",
+      "versionCode": 162,
+      "package": "antdroid.profootball.franchise",
+      "run": 41574780264,
+      "artifact": 13203850790,
+      "source": "cb16217993784bbd8e65ce07f88664c84806e38e",
+      "runtime": "f4c3bbf2b6f37694f49dc3f3c796474dbb38300c",
+      "sha256": "d62badfc78e52b947deb8b1f79bfb5f95c6aed8116273fbf749efcf68532d689",
+      "tests": {
+        "ProScoped": 419
+      },
+      "warnings": 2,
+      "url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41574780264/artifacts/13203850790"
+    }
+  }
 }
