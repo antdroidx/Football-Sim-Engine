@@ -1,5 +1,5 @@
 {
-  "status": "merged_and_main_builds_verified_with_documented_limits",
+  "status": "merged_and_prerelease_published_with_documented_limits",
   "date": "2026-11-02",
   "branch": "codex/parity-roadmap-audit",
   "runtime": "f4c3bbf2b6f37694f49dc3f3c796474dbb38300c",
@@ -47,7 +47,7 @@
     "Supported common-foul subset; no complete officiating catalog or new interactive penalty-decision screen.",
     "Original intermittent career failure full trace remains unavailable; reproduced destructive repair path fixed.",
     "Twenty-year calibration not repeated.",
-    "No new prerelease; local cleanup deferred; unrelated workflow and dirty root preserved."
+    "local cleanup deferred; unrelated workflow and dirty root preserved."
   ],
   "mainIntegration": "cb16217993784bbd8e65ce07f88664c84806e38e",
   "mainApps": {
@@ -83,5 +83,14 @@
       "warnings": 2,
       "url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41574780264/artifacts/13203850790"
     }
+  },
+  "release": {
+    "tag": "preview-2026-11-02-parity-rules",
+    "url": "https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules",
+    "date": "2026-11-02",
+    "commit": "d888557ac22474c570a4e0bc2130f62e2b6f8100",
+    "assetHashesVerified": true,
+    "ProAssetId": 704583770,
+    "CollegeAssetId": 704583766
   }
 }

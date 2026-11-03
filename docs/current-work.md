@@ -2,6 +2,8 @@
 
 ## Active roster/rules follow-up
 
+Published November 2: [Pro162 / College450 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules), tag `preview-2026-11-02-parity-rules`, target `d888557`. Both APK hashes match the successful main-build manifest; full changelog and checksums attached.
+
 CPU safeguards, supported additional league rules and shared-test migration are complete and merged at `cb16217`. Main Pro162/College450 build successfully; exact checks, artifacts and limits are tracked in [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The user authorized merge after validation. Earlier APK acceptance and historical pending notes below keep their original scope. Preserve unrelated workflow/root changes and defer local cleanup.
 
 Final candidates Pro160 / College448, runtime `d3ed91a`, are on `codex/parity-roadmap-audit`. CI passes27 Pro,30 Engine and107 College/shared cases; both APKs package (Pro retains2 existing nullable warnings). The768-game mode comparison, specialist cohorts, annual staff characterization and exact-APK native evidence have separate scopes; overlapping counts are not added together. See [the completion report](audits/parity-completion-2026-11-02.md), [exact manifest](audits/parity-acceptance-current.json) and [full draft changelog](releases/preview-2026-11-02-parity.md).

@@ -22,7 +22,7 @@ This is the full continuation scope, not just the first four implementation batc
 
 **Usage constraint:** Keep checks small and specific to changed locations. Do not launch broad suites, long simulations, APK builds or device runs for display-text-only edits. Broader checks remain appropriate when the actual approved rules/lifecycle changes require them.
 
-**Local cleanup is deferred.** Preserve files until the user authorizes resuming it. The subsequent user instruction authorizes merge to main after completion and validation. A new prerelease is not being published in this follow-up.
+**Local cleanup is deferred.** Preserve files until the user authorizes resuming it. The subsequent user instruction authorizes merge to main after completion and validation. The subsequent release instruction is complete: [Pro162 / College450 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules), with full changelog and verified permanent APK assets.
 
 ## Working checkout
 

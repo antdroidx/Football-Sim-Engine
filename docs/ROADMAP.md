@@ -1,6 +1,6 @@
 # Current roadmap — November 2, 2026
 
-Parity plus roster/rules/test-ownership follow-up merged to main at `cb16217`; implementation runtime `f4c3bbf`. Exact builds/checks and integration status are in [the active handoff](ROSTER-RULES-VALIDATION-HANDOFF.md). This supersedes outstanding-work wording in historical plans. Latest release: Pro149 / College439, [dual-app prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-01-staff-gamecast). Full [parity audit and recommendations](audits/pro-college-parity-2026-11-01.md), with a [standalone HTML report](audits/pro-college-parity-2026-11-01.html).
+Parity plus roster/rules/test-ownership follow-up merged to main at `cb16217`; implementation runtime `f4c3bbf`. Exact builds/checks and integration status are in [the active handoff](ROSTER-RULES-VALIDATION-HANDOFF.md). This supersedes outstanding-work wording in historical plans. Latest release: Pro162 / College450, [dual-app prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules). Full [parity audit and recommendations](audits/pro-college-parity-2026-11-01.md), with a [standalone HTML report](audits/pro-college-parity-2026-11-01.html).
 
 ## Completed and released
 
@@ -28,7 +28,7 @@ Parity plus roster/rules/test-ownership follow-up merged to main at `cb16217`; i
 - **Shared code:** A10 competition/scope/dedup adapters, phase results/task UI, staff-name components, canonical specialist/fullback adapters, and A12 bounded arithmetic with annual characterization delivered.
 - **A11:** ownership and Fast/Balance/Career execution established; Device remains an exact-APK tier. Further legacy-fixture migration is incremental maintenance.
 - **College.Core:** evaluation complete; physical separation deferred for compatibility/ownership reasons.
-- **Repository:** tested changes merged to main at `cb16217`; successful main APKs Pro162/College450 and draft changelog are available. Main checks pass331 Engine,602 College and419 Pro cases; exact artifacts and limits are in the active handoff. A new prerelease is not being published; preserve unrelated work and defer local cleanup.
+- **Repository:** tested changes merged to main at `cb16217`; successful main APKs Pro162/College450 and draft changelog are available. Main checks pass331 Engine,602 College and419 Pro cases; exact artifacts and limits are in the active handoff. The Pro162/College450 prerelease is published with full changelog, manifest and verified APK/checksum assets; preserve unrelated work and defer local cleanup.
 - The follow-up reproduces and fixes a destructive CPU cap-repair path, adds minimum-roster/rookie reserves and future-contract safeguards. Its full original intermittent career trace remains unavailable; see [the active follow-up](ROSTER-RULES-VALIDATION-HANDOFF.md). Routine data refresh, playtesting and wider career/balance validation remain ongoing.
 
 ## Release/validation status
