@@ -93,7 +93,7 @@ public static class ProScouting
         var upside=Math.Clamp(ProDevelopment.Headroom(p)/40d,0,1);
         var uncertainty=Math.Clamp(Bit(p.Football.PlayerId,5)*2-1,-1,1);
         var staffWeight=(staff-50)/50d;
-        return need*(2.5+staffWeight*.7)+availability*(1.8+staffWeight*.6)+upside*(1+staffWeight*1.2)+uncertainty;
+        return ProRosterPlanService.Priority(s,team,p)*(1+staffWeight*.1)+availability*(1.8+staffWeight*.6)+uncertainty;
     }
 
     static int RankedProspect(ProFranchise s,ProPlayer p)
@@ -177,3 +177,4 @@ public static class ProScouting
         }).ToList()};
     }
 }
+
