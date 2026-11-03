@@ -1,0 +1,52 @@
+{
+  "status": "verified_branch_awaiting_main_integration",
+  "date": "2026-11-02",
+  "branch": "codex/parity-roadmap-audit",
+  "runtime": "f4c3bbf2b6f37694f49dc3f3c796474dbb38300c",
+  "apps": {
+    "College": {
+      "version": "0.20.449",
+      "versionCode": 849,
+      "package": "antdroid.cfbcoach.dev",
+      "run": 41574279380,
+      "artifact": 13203096217,
+      "runtime": "f4c3bbf2b6f37694f49dc3f3c796474dbb38300c",
+      "sha256": "563678de46639f69ea7aa89b00ecb7dfea879679990c2554dc5e53ab80171ecf",
+      "tests": {
+        "EngineFast": 319,
+        "EngineBalance": 12,
+        "CollegeParity": 27
+      },
+      "warnings": 0,
+      "url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41574279380/artifacts/13203096217"
+    },
+    "Pro": {
+      "version": "0.1.161",
+      "versionCode": 161,
+      "package": "antdroid.profootball.franchise",
+      "run": 41574281996,
+      "artifact": 13203420594,
+      "runtime": "f4c3bbf2b6f37694f49dc3f3c796474dbb38300c",
+      "sha256": "71460d2bf232feea79153006731175b06e7e08a5cfc97d566bdb412dbe2950b5",
+      "tests": {
+        "ProFast": 33
+      },
+      "warnings": 2,
+      "url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41574281996/artifacts/13203420594"
+    }
+  },
+  "localValidation": {
+    "Engine": 331,
+    "CollegeScoped": 602,
+    "ProScoped": 419,
+    "FocusedSafeguardAndCareer": 7,
+    "ProductionModeGames": 768
+  },
+  "limits": [
+    "No new all-screen exact-APK device walkthrough. Earlier device evidence retains its original APK hashes.",
+    "Supported common-foul subset; no complete officiating catalog or new interactive penalty-decision screen.",
+    "Original intermittent career failure full trace remains unavailable; reproduced destructive repair path fixed.",
+    "Twenty-year calibration not repeated.",
+    "No new prerelease; local cleanup deferred; unrelated workflow and dirty root preserved."
+  ]
+}

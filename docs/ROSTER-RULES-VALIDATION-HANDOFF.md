@@ -25,14 +25,13 @@ Fourteen shared simulation/rules files moved from College to Engine across the t
 ## Evidence and delivery
 
 - Final shared Engine run: 331 passed, including 12 Balance cases.
-- Related College integration: 99 passed.
-- Broad scoped Pro run before the final rookie-reserve boundary addition: 418 passed, including the original three-season financial invariant. Final focused safeguard/career rerun and CI results are recorded in the delivery checkpoint below when complete.
+- Final College scope used on main: 602 passed; the earlier related 99-case run is overlapping evidence.
+- Final Pro scoped run: 419 passed, including the original three-season financial invariant. The final focused six safeguard cases plus that career invariant also pass (7 total).
 - Fresh production comparison: 768 completed games, 32 per cell across both leagues, real/generated rosters, CPU/controlled calls and Simulate/Watch/Play. CPU completed records agree across modes; personnel, clock bounds and target/coverage accounting pass. Controlled Play distributions can differ because of timeout/kneel authority. Raw results: `audits/roster-rules-mode-conformance.json`.
 - No fresh all-screen device walkthrough or twenty-year calibration was run for this follow-up. Earlier Pro160/College448 evidence applies only to their recorded APK hashes.
 
-## Next actions
+## Delivery checkpoint
 
-1. Finish the final focused finance check and lint/diff review.
-2. Commit/push the intended changes, excluding the unrelated workflow edit; build both games with the established Actions.
-3. Record exact successful build identities/artifacts and remaining device limits. Fetch latest main and merge only after successful validation.
-4. Record integration and main-build results without claiming a new prerelease.
+Implementation `f4c3bbf` is pushed. College449 run41574279380 passes Engine Fast319/Balance12 and College parity27, packaging with zero warnings/errors. Pro161 run41574281996 passes33 Fast cases and packages with the two existing nullable warnings, zero errors. Both APKs were downloaded, SHA-256 hashed and package/version identities checked with aapt. Exact artifact links/hashes: [roster-rules-acceptance.json](audits/roster-rules-acceptance.json). Workflow actionlint and git diff whitespace checks pass.
+
+Remaining delivery action: integrate into latest main (ancestry verified before builds), inspect resulting main workflows and record integration. No source change is pending; preserve unrelated workflow/root changes. This checkpoint does not claim a new device walkthrough or prerelease.
