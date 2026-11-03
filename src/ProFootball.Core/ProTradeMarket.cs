@@ -28,7 +28,7 @@ public static class ProTradeMarket
     }
     public static IReadOnlyList<string> InterestedTeams(ProFranchise s, ProPlayer player) => s.League.Teams
         .Where(t=>t.Name!=player.Football.TeamName&&ProRoster.CountForLimit(s,t.Name)<ProRoster.Limit(s)&&ProEconomy.Room(s,t.Name)>=s.Contracts.Where(c=>c.Active&&c.PlayerId==player.Football.PlayerId).Sum(c=>c.Years.FirstOrDefault(y=>y.Year==s.Year)?.Salary??0))
-        .OrderByDescending(t=>ProCpu.Need(s,t.Name,player.Football.Position)*100+ProTrade.PlayerValue(s,player,t.Name))
+        .OrderByDescending(t=>ProRosterPlanService.Priority(s,t.Name,player)*100+ProTrade.PlayerValue(s,player,t.Name))
         .Take(5).Select(t=>t.Name).ToArray();
 
     public static double PackageValue(ProFranchise s, IEnumerable<Guid> players, IEnumerable<Guid> picks, string recipient) =>
@@ -58,3 +58,4 @@ public static class ProTradeMarket
         return best;
     }
 }
+
