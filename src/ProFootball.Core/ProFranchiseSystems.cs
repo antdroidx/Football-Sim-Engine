@@ -123,7 +123,7 @@ public static class ProDraft
         {
             var staff=pick.Owner==s.UserTeam&&!includeUser&&s.Career?.Unemployed!=true&&ProCareer.Role(s)!=StaffRole.HeadCoach;
             var needs=Enum.GetValues<Position>().ToDictionary(p=>p,p=>ProCpu.Need(s,pick.Owner,p));
-            var chosen=s.Prospects.OrderByDescending(p=>ProRosterPlanService.Priority(s,pick.Owner,p)).ThenBy(p=>p.Football.PlayerId).FirstOrDefault();
+            var chosen=s.Prospects.OrderByDescending(p=>ProRosterPlanService.AcquisitionScore(s,pick.Owner,p,RookieSalary(s,pick.Round),true)).ThenBy(p=>p.Football.PlayerId).FirstOrDefault();
             if(chosen is null)break;
             if(pick.Owner==s.UserTeam&&!includeUser&&s.Career?.Unemployed!=true&&(!staff||ProCareer.Controls(s,chosen.Football.Position)))break;
             if(staff)
@@ -138,7 +138,7 @@ public static class ProDraft
                 // Camp's top-51 exclusion must not fund extra compensatory selections at the expense of opening-day compliance.
                 var excluded=Math.Max(0,ProEconomy.Room(s,pick.Owner)-ProEconomy.Room(s with{Phase=ProPhase.RegularSeason},pick.Owner));
                 s=ProCpu.MakeRoom(s,pick.Owner,salary+(salary+3)/4+excluded+ProCpuBudget.FutureRolloverNeed(s,pick.Owner));
-                chosen=s.Prospects.OrderByDescending(p=>ProRosterPlanService.Priority(s,pick.Owner,p)).First();
+                chosen=s.Prospects.OrderByDescending(p=>ProRosterPlanService.AcquisitionScore(s,pick.Owner,p,salary,true)).First();
                 s=Pick(s,chosen.Football.PlayerId);
             }
         }
@@ -341,6 +341,7 @@ public static class ProOffseason
         return s with { Phase = ProPhase.Preseason, Week = 1, OffseasonStep = OffseasonStep.Retention, Games = ProSchedule.Build(s.League, s.Year), TaggedTeams = [], Picks = s.Picks.Concat(ProEconomy.CreatePicks(s, s.Year + 1)).DistinctBy(p => p.Id).ToList() };
     }
 }
+
 
 
 

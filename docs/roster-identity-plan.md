@@ -10,16 +10,17 @@ The same identity model powers both games. Pro decisions keep existing salary-ca
 
 ## Current behavior
 - Pro acquisition score blends roster priority and cap efficiency.
+- Pro CPU draft choices use cap-aware acquisition scoring, not raw OVR.
+- Pro free agency and waiver claims rank by acquisition score rather than raw OVR.
 - Pro trade value blends standard value, cap surplus, positional need and identity fit.
-- waiver claims rank by acquisition score rather than raw OVR.
-- draft picks and free agencies use fit/need-weighted priority.
-- trade markets rank interested teams by priority and value.
+- Pro retention processes higher-priority players first.
+- Pro cuts and trade markets rank interested teams by priority and value.
 - recruiting target counts reflect the team's offensive/defensive identity.
 
 ## Staff UI
 - Front Office > Staff now shows a compact priority strip for the team's highest positional weights.
 
 ## Next work
-- deeper cap/roster planning for extensions, cuts and trades;
 - staff-adapted philosophy changes;
+- pro depth/extension resource accounting;
 - long-term roster audits.
