@@ -36,6 +36,21 @@ The same identity model powers both games. Pro decisions keep existing salary-ca
 - `ProDepthChart.Plan` derives the working plan from the current identity model.
 - `ProDepthChart.AutoAssign` uses that identity plan to shape positional slots and fit ordering without changing the saved plan.
 
-## Next work
-- long-term roster audits;
-- staff-adapted CPU game-plan drift over seasons.
+## Long-term audit
+- A three-season audit across real and generated Pro/College modes (8,832 games) validated identity
+  adherence and balance; the report and per-mode JSON live in
+  [roster-identity-long-term-audit.md](roster-identity-long-term-audit.md) and
+  `docs/data/roster-identity-{2026-11-03,drift-2026-11-03}/`.
+- Identity roster-target gaps stay stable across seasons, zero personnel violations, and
+  acquisition-scoring-only philosophies keep the Pro/College rosters balanced.
+
+## Game-plan drift
+- CPU saved plans drift at most one adjacent playbook step per offseason toward an established head
+  coach's mapped philosophy; the user plan, custom playbooks, plans already at the target, and
+  teams below the shared influence gate never drift.
+- Pro derives the philosophy from engine-mappable coach scheme labels plus the catalog baseline;
+  College derives the offense target from the head coach's numeric stronger side (lean ≥ 3).
+- Hooks live in `ProGamePlanDrift` (Pro retention advance) and `RosterPlanService.ApplyCpuPlanDrift`
+  (college annual staff advance), both covered by dedicated drift tests.
+- The drift-enabled re-run of the long-term audit shows bounded drift with stable scoring, stable
+  roster-target gaps and an unchanged user plan each season.

@@ -1,5 +1,28 @@
 ## Current parity continuation — November 2, 2026
 
+## Roster identity long-term audit and CPU plan drift — November 3, 2026
+
+Branch `codex/roster-identity-and-priority`. Completed the two roster-identity plan next-work items in order.
+
+1. Long-term roster audit: three-season real/generated audits for Pro and College (8,832 games) through the
+   `tools/FootballBalanceAudit` season modes with identity evidence (roster-target gaps, plan distributions,
+   philosophy counts, drift counts, user-plan stability). Zero personnel violations, identity roster-target gaps
+   stable across seasons, and balance within noise in every season. Baseline with drift hooks disabled:
+   `docs/data/roster-identity-2026-11-03/`; report: docs/roster-identity-long-term-audit.md.
+2. Staff-adapted CPU game-plan drift: Pro CPU plans now drift one adjacent playbook step per offseason toward the
+   established head coach's mapped scheme-label philosophy during retention (`ProGamePlanDrift`), and college CPU
+   plans drift toward the head coach's numeric offensive lean during the annual staff advance
+   (`RosterPlanService.ApplyCpuPlanDrift`). User plans, custom playbooks and weak-influence coaches never drift;
+   the shared gate is `RosterPlanService.MinimumDriftInfluence` (.10, roughly two seasons of tenure with average
+   leadership). Dedicated tests pass (5 College + 3 Pro drift cases; Fast Pro 33, College 7, Engine 319) and the
+   drift-enabled re-audit (`docs/data/roster-identity-drift-2026-11-03/`) shows bounded drift (College real 49 and
+   generated 31 of 132-138 CPU programs, Pro 2-3) with stable scoring and unchanged user plans.
+
+Known local limits: `PortalProcessingTests.FullLeagueHighSchoolMarketUsesActualCompetingOffers` exceeded its 30s
+timing guard on this machine both with and without this batch (36.2s on base, 35.2s with the batch) — a
+machine-speed flake CI verifies separately; no APK, device flow, merge, or prerelease is claimed in this scope.
+
+
 ## Active roster/rules follow-up
 
 Published November 2: [Pro162 / College450 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules), tag `preview-2026-11-02-parity-rules`, target `d888557`. Both APK hashes match the successful main-build manifest; full changelog and checksums attached.
