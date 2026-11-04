@@ -36,6 +36,8 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Derive rivalry status from conference, division, geography, and history using league adapters.
    - Show rivalry labels in team, schedule, game-center, and historical-record views.
    - No simulation effect in the first increment.
+   - Added a shared rivalry model and service plus schedule labels.
+   - College gained a deterministic traditional-rivalry catalog and focused tests.
 
 2. **Expanded playbooks and pre-snap football**
    - Extend shared play definitions with motion, shift, trick-play, and defensive-counter metadata.
