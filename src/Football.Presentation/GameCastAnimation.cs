@@ -24,6 +24,7 @@ public sealed class GameCastAnimationContext
     public Func<bool> UseSprites { get; init; } = () => true;
     public Func<bool> ShowCarrierNames { get; init; } = () => true;
     public Func<int> CameraMode { get; init; } = () => 0;
+    public Func<ReplayAngle>? ReplayAngle { get; init; }
     public Action<double, double> FrameCamera { get; init; } = (_, _) => { };
     public double GameSpeed { get; init; } = 1;
     public double ReplaySpeed { get; init; } = 1;
@@ -710,7 +711,9 @@ public static class GameCastAnimation
             else currentBall = BallAt(Track(qbFrom, qbTo, progress));
             if (snap.TurnoverYardLine.HasValue && progress >= catchProgress) currentBall = BallAt(TurnoverTrack(progress));
             AbsoluteLayout.SetLayoutBounds(ball, currentBall);
-            if (context.CameraMode() != 0) context.FrameCamera(context.CameraMode() == 2 ? currentBall.X : (centerPoint.X + currentBall.X) / 2, context.CameraMode() == 2 ? currentBall.Y : .5);
+            var replayAngle = context.ReplayAngle?.Invoke() ?? ReplayAngle.Broadcast;
+            if (instantReplay && replayAngle != ReplayAngle.Broadcast) context.FrameCamera(replayAngle == ReplayAngle.FollowBall ? currentBall.X : 1 - currentBall.X, replayAngle == ReplayAngle.FollowBall ? currentBall.Y : .5);
+            else if (context.CameraMode() != 0) context.FrameCamera(context.CameraMode() == 2 ? currentBall.X : (centerPoint.X + currentBall.X) / 2, context.CameraMode() == 2 ? currentBall.Y : .5);
             fieldArt.WeatherPhase = progress * durationSeconds;
             if (session.Weather.Precipitation != GamePrecipitation.Clear) fieldLines.Invalidate();
             if (isTackle && terminalCarrierView is not null && primaryTacklerView is not null && progress >= .84)
@@ -735,3 +738,6 @@ public static class GameCastAnimation
     static Rect Interpolate(Rect start, Rect end, double progress) => new(
         start.X + (end.X - start.X) * progress, start.Y + (end.Y - start.Y) * progress, start.Width, start.Height);
 }
+
+
+

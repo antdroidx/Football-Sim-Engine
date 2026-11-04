@@ -48,6 +48,7 @@ public class GameCastLivePage : ContentPage
     bool started, menuOpen, closing, replaying, finishing;
     double speed, replaySpeed;
     int camera;
+    ReplayAngle replayAngle = ReplayAngle.Broadcast;
     bool autoReplay, showNames;
     bool landscape;
     bool? arrangedLandscape;
@@ -69,6 +70,7 @@ public class GameCastLivePage : ContentPage
         speed = Math.Clamp(Preferences.Get(Key("speed"), 1d), .5, 2);
         replaySpeed = Math.Clamp(Preferences.Get(Key("replay-speed"), 1d), .5, 2);
         camera = Math.Clamp(Preferences.Get(Key("camera"), 0), 0, 2);
+        replayAngle = BroadcastReplayService.AngleFor(Preferences.Get(Key("replay-angle"), BroadcastReplayService.Angles[0].ToString()));
         autoReplay = Preferences.Get(Key("auto-replay"), true); showNames = Preferences.Get(Key("names"), true);
         var home = Brand(session.Game.HomeTeamName);
         art = new() { HomeName = (home.FieldName ?? home.Abbreviation).ToUpperInvariant(), HomeInitial = home.Abbreviation,
@@ -471,13 +473,19 @@ public class GameCastLivePage : ContentPage
     }
     async Task ViewingOptions()
     {
-        var value = await GameDialogs.ActionSheetAsync(this, "Viewing options", "Cancel", null, "Camera", "Game speed", "Replay speed",
+        var value = await GameDialogs.ActionSheetAsync(this, "Viewing options", "Cancel", null, "Camera", "Replay angle", "Game speed", "Replay speed",
             "Automatic replays: " + (autoReplay ? "On" : "Off"), "Player names: " + (showNames ? "On" : "Off"));
         if (value == "Camera")
         {
             var names = new[] { "Full field", "Broadcast", "Follow ball" };
             var choice = await GameDialogs.ActionSheetAsync(this, "Camera", "Cancel", null, names); var index = Array.IndexOf(names, choice);
             if (index >= 0) { camera = index; Preferences.Set(Key("camera"), camera); FrameCamera(); }
+        }
+        else if (value == "Replay angle")
+        {
+            var names = BroadcastReplayService.Angles.Select(a => a.ToString()).ToArray();
+            var choice = await GameDialogs.ActionSheetAsync(this, "Replay angle", "Cancel", null, names);
+            if (Enum.TryParse<ReplayAngle>(choice, true, out var angle)) { replayAngle = angle; Preferences.Set(Key("replay-angle"), angle.ToString()); }
         }
         else if (value is "Game speed" or "Replay speed")
         {
@@ -532,7 +540,7 @@ public class GameCastLivePage : ContentPage
         Session = session, ControlledPlan = Plan, Players = players, Turf = turf, Artwork = art, Commentary = commentary, Highlight = highlight,
         SpritePlayers = spritePlayers, MarkerHosts = markerHosts, ActiveBallOwners = ballOwners, CreateMarker = Marker,
         ClearMarkers = () => { spritePlayers.Clear(); markerHosts.Clear(); ballOwners.Clear(); }, TeamPrimary = Primary, TeamSecondary = Secondary,
-        GameSpeed = speed, ReplaySpeed = replaySpeed, UseSprites = () => true, ShowCarrierNames = () => showNames, CameraMode = () => camera, FrameCamera = FrameCamera
+        GameSpeed = speed, ReplaySpeed = replaySpeed, UseSprites = () => true, ShowCarrierNames = () => showNames, CameraMode = () => camera, ReplayAngle = () => replayAngle, FrameCamera = FrameCamera
     }, snap, replay);
     void RenderHuddles()
     {
@@ -560,3 +568,4 @@ public class GameCastLivePage : ContentPage
         }
     }
 }
+
