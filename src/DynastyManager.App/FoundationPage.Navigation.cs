@@ -14,6 +14,8 @@ public sealed partial class FoundationPage
     private readonly VerticalStackLayout _seasonHub = new() { Spacing = 12 };
     private readonly VerticalStackLayout _matchupHub = new() { Spacing = 12 };
     private readonly VerticalStackLayout _newsRows = new() { Spacing = 10 };
+    private readonly Picker _newsScope = new() { ItemsSource = new[] { "All", "My team" }, SelectedIndex = 0 };
+    private string _newsFilter = "All";
     private readonly VerticalStackLayout _injuryRows = new() { Spacing = 10 };
     private readonly Picker _injuryScope = new() { ItemsSource = new[] { "Your team", "Entire league" }, SelectedIndex = 0 };
     private Action<int>? _selectRankingsPanel;
@@ -315,7 +317,11 @@ public sealed partial class FoundationPage
         return button;
     }
 
-    private View BuildNewsSection() => _newsRows;
+    private View BuildNewsSection()
+    {
+        _newsScope.SelectedIndexChanged += (_, _) => { _newsFilter = _newsScope.SelectedIndex == 1 ? "My team" : "All"; RenderNews(); };
+        return _newsRows;
+    }
 
     private View NewsCard(DynastyNewsStory story)
     {
@@ -364,14 +370,17 @@ public sealed partial class FoundationPage
 
     private void RenderNews()
     {
-        _newsRows.Children.Clear();
         if (_currentDynasty is null) return;
+        var requestedScope = _newsFilter == "My team" ? 1 : 0;
+        if (_newsScope.SelectedIndex != requestedScope) _newsScope.SelectedIndex = requestedScope;
+        _newsRows.Children.Clear();
         _newsRows.Children.Add(SectionTitle("News & headlines", "Dynasty Wire · results, people and stories from around the league"));
+        _newsRows.Children.Add(_newsScope);
         var stories = DynastyNewsService.Build(_currentDynasty);
+        if (_newsFilter == "My team") stories = stories.Where(s => s.TeamName == _currentDynasty.UserTeamName).ToArray();
         if (stories.Count > 0) _newsRows.Children.Add(FootballNewsCard.Layout(stories.Select(NewsCard)));
         if (stories.Count == 0) _newsRows.Children.Add(new Label { Text = "No stories yet. Check back as your season develops." });
     }
-
     private View BuildInjurySection()
     {
         _injuryScope.SelectedIndexChanged += (_, _) => RenderInjuryReport();
@@ -394,3 +403,4 @@ public sealed partial class FoundationPage
                 TableText(player.CurrentInjury!.Severity.ToString(), color: DynastyTheme.Palette("#E5A1B7")), TableText(player.CurrentInjury.BodyArea.ToString()), TableText(player.CurrentInjury.WeeksRemaining.ToString()) })));
     }
 }
+

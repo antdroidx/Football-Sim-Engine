@@ -60,6 +60,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Add persistent narrative memory keyed by team, player, coach, rivalry, and season.
    - Build a shared News Hub with league adapters, filters, saved/social/story views, and read state.
    - Reference only recorded facts and explicitly label fictional social posts as in-game media.
+   - Status: College News Hub now supports All/My-team scope filtering and mobile-friendly card layout.
 
 6. **GameCast immersion and broadcast replay**
    - Improve venue styling, visual markers, replay angles, highlight selection, and mobile readability.
@@ -140,6 +141,7 @@ Acceptance criteria:
 - Do not claim simulation, save, mobile-ui, or device acceptance without an actual focused check.
 - Android packaging and device acceptance require successful focused tests first.
 - No release or merge is part of planning.
+
 
 
 
