@@ -203,6 +203,15 @@ public static class ProRosterPlanService
         return Math.Clamp(value / Math.Max(1, costIndex) * priority * 100d, 1, 100);
     }
 
+    public static double RetentionScore(ProFranchise state, ProPlayer player, long annualSalary)
+    {
+        var priority = Priority(state, player.Football.TeamName, player);
+        var efficiency = CapEfficiency(state, player, annualSalary);
+        var ageCurve = player.Age <= 27 ? 1.05 : player.Age <= 32 ? 1.00 : Math.Max(.70, 1 - (player.Age - 32) * .02);
+        var headroom = Math.Clamp(ProDevelopment.Headroom(player) / 40d, 0, 1.5);
+        return priority * ageCurve * (1 + headroom * .08) + efficiency * .32;
+    }
+
     public static double AcquisitionScore(ProFranchise state, string team, ProPlayer player, long annualSalary, bool isDraft = false)
     {
         var priority = Priority(state, team, player);
@@ -273,6 +282,7 @@ public sealed class ProRosterPlan
             positional * need * 8 + headroom*upside, 1, 100);
     }
 }
+
 
 
 
