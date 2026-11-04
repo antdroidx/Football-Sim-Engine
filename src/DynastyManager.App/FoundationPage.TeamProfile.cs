@@ -62,7 +62,10 @@ public sealed partial class FoundationPage
                 T($"{GamePlanService.Label(plan.Offense)} offense · {GamePlanService.Label(plan.Defense)} defense · {GamePlanService.Label(plan.Approach)} approach",true)),
             Box("Staff",staff.Length==0?T("No staff records are available."):DataTable([("Role",170),("Name",210),("Age",55),("Overall",75)],staff.Select(item=>new View[]{
                 TableText(FormatStaffRole(item.Role)),CoachLink(item),TableText(item.Age.ToString()),TableText(item.OverallRating.ToString(),true)}))),
-            Box("Scouting department",ScoutDirectory()),
+            Box("Coach performance audit",staff.Length==0?T("No coaching records are available."):DataTable([("Role",170),("Name",210),("Expected",75),("Record",75),("Change",75),("Audit",160)],CollegeCoachPerformanceService.AuditLeague(state,[team]).Select(audit=>new View[]{
+                TableText(FormatStaffRole(audit.Role)), CoachLink(state.Staff.First(item=>item.StaffId==audit.StaffId)),
+                TableText(audit.ExpectedWins.ToString()), TableText($"{audit.Wins}-{audit.Losses}"),
+                TableText($"{audit.PerformanceChange:+0;-0;0}"), TableText(audit.Summary)}))),            Box("Scouting department",ScoutDirectory()),
             Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true))
         }};
         await Navigation.PushModalAsync(new ContentPage{Title=team.Name+" profile",AutomationId="college-team-profile-page",BackgroundColor=DynastyTheme.Background,Content=new ScrollView{Content=content}});

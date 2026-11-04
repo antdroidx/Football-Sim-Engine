@@ -172,12 +172,18 @@ public static class StaffManagementService
             var decline = item.Age >= 64 && growthSeed % 100 < Math.Min(35, item.Age - 58)
                 ? 1
                 : 0;
+            var team = state.LeagueTeams.FirstOrDefault(candidate =>
+                candidate.Name.Equals(item.TeamName, StringComparison.OrdinalIgnoreCase));
+            var prestige = team is null
+                ? 55
+                : ProgramPrestigeService.GetCurrentPrestige(state, team);
             var latest = state.TeamSeasonHistory
                 .Where(record => record.SeasonYear == state.SeasonYear && record.TeamName.Equals(item.TeamName, StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(record => record.SeasonYear).FirstOrDefault();
-            var performanceChange = latest is null || latest.Wins + latest.Losses == 0 ? 0 :
-                latest.Wins / (double)(latest.Wins + latest.Losses) >= .68 ? 1 :
-                latest.Wins / (double)(latest.Wins + latest.Losses) <= .32 ? -1 : 0;
+            var expectedWins = CollegeCoachPerformanceService.ExpectedWins(prestige);
+            var performanceChange = latest is null || latest.Wins + latest.Losses == 0
+                ? 0
+                : CollegeCoachPerformanceService.PerformanceChange(latest.Wins - expectedWins);
             var netChange = Math.Clamp(growth - decline + performanceChange, -1, 1);
 
             return item with
@@ -342,8 +348,8 @@ public static class StaffManagementService
         // New dynasties target about 65 overall in College. Prestige raises the center and the dynasty seed
         // creates a new but stable staff distribution for each save.
         var programBase = Math.Clamp(
-            (int)Math.Round(61 + (prestige - 65) * .20, MidpointRounding.AwayFromZero),
-            52, 74);
+            (int)Math.Round(58 + (prestige - 45) * .38, MidpointRounding.AwayFromZero),
+            50, 90);
         int Rating(string key, int adjustment = 0) => Clamp(
             programBase + adjustment +
             SimulationSeed.Create(
