@@ -31,7 +31,7 @@ CollegeTeamStrategyCatalog.SourceOffense/SourceDefense).
 | Wide-zone play action | PlayAction | Covered (Pro wide-zone play action × 2) |
 | Veer and shoot | Option | Mapped loosely (12 College teams); source labels retained for future refinement |
 | Veer / midline option | Option | Covered (Spread Option 5, Option 3) |
-| Triple option (flexbone: Air Force, Navy, Army) | Option (catalog) | Mapped; the dedicated Flexbone playbook exists but no catalog team uses it |
+| Triple option (flexbone: Air Force, Navy, Army) | Flexbone | Covered (academies run the dedicated Flexbone playbook with flexbone formations since November 4) |
 | Pistol | Formation, inside Spread playbook | Covered (4 College "Pistol" teams run Spread with Pistol formations) |
 | Wing-T, double wing, single wing, wildcat | none | Not covered; nothing at current FBS/NFL scope uses them and Custom plays can approximate them |
 | Vertical "Air Coryell" passing identity | PlayAction/DeepPass concepts | Partial: deep passing exists as a concept, no dedicated identity label |
@@ -56,8 +56,8 @@ CollegeTeamStrategyCatalog.SourceOffense/SourceDefense).
 
 - Pro offense: Balanced 4, PlayAction 14, Spread 9, PowerRun 5; no pro team uses AirRaid,
   Option or Flexbone - accurate for the NFL. Pro defense: 4-3 12, 3-4 13, Nickel 7.
-- College offense: Balanced 22, Spread 57, AirRaid 13, PowerRun 26, Option 20 (from 134 catalog
-  teams plus generated worlds); College defense: 4-3 25, 3-4 28, Nickel 81, Balanced 10. The
+- College offense: Balanced 22, Spread 57, AirRaid 13, PowerRun 26, Option 17, Flexbone 3 (from
+  134 catalog teams plus generated worlds); College defense: 4-3 25, 3-4 28, Nickel 81, Balanced 10. The
   Nickel playbook absorbs 4-2-5 and 3-3-5 teams as intended.
 - Every one of the 138 college and 32 pro team labels maps to a defined playbook enum; none fall
   through to Custom. Drift adjacency (added November 3) can reach every playbook from every other
@@ -69,5 +69,5 @@ The curated catalogs cover every mainstream modern offense and defense family at
 with named coverage/blitz concepts for scheme flavor. Real gaps are the scheme families that no
 current FBS/NFL program runs (Wing-T/double-wing/wildcat) and a few judgment-call mappings
 (Veer & Shoot -> Option, hybrid fronts -> nearest base) that stay documented through retained
-source labels. The dedicated Flexbone playbook is currently unused by the triple-option schools;
-if they should run true flexbone formations, that catalog mapping is a one-line follow-up.
+source labels. The dedicated Flexbone playbook is used by the three service academies
+since November 4.

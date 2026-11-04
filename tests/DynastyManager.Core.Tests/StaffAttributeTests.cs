@@ -53,7 +53,7 @@ public class StaffAttributeTests
         Assert.Equal(138,CollegeTeamStrategyCatalog.All.Count);
         Assert.Equal(138,CollegeTeamStrategyCatalog.All.Select(item=>item.TeamName).Distinct(StringComparer.OrdinalIgnoreCase).Count());
         Assert.True(CollegeTeamStrategyCatalog.TryGet("Air Force",out var airForce));
-        Assert.Equal(OffensivePlaybook.Option,airForce.Offense);
+        Assert.Equal(OffensivePlaybook.Flexbone,airForce.Offense);
         Assert.Equal(DefensivePlaybook.ThreeFour,airForce.Defense);
         var actual=CollegeTeamStrategyCatalog.All.Select(identity=>new Team{Name=identity.TeamName,
             Abbreviation=identity.TeamName[..Math.Min(3,identity.TeamName.Length)].ToUpperInvariant(),ConferenceName="Test",Prestige=65}).ToArray();

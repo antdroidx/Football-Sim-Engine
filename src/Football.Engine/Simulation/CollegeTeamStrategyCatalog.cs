@@ -57,7 +57,7 @@ public static class CollegeTeamStrategyCatalog
 
     static readonly CollegeTeamStrategy[] Entries =
     [
-        new("Air Force", "Option", "3-4 Zone", OffensivePlaybook.Option, DefensivePlaybook.ThreeFour, DefensiveApproach.Balanced, OffensiveFormation.Pistol, DefensiveFormation.ThreeFour, OffensiveTempo.ChewClock),
+        new("Air Force", "Option", "3-4 Zone", OffensivePlaybook.Flexbone, DefensivePlaybook.ThreeFour, DefensiveApproach.Balanced, OffensiveFormation.Flexbone, DefensiveFormation.ThreeFour, OffensiveTempo.ChewClock),
         new("Akron", "Spread", "3-4 Zone Pressure", OffensivePlaybook.Spread, DefensivePlaybook.ThreeFour, DefensiveApproach.Pressure, OffensiveFormation.ShotgunSpread, DefensiveFormation.ThreeFour, OffensiveTempo.Normal),
         new("Alabama", "Multiple", "3-4 Zone", OffensivePlaybook.Balanced, DefensivePlaybook.ThreeFour, DefensiveApproach.Balanced, OffensiveFormation.Singleback, DefensiveFormation.ThreeFour, OffensiveTempo.Normal),
         new("Appalachian State", "Spread", "4-2-5 Man", OffensivePlaybook.Spread, DefensivePlaybook.Nickel, DefensiveApproach.ProtectPass, OffensiveFormation.ShotgunSpread, DefensiveFormation.Nickel, OffensiveTempo.Normal),
@@ -65,7 +65,7 @@ public static class CollegeTeamStrategyCatalog
         new("Arizona State", "Multiple", "4-2-5 Zone Pressure", OffensivePlaybook.Balanced, DefensivePlaybook.Nickel, DefensiveApproach.Pressure, OffensiveFormation.Singleback, DefensiveFormation.Nickel, OffensiveTempo.Normal),
         new("Arkansas", "Spread", "3-3-5 Zone Pressure", OffensivePlaybook.Spread, DefensivePlaybook.Nickel, DefensiveApproach.Pressure, OffensiveFormation.ShotgunSpread, DefensiveFormation.Nickel, OffensiveTempo.Normal),
         new("Arkansas State", "Power Spread", "4-2-5", OffensivePlaybook.PowerRun, DefensivePlaybook.Nickel, DefensiveApproach.Balanced, OffensiveFormation.IForm, DefensiveFormation.Nickel, OffensiveTempo.ChewClock),
-        new("Army", "Option", "3-4 Zone Pressure", OffensivePlaybook.Option, DefensivePlaybook.ThreeFour, DefensiveApproach.Pressure, OffensiveFormation.Pistol, DefensiveFormation.ThreeFour, OffensiveTempo.ChewClock),
+        new("Army", "Option", "3-4 Zone Pressure", OffensivePlaybook.Flexbone, DefensivePlaybook.ThreeFour, DefensiveApproach.Pressure, OffensiveFormation.Flexbone, DefensiveFormation.ThreeFour, OffensiveTempo.ChewClock),
         new("Auburn", "Veer & Shoot", "3-3-5 Tite", OffensivePlaybook.Option, DefensivePlaybook.Nickel, DefensiveApproach.Balanced, OffensiveFormation.Pistol, DefensiveFormation.Nickel, OffensiveTempo.ChewClock),
         new("Ball State", "Spread", "Multiple", OffensivePlaybook.Spread, DefensivePlaybook.Balanced, DefensiveApproach.Balanced, OffensiveFormation.ShotgunSpread, DefensiveFormation.Nickel, OffensiveTempo.Normal),
         new("Baylor", "Air Raid", "3-3-5 Shell", OffensivePlaybook.AirRaid, DefensivePlaybook.Nickel, DefensiveApproach.ProtectPass, OffensiveFormation.Empty, DefensiveFormation.Nickel, OffensiveTempo.UpTempo),
@@ -125,7 +125,7 @@ public static class CollegeTeamStrategyCatalog
         new("Mississippi State", "Veer & Shoot", "3-3-5", OffensivePlaybook.Option, DefensivePlaybook.Nickel, DefensiveApproach.Balanced, OffensiveFormation.Pistol, DefensiveFormation.Nickel, OffensiveTempo.ChewClock),
         new("Missouri", "Power Spread", "4-2-5 Zone", OffensivePlaybook.PowerRun, DefensivePlaybook.Nickel, DefensiveApproach.Balanced, OffensiveFormation.IForm, DefensiveFormation.Nickel, OffensiveTempo.ChewClock),
         new("Missouri State", "Spread", "3-3-5 Tite", OffensivePlaybook.Spread, DefensivePlaybook.Nickel, DefensiveApproach.Balanced, OffensiveFormation.ShotgunSpread, DefensiveFormation.Nickel, OffensiveTempo.Normal),
-        new("Navy", "Option", "3-3-5 Zone Pressure", OffensivePlaybook.Option, DefensivePlaybook.Nickel, DefensiveApproach.Pressure, OffensiveFormation.Pistol, DefensiveFormation.Nickel, OffensiveTempo.ChewClock),
+        new("Navy", "Option", "3-3-5 Zone Pressure", OffensivePlaybook.Flexbone, DefensivePlaybook.Nickel, DefensiveApproach.Pressure, OffensiveFormation.Flexbone, DefensiveFormation.Nickel, OffensiveTempo.ChewClock),
         new("NC State", "Power Spread", "3-4 Shell", OffensivePlaybook.PowerRun, DefensivePlaybook.ThreeFour, DefensiveApproach.ProtectPass, OffensiveFormation.IForm, DefensiveFormation.ThreeFour, OffensiveTempo.ChewClock),
         new("Nebraska", "Multiple", "4-2-5 Man Pressure", OffensivePlaybook.Balanced, DefensivePlaybook.Nickel, DefensiveApproach.Pressure, OffensiveFormation.Singleback, DefensiveFormation.Nickel, OffensiveTempo.Normal),
         new("Nevada", "Spread", "Multiple", OffensivePlaybook.Spread, DefensivePlaybook.Balanced, DefensiveApproach.Balanced, OffensiveFormation.ShotgunSpread, DefensiveFormation.Nickel, OffensiveTempo.Normal),

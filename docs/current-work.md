@@ -25,6 +25,9 @@ Playbook/scheme coverage verification: audited the 8 offensive playbooks, 5 defe
    (Veer and Shoot to Option, hybrid fronts to nearest base); the dedicated Flexbone playbook is currently
    unused by the triple-option schools.
 
+Flexbone academies: Air Force, Army and Navy now run the dedicated Flexbone playbook with
+   flexbone formations (previously the generic Option playbook), matching real triple-option football;
+   source labels stay "Option" with defensive identities unchanged.
 Perf fix: the branch's identity work replaced constant roster-count lookups with full
    RosterPlanService.GetRosterTarget calls inside the competing recruiting market loops, which pushed
    PortalProcessingTests.FullLeagueHighSchoolMarketUsesActualCompetingOffers past its 30s guard in CI (40s).
