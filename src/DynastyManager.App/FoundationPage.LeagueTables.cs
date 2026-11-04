@@ -133,7 +133,8 @@ public sealed partial class FoundationPage
                     resultColor = userScore > otherScore ? PositiveChangeColor : NegativeChangeColor;
                 }
             }
-            var rivalry = RivalryService.Label(_currentDynasty.Schedule, game.HomeTeamName, game.AwayTeamName);
+            var rivalry = TraditionalCollegeRivalries.Label(_currentDynasty.LeagueTeams, game.HomeTeamName, game.AwayTeamName);
+            if (string.IsNullOrWhiteSpace(rivalry)) rivalry = RivalryService.Label(_currentDynasty.Schedule, game.HomeTeamName, game.AwayTeamName);
             var type = game.GameType switch { ScheduledGameType.Conference => "CONF", ScheduledGameType.ConferenceChampionship => "CCG",
                 ScheduledGameType.CollegeFootballPlayoff => "CFP", ScheduledGameType.Bowl => "BOWL", _ => "OOC" };
             var stats = home ? game.HomeStats : game.AwayStats;

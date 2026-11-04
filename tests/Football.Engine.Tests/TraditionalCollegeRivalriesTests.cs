@@ -48,5 +48,20 @@ public class TraditionalCollegeRivalriesTests
         Assert.True(TraditionalCollegeRivalries.IsTraditional(teams, "USC", "Notre Dame"));
         Assert.False(TraditionalCollegeRivalries.IsTraditional(teams, "USC", "Washington"));
     }
+
+    [Fact]
+    public void TraditionalLabelUsesAnnualAndNamedPairingsOnly()
+    {
+        var teams = new[]
+        {
+            new Team { Name = "Notre Dame", Abbreviation = "ND", ConferenceName = "Independent" },
+            new Team { Name = "Stanford", Abbreviation = "STAN", ConferenceName = "ACC" },
+            new Team { Name = "Washington", Abbreviation = "UW", ConferenceName = "Big Ten" },
+            new Team { Name = "Washington State", Abbreviation = "WSU", ConferenceName = "Big Ten" }
+        };
+        Assert.Equal("Annual rivalry", TraditionalCollegeRivalries.Label(teams, "Notre Dame", "Stanford"));
+        Assert.Equal("Rivalry", TraditionalCollegeRivalries.Label(teams, "Washington", "Washington State"));
+        Assert.Equal(string.Empty, TraditionalCollegeRivalries.Label(teams, "Notre Dame", "Washington"));
+    }
 }
 

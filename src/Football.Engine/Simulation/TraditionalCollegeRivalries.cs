@@ -63,6 +63,15 @@ public static class TraditionalCollegeRivalries
         ("San Diego State", "Fresno State", false)
     ];
 
+    public static string Label(IReadOnlyList<Team> teams, string teamAName, string teamBName)
+    {
+        var pair = Pairs.FirstOrDefault(value => IsPair(value.TeamA, value.TeamB, teamAName, teamBName));
+        if (pair == default || !IsTraditional(teams, teamAName, teamBName)) return string.Empty;
+        return pair.Annual ? "Annual rivalry" : "Rivalry";
+    }
+    private static bool IsPair(string firstA, string firstB, string secondA, string secondB) =>
+        (firstA.Equals(secondA, StringComparison.OrdinalIgnoreCase) && firstB.Equals(secondB, StringComparison.OrdinalIgnoreCase)) ||
+        (firstA.Equals(secondB, StringComparison.OrdinalIgnoreCase) && firstB.Equals(secondA, StringComparison.OrdinalIgnoreCase));
     public static bool IsTraditional(IReadOnlyList<Team> teams, string teamAName, string teamBName)
     {
         var leagueNames = teams.Select(team => team.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);

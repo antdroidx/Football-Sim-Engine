@@ -38,6 +38,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - No simulation effect in the first increment.
    - Added a shared rivalry model and service plus schedule labels.
    - College gained a deterministic traditional-rivalry catalog and focused tests.
+   - College schedule labels now prefer the traditional catalog and distinguish annual rivalries from other historical pairings.
 
 2. **Expanded playbooks and pre-snap football**
    - Started a shared pre-snap model and catalog focused on non-simulation presentation intent.
@@ -139,5 +140,6 @@ Acceptance criteria:
 - Do not claim simulation, save, mobile-ui, or device acceptance without an actual focused check.
 - Android packaging and device acceptance require successful focused tests first.
 - No release or merge is part of planning.
+
 
 
