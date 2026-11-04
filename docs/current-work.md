@@ -18,6 +18,13 @@ Branch `codex/roster-identity-and-priority`. Completed the two roster-identity p
    drift-enabled re-audit (`docs/data/roster-identity-drift-2026-11-03/`) shows bounded drift (College real 49 and
    generated 31 of 132-138 CPU programs, Pro 2-3) with stable scoring and unchanged user plans.
 
+Perf fix: the branch's identity work replaced constant roster-count lookups with full
+   RosterPlanService.GetRosterTarget calls inside the competing recruiting market loops, which pushed
+   PortalProcessingTests.FullLeagueHighSchoolMarketUsesActualCompetingOffers past its 30s guard in CI (40s).
+   RosterPlanService now memoizes identity and roster-target values with weak, state-instance keys (same
+   pattern as the existing recruiting preference memos), keeping identical results while restoring the hot
+   market path.
+
 Known local limits: `PortalProcessingTests.FullLeagueHighSchoolMarketUsesActualCompetingOffers` exceeded its 30s
 timing guard on this machine both with and without this batch (36.2s on base, 35.2s with the batch) — a
 machine-speed flake CI verifies separately; no APK, device flow, merge, or prerelease is claimed in this scope.

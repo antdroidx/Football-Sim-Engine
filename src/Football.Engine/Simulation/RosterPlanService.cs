@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using DynastyManager.Core.Models;
 
 namespace DynastyManager.Core.Simulation;
@@ -33,7 +35,24 @@ public sealed record PersonnelProfile(double PassRatio, double RunRatio, double 
 /// </summary>
 public static class RosterPlanService
 {
+    // Identities derive from the state record, so memoization keyed by the state instance stays
+    // fresh for every save change; the weak table lets old states collect as usual.
+    private static readonly ConditionalWeakTable<DynastyState,
+        ConcurrentDictionary<string, TeamIdentity>> IdentityCache = new();
+    private static readonly ConditionalWeakTable<DynastyState,
+        ConcurrentDictionary<(string Team, Position Position), int>> RosterTargetCache = new();
+
     public static TeamIdentity GetIdentity(
+        DynastyState state,
+        string team,
+        IReadOnlyList<DynastyPlayer>? roster = null)
+    {
+        if (roster is not null) return BuildIdentity(state, team, roster);
+        return IdentityCache.GetValue(state, static _ => new())
+            .GetOrAdd(team, static (key, targetState) => BuildIdentity(targetState, key, null), state);
+    }
+
+    private static TeamIdentity BuildIdentity(
         DynastyState state,
         string team,
         IReadOnlyList<DynastyPlayer>? roster = null)
@@ -137,9 +156,14 @@ public static class RosterPlanService
         string team,
         TeamIdentity? identity = null)
     {
-        identity ??= GetIdentity(state, team);
-        return position switch
-        {
+        if (identity is not null) return ComputeRosterTarget(identity, position);
+        return RosterTargetCache.GetValue(state, static _ => new())
+            .GetOrAdd((team, position), static (key, targetState) =>
+                ComputeRosterTarget(GetIdentity(targetState, key.Team), key.Position), state);
+    }
+
+    private static int ComputeRosterTarget(TeamIdentity identity, Position position) => position switch
+    {
             Position.FB when identity.Offense is OffensivePlaybook.PowerRun or OffensivePlaybook.Flexbone => 1,
             Position.FB => 0,
             Position.QB => 3,
@@ -163,7 +187,6 @@ public static class RosterPlanService
             Position.P => identity.Offense is OffensivePlaybook.AirRaid or OffensivePlaybook.Spread ? 0 : 1,
             _ => 2
         };
-    }
 
     public static IReadOnlyDictionary<Position, int> GetPositionPriorities(
         OffensivePlaybook offense, DefensivePlaybook defense, DefensiveApproach approach)
