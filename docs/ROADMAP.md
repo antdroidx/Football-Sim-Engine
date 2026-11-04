@@ -64,7 +64,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Improve venue styling, visual markers, replay angles, highlight selection, and mobile readability.
    - Replays must consume recorded state only and never reroll simulation.
    - Preserve portrait/landscape and light/dark usability.
-   - Status: Complete for three presentation-only engine presets (Broadcast, FollowBall, and ReverseFollow); UI bindings remain before milestone completion.
+   - Status: Shared GameCast now persists and applies a replay angle; Broadcast, FollowBall, and ReverseFollow are wired into the shared live page and engine preset catalog.
 
 7. **Player and coach Hall of Fame**
    - Create a shared scoring and citation core.
@@ -139,4 +139,5 @@ Acceptance criteria:
 - Do not claim simulation, save, mobile-ui, or device acceptance without an actual focused check.
 - Android packaging and device acceptance require successful focused tests first.
 - No release or merge is part of planning.
+
 
