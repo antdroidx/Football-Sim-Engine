@@ -40,7 +40,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - College gained a deterministic traditional-rivalry catalog and focused tests.
 
 2. **Expanded playbooks and pre-snap football**
-   - Extend shared play definitions with motion, shift, trick-play, and defensive-counter metadata.
+   - Started a shared pre-snap model and catalog focused on non-simulation presentation intent.
    - Add legal situational actions and keep College/Pro personnel and rules separate.
    - Preserve deterministic simulation, mobile call-sheet density, and replay compatibility.
 
