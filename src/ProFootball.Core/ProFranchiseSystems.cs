@@ -330,7 +330,7 @@ public static class ProOffseason
             var retired = players.Where(p => p.Retired).Select(p => p.Football.PlayerId).ToHashSet();
             var merged = players.Select(p => retired.Contains(p.Football.PlayerId) ? p with { Football = p.Football with { TeamName = "Retired" }, PracticeSquad = false, Reserve = false } : p).ToList();
             var next = s with { Year = year, Week = 1, Players = merged, SalaryCap = nextCap, Owners = owners, Coaches = s.Coaches, Games = [], OffseasonStep = OffseasonStep.FreeAgency, LetExpire = [], Bids = [], Waivers = [], Champion = null };
-            return ProDraft.Generate(ProStaff.ManageCpu(next));
+            return ProDraft.Generate(ProStaff.ManageCpu(ProGamePlanDrift.Apply(next)));
         }
         if (s.OffseasonStep == OffseasonStep.FreeAgency) return ProDraft.AutoScout(ProDraft.AutoUntilUser(ProCpu.Manage(s.AutoManageFreeAgency?ProFreeAgencyAssistance.Propose(s):s) with { OffseasonStep = OffseasonStep.Draft }));
         if (s.OffseasonStep == OffseasonStep.Draft)

@@ -237,5 +237,138 @@ public static class RosterPlanService
             1, 100) * graduationRisk;
     }
 
+    /// <summary>
+    /// College staff lean is derived from the head coach's stronger side, because college staff records carry
+    /// numeric coaching attributes instead of scheme labels. Generated staff ratings differ by small offsets,
+    /// so a lean of at least three marks a clearly offense- or defense-focused coach. Weight follows the same
+    /// tenure/leadership rule as the Pro model. College acquisition scoring never reads this; it only powers
+    /// CPU plan drift and audit evidence, so season-zero and balanced staff keep the catalog identity exactly.
+    /// </summary>
+    public static StaffPhilosophy? HeadLeanPhilosophy(
+        DynastyState state, string team, OffensivePlaybook fallbackOffense, DefensivePlaybook fallbackDefense)
+    {
+        var head = StaffManagementService.GetStaff(state, team, StaffRole.HeadCoach);
+        if (head is null) return null;
+        return HeadLeanPhilosophy(head, StaffAttributeService.Coaching(head), fallbackOffense, fallbackDefense);
+    }
+
+    public static StaffPhilosophy? HeadLeanPhilosophy(
+        StaffMember head, CoachingAttributes coaching, OffensivePlaybook fallbackOffense, DefensivePlaybook fallbackDefense)
+    {
+        var lean = coaching.OffensePlaycalling - coaching.DefenseScheme;
+        var offense = lean >= 3 ? OffensivePlaybook.Spread
+            : lean <= -3 ? OffensivePlaybook.PowerRun
+            : (OffensivePlaybook?)null;
+        if (offense is null) return null;
+        var weight = Math.Clamp(.05 * head.TenureYears + (head.Leadership - 55) / 300d, .05, .40);
+        return new(offense.Value, fallbackDefense, weight);
+    }
+
+    /// <summary>
+    /// CPU plan drift starts once head-coach influence is established: roughly two seasons of tenure with
+    /// average leadership. The saved team plan still keeps its authority because each step is one adjacent
+    /// playbook per offseason toward the coach target, and user plans never drift.
+    /// </summary>
+    public const double MinimumDriftInfluence = .10;
+
+    /// <summary>
+    /// Bounded CPU plan drift. Each step moves a saved offense/defense one adjacency step toward the staff
+    /// target; custom playbooks and plans already at the target stay unchanged. Shared by both games.
+    /// </summary>
+    public static TeamGamePlan DriftPlan(
+        TeamGamePlan plan, OffensivePlaybook? offenseTarget, DefensivePlaybook? defenseTarget)
+        => plan with
+        {
+            Offense = OffenseStep(plan.Offense, offenseTarget),
+            Defense = DefenseStep(plan.Defense, defenseTarget)
+        };
+
+    public static OffensivePlaybook OffenseStep(OffensivePlaybook offense, OffensivePlaybook? target) =>
+        target is not OffensivePlaybook goal || goal is OffensivePlaybook.Custom || offense is OffensivePlaybook.Custom
+            ? offense : StepTowards(offense, goal, OffensePaths);
+
+    public static DefensivePlaybook DefenseStep(DefensivePlaybook defense, DefensivePlaybook? target) =>
+        target is not DefensivePlaybook goal || goal is DefensivePlaybook.Custom || defense is DefensivePlaybook.Custom
+            ? defense : StepTowards(defense, goal, DefensePaths);
+
+    static readonly IReadOnlyDictionary<OffensivePlaybook, IReadOnlyList<OffensivePlaybook>> OffensePaths = new
+        Dictionary<OffensivePlaybook, IReadOnlyList<OffensivePlaybook>>
+    {
+        [OffensivePlaybook.Balanced] = [OffensivePlaybook.PlayAction, OffensivePlaybook.Spread, OffensivePlaybook.PowerRun],
+        [OffensivePlaybook.PlayAction] = [OffensivePlaybook.Balanced, OffensivePlaybook.Spread],
+        [OffensivePlaybook.Spread] = [OffensivePlaybook.Balanced, OffensivePlaybook.PlayAction, OffensivePlaybook.AirRaid, OffensivePlaybook.PowerRun],
+        [OffensivePlaybook.AirRaid] = [OffensivePlaybook.Spread],
+        [OffensivePlaybook.PowerRun] = [OffensivePlaybook.Balanced, OffensivePlaybook.Spread, OffensivePlaybook.Option],
+        [OffensivePlaybook.Option] = [OffensivePlaybook.PowerRun, OffensivePlaybook.Spread, OffensivePlaybook.Flexbone],
+        [OffensivePlaybook.Flexbone] = [OffensivePlaybook.Option]
+    };
+
+    static readonly IReadOnlyDictionary<DefensivePlaybook, IReadOnlyList<DefensivePlaybook>> DefensePaths = new
+        Dictionary<DefensivePlaybook, IReadOnlyList<DefensivePlaybook>>
+    {
+        [DefensivePlaybook.Balanced] = [DefensivePlaybook.FourThree],
+        [DefensivePlaybook.FourThree] = [DefensivePlaybook.Balanced, DefensivePlaybook.ThreeFour, DefensivePlaybook.Nickel],
+        [DefensivePlaybook.ThreeFour] = [DefensivePlaybook.FourThree, DefensivePlaybook.Nickel],
+        [DefensivePlaybook.Nickel] = [DefensivePlaybook.FourThree, DefensivePlaybook.ThreeFour]
+    };
+
+    static T StepTowards<T>(T current, T target, IReadOnlyDictionary<T, IReadOnlyList<T>> graph) where T : struct, Enum
+    {
+        if (EqualityComparer<T>.Default.Equals(current, target)) return current;
+        T best = current; var bestDistance = int.MaxValue;
+        foreach (var neighbor in NeighborsOf(current, graph).Keys)
+        {
+            var distance = DistanceFrom(neighbor, target, graph);
+            if (distance < bestDistance) { best = neighbor; bestDistance = distance; }
+        }
+        return bestDistance is int.MaxValue ? current : best;
+    }
+
+    static IReadOnlyDictionary<T, bool> NeighborsOf<T>(T node, IReadOnlyDictionary<T, IReadOnlyList<T>> graph) where T : struct, Enum
+    {
+        var neighbors = new Dictionary<T, bool>();
+        if (graph.TryGetValue(node, out var forward)) foreach (var item in forward) neighbors[item] = true;
+        foreach (var (other, list) in graph) if (list.Contains(node)) neighbors.TryAdd(other, true);
+        return neighbors;
+    }
+
+    static int DistanceFrom<T>(T from, T target, IReadOnlyDictionary<T, IReadOnlyList<T>> graph) where T : struct, Enum
+    {
+        if (EqualityComparer<T>.Default.Equals(from, target)) return 0;
+        var seen = new HashSet<T> { from };
+        var frontier = new List<T> { from };
+        for (var depth = 1; frontier.Count > 0; depth++)
+        {
+            var next = new List<T>();
+            foreach (var node in frontier) foreach (var neighbor in NeighborsOf(node, graph).Keys) if (seen.Add(neighbor)) next.Add(neighbor);
+            if (next.Contains(target)) return depth;
+            frontier = next;
+        }
+        return int.MaxValue;
+    }
+
+    /// <summary>
+    /// College CPU game plans drift one step per offseason toward a head coach whose stronger coaching side
+    /// diverges from the saved plan. User plans, plans without staff targets and weak influence stay unchanged.
+    /// </summary>
+    public static DynastyState ApplyCpuPlanDrift(DynastyState state)
+    {
+        var plans = state.TeamGamePlans.ToList();
+        var changed = false;
+        foreach (var team in state.LeagueTeams)
+        {
+            if (team.Name.Equals(state.UserTeamName, StringComparison.OrdinalIgnoreCase)) continue;
+            var index = plans.FindIndex(plan => plan.TeamName.Equals(team.Name, StringComparison.OrdinalIgnoreCase));
+            if (index < 0) continue;
+            var philosophy = HeadLeanPhilosophy(state, team.Name, plans[index].Offense, plans[index].Defense);
+            if (philosophy is null || philosophy.Weight < MinimumDriftInfluence) continue;
+            var drifted = DriftPlan(plans[index], philosophy.Offense, null);
+            if (drifted == plans[index]) continue;
+            plans[index] = drifted;
+            changed = true;
+        }
+        return changed ? state with { TeamGamePlans = plans.ToArray() } : state;
+    }
+
     static double priorit(double value) => value;
 }

@@ -205,11 +205,11 @@ public static class StaffManagementService
             };
         }).ToArray();
 
-        var advanced = CoachSuccessionService.ResolveRetirements(state with
+        var advanced = RosterPlanService.ApplyCpuPlanDrift(CoachSuccessionService.ResolveRetirements(state with
         {
             Staff = staff,
             StaffLastAdvancedSeasonYear = state.SeasonYear
-        });
+        }));
         var userTeam = advanced.LeagueTeams.FirstOrDefault(team =>
             team.Name.Equals(advanced.UserTeamName, StringComparison.OrdinalIgnoreCase));
         return userTeam is null ? advanced : ScoutingDepartmentService.AdvanceSeason(advanced, userTeam);

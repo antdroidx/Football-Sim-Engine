@@ -1,0 +1,222 @@
+{
+  "Mode": "pro-real-seasons",
+  "Seasons": [
+    {
+      "Year": 2026,
+      "Games": 272,
+      "Points": 23.83639705882353,
+      "Yards": 361.0459558823529,
+      "Passing": 261.7022058823529,
+      "Rushing": 127.49816176470588,
+      "PassAttempts": 36.13970588235294,
+      "RushAttempts": 27.294117647058822,
+      "CompletionPct": 61.622583926754835,
+      "YardsPerRush": 4.671268857758621,
+      "YardsPerPass": 7.241403865717192,
+      "Sacks": 4.306985294117647,
+      "Turnovers": 1.5404411764705883,
+      "PassLeader": 6367,
+      "RushLeader": 1744,
+      "GeneratedNewcomersPlaying": 0,
+      "RosterAverage": 78.29366028708134,
+      "TeamMeanStandardDeviation": 1.1384265621471734
+    },
+    {
+      "Year": 2027,
+      "Games": 272,
+      "Points": 23.97426470588235,
+      "Yards": 362.5091911764706,
+      "Passing": 266.97610294117646,
+      "Rushing": 122.66360294117646,
+      "PassAttempts": 36.28492647058823,
+      "RushAttempts": 27.303308823529413,
+      "CompletionPct": 61.68498910785754,
+      "YardsPerRush": 4.492627751969299,
+      "YardsPerPass": 7.357768883935356,
+      "Sacks": 4.178308823529412,
+      "Turnovers": 1.4705882352941178,
+      "PassLeader": 6248,
+      "RushLeader": 1707,
+      "GeneratedNewcomersPlaying": 128,
+      "RosterAverage": 76.15767634854772,
+      "TeamMeanStandardDeviation": 2.0612016435197447
+    },
+    {
+      "Year": 2028,
+      "Games": 272,
+      "Points": 23.77573529411765,
+      "Yards": 364.15257352941177,
+      "Passing": 268.3970588235294,
+      "Rushing": 123.49632352941177,
+      "PassAttempts": 36.91360294117647,
+      "RushAttempts": 27.402573529411764,
+      "CompletionPct": 60.98799860564713,
+      "YardsPerRush": 4.506741799154759,
+      "YardsPerPass": 7.270952641800707,
+      "Sacks": 4.21875,
+      "Turnovers": 1.6525735294117647,
+      "PassLeader": 6244,
+      "RushLeader": 2023,
+      "GeneratedNewcomersPlaying": 295,
+      "RosterAverage": 74.99288678126852,
+      "TeamMeanStandardDeviation": 2.6669517031703047
+    }
+  ],
+  "ProRosterSeasons": [
+    {
+      "Year": 2026,
+      "PracticePlayers": 0,
+      "ActiveMinimum": 47,
+      "ActiveMaximum": 53,
+      "ReservePlayers": 181,
+      "Fullbacks": 16
+    },
+    {
+      "Year": 2027,
+      "PracticePlayers": 0,
+      "ActiveMinimum": 45,
+      "ActiveMaximum": 53,
+      "ReservePlayers": 0,
+      "Fullbacks": 10
+    },
+    {
+      "Year": 2028,
+      "PracticePlayers": 0,
+      "ActiveMinimum": 45,
+      "ActiveMaximum": 53,
+      "ReservePlayers": 0,
+      "Fullbacks": 8
+    }
+  ],
+  "ProIdentitySeasons": [
+    {
+      "Year": 2026,
+      "SavedPlans": 32,
+      "PlanOffenses": [
+        {
+          "Playbook": "Balanced",
+          "Teams": 4
+        },
+        {
+          "Playbook": "PlayAction",
+          "Teams": 14
+        },
+        {
+          "Playbook": "Spread",
+          "Teams": 9
+        },
+        {
+          "Playbook": "PowerRun",
+          "Teams": 5
+        }
+      ],
+      "PlanDefenses": [
+        {
+          "Playbook": "FourThree",
+          "Teams": 12
+        },
+        {
+          "Playbook": "ThreeFour",
+          "Teams": 13
+        },
+        {
+          "Playbook": "Nickel",
+          "Teams": 7
+        }
+      ],
+      "PhilosophyTeams": 2,
+      "DriftedFromCatalog": 0,
+      "PositionTargetGapPerTeam": 11.59,
+      "UserPlanOffense": "PlayAction",
+      "UserPlanDefense": "FourThree"
+    },
+    {
+      "Year": 2027,
+      "SavedPlans": 32,
+      "PlanOffenses": [
+        {
+          "Playbook": "Balanced",
+          "Teams": 4
+        },
+        {
+          "Playbook": "PlayAction",
+          "Teams": 14
+        },
+        {
+          "Playbook": "Spread",
+          "Teams": 9
+        },
+        {
+          "Playbook": "PowerRun",
+          "Teams": 5
+        }
+      ],
+      "PlanDefenses": [
+        {
+          "Playbook": "FourThree",
+          "Teams": 12
+        },
+        {
+          "Playbook": "ThreeFour",
+          "Teams": 14
+        },
+        {
+          "Playbook": "Nickel",
+          "Teams": 6
+        }
+      ],
+      "PhilosophyTeams": 2,
+      "DriftedFromCatalog": 2,
+      "PositionTargetGapPerTeam": 11.97,
+      "UserPlanOffense": "PlayAction",
+      "UserPlanDefense": "FourThree"
+    },
+    {
+      "Year": 2028,
+      "SavedPlans": 32,
+      "PlanOffenses": [
+        {
+          "Playbook": "Balanced",
+          "Teams": 4
+        },
+        {
+          "Playbook": "PlayAction",
+          "Teams": 14
+        },
+        {
+          "Playbook": "Spread",
+          "Teams": 9
+        },
+        {
+          "Playbook": "PowerRun",
+          "Teams": 5
+        }
+      ],
+      "PlanDefenses": [
+        {
+          "Playbook": "FourThree",
+          "Teams": 12
+        },
+        {
+          "Playbook": "ThreeFour",
+          "Teams": 14
+        },
+        {
+          "Playbook": "Nickel",
+          "Teams": 6
+        }
+      ],
+      "PhilosophyTeams": 3,
+      "DriftedFromCatalog": 2,
+      "PositionTargetGapPerTeam": 13.59,
+      "UserPlanOffense": "PlayAction",
+      "UserPlanDefense": "FourThree"
+    }
+  ],
+  "CollegeIdentitySeasons": [],
+  "PersonnelSampleGames": 54,
+  "PrimaryQBSnapShare": 1,
+  "ThirdAndLaterRBCarryShare": 0.10929647711514633,
+  "BackupDLSnapShare": 0.3597223314010629,
+  "InvalidPersonnelSnaps": 0
+}
