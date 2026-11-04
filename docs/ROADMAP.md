@@ -45,6 +45,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Preserve deterministic simulation, mobile call-sheet density, and replay compatibility.
 
 3. **Captains, leadership, cohesion, and scheme familiarity**
+   - Added a shared team-chemistry record and deterministic captain/id helper.
    - Add shared captain, player-leadership, team-cohesion, and scheme-familiarity records.
    - Feed from tenure, roster turnover, coaching change, plan usage, injuries, and discipline.
    - Apply bounded simulation modifiers with player-facing explanations.
