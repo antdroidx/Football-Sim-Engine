@@ -1,10 +1,10 @@
 # Implementation handoff — resume here
 
-Last updated: November 2, 2026 (America/Los_Angeles). The parity and subsequent roster/rules/test-ownership changes are merged to main at `cb16217`. Follow-up implementation is `f4c3bbf`; final successful main APKs are Pro162 / College450 (branch validation APKs Pro161 / College449). Current integration/build status and limits: [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md), with exact APK identities in `audits/roster-rules-acceptance.json`. Earlier parity acceptance remains historical in `audits/parity-acceptance-current.json`. This is the model-independent continuation point; current status supersedes historical checkpoints below.
+Last updated: November 4, 2026 (America/Los_Angeles). Latest release: **Pro165 / College454**, tag `preview-2026-11-04-roster-identity`; main implementation `9c9ff9c`, release record `8a62a03`. The roster identity model, three-season audit, CPU game-plan drift and Flexbone academies are merged and released. Current build/check evidence is in [ROADMAP.md](ROADMAP.md), [current-work.md](current-work.md), [testing-scope.md](testing-scope.md), [roster-identity-long-term-audit.md](roster-identity-long-term-audit.md) and [playbook-scheme-coverage-audit.md](playbook-scheme-coverage-audit.md). Historical parity checkpoints below are retained as evidence.
+
 
 ## Active follow-up
-
-CPU roster safeguards/future planning, supported additional officiating rules and validation-test refactoring are complete and merged after validation. Review completion, evidence and future limits in [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The completed parity batch below remains historical evidence.
+The parity follow-up is complete and released as the historical Pro162 / College450 baseline. The current accepted release is Pro165 / College454. Remaining work after this point: device/native acceptance for a future all-screen release, explicit officiating extensions, intermittent career cap/roster validation when reproduced, and the original design backlog. Use ROADMAP.md's "Current focus" section as the continuation point.
 
 ## User-approved scope and preferences
 
@@ -22,20 +22,19 @@ This is the full continuation scope, not just the first four implementation batc
 
 **Usage constraint:** Keep checks small and specific to changed locations. Do not launch broad suites, long simulations, APK builds or device runs for display-text-only edits. Broader checks remain appropriate when the actual approved rules/lifecycle changes require them.
 
-**Local cleanup is deferred.** Preserve files until the user authorizes resuming it. The subsequent user instruction authorizes merge to main after completion and validation. The subsequent release instruction is complete: [Pro162 / College450 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules), with full changelog and verified permanent APK assets.
+**Local cleanup status:** the superseded uncommitted root changes were verified against upstream, archived for comparison, and removed on November 4; local `main` now matches `origin/main`. Preserve the remaining unrelated untracked directories/checkouts. Both parity and roster-identity releases have verified permanent APK/checksum assets; current release: [Pro165 / College454](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-04-roster-identity).
 
 ## Working checkout
 
-- Branch: `codex/parity-roadmap-audit`.
-- Checkout: `D:/AppProjects/Codex/Football Simulation Engine/.codex-coach-fix`.
-- Read `AGENTS.md`, [ROADMAP.md](ROADMAP.md) and [the audit](audits/pro-college-parity-2026-11-01.md).
-- The root checkout has unrelated uncommitted changes and a stale local main. Do not reset, clean, overwrite or switch it as a shortcut.
-- An unrelated `.github/workflows/pro-android-branch.yml` edit remains in this checkout. Keep it out of implementation commits.
+- Current main checkout: `D:/AppProjects/Codex/Football Simulation Engine` at `8a62a03` (synced with `origin/main`).
+- Feature worktree: `worktrees/roster-identity` on `codex/roster-identity-and-priority`, also at `8a62a03`.
+- Read `AGENTS.md`, [ROADMAP.md](ROADMAP.md), [current-work.md](current-work.md) and [testing-scope.md](testing-scope.md) before starting new work.
+- Preserve remaining unrelated untracked directories and checkouts; do not reset or clean them as a shortcut.
 - Inspect current git status and remote state; do not assume the historical commit IDs below are still the branch head.
 
 ## Current state
 
-This table supersedes the historical checkpoints below. Stay within the approved parity scope; the Older Design Backlog is excluded.
+The parity table below is historical evidence for the Pro162 / College450 baseline. Current work is the released roster identity batch; use the "Current focus" section in ROADMAP.md for active follow-ups.
 
 | Area | Delivered / verification |
 |---|---|
@@ -52,7 +51,7 @@ This table supersedes the historical checkpoints below. Stay within the approved
 | Phase contracts | Shared validation/blocker/task contracts and task UI implemented; host transitions, authority and saved phase enums preserved. |
 | Rating/physical/position adapters | Canonical FB/K/P code delegation; specialist, physical, conversion, imported identity and idempotence cases covered. |
 | College.Core evaluation | Complete: defer physical split until dependency/test ownership supports a compatible migration. No assembly rename performed. |
-| Repository/release | Final CI APKs produced; changelog and acceptance manifest maintained. Keep current branch, prior permanent release assets, unrelated dirty workflow and deferred local cleanup. Follow-up merge is now authorized after validation; see the active follow-up for current build/integration status. |
+| Repository/release | Parity release is historical; current main is `9c9ff9c` with release record `8a62a03`. Permanent release assets and manifests are maintained. Root and origin are synced; superseded local root changes were verified and removed on November 4. |
 
 ## What changed and where
 
@@ -208,14 +207,14 @@ This supersedes the earlier scrimmage-safety, basic query-scope and staff-bound 
 - **Checks:** four initial safety reproductions failed before the fix. The final safety matrix passes25 cases. The affected shared clock/kick/stat/mode set passes138 cases (including22 initial safety cases), Pro rules/foundation17, Engine14, Pro lifecycle/query6 and College annual scouting4. Result sets overlap; do not sum repeated runs as new coverage. Both Android hosts compile; Pro retains the two existing CS8625 warnings. Final local package details belong in `audits/safety-query-checkpoint.json`; earlier palette device evidence applies to its recorded APK hashes only.
 - **Packaging/device boundary:** APKs are local Debug builds, not GitHub Actions artifacts or prereleases. No new safety-specific device scenario or complete all-role/theme matrix has been run for this runtime. Do not relabel the earlier custom-play/palette device evidence as acceptance of these newer binaries.
 
-### Next work, still within the approved list
+### Historical parity next-work list (superseded)
 
 1. Exact-APK safety banner, score/box/drive views and free-kick playback; remaining role/theme/extreme-rating and defensive editor scenarios.
 2. Full dynamic kickoff landing-zone/touchback and modern Pro formation restrictions; loose-ball/return/foul/try safeties; broader live-ball penalty, runoff and untimed-down cases. The implemented safety path is ordinary scrimmage play, not every impetus/penalty exception.
 3. Actively controlled-call and broader real/generated mode distributions. CPU-delegated parity is already covered.
 4. Broader league competition-phase/historical query adapters; phase blocker/task result contracts and reusable task UI; remaining physical/position/import adapters and stable-ID staff-directory components.
 5. Continue incremental legacy test ownership/categories. Keep College.Core physical separation deferred under the recorded evaluation. No shared seed/hash replacement or league-policy merger is planned.
-6. Integrate/release only after acceptance; preserve the unrelated Pro workflow edit and deferred local cleanup. No new merge or prerelease has occurred in this continuation.
+6. Historical note: this list was completed through the parity and roster-identity releases. Current changes follow AGENTS.md and the active ROADMAP focus.
 
 ## Active continuation — runtime5239013
 

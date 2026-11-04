@@ -54,3 +54,9 @@ The same identity model powers both games. Pro decisions keep existing salary-ca
   (college annual staff advance), both covered by dedicated drift tests.
 - The drift-enabled re-run of the long-term audit shows bounded drift with stable scoring, stable
   roster-target gaps and an unchanged user plan each season.
+
+## Released
+- Pro165 / College454 were published as `preview-2026-11-04-roster-identity` from main implementation
+  `9c9ff9c` (record `8a62a03`). Main CI passed456 Pro cases and319 Engine Fast +12 Engine Balance +
+  607 Core/College cases. Exact APK hashes, changelog and the build manifest are attached to the release.
+- Air Force, Army and Navy now run the Flexbone playbook, completing the triple-option catalog mapping.

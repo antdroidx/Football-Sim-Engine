@@ -1,6 +1,8 @@
-# Current roadmap — November 2, 2026
+# Current roadmap — November 4, 2026
 
-Parity plus roster/rules/test-ownership follow-up merged to main at `cb16217`; implementation runtime `f4c3bbf`. Exact builds/checks and integration status are in [the active handoff](ROSTER-RULES-VALIDATION-HANDOFF.md). This supersedes outstanding-work wording in historical plans. Latest release: Pro162 / College450, [dual-app prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules). Full [parity audit and recommendations](audits/pro-college-parity-2026-11-01.md), with a [standalone HTML report](audits/pro-college-parity-2026-11-01.html).
+Latest release: **Pro165 / College454** — [roster identity, CPU plan drift and Flexbone academies](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-04-roster-identity), published from implementation commit `9c9ff9c` with the release record at `8a62a03`. The shared roster identity system, three-season audit, staff-adapted CPU game-plan drift and Flexbone service academies are merged to main and released. The prior Pro162 / College450 [parity prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules) remains the prior accepted baseline.
+
+Evidence for the current release: [roster identity plan](roster-identity-plan.md), [long-term audit](roster-identity-long-term-audit.md), [playbook/scheme coverage audit](playbook-scheme-coverage-audit.md), `docs/data/roster-identity-*-2026-11-03/`, [release changelog](../releases/preview-2026-11-04-roster-identity.md) and manifest. Main CI: Pro165 run `41798956069` passes456 Pro cases; College454 run `41798956072` passes319 Engine Fast +12 Engine Balance +607 Core/College cases. Both builds package successfully.
 
 ## Completed and released
 
@@ -16,10 +18,11 @@ Parity plus roster/rules/test-ownership follow-up merged to main at `cb16217`; i
 | Staff and team identity | Shared coaching/medical/scout attributes, lifecycle, strategies, team directories; College academics and Pro HC calibration | shared-staff-attributes.md; pro-coach-rating-verification.md |
 | Simulation foundation checks | Real/generated balance samples, personnel/stat accounting, Pro pacing and staff sensitivity | football-balance-audit.md; pro-pacing-audit.md; coach-rating verification |
 | Integration/archive/release | Shared work merged to main; Java retained under Archive; repository renamed; dual APK prerelease and full changelog published | releases/preview-2026-11-01.md |
+| Roster identity and CPU plan drift | Shared playbook-driven targets/priorities, Pro cap-aware acquisition scoring, College roster-shape scoring, staff-adapted CPU game-plan drift, Flexbone service academies and a covered scheme taxonomy audit | roster-identity-plan.md; roster-identity-long-term-audit.md; playbook-scheme-coverage-audit.md; Pro165/College454 |
 
 [Active implementation handoff](IMPLEMENTATION-HANDOFF.md) records the approved sequence, checkpoints and model-resume instructions.
 
-## Approved parity continuation
+## Historical parity continuation (released baseline)
 
 - **Staff, editors and portraits:** implemented and device-verified; profile identity/permission, Save/restart/reload/Back and offensive/defensive custom calls are covered. Exact-APK evidence remains separately identified.
 - **Palette and analytics:** range colors shared across rating bars and quality comparisons, with light/dark variants; signed efficiency metrics honor their quality callback and lower-is-better direction.
@@ -28,16 +31,23 @@ Parity plus roster/rules/test-ownership follow-up merged to main at `cb16217`; i
 - **Shared code:** A10 competition/scope/dedup adapters, phase results/task UI, staff-name components, canonical specialist/fullback adapters, and A12 bounded arithmetic with annual characterization delivered.
 - **A11:** ownership and Fast/Balance/Career execution established; Device remains an exact-APK tier. Further legacy-fixture migration is incremental maintenance.
 - **College.Core:** evaluation complete; physical separation deferred for compatibility/ownership reasons.
-- **Repository:** tested changes merged to main at `cb16217`; successful main APKs Pro162/College450 and draft changelog are available. Main checks pass331 Engine,602 College and419 Pro cases; exact artifacts and limits are in the active handoff. The Pro162/College450 prerelease is published with full changelog, manifest and verified APK/checksum assets; preserve unrelated work and defer local cleanup.
-- The follow-up reproduces and fixes a destructive CPU cap-repair path, adds minimum-roster/rookie reserves and future-contract safeguards. Its full original intermittent career trace remains unavailable; see [the active follow-up](ROSTER-RULES-VALIDATION-HANDOFF.md). Routine data refresh, playtesting and wider career/balance validation remain ongoing.
+- **Repository:** the parity batch is superseded as the latest baseline by the roster-identity release `9c9ff9c` / `8a62a03`. Main and the local repository were synced on November 4; the branch-dispatch and main Android workflows both pass. Pro162/College450 assets remain published as historical release evidence.
+- The parity follow-up fixed a destructive CPU cap-repair path and added minimum-roster/rookie reserves and future-contract safeguards. Its original intermittent career trace remains unavailable; see [the roster/rules handoff](ROSTER-RULES-VALIDATION-HANDOFF.md). Routine data refresh, playtesting and wider career/balance validation remain the ongoing parity work.
 
 ## Release/validation status
 
-Latest published APKs pass401 Pro and760 combined Core/College cases. Prior device and long-run evidence is scoped in testing-scope.md; the final presentation APKs do not claim a fresh all-screen walkthrough. Keep intentional league differences; do not reopen perfect-source finance or repeat already completed exchange/coordinator work because an older plan says pending.
+Latest published APKs are Pro165 / College454 from successful main runs `41798956069` and `41798956072`: 456 Pro cases, 319 Engine Fast, 12 Engine Balance and 607 combined Core/College cases, all passing. This release claims no new device-played GameCast flow; earlier device evidence keeps its exact-APK identity and scope. The three-season identity audits and the scheme-coverage audit are committed with the release evidence.
 
 ## Repository hygiene policy
 
-Retain permanent release assets/checksums, current accepted build runs, unique UI/performance evidence and recent useful caches. Delete superseded build-only APK artifacts and artifact-free failed/cancelled attempts after inventory. Delete remote branches only after ancestry verification; never discard dirty local worktrees. Keep both primary Android workflows. The additional branch-only build workflow is redundant and should be retired only when its pending local edit is resolved, not silently overwritten.
+Retain permanent release assets/checksums, current accepted build runs, unique UI/performance evidence and recent useful caches. Delete superseded build-only APK artifacts and artifact-free failed/cancelled attempts after inventory. Delete remote branches only after ancestry verification; never discard unrelated local worktrees. Keep both primary Android workflows. The branch-dispatch workflow remains available for feature-branch APK checks; retire it only with explicit approval. Local main was synced to `origin/main` on November 4 and the superseded uncommitted root changes were verified and removed after backup comparison.
+
+## Current focus after the roster identity release
+
+- Native/device acceptance for Pro165 / College454 if the next release requires a new all-screen walkthrough; the current batch makes no device-flow claim.
+- Continue parity follow-ups for explicit officiating extensions and the intermittent multi-season CPU cap/roster trace where reproduced.
+- Keep legacy HS-era scheme families (Wing-T, double-wing, wildcat) outside the current catalogs; they remain covered by Custom plays.
+- Continue routine data refresh, playtesting and wider career/balance validation.
 
 ## Original College roadmap and unresolved design backlog
 

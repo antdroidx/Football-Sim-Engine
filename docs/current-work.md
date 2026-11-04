@@ -1,8 +1,6 @@
-## Current parity continuation — November 2, 2026
-
 ## Published Pro165 / College454 — roster identity, CPU plan drift, Flexbone academies — November 4, 2026
 
-Published November 4: [Pro165 / College454 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-04-roster-identity), tag `preview-2026-11-04-roster-identity`, target `9c9ff9c`. Both APKs come from the successful main builds (Pro run 41798956069 with the full validation scope; College run 41798956072 with the full management scope); SHA-256 values and the small build manifest are attached to the release. Batch scope: the shared roster identity model with acquisition scoring, a completed three-season long-term audit, staff-adapted CPU game-plan drift for Pro and College, the Flexbone service academies, and the playbook/scheme coverage audit. No device-played flows are claimed; evidence lives in docs/roster-identity-long-term-audit.md, docs/playbook-scheme-coverage-audit.md, docs/current-work.md history and the two CI runs above.
+Published November 4: [Pro165 / College454 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-04-roster-identity), tag `preview-2026-11-04-roster-identity` (release record `8a62a03`, implementation `9c9ff9c`). Both APKs come from the successful main builds (Pro run 41798956069 with the full validation scope; College run 41798956072 with the full management scope); SHA-256 values and the small build manifest are attached to the release. Batch scope: the shared roster identity model with acquisition scoring, a completed three-season long-term audit, staff-adapted CPU game-plan drift for Pro and College, the Flexbone service academies, and the playbook/scheme coverage audit. No device-played flows are claimed; evidence lives in docs/roster-identity-long-term-audit.md, docs/playbook-scheme-coverage-audit.md, docs/current-work.md history and the two CI runs above.
 
 ## Roster identity long-term audit and CPU plan drift — November 3, 2026
 
@@ -26,29 +24,28 @@ Playbook/scheme coverage verification: audited the 8 offensive playbooks, 5 defe
    80 offensive / 30 defensive named plays, 32 pro and 138 college catalog labels against the real
    football scheme families; report: docs/playbook-scheme-coverage-audit.md. Modern families are covered;
    gaps are pre-2000 HS-scope schemes (Wing-T/double-wing/wildcat) plus retained judgment-call mappings
-   (Veer and Shoot to Option, hybrid fronts to nearest base); the dedicated Flexbone playbook is currently
-   unused by the triple-option schools.
+   (Veer and Shoot to Option, hybrid fronts to nearest base). The dedicated Flexbone playbook now backs
+   Air Force, Army and Navy, so the triple-option schools run true flexbone formations.
 
 Flexbone academies: Air Force, Army and Navy now run the dedicated Flexbone playbook with
    flexbone formations (previously the generic Option playbook), matching real triple-option football;
    source labels stay "Option" with defensive identities unchanged.
-Perf fix: the branch's identity work replaced constant roster-count lookups with full
-   RosterPlanService.GetRosterTarget calls inside the competing recruiting market loops, which pushed
-   PortalProcessingTests.FullLeagueHighSchoolMarketUsesActualCompetingOffers past its 30s guard in CI (40s).
-   RosterPlanService now memoizes identity and roster-target values with weak, state-instance keys (same
-   pattern as the existing recruiting preference memos), keeping identical results while restoring the hot
-   market path.
+Performance follow-up: `PortalProcessingTests.FullLeagueHighSchoolMarketUsesActualCompetingOffers` first exceeded
+its 30s guard because the identity work added full roster-target calculations inside the competing-recruiting
+hot loops. Identity and roster-target memoization restored the market path and the final main CI passes. The
+November 3 audit checkpoint itself made no release claim; the November 4 release above supersedes its status.
 
-Known local limits: `PortalProcessingTests.FullLeagueHighSchoolMarketUsesActualCompetingOffers` exceeded its 30s
-timing guard on this machine both with and without this batch (36.2s on base, 35.2s with the batch) — a
-machine-speed flake CI verifies separately; no APK, device flow, merge, or prerelease is claimed in this scope.
 
+## Historical notes below
+
+Release/status wording in the entries below is retained as evidence. Where it says a batch was unmerged,
+unreleased or pending, the November 4 published summary above and the release record supersede it.
 
 ## Active roster/rules follow-up
 
 Published November 2: [Pro162 / College450 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules), tag `preview-2026-11-02-parity-rules`, target `d888557`. Both APK hashes match the successful main-build manifest; full changelog and checksums attached.
 
-CPU safeguards, supported additional league rules and shared-test migration are complete and merged at `cb16217`. Main Pro162/College450 build successfully; exact checks, artifacts and limits are tracked in [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The user authorized merge after validation. Earlier APK acceptance and historical pending notes below keep their original scope. Preserve unrelated workflow/root changes and defer local cleanup.
+CPU safeguards, supported additional league rules and shared-test migration are complete and merged at `cb16217`. Main Pro162/College450 build successfully; exact checks, artifacts and limits are tracked in [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The user authorized merge after validation. Earlier APK acceptance and historical pending notes below keep their original scope. The preserved root changes were later verified and removed during the November 4 sync.
 
 Final candidates Pro160 / College448, runtime `d3ed91a`, are on `codex/parity-roadmap-audit`. CI passes27 Pro,30 Engine and107 College/shared cases; both APKs package (Pro retains2 existing nullable warnings). The768-game mode comparison, specialist cohorts, annual staff characterization and exact-APK native evidence have separate scopes; overlapping counts are not added together. See [the completion report](audits/parity-completion-2026-11-02.md), [exact manifest](audits/parity-acceptance-current.json) and [full draft changelog](releases/preview-2026-11-02-parity.md).
 

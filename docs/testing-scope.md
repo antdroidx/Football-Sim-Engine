@@ -1,10 +1,23 @@
+## Released Pro165 / College454 — November 4, 2026
+
+Scope: shared roster identity/acquisition scoring, CPU game-plan drift, Flexbone service academies and their documentation. College and Pro remain separate hosts with their existing save/package identities.
+
+Executed and passing:
+- Focused local checks: 19 Core cases (`StaffAttributeTests`, `GamePlanDriftTests`, `FullbackRoleTests`), Pro Fast33, College Fast7, Engine Fast319/Balance12, plus ProFootball.Core/Engine builds with 0 errors.
+- Main CI: Pro165 run `41798956069` (full validation scope) passes456 Pro cases; College454 run `41798956072` (full management scope) passes319 Engine Fast,12 Engine Balance and607 Core/College cases. Both signed APKs package successfully.
+- Three-season identity audits: four real/generated Pro/College modes,8,832 games total, zero invalid personnel; baseline and drift-enabled JSON are committed in `docs/data/roster-identity-2026-11-03/` and `docs/data/roster-identity-drift-2026-11-03/`.
+- The full-league recruiting timing guard that first regressed under the identity work was fixed by state-keyed memoization and passes in final main CI.
+- Exact APK hashes are in [the release manifest](../releases/preview-2026-11-04-roster-identity.manifest.json) and [checksums](../releases/SHA256SUMS.txt).
+
+Not claimed: no new device-played GameCast/native walkthrough was run for this release; prior device evidence remains tied to its original APK hashes. No whole-device multi-season acceptance is repeated.
+
 ## Final parity validation — November 2, 2026
 
 ## Active roster/rules follow-up
 
 Published November 2: [Pro162 / College450 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-02-parity-rules), tag `preview-2026-11-02-parity-rules`, target `d888557`. Both APK hashes match the successful main-build manifest; full changelog and checksums attached.
 
-CPU safeguards, supported additional league rules and shared-test migration are complete and merged at `cb16217`. Main Pro162/College450 build successfully; exact checks, artifacts and limits are tracked in [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The user authorized merge after validation. Earlier APK acceptance and historical pending notes below keep their original scope. Preserve unrelated workflow/root changes and defer local cleanup.
+CPU safeguards, supported additional league rules and shared-test migration are complete and merged at `cb16217`. Main Pro162/College450 build successfully; exact checks, artifacts and limits are tracked in [ROSTER-RULES-VALIDATION-HANDOFF.md](ROSTER-RULES-VALIDATION-HANDOFF.md). The user authorized merge after validation. Earlier APK acceptance and historical pending notes below keep their original scope. The preserved root changes were later verified and removed during the November 4 sync.
 
 Final candidates Pro160 / College448, runtime `d3ed91a`, are on `codex/parity-roadmap-audit`. CI passes27 Pro,30 Engine and107 College/shared cases; both APKs package (Pro retains2 existing nullable warnings). The768-game mode comparison, specialist cohorts, annual staff characterization and exact-APK native evidence have separate scopes; overlapping counts are not added together. See [the completion report](audits/parity-completion-2026-11-02.md), [exact manifest](audits/parity-acceptance-current.json) and [full draft changelog](releases/preview-2026-11-02-parity.md).
 
