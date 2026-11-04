@@ -27,10 +27,17 @@ public static class ProDepthChart
         16 => 7, 17 => 4, 18 => 4, 19 => 1, 20 => 1, _ => 4
     };
 
-    // CPU assistance: fill natural slots by positional rating, then trim each slot to its cap.
+    public static TeamGamePlan Plan(ProFranchise state, string team)
+    {
+        var identity = ProRosterPlanService.GetIdentity(state, team);
+        return new TeamGamePlan { TeamName = team, Offense = identity.Offense, Defense = identity.Defense, Approach = identity.Approach };
+    }
+
+    // CPU assistance: fill natural slots by identity-derived positional structure, then trim each slot to its cap.
     public static ProFranchise AutoAssign(ProFranchise state, string team, int? selectedCode = null)
     {
-        var projected = DepthChartService.AutoSet(Bridge(state), team, selectedCode);
+        var bridge = Bridge(state) with { TeamGamePlans = [Plan(state, team)] };
+        var projected = DepthChartService.AutoSet(bridge, team, selectedCode);
         var rebuilt = projected.DepthChartAssignments
             .Where(a => !string.Equals(a.TeamName, team, StringComparison.OrdinalIgnoreCase))
             .Concat(projected.DepthChartAssignments
@@ -80,3 +87,4 @@ public static class ProDepthChart
         return Assign(state, team, playerId, AssignedCode(state, player), 1);
     }
 }
+

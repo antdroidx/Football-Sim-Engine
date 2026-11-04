@@ -16,6 +16,13 @@ public sealed class DepthChartTests
         var unavailable = s.Players.First(p => p.PracticeSquad);
         Assert.Throws<InvalidOperationException>(() => ProDepthChart.MakeStarter(s, s.UserTeam, unavailable.Football.PlayerId));
     }
+    [Fact] public void IdentityPlanTracksSavedGamePlanWithoutStaffOverride()
+    {
+        var s=ProLeagueService.Create("Seattle Seahawks",preserveLegacyPracticeForAudit:true);
+        var plan=ProDepthChart.Plan(s,s.UserTeam);
+        Assert.Equal(s.GamePlans.Last(p => p.TeamName == s.UserTeam).Offense, plan.Offense);
+        Assert.Equal(s.GamePlans.Last(p => p.TeamName == s.UserTeam).Defense, plan.Defense);
+    }
     [Fact] public void PersistedGamePlanFeedsSharedSimulationProfile()
     {
         var s = ProLeagueService.Create("Seattle Seahawks",preserveLegacyPracticeForAudit:true);
@@ -85,3 +92,4 @@ public sealed class DepthChartTests
     }
 
 }
+
