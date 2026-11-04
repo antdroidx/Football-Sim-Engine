@@ -6,9 +6,71 @@ using DynastyManager.Data.Import;
 using ProFootball.Core;
 static class SeasonAudit
 {
+    public static object ProIdentitySummary(ProFranchise s)
+    {
+        var plans = s.League.Teams.Select(team => new
+        {
+            team.Name,
+            Plan = s.GamePlans.LastOrDefault(plan => plan.TeamName.Equals(team.Name, StringComparison.OrdinalIgnoreCase)),
+            Baseline = ProTeamStrategyCatalog.TryGet(team.Id, out var strategy) ? strategy : null
+        }).ToArray();
+        return new
+        {
+            Year = s.Year,
+            SavedPlans = plans.Count(item => item.Plan is not null),
+            PlanOffenses = plans.GroupBy(item => item.Plan?.Offense ?? item.Baseline!.Offense).OrderBy(g => g.Key)
+                .Select(g => new { Playbook = g.Key.ToString(), Teams = g.Count() }).ToArray(),
+            PlanDefenses = plans.GroupBy(item => item.Plan?.Defense ?? item.Baseline!.Defense).OrderBy(g => g.Key)
+                .Select(g => new { Playbook = g.Key.ToString(), Teams = g.Count() }).ToArray(),
+            PhilosophyTeams = plans.Count(item => ProRosterPlanService.GetIdentity(s, item.Name).StaffPhilosophy is not null),
+            DriftedFromCatalog = plans.Count(item => item.Plan is not null && item.Baseline is not null &&
+                (item.Plan.Offense != item.Baseline.Offense || item.Plan.Defense != item.Baseline.Defense)),
+            PositionTargetGapPerTeam = Math.Round(plans.Average(item =>
+            {
+                var targets = ProRosterPlanService.GetPositionTargets(s, item.Name);
+                return targets.Where(kv => kv.Value > 0)
+                    .Sum(kv => Math.Abs(ProRosterPlanService.Active(s, item.Name).Count(p => p.Football.Position == kv.Key) - kv.Value));
+            }), 2),
+            UserPlanOffense = plans.First(item => item.Name == s.UserTeam).Plan?.Offense.ToString() ?? "none",
+            UserPlanDefense = plans.First(item => item.Name == s.UserTeam).Plan?.Defense.ToString() ?? "none"
+        };
+    }
+
+    public static object CollegeIdentitySummary(DynastyState s)
+    {
+        var plans = s.LeagueTeams.Select(team => new
+        {
+            team.Name,
+            Plan = s.TeamGamePlans.LastOrDefault(plan => plan.TeamName.Equals(team.Name, StringComparison.OrdinalIgnoreCase)),
+            Baseline = CollegeTeamStrategyCatalog.ForTeam(team.Name)
+        }).ToArray();
+        return new
+        {
+            Year = s.SeasonYear,
+            SavedPlans = plans.Count(item => item.Plan is not null),
+            PlanOffenses = plans.GroupBy(item => item.Plan?.Offense ?? item.Baseline?.Offense ?? OffensivePlaybook.Balanced).OrderBy(g => g.Key)
+                .Select(g => new { Playbook = g.Key.ToString(), Teams = g.Count() }).ToArray(),
+            PlanDefenses = plans.GroupBy(item => item.Plan?.Defense ?? item.Baseline?.Defense ?? DefensivePlaybook.Balanced).OrderBy(g => g.Key)
+                .Select(g => new { Playbook = g.Key.ToString(), Teams = g.Count() }).ToArray(),
+            DriftEligibleTeams = plans.Count(item => RosterPlanService.HeadLeanPhilosophy(s, item.Name,
+                item.Plan?.Offense ?? OffensivePlaybook.Balanced, item.Plan?.Defense ?? DefensivePlaybook.Balanced) is
+            { Weight: >= RosterPlanService.MinimumDriftInfluence }),
+            DriftedFromCatalog = plans.Count(item => item.Plan is not null && item.Baseline is not null &&
+                (item.Plan.Offense != item.Baseline.Offense || item.Plan.Defense != item.Baseline.Defense)),
+            PositionTargetGapPerTeam = Math.Round(plans.Average(item =>
+            {
+                var roster = s.ActiveRoster.Where(p => p.TeamName.Equals(item.Name, StringComparison.OrdinalIgnoreCase)).ToArray();
+                return Enum.GetValues<Position>().Where(position => RosterPlanService.GetRosterTarget(s, position, item.Name) > 0)
+                    .Sum(position => Math.Abs(roster.Count(p => p.Position == position) - RosterPlanService.GetRosterTarget(s, position, item.Name)));
+            }), 2),
+            UserPlanOffense = plans.First(item => item.Name.Equals(s.UserTeamName, StringComparison.OrdinalIgnoreCase)).Plan?.Offense.ToString() ?? "none",
+            UserPlanDefense = plans.First(item => item.Name.Equals(s.UserTeamName, StringComparison.OrdinalIgnoreCase)).Plan?.Defense.ToString() ?? "none"
+        };
+    }
+
     public static async Task Run(string mode,int years,string output)
     {
-        var reports=new List<object>();var rosterChecks=new List<object>();var generated=mode.Contains("generated");var sampledQb=new List<double>();var sampledRb3=new List<double>();var sampledDl=new List<double>();var invalid=0;var sampledGames=0;
+        var reports=new List<object>();var rosterChecks=new List<object>();var proIdentityChecks=new List<object>();var collegeIdentityChecks=new List<object>();var generated=mode.Contains("generated");var sampledQb=new List<double>();var sampledRb3=new List<double>();var sampledDl=new List<double>();var invalid=0;var sampledGames=0;
         void Observe(GameDaySession session)
         {
             sampledGames++;
@@ -42,7 +104,7 @@ static class SeasonAudit
                     var before=(s.Phase,s.Week);s=ProLeagueService.Advance(s);if(before==(s.Phase,s.Week))throw new Exception("Blocked phase "+s.Year+" "+before+" "+ProSeasonEligibility.Issue(s,s.UserTeam));
                 }
                 rosterChecks.Add(new{Year=s.Year,PracticePlayers=s.Players.Count(p=>p.PracticeSquad),ActiveMinimum=s.League.Teams.Min(t=>ProRoster.Active(s,t.Name)),ActiveMaximum=s.League.Teams.Max(t=>ProRoster.Active(s,t.Name)),ReservePlayers=s.Players.Count(p=>p.Reserve),Fullbacks=s.Players.Count(p=>p.Football.Position==Position.FB&&p.Football.TeamName!="Free agent"&&!p.Retired)});
-                var report=Summary(s.Year,s.Games.Where(g=>g.Phase==ProPhase.RegularSeason).Select(g=>g.Football),s.Players.Where(p=>ProDepthChart.Active(p)&&p.Football.TeamName!="Free agent").Select(p=>p.Football),original);reports.Add(report);Console.WriteLine(JsonSerializer.Serialize(report));
+                var report=Summary(s.Year,s.Games.Where(g=>g.Phase==ProPhase.RegularSeason).Select(g=>g.Football),s.Players.Where(p=>ProDepthChart.Active(p)&&p.Football.TeamName!="Free agent").Select(p=>p.Football),original);reports.Add(report);Console.WriteLine(JsonSerializer.Serialize(report));proIdentityChecks.Add(ProIdentitySummary(s));
                 if(cycle==years-1)break;
                 s=ProOffseason.Advance(s);s=ProOffseason.Advance(s);s=ProDraft.AutoUntilUser(s,true);s=ProOffseason.Advance(s);s=ProCpu.Trim(s,s.UserTeam);s=ProOffseason.Advance(s);s=ProCpu.Manage(s,true);
                 if(s.Phase!=ProPhase.Preseason)throw new Exception("Offseason failed");
@@ -53,7 +115,7 @@ static class SeasonAudit
             var teams=ModernFbsUniverseFactory.Create(LegacyUniverseCsvImporter.Import(File.ReadAllText("src/DynastyManager.Data/Resources/Legacy/universe.csv")).Teams).ToDictionary(t=>t.Name);
             using var reader=File.OpenText("src/DynastyManager.App/Resources/Raw/next26-aug26-2025.csv");var pack=Next26RosterCsvImporter.LoadPack(reader,teams.Keys).Players;var names=pack.Select(p=>p.TeamName).ToHashSet();var template=pack.Concat(LegacyDynastyRosterFactory.Create([],teams.Values,Guid.NewGuid()).Where(p=>!names.Contains(p.TeamName))).ToArray();
             var s=new DynastyState{DynastyName="Three-season balance",UserTeamName="Washington",SeasonYear=2026,Phase=SeasonPhase.RegularSeason,LeagueTeams=teams.Values.ToArray(),RecruitingAssistanceEnabled=true,RecruitingAssistanceWorkloadPercent=100,ActiveRoster=generated?FictionalRosterService.College(template,teams.Values.ToArray(),new Random(713)):template};
-            s=RosterManagementService.NormalizeAllDepthCharts(PlayerRatingService.EnsureProfiles(s));s=StaffManagementService.EnsureLeagueStaff(s,teams.Values);var original=s.ActiveRoster.Select(p=>p.PlayerId).ToHashSet();var user=teams[s.UserTeamName];
+            s=RosterManagementService.NormalizeAllDepthCharts(PlayerRatingService.EnsureProfiles(s));s=CollegeTeamStrategyCatalog.InitializePlans(s,teams.Values);s=StaffManagementService.EnsureLeagueStaff(s,teams.Values);var original=s.ActiveRoster.Select(p=>p.PlayerId).ToHashSet();var user=teams[s.UserTeamName];
             for(var cycle=0;cycle<years;cycle++)
             {
                 var rotation=teams.Keys.Order().ToList();var schedule=new List<ScheduledGame>();
@@ -64,14 +126,14 @@ static class SeasonAudit
                     s=s with{Week=week};var profiles=DynastyRosterSimulationProfileBuilder.Build(s,teams.Values);var game=s.Schedule.First(g=>g.Week==week);var session=GameDayEngine.Start(game,GamePlanService.Attach(s,teams[game.HomeTeamName],profiles[game.HomeTeamName]),GamePlanService.Attach(s,teams[game.AwayTeamName],profiles[game.AwayTeamName]),s.ActiveRoster,GameDayMode.Simulate,s.DepthChartAssignments);GameDayEngine.SimulateToEnd(session);Observe(session);
                     s=WeekSimulation.SimulateCurrentRegularSeasonWeek(s,teams,profiles);s=TransferPortalMarketService.AdvanceRegularSeasonWeek(s);s=InteractiveRecruitingService.EnsurePhaseInitialized(s,user);s=CpuRecruitingService.ApplyWeeklyUserAssistance(s,user);s=InteractiveRecruitingService.ResolveCurrentPhase(s,user,teams);if(week is 3 or 6 or 9 or 12)s=PlayerDevelopmentService.ApplyMidseasonDevelopment(s);
                 }
-                var report=Summary(s.SeasonYear,s.Schedule,s.ActiveRoster,original);reports.Add(report);Console.WriteLine(JsonSerializer.Serialize(report));if(cycle==years-1)break;
+                var report=Summary(s.SeasonYear,s.Schedule,s.ActiveRoster,original);reports.Add(report);Console.WriteLine(JsonSerializer.Serialize(report));collegeIdentityChecks.Add(CollegeIdentitySummary(s));if(cycle==years-1)break;
                 s=DynastyHistoryService.FinalizeSeason(s,teams);s=StaffManagementService.AdvanceSeason(s);s=ProgramPrestigeService.ApplySeasonResults(s,teams);s=s with{Phase=SeasonPhase.TransferPortal,Week=19};s=OffseasonPlayerLifecycleService.EnterTransferPortal(s);s=TransferPortalMarketService.MaterializePendingCommitments(s);s=InteractiveRecruitingService.EnsurePhaseInitialized(s,user);s=CpuRecruitingService.ApplyWeeklyUserAssistance(s,user);s=InteractiveRecruitingService.ResolveCurrentPhase(s,user,teams);s=CpuRecruitingService.ApplyPhaseAssistance(s,teams);s=SeasonProgression.Advance(s);
                 s=s with{HighSchoolRecruitingPool=HighSchoolRecruitingPoolFactory.Create(s.DynastyId,s.SeasonYear,teams.Count,[])};
                 for(var week=0;week<SeasonProgression.RecruitingWeekCount;week++){s=InteractiveRecruitingService.EnsurePhaseInitialized(s,user);s=CpuRecruitingService.ApplyWeeklyUserAssistance(s,user);s=InteractiveRecruitingService.ResolveCurrentPhase(s,user,teams);s=CpuRecruitingService.AdvanceCpuRecruitingWeek(s,teams);s=SeasonProgression.Advance(s);}
                 s=WalkOnRosterService.FillAllTeams(s,teams);s=RosterManagementService.NormalizeAllDepthCharts(s);s=SeasonProgression.Advance(s);s=PlayerDevelopmentService.ApplyOffseasonDevelopment(s);s=SeasonProgression.Advance(s);s=StaffManagementService.AdvanceSeason(s);s=SeasonProgression.Advance(s);
             }
         }
-        var final=new{Mode=mode,Seasons=reports,ProRosterSeasons=rosterChecks,PersonnelSampleGames=sampledGames,PrimaryQBSnapShare=sampledQb.Average(),ThirdAndLaterRBCarryShare=sampledRb3.Average(),BackupDLSnapShare=sampledDl.Average(),InvalidPersonnelSnaps=invalid};Directory.CreateDirectory(Path.GetDirectoryName(output)!);await File.WriteAllTextAsync(output,JsonSerializer.Serialize(final,new JsonSerializerOptions{WriteIndented=true}));
+        var final=new{Mode=mode,Seasons=reports,ProRosterSeasons=rosterChecks,ProIdentitySeasons=proIdentityChecks,CollegeIdentitySeasons=collegeIdentityChecks,PersonnelSampleGames=sampledGames,PrimaryQBSnapShare=sampledQb.Average(),ThirdAndLaterRBCarryShare=sampledRb3.Average(),BackupDLSnapShare=sampledDl.Average(),InvalidPersonnelSnaps=invalid};Directory.CreateDirectory(Path.GetDirectoryName(output)!);await File.WriteAllTextAsync(output,JsonSerializer.Serialize(final,new JsonSerializerOptions{WriteIndented=true}));
         if(invalid!=0)throw new Exception("Invalid personnel detected: "+invalid);
     }
 }
