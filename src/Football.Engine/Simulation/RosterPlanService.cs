@@ -17,7 +17,14 @@ public sealed record TeamIdentity
     public double TalentVersusFit { get; init; } = .55;
     public double DevelopmentalUpside { get; init; } = .35;
     public IReadOnlyDictionary<Position, int> PositionPriorities { get; init; } = new Dictionary<Position, int>();
+    public StaffPhilosophy? StaffPhilosophy { get; init; }
 }
+
+/// <summary>
+/// Optional head-staff philosophy that adapts identity weights without changing a saved team plan.
+/// </summary>
+public sealed record StaffPhilosophy(OffensivePlaybook Offense, DefensivePlaybook Defense, double Weight);
+
 
 public sealed record PersonnelProfile(double PassRatio, double RunRatio, double CoverageRatio, double EdgeRatio);
 
@@ -90,6 +97,26 @@ public static class RosterPlanService
         return (offense, defense);
     }
 
+    /// <summary>
+    /// Blends two identity priority dictionaries by staff-influence weight without changing either source.
+    /// </summary>
+    public static IReadOnlyDictionary<Position, int> BlendPriorities(
+        IReadOnlyDictionary<Position, int> primary,
+        IReadOnlyDictionary<Position, int> secondary,
+        double weight)
+    {
+        if (weight <= 0 || secondary.Count == 0) return primary;
+        if (weight >= 1) return secondary;
+        return primary.ToDictionary(
+            pair => pair.Key,
+            pair => (int)Math.Round(pair.Value * (1 - weight) + secondary.GetValueOrDefault(pair.Key, pair.Value) * weight));
+    }
+
+    /// <summary>
+    /// Blends a positional depth target toward the staff philosophy by weight.
+    /// </summary>
+    public static int BlendTarget(int primary, int secondary, double weight) =>
+        weight <= 0 ? primary : weight >= 1 ? secondary : (int)Math.Round(primary * (1 - weight) + secondary * weight);
     private static IReadOnlyList<DynastyPlayer> RosterShapes(DynastyState state, string team)
     {
         return state.ActiveRoster

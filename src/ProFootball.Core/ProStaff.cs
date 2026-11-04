@@ -146,6 +146,16 @@ public static class ProStaff
         return s;
     }
 
+
+    /// <summary>
+    /// A new head coach brings a stable personal philosophy instead of adopting the club baseline, so the
+    /// roster identity gradually follows hired coaches the way the staff card describes.
+    /// </summary>
+    private static ProCoach PersonalHeadPhilosophy(ProCoach coach, Guid franchiseId)
+    {
+        var (offense, defense) = ProTeamPhilosophy.HireHeadProfile(coach with { PreferredOffense = "", PreferredDefense = "" }, franchiseId);
+        return coach with { PreferredOffense = offense, PreferredDefense = defense };
+    }
     public static ProCoach InitializeMetadata(ProCoach coach, Guid franchiseId)
     {
         if (coach.Age > 0) return coach;
@@ -169,7 +179,7 @@ public static class ProStaff
         var club = s.League.Teams.Single(t => t.Name == team); var candidate = s.CoachCandidates.FirstOrDefault(c => c.Name == name) ?? throw new InvalidOperationException("This coach is unavailable.");
         var coaches = s.Coaches.ToList(); var old = coaches.FirstOrDefault(c => c.TeamId == club.Id && c.Role == role); var pool = s.CoachCandidates.Where(c => c.Name != name).ToList();
         if (old is not null && !old.Vacant) pool.Add(new(old.Name, club.Id, old.Title, old.Source));
-        coaches.RemoveAll(c => c.TeamId == club.Id && c.Role == role); ProCoach hired = new(club.Id, role, name, role.ToString() + " · franchise hire", candidate.Source) { Rating = 65, Development = 65 }; hired = InitializeMetadata(hired, s.Id) with { Coaching = ProTeamStrategyCatalog.Attributes(hired, s.Id) }; var profile = Profile(hired); coaches.Add(hired with { OffenseRating = profile.Offense, DefenseRating = profile.Defense, SpecialTeamsRating = profile.SpecialTeams, Leadership = profile.Leadership, PreferredOffense = profile.OffenseScheme, PreferredDefense = profile.DefenseScheme });
+        coaches.RemoveAll(c => c.TeamId == club.Id && c.Role == role); ProCoach hired = new(club.Id, role, name, role.ToString() + " · franchise hire", candidate.Source) { Rating = 65, Development = 65 }; hired = InitializeMetadata(hired, s.Id) with { Coaching = ProTeamStrategyCatalog.Attributes(hired, s.Id) }; hired = role == StaffRole.HeadCoach ? PersonalHeadPhilosophy(hired, s.Id) : hired; var profile = Profile(hired); coaches.Add(hired with { OffenseRating = profile.Offense, DefenseRating = profile.Defense, SpecialTeamsRating = profile.SpecialTeams, Leadership = profile.Leadership, PreferredOffense = profile.OffenseScheme, PreferredDefense = profile.DefenseScheme });
         return ProEconomy.Log(s with { Coaches = coaches, CoachCandidates = pool }, $"{team} hired {name} as {role}.");
     }
     public static ProFranchise Fire(ProFranchise s, string team, StaffRole role)

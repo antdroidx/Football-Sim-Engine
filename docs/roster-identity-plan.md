@@ -28,9 +28,19 @@ The same identity model powers both games. Pro decisions keep existing salary-ca
 ## Staff UI
 - Front Office > Staff now shows a compact priority strip for the team's highest positional weights.
 
+## Staff philosophy adaptation
+- Coach scheme labels map deterministically to engine playbooks; ambiguous or unknown labels carry no influence.
+- A head coach whose personal philosophy differs from the club baseline adapts positional priorities and depth
+  targets by an influence weight that grows with tenure and leadership (capped so saved game plans stay authoritative).
+- Season-zero staff and coordinators keep the club baseline, so existing identities are unchanged until a hire differs.
+- Newly hired head coaches carry a stable personal philosophy derived from their name, franchise and stronger skills;
+  the club baseline is no longer automatically adopted. User-set game plans are never rewritten.
+- Identity blending affects CPU draft, free agency, waiver, scouting, retention and trade ordering through the
+  existing ProRosterPlanService scores; cap/roster/rule validation is unchanged.
+
 ## Next work
-- staff-adapted philosophy changes;
 - pro depth/extension resource accounting;
-- long-term roster audits.
+- long-term roster audits;
+- staff-adapted CPU game-plan drift over seasons (saved plans only change through the user or a future CPU phase).
 
 
