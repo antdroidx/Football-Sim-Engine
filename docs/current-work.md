@@ -18,6 +18,13 @@ Branch `codex/roster-identity-and-priority`. Completed the two roster-identity p
    drift-enabled re-audit (`docs/data/roster-identity-drift-2026-11-03/`) shows bounded drift (College real 49 and
    generated 31 of 132-138 CPU programs, Pro 2-3) with stable scoring and unchanged user plans.
 
+Playbook/scheme coverage verification: audited the 8 offensive playbooks, 5 defensive playbooks,
+   80 offensive / 30 defensive named plays, 32 pro and 138 college catalog labels against the real
+   football scheme families; report: docs/playbook-scheme-coverage-audit.md. Modern families are covered;
+   gaps are pre-2000 HS-scope schemes (Wing-T/double-wing/wildcat) plus retained judgment-call mappings
+   (Veer and Shoot to Option, hybrid fronts to nearest base); the dedicated Flexbone playbook is currently
+   unused by the triple-option schools.
+
 Perf fix: the branch's identity work replaced constant roster-count lookups with full
    RosterPlanService.GetRosterTarget calls inside the competing recruiting market loops, which pushed
    PortalProcessingTests.FullLeagueHighSchoolMarketUsesActualCompetingOffers past its 30s guard in CI (40s).
