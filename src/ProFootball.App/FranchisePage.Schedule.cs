@@ -1,5 +1,6 @@
 using ProFootball.Core;
 using DynastyManager.App;
+using DynastyManager.Core.Simulation;
 namespace ProFootball.App;
 public sealed partial class FranchisePage
 {
@@ -34,7 +35,8 @@ public sealed partial class FranchisePage
                 else actions.Add(Text("Upcoming",12));
                 var home=s.League.Teams.Single(t=>t.Name==f.HomeTeamName);var away=s.League.Teams.Single(t=>t.Name==f.AwayTeamName);
                 var result=f.HasPlayed?$"{f.AwayScore}–{f.HomeScore}":"Upcoming";
-                return new View[] { Text(f.Week.ToString()+(g.Phase==s.Phase&&f.Week==s.Week?" •":"")),Text(g.Phase==ProPhase.RegularSeason?"Season":g.Phase.ToString(),12),own?TeamCell(f.HomeTeamName==selected?away:home):TeamCell(away),own?Text(f.HomeTeamName==selected?"Home":"Away"):TeamCell(home),Text(result),actions };
+                var rivalry=RivalryService.Label(s.Games.Select(x=>x.Football).ToArray(),f.HomeTeamName,f.AwayTeamName);
+                return new View[] { Text(f.Week.ToString()+(g.Phase==s.Phase&&f.Week==s.Week?" •":"")),Text(g.Phase==ProPhase.RegularSeason?"Season":g.Phase.ToString(),12),own?TeamCell(f.HomeTeamName==selected?away:home):TeamCell(away),own?Text(f.HomeTeamName==selected?"Home":"Away"):TeamCell(home),Text(result),Text(rivalry),actions };
             }))));
         }
         team.SelectedIndexChanged+=(_,_)=>{scheduleTeam=(string)team.SelectedItem;Draw();};phase.SelectedIndexChanged+=(_,_)=>{schedulePhase=phase.SelectedIndex==0?null:((string)phase.SelectedItem) switch {"Season"=>ProPhase.RegularSeason,_=>Enum.Parse<ProPhase>((string)phase.SelectedItem)};scheduleWeek=null;scheduleWeekPhase=null;UpdateWeeks();Draw();};week.SelectedIndexChanged+=(_,_)=>{if(syncingWeeks||week.SelectedIndex<0)return;var choice=weeks[week.SelectedIndex];scheduleWeek=choice.Week;scheduleWeekPhase=choice.Phase;Draw();};Draw();

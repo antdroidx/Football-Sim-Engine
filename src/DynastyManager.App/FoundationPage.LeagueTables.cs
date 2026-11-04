@@ -133,6 +133,7 @@ public sealed partial class FoundationPage
                     resultColor = userScore > otherScore ? PositiveChangeColor : NegativeChangeColor;
                 }
             }
+            var rivalry = RivalryService.Label(_currentDynasty.Schedule, game.HomeTeamName, game.AwayTeamName);
             var type = game.GameType switch { ScheduledGameType.Conference => "CONF", ScheduledGameType.ConferenceChampionship => "CCG",
                 ScheduledGameType.CollegeFootballPlayoff => "CFP", ScheduledGameType.Bowl => "BOWL", _ => "OOC" };
             var stats = home ? game.HomeStats : game.AwayStats;
@@ -140,12 +141,12 @@ public sealed partial class FoundationPage
                 leagueWide ? SchoolCell(game.AwayTeamName) : SchoolCell(home ? game.AwayTeamName : game.HomeTeamName),
                 leagueWide ? SchoolCell(game.HomeTeamName) : TableText(home ? "Home" : "Away"),
                 TableText(result, true, resultColor), TableText(type),
-                TableText(stats?.TotalYards.ToString("N0") ?? "—"), TableText(stats?.Turnovers.ToString() ?? "—") ]);
+                TableText(rivalry), TableText(stats?.TotalYards.ToString("N0") ?? "—"), TableText(stats?.Turnovers.ToString() ?? "—") ]);
         }
         if (rows.Count == 0) _scheduleList.Children.Add(new Label { Text = "No games match this selection." });
         else _scheduleList.Children.Add(DataTable(leagueWide
-            ? [("Week", 95), ("Game center", 130), ("Away", 195), ("Home", 195), ("Score", 90), ("Type", 55), ("Yards", 65), ("TO", 45)]
-            : [("Week", 95), ("Game center", 130), ("Opponent", 195), ("Venue", 60), ("Result", 100), ("Type", 55), ("Yards", 65), ("TO", 45)], rows));
+            ? [("Week", 95), ("Game center", 130), ("Away", 195), ("Home", 195), ("Score", 90), ("Type", 55), ("Series", 90), ("Yards", 65), ("TO", 45)]
+            : [("Week", 95), ("Game center", 130), ("Opponent", 195), ("Venue", 60), ("Result", 100), ("Type", 55), ("Series", 90), ("Yards", 65), ("TO", 45)], rows));
     }
 
     private void OpenLeagueWeek(int week)
