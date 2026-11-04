@@ -1,5 +1,9 @@
 ## Current parity continuation — November 2, 2026
 
+## Published Pro165 / College454 — roster identity, CPU plan drift, Flexbone academies — November 4, 2026
+
+Published November 4: [Pro165 / College454 prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-04-roster-identity), tag `preview-2026-11-04-roster-identity`, target `9c9ff9c`. Both APKs come from the successful main builds (Pro run 41798956069 with the full validation scope; College run 41798956072 with the full management scope); SHA-256 values and the small build manifest are attached to the release. Batch scope: the shared roster identity model with acquisition scoring, a completed three-season long-term audit, staff-adapted CPU game-plan drift for Pro and College, the Flexbone service academies, and the playbook/scheme coverage audit. No device-played flows are claimed; evidence lives in docs/roster-identity-long-term-audit.md, docs/playbook-scheme-coverage-audit.md, docs/current-work.md history and the two CI runs above.
+
 ## Roster identity long-term audit and CPU plan drift — November 3, 2026
 
 Branch `codex/roster-identity-and-priority`. Completed the two roster-identity plan next-work items in order.

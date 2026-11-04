@@ -1,0 +1,18 @@
+{
+  "tag": "preview-2026-11-04-roster-identity",
+  "commit": "9c9ff9c",
+  "pro": {
+    "build": "Pro165",
+    "run": 41798956069,
+    "apk": "antdroid.profootball.franchise-Signed.apk",
+    "sha256": "7E7B5DF7074C8BE3C14B491342C6610F8A66A99441B9B1A6E0F95CB05B667B7F",
+    "scope": "full"
+  },
+  "college": {
+    "build": "College454",
+    "run": 41798956072,
+    "apk": "antdroid.cfbcoach.dev-Signed.apk",
+    "sha256": "B0424B5F723BE2F0800CF903C678710AFEFF41E19C502E05FFBDD04DFFE33B5D",
+    "scope": "full"
+  }
+}
