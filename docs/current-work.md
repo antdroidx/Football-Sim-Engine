@@ -1,3 +1,11 @@
+## User visual review and roadmap checkpoint — November 5, 2026
+
+Documentation-only review on `codex/feature-roadmap-plan`, starting at `9a28a7f`. Recorded the user's Pro landscape screenshot (`534722.jpg`): a home-team color band crosses the top of the playing field. Source inspection found the matching full-width, 12%-height `HomeColor` fill in shared `GameFieldDrawable.Draw`; both games consume this renderer. This is an open priority defect, not a fix or device reproduction.
+
+Recorded dissatisfaction with the News layout and its separate Save story row, low perceived value of bookmarks, and expectation of a social media element. Both hosts currently expose Social in News filters; posts only derive labeled in-game reactions from recorded headlines. Narrative memory and richer interactions remain open. The updated `ROADMAP.md` records the compact-feed direction, bookmark deprioritization, social discoverability gap, and a seven-workstream near-term checkpoint. Earlier saved-story implementation/evidence below remains historical; it does not override this feedback.
+
+Checks this review: inspected branch/status/remotes/history, current status/testing docs, shared field renderer, both News host layouts, social model/service/tests, Presentation project configuration and all three existing Actions workflows. Documentation diff/whitespace validation only; no application edits, tests, builds, APKs, device runs or CI dispatch. Existing untracked files/worktrees are preserved.
+
 ## Feature branch APK verification — November 5, 2026
 
 Source `9f7af9c` on `codex/feature-roadmap-plan` is verified on GitHub. Existing Actions workflows manually dispatched against that exact branch both succeeded:

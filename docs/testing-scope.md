@@ -1,3 +1,9 @@
+## User visual review checkpoint — November 5, 2026
+
+Documentation-only review at branch baseline `9a28a7f`: user-provided Pro landscape screenshot reports a team-color band across the field. Shared `GameFieldDrawable.Draw` contains a matching full-width `HomeColor` fill over the top 12% of the field. Source inspection is not a device reproduction or a passing visual check. The defect remains open, and prior College455 / Pro166 packaging evidence does not establish visual acceptance.
+
+News layout feedback and the incomplete social experience are tracked in `ROADMAP.md` and `current-work.md`. Both hosts' separate Save story rows and Social filter wiring were inspected, along with the social service and existing tests. No tests/builds, APK generation, emulator walkthrough or CI run were performed for this documentation change. Future fixes require focused checks followed by both hosts' field/News visual acceptance on the exact new APKs, including landscape/portrait, branding/markings and Social discoverability.
+
 ## Feature branch APK verification — November 5, 2026
 
 Source `9f7af9c` on `codex/feature-roadmap-plan` is verified on GitHub. Existing Actions workflows manually dispatched against that exact branch both succeeded:
