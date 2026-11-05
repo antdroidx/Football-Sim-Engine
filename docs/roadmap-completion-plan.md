@@ -30,6 +30,8 @@ are `tests/Football.Engine.Tests/CoachHallOfFameTests.cs`. College's Hall of Fam
 `ProHallOfFameService.Build` (players only, `FranchisePage.Honors.cs:20`). `ProHallOfFameService.CoachSummaries`
 produces the coach summaries that the shared service is supposed to score, but nothing calls it.
 
+`docs/ROADMAP.md` and `docs/IMPLEMENTATION-HANDOFF.md` were corrected to match this audit.
+
 A second audit result drives most of the remaining work: none of `TeamChemistryRecord`,
 `RivalryRecord`, or `CoachHallOfFameEntry` is persisted in either save model. `DynastyState`
 (`src/Football.Engine/Models/DynastyState.cs`) and `ProFranchise`

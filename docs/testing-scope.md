@@ -1,3 +1,13 @@
+## Roadmap completion plan and stale worktree cleanup — November 5, 2026
+
+Documentation and local repository housekeeping only. No application source changed, so no Engine, College, or Pro test, build, APK packaging, device walkthrough, or CI run applies to this entry. The plan itself defines the validation commands for each of the five batches it describes.
+
+Executed: `git branch -a -vv` inventory of local and remote-tracking branches; `git worktree list --porcelain`; `git merge-base --is-ancestor` and `git merge-base` against `origin/main` and `HEAD` for each of the three removed branches; `git log --oneline origin/main..<branch>` for each, all empty; `git status --porcelain --untracked-files=all` inside each worktree, which surfaced one modified tracked file and six untracked attachments; SHA-256 comparison of the six copied attachments against their originals, all identical; `git fsck --no-progress --no-dangling`, which reported no errors; `git ls-remote --heads origin`; `gh pr list --state all --head <branch>` for all four branches, all empty; `git rev-list --left-right --count` against `origin/main` and `origin/codex/feature-roadmap-plan`, 0/0 on both before and after the push; `git branch -d` on each removed branch, which git accepted as merged; and `git status` after commit and push.
+
+Two `git worktree remove` calls failed to delete the deep build output with a Windows `MAX_PATH` error after clearing the git metadata. The leftover directories were finished with .NET `Directory.Delete` using an extended-length path. No file outside the three named worktree directories was touched, and the six attachments plus the workflow patch were confirmed present in `.artifacts/stale-worktrees/` afterwards.
+
+Not claimed: no simulation, save, mobile-ui, or device acceptance; no APK built or attached; no workflow content merged; no CI artifact produced; no dispatch, PR, merge, or release. The preserved patch and screenshots live under the gitignored `.artifacts/stale-worktrees/` and are local evidence only.
+
 ## Visible pre-snap formation hold and motion-preset plays — November 5, 2026
 
 Branch `codex/feature-roadmap-plan`: manual offensive snaps now pause for approximately 900 ms after Call play while the called formation is displayed on the field. The status and recap identify the interval as Pre-snap formation. Shift and motion choices animate their alignment preview during the hold, and the recorded snap begins from the adjusted presentation alignment without changing simulation randomness.

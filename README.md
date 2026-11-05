@@ -4,7 +4,7 @@ Two independently installable Android football management games, built with C# a
 
 [Latest dual-app prerelease](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-01-staff-gamecast) · [Validation and cleanup](docs/current-work.md)
 
-[Current roadmap](docs/ROADMAP.md) · [Pro/College audit](docs/audits/pro-college-parity-2026-11-01.md)
+[Current roadmap](docs/ROADMAP.md) · [Roadmap completion plan](docs/roadmap-completion-plan.md) · [Pro/College audit](docs/audits/pro-college-parity-2026-11-01.md)
 
 ## Applications
 

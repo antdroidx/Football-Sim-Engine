@@ -1,7 +1,7 @@
 # Implementation handoff
 
-Current planning source: [ROADMAP.md](ROADMAP.md).
+Current planning source: [ROADMAP.md](ROADMAP.md). Execution plan for the remaining near-term batches: [roadmap-completion-plan.md](roadmap-completion-plan.md).
 
 Use the active roadmap above for the approved feature audit, near-term/long-term phases, implementation order, and first-batch acceptance criteria. Historical releases, APK evidence, and completed checks remain in `current-work.md`, `testing-scope.md`, `pro-completion-checklist.md`, and the matching release/audit documents.
 
-The first implementation batch is shared rivalries and rivalry history, with no simulation effect. Do not start playbook/UI/narrative work while that batch is in flight unless the user explicitly expands the scope.
+The shared rivalry foundation batch has shipped (shared rivalry records and service, schedule labels, College traditional-rivalry catalog). The remaining near-term work is the five batches in [roadmap-completion-plan.md](roadmap-completion-plan.md): A season-aware chemistry and locker-room events, B replay highlights and pre-snap choreography, C persistent Hall of Fame lifecycle, D news and social interactions, E rivalry completion. Work them in that order. Batches A, C, and D add new save-state collections, which must default empty for older saves and must not rewrite existing data. Batch C must also render the shared coach Hall of Fame service, which currently has no production caller. No release, merge, or publication is authorized by this handoff.
