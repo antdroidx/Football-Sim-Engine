@@ -659,8 +659,8 @@ def node_with_id(root, suffix):
 
 def exit_via_settings(kind):
     root=scroll_to_text("exit-settings-"+kind,"Settings",max_swipes=20,toward_start=True);tap(root,"Settings")
-    # The Settings page can open scrolled past the Save & exit button, so scroll it into view.
-    root=scroll_to_text("exit-choice-"+kind,"Save & exit",max_swipes=20);tap(root,"Save & exit")
+    # The Settings page can open scrolled past the Save & exit button, so scroll back up to it.
+    root=scroll_to_text("exit-choice-"+kind,"Save & exit",max_swipes=20,toward_start=True);tap(root,"Save & exit")
     root=wait_for("exit-confirm-"+kind,lambda r:"Save and exit?" in texts(r));tap(root,"Save & exit")
     return wait_for("exit-library-"+kind,lambda r:library_loaded(r) if kind=="pro" else "Your dynasties" in texts(r) and "New dynasty" in texts(r),timeout=180)
 
