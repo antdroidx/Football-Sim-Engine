@@ -202,6 +202,12 @@ public sealed partial class FranchisePage : ContentPage
         else if (game.Phase == state!.Phase && g.Week == state.Week)
         { var row = new ActionRow(); row.Add(Action("Watch", () => Live(game, GameDayMode.Watch), "pro-watch")); row.Add(Action("Play", () => Live(game, GameDayMode.Play), "pro-play")); row.Add(Action("Simulate", async () => { var session = ProLeagueService.Start(state!, game, GameDayMode.Simulate); await Task.Run(() => GameDayEngine.SimulateToEnd(session)); state = ProLeagueService.Finish(state!, session); await Save(); Render(); }, "pro-sim")); stack.Add(row); }
         else stack.Add(Text(game.Phase + " · Week " + g.Week));
+        var rivalryLabel=RivalryRecordService.Label(state!.Rivalries,g.HomeTeamName,g.AwayTeamName);
+        if(!string.IsNullOrWhiteSpace(rivalryLabel))
+        {
+            var rivalry=RivalryRecordService.For(state.Rivalries,g.HomeTeamName).FirstOrDefault(item=>item.Involves(g.AwayTeamName));
+            stack.Add(Text(rivalry is null?rivalryLabel:$"{rivalryLabel} · {RivalryRecordService.Series(rivalry,g.HomeTeamName)}",12,true));
+        }
         return new Border { Padding = 12, StrokeThickness = 0, BackgroundColor = DynastyTheme.Surface, StrokeShape = new RoundRectangle { CornerRadius = 12 }, Content = stack };
     }
 
@@ -210,6 +216,15 @@ public sealed partial class FranchisePage : ContentPage
         body.Add(PageHeader("Standings","Conference and division tables"));body.Add(Action("Playoff bracket ›",()=>Open("Playoffs")));
         foreach (var group in ProStandings.Build(state!).GroupBy(r => r.Team.Conference + " · " + r.Team.Division))
         { body.Add(SectionCard(group.Key,null,Table([("Team", 210), ("W", 40), ("L", 40), ("T", 40), ("Pct", 65), ("Diff", 65)], group.Select(r => new View[] { TeamCell(r.Team), Text(r.Wins.ToString()), Text(r.Losses.ToString()), Text(r.Ties.ToString()), Text(r.Percentage.ToString(".000")), Text(r.Differential.ToString()) })))); }
+    }
+    View RivalryPanel(ProFranchise s,string teamName)
+    {
+        var rivalries=RivalryRecordService.For(s.Rivalries,teamName);
+        if(rivalries.Count==0)return Text("No rivalry series are recorded for this club yet.",13);
+        var stack=new VerticalStackLayout{Spacing=4};
+        foreach(var rivalry in rivalries)
+            stack.Children.Add(Text($"{RivalryRecordService.Opponent(rivalry,teamName)} · {RivalryRecordService.Series(rivalry,teamName)}",13,true));
+        return stack;
     }
     View ChemistryPanel(ProFranchise s,string teamName,TeamSimulationProfile profile)
     {
@@ -251,6 +266,7 @@ public sealed partial class FranchisePage : ContentPage
         return ShowPage(team.Name,new TeamBadgeView(team,56),Text(team.Conference+" · "+team.Division),Text($"{standing.Wins}–{standing.Losses}–{standing.Ties} · {SeasonCapLabel(s,team.Name)}"),
             Panel("Identity",Text($"{GamePlanService.Label(plan.Offense)} offense · {GamePlanService.Label(plan.Defense)} defense · {GamePlanService.Label(plan.Approach)} approach",13,true)),
             Panel("Team chemistry",ChemistryPanel(s,team.Name,profile)),
+            Panel("Rivalries",RivalryPanel(s,team.Name)),
             Panel("Coaching staff",Table([("Role",150),("Name",190),("Age",45),("OVR",50)],coaches.Select(c=>new View[]{Text(RoleName(c.Role)),c.Vacant?Text(c.Name):StaffDirectoryComponents.Name(CoachId(c),c.Name,Link,id=>CoachProfile(state!.Coaches.FirstOrDefault(x=>x.TeamId==c.TeamId&&CoachId(x)==id)??c)),Text(c.Age.ToString()),Text(c.Vacant?"—":ProStaff.Profile(c).Coaching.ToString())}))),
             Panel("Medical staff",Table([("Role",150),("Name",190),("Age",45),("OVR",55)],medical.Select(c=>new View[]{Text(RoleName(c.Staff.Role)),StaffDirectoryComponents.Name(c.Staff.StaffId,c.Staff.FullName,Link,_=>MedicalProfile(c)),Text(c.Staff.Age.ToString()),Text(StaffAttributeService.Medical(c.Staff).Overall().ToString())}))),
             Panel("Scouting staff",Table([("Coverage",90),("Name",190),("Age",45),("Quality",65)],scouts.Select(c=>new View[]{Text(c.Regional?"Regional":"National"),StaffDirectoryComponents.Name(c.Staff.ScoutId,c.Staff.FullName,Link,_=>ShowPage("Scout profile",Text(c.Staff.FullName,22,true),Text($"Age {c.Staff.Age}"),CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(c.Staff)))),Text(c.Staff.Age.ToString()),Text(ScoutAttributes.FromLegacy(c.Staff).PredictionQuality(c.Regional).ToString())}))),

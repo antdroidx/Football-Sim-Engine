@@ -57,6 +57,15 @@ public sealed partial class FoundationPage
             foreach(var item in notes)stack.Children.Add(T($"{LockerRoomEventService.Label(item.Kind)} · {item.Headline} — {item.Detail}"));
             return stack;
         }
+        View RivalrySummary()
+        {
+            var rivalries=RivalryRecordService.For(state.Rivalries,team.Name);
+            if(rivalries.Count==0)return T("No rivalry series are recorded for this program yet.");
+            var stack=new VerticalStackLayout{Spacing=4};
+            foreach(var rivalry in rivalries)
+                stack.Children.Add(T($"{RivalryRecordService.Opponent(rivalry,team.Name)} · {RivalryRecordService.Series(rivalry,team.Name)}",true));
+            return stack;
+        }
         View ScoutDirectory()
         {
             if(!team.Name.Equals(state.UserTeamName,StringComparison.OrdinalIgnoreCase))
@@ -91,7 +100,8 @@ public sealed partial class FoundationPage
             Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true)),
             Box("Team chemistry",T($"Cohesion {profile.Cohesion} / 100 · Scheme familiarity {profile.SchemeFamiliarity} / 100",true),
                 ChemistrySummary(),
-                LockerRoomSummary())
+                LockerRoomSummary()),
+            Box("Rivalries",RivalrySummary())
         }};
         await Navigation.PushModalAsync(new ContentPage{Title=team.Name+" profile",AutomationId="college-team-profile-page",BackgroundColor=DynastyTheme.Background,Content=new ScrollView{Content=content}});
     }

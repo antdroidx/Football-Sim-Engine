@@ -1,3 +1,12 @@
+## Persisted rivalries and rivalry series in both games — November 5, 2026
+
+Branch `codex/feature-roadmap-plan`: rivalries are now a durable record instead of a label recomputed from the schedule.
+
+Both games persist the rivalry set. College records it on its offseason rollover and Pro when the offseason hands over to preseason, and each save keeps the series with the games behind it. The shared `RivalryRecordService` reads that set, so both games label the same matchup the same way and describe a series the same way, with the number of meetings and the record from one team's point of view.
+
+The exposure is wider now. The College team profile and the Pro team page list each program's rivalry series with its opponent and the recorded record. The College game center and the Pro matchup card name the series for the game in front of you, and the schedule series column reads the persisted set rather than re-deriving it. The same records feed the rivalry threads in the social feed.
+
+Save compatibility: `DynastyState` and `ProFranchise` gained a rivalry collection with an empty default and no schema-version bump, so older saves load with empty fields. As with the earlier batches, nothing about the simulation changes: the first increment carries no rivalry effect on a play.
 ## Social interaction, replies, and rivalry threads — November 5, 2026
 
 Branch `codex/feature-roadmap-plan`: the in-game social network now records what the player actually does with it.

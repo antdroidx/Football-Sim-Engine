@@ -26,7 +26,7 @@ This checkpoint follows the original review at `9a28a7f`. It applies to both And
 
 | Workstream | Implemented on the feature branch | Still open |
 |---|---|---|
-| Rivalries | Shared records/service, schedule labels, College traditional rivalry catalog | Complete team/game-center/history exposure and durable rivalry-history acceptance; no rivalry simulation effect in the first increment. |
+| Rivalries | Shared records/service, schedule labels, College traditional rivalry catalog, persisted rivalry set with team, game-center and history exposure | A sourced league rule for a rivalry effect on a play, which the first increment deliberately excludes. |
 | Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; preset motion entries in every offensive formation family; choices recorded in live/replay; a bounded outcome effect on the recorded play; league rules own the shift and motion limits | Remaining device acceptance and any sourced league-specific limit. |
 | Captains / chemistry | Deterministic captains, cohesion/familiarity, bounded GameCast effect, both hosts' team UI, per-season memory fed by roster turnover, coaching and plan continuity, captain changes and discipline | Deeper continuity effects and remaining discipline inputs. |
 | Morale / locker room | Existing league-specific morale, discipline, transfer and trade systems retained; factual narratives now have persistent memory; shared locker-room events recorded from real state | Motivation state and further locker-room narrative hooks. |

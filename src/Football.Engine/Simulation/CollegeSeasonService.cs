@@ -8,6 +8,7 @@ public static class CollegeSeasonService
     public static DynastyState Refresh(DynastyState state)
     {
         ArgumentNullException.ThrowIfNull(state);
-        return CollegeHallOfFameService.Refresh(CollegeChemistryService.Refresh(state));
+        state = CollegeHallOfFameService.Refresh(CollegeChemistryService.Refresh(state));
+        return state with { Rivalries = RivalryRecordService.Derive(state.Schedule) };
     }
 }

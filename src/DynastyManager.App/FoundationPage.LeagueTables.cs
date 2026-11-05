@@ -134,7 +134,7 @@ public sealed partial class FoundationPage
                 }
             }
             var rivalry = TraditionalCollegeRivalries.Label(_currentDynasty.LeagueTeams, game.HomeTeamName, game.AwayTeamName);
-            if (string.IsNullOrWhiteSpace(rivalry)) rivalry = RivalryService.Label(_currentDynasty.Schedule, game.HomeTeamName, game.AwayTeamName);
+            if (string.IsNullOrWhiteSpace(rivalry)) rivalry = RivalryRecordService.Label(_currentDynasty.Rivalries, game.HomeTeamName, game.AwayTeamName);
             var type = game.GameType switch { ScheduledGameType.Conference => "CONF", ScheduledGameType.ConferenceChampionship => "CCG",
                 ScheduledGameType.CollegeFootballPlayoff => "CFP", ScheduledGameType.Bowl => "BOWL", _ => "OOC" };
             var stats = home ? game.HomeStats : game.AwayStats;

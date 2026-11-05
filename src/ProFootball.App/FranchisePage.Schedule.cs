@@ -35,7 +35,7 @@ public sealed partial class FranchisePage
                 else actions.Add(Text("Upcoming",12));
                 var home=s.League.Teams.Single(t=>t.Name==f.HomeTeamName);var away=s.League.Teams.Single(t=>t.Name==f.AwayTeamName);
                 var result=f.HasPlayed?$"{f.AwayScore}–{f.HomeScore}":"Upcoming";
-                var rivalry=RivalryService.Label(s.Games.Select(x=>x.Football).ToArray(),f.HomeTeamName,f.AwayTeamName);
+                var rivalry=RivalryRecordService.Label(s.Rivalries,f.HomeTeamName,f.AwayTeamName);
                 return new View[] { Text(f.Week.ToString()+(g.Phase==s.Phase&&f.Week==s.Week?" •":"")),Text(g.Phase==ProPhase.RegularSeason?"Season":g.Phase.ToString(),12),own?TeamCell(f.HomeTeamName==selected?away:home):TeamCell(away),own?Text(f.HomeTeamName==selected?"Home":"Away"):TeamCell(home),Text(result),Text(rivalry),actions };
             }))));
         }

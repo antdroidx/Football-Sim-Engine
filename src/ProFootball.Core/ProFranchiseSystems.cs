@@ -1,4 +1,5 @@
 using DynastyManager.Core.Models;
+using DynastyManager.Core.Simulation;
 namespace ProFootball.Core;
 
 public static class ProTrade
@@ -339,6 +340,10 @@ public static class ProOffseason
         }
         s = ProCpu.Manage(ProTermination.ProcessJune1(s with { Phase = ProPhase.Preseason, Week = 1 }));
         var season = s with { Phase = ProPhase.Preseason, Week = 1, OffseasonStep = OffseasonStep.Retention, Games = ProSchedule.Build(s.League, s.Year), TaggedTeams = [], Picks = s.Picks.Concat(ProEconomy.CreatePicks(s, s.Year + 1)).DistinctBy(p => p.Id).ToList() };
+        var rivalryGames = season.Games.Select(game => game.Football)
+            .Concat(season.History.SelectMany(archive => archive.Games).Select(game => game.Football))
+            .ToArray();
+        season = season with { Rivalries = RivalryRecordService.Derive(rivalryGames).ToList() };
         return ProCoachHallOfFameService.Refresh(ProChemistryService.Refresh(season));
     }
 }

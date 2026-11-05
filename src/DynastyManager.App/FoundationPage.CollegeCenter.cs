@@ -53,6 +53,12 @@ public sealed partial class FoundationPage
         body.Children.Add(SchoolBanner(game.AwayTeamName, "Away"));
         body.Children.Add(SchoolBanner(game.HomeTeamName, "Home"));
         body.Children.Add(new Label { Text = GameOutlookLabel(game), TextColor = DynastyTheme.Muted });
+        var rivalryLabel=RivalryRecordService.Label(_currentDynasty.Rivalries,game.HomeTeamName,game.AwayTeamName);
+        if(!string.IsNullOrWhiteSpace(rivalryLabel))
+        {
+            var rivalry=RivalryRecordService.For(_currentDynasty.Rivalries,game.HomeTeamName).FirstOrDefault(item=>item.Involves(game.AwayTeamName));
+            body.Children.Add(new Label { Text=rivalry is null?rivalryLabel:$"{rivalryLabel} · {RivalryRecordService.Series(rivalry,game.HomeTeamName)}", TextColor=DynastyTheme.Accent });
+        }
         if (GameDayEngine.IsAvailable(game, _currentDynasty.SeasonYear, _currentDynasty.Week, _currentDynasty.Phase))
         {
             async Task Open(GameDayMode mode)

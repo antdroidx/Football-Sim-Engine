@@ -53,6 +53,7 @@ public sealed record DynastyState
     public IReadOnlyList<CoachHallOfFameEntry> CoachHallOfFame { get; init; } = [];
     public IReadOnlyList<FootballSocialInteraction> SocialInteractions { get; init; } = [];
     public IReadOnlyList<FootballSocialFollow> SocialFollows { get; init; } = [];
+    public IReadOnlyList<RivalryRecord> Rivalries { get; init; } = [];
     public IReadOnlyList<PlayerDepartureRecord> RecentPlayerDepartures { get; init; } =
         Array.Empty<PlayerDepartureRecord>();
     public IReadOnlyList<PlayerInjuryRecord> InjuryHistory { get; init; } =

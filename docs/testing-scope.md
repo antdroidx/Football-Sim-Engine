@@ -1,3 +1,10 @@
+## Persisted rivalries and rivalry series in both games — November 5, 2026
+
+Executed: Engine `RivalryRecordTests` 5 passed, covering the matchup label, the series record from one team's point of view, the opponent name, the series a team belongs to, and the same games always producing the same rivalry set. College `CollegeRivalryTests` 3 passed, covering the rivalry set recorded at the season rollover, an older save loading with an empty collection, and a save round-trip. Pro `ProRivalryTests` 3 passed, covering the save round-trip, an older save loading with an empty collection, and both games labelling the same matchup the same way.
+
+Regression: Engine 387 passed. College 629 passed with the standard `DynastyHealthTests` and `OvrCalibrationDynastyTests` exclusions. Pro 473 passed with the standard `TwentySeasons` and `SourcedFiveSeasons` exclusions. College and Pro Android compile targets passed; the only warnings are the known offline `NU1900` package-vulnerability warnings and the two existing Pro `CS8625` nullable warnings.
+
+Not claimed: no APK packaged, no device or emulator acceptance, no CI dispatch, no PR, merge, or release. The rivalry series surfaces were not exercised on a device, and the rivalry records carry no effect on a play.
 ## Social interaction, replies, and rivalry threads — November 5, 2026
 
 Executed: Engine `FootballSocialTests` 6 passed, covering recording and clearing a like and a repost, the player's activity showing on a post, followed desks sorting first, replies restating the recorded category from a different desk, and rivalry threads built from recorded results and staying empty without a recorded series. College `CollegeSocialTests` 2 passed and Pro `ProSocialTests` 2 passed, covering the save round-trip for the player's activity and an older save loading with empty collections.

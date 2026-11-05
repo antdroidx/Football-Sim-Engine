@@ -194,6 +194,10 @@ Acceptance
 
 ## Batch E — Rivalry completion
 
+**Status: delivered on `codex/feature-roadmap-plan`.** Both games persist the rivalry set, the shared reader
+labels a matchup and describes a series the same way in both games, and the team, game-center and history
+surfaces show the series. No rivalry effect on a play is included.
+
 Current state
 
 - `RivalryService.Derive` returns only pairings with more than one game and is not persisted.
@@ -210,6 +214,9 @@ Work
 3. Define and run durable rivalry-history acceptance: stable rivalry set for the same save
    identity, correct series records, consistent labels across hosts.
 4. Keep the first increment simulation-free, as the roadmap requires.
+
+All five batches are delivered on `codex/feature-roadmap-plan`. The near-term checkpoint in `ROADMAP.md` is
+complete apart from the items each batch explicitly left open, which are listed per batch above.
 
 ## Sequencing
 
