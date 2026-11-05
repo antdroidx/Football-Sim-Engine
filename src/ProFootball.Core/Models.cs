@@ -100,6 +100,7 @@ public sealed record ProFranchise
     public List<ProNewsStory> News { get; init; } = [];
     public List<string> ReadNewsIds { get; init; } = [];
     public List<DynastyManager.Core.Models.FootballNewsStory> SavedNews { get; init; } = [];
+    public IReadOnlyList<DynastyManager.Core.Models.FootballNarrativeMemoryRecord> NarrativeMemory { get; init; } = [];
     public List<ProTransactionEntry> TransactionLog { get; init; } = [];
     public List<string> Transactions { get; init; } = [];
     public List<string> TaggedTeams { get; init; } = [];
@@ -163,7 +164,7 @@ public sealed record ProGmDecision(Guid Id, int Year, int Week, string Action, b
 
 public sealed record ProTradeRecord(Guid Id, int Year, int Week, string From, string To, List<Guid> GivenPlayers, List<Guid> ReceivedPlayers, List<ProDraftPick> GivenPicks, List<ProDraftPick> ReceivedPicks) { public int TransactionTick {get;init;}=-1; }
 
-public sealed record ProNewsStory(string Id, int Year, int Week, string Category, string Headline, string Body, string? Team = null, string? GameId = null);
+public sealed record ProNewsStory(string Id, int Year, int Week, string Category, string Headline, string Body, string? Team = null, string? GameId = null, ProPhase? Phase = null);
 
 public sealed record ProWeeklyTalk(int Year,int Week,ProPhase Phase,int Tick,DynastyManager.Core.Simulation.CoachTalkRecord Talk);
 public sealed record ProMoraleEffect(Guid PlayerId,string Reason,int RemainingChange,int NextDecayTick);

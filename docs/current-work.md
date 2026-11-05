@@ -1,3 +1,18 @@
+## Live field, compact News, Social narratives, and phase ordering — November 5, 2026
+
+Branch `codex/feature-roadmap-plan`: fixed the shared GameCast field by removing the full-width home-color overlay that crossed the top of the playing surface. Revised both News hosts to remove the standalone Save story rows and Saved filter while preserving saved-story data. Added a visible Social shortcut, richer authored posts with engagement labels, deterministic narrative memory in both save models, factual multi-story season threads, and phase-aware Pro News ordering so preseason stories no longer outrank regular-season news.
+
+Validation: Engine `NewsStoryTests` 8 passed, including narrative-memory idempotency, older-save defaults, derived posts, source read state and stored snapshots. Pro `NewsOrdersPlayoffsAndAwardsAfterRegularSeason` 1 passed with preseason/regular/playoff/award ordering. Pro `NewsRefreshIsIdempotentAndPreservesReadState` 1 passed. College `NewsAndTableOrderingTests` 7 passed. Presentation compile and both Android app compile targets passed; Android packaging passed with known NU1900 warnings and two existing Pro CS8625 warnings; xUnit analyzer warnings remain pre-existing.
+
+Exact local debug artifacts from this source working tree:
+
+- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, 90,116,617 bytes, SHA-256 `41C9596D6FB024790D0E55070BCAD452930AF937C44F79876FF25480E68847E7`.
+- College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, 91,090,072 bytes, SHA-256 `CCAA91AE0C297F8A92082F3CBC94FF7A5742B1C1701FE1B357D568916E983EFB`.
+
+Device acceptance on the exact APKs: Pro field checked in portrait and landscape with no top color band; Pro Overview/News checked after simulated preseason for regular-before-preseason ordering, compact cards and populated Social; College News and Social checked for the visible shortcut and compact cards. The first College Social build exposed a reused-picker parent crash; it was fixed by creating the picker per render, rebuilt, reinstalled and retested with an empty crash buffer. Screenshots: `.artifacts/pro-live-field-fixed.png`, `.artifacts/pro-live-field-landscape-fixed.png`, `.artifacts/pro-social-network-feed.png`, `.artifacts/college-social-network-fixed.png`.
+
+No CI dispatch, PR, merge or release was performed. Season-aware chemistry/locker-room events, social replies/follows, replay highlights/choreography and HOF lifecycle work remain next.
+
 ## User visual review and roadmap checkpoint — November 5, 2026
 
 Documentation-only review on `codex/feature-roadmap-plan`, starting at `9a28a7f`. Recorded the user's Pro landscape screenshot (`534722.jpg`): a home-team color band crosses the top of the playing field. Source inspection found the matching full-width, 12%-height `HomeColor` fill in shared `GameFieldDrawable.Draw`; both games consume this renderer. This is an open priority defect, not a fix or device reproduction.

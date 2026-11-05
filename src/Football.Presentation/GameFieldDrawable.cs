@@ -45,8 +45,6 @@ public sealed class GameFieldDrawable : IDrawable
                 var x = rect.Width * (float)GameDayAnimationPlanner.ProjectYardLine(yard, 1);
                 canvas.DrawLine(x, 0, x, rect.Height);
             }
-            canvas.FillColor = HomeColor;
-            canvas.FillRectangle(0, 0, rect.Width, rect.Height * .12f);
             var leftGoal = (float)GameDayAnimationPlanner.ProjectYardLine(0, 1);
 
             var rightGoal = (float)GameDayAnimationPlanner.ProjectYardLine(100, 1);

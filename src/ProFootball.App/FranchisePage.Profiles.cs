@@ -167,39 +167,51 @@ public sealed partial class FranchisePage
     void News()
     {
         state = ProNews.Refresh(state!); var s = state!;
-        body.Add(PageHeader("League news","Results, headlines, awards and transactions"));
-        body.Add(Action("Filter: " + newsFilter, async () => { var filter = await GameDialogs.ActionSheetAsync(this, "News", "Cancel", null, new[] { "All", "My team", "Unread", "Social", "Saved" }.Concat(s.News.Select(n => n.Category).Distinct()).ToArray()); if (filter is null or "Cancel") return; newsFilter = filter; Render(); }));
-        if (newsFilter == "Saved")
+        body.Add(PageHeader("League news", "League Wire · factual stories and the Social network"));
+        var sources = s.News.Select(story => new FootballNewsStory
         {
-            if (s.SavedNews.Count == 0) body.Add(Text("Save a story to keep it here across seasons."));
-            foreach (var saved in s.SavedNews)
-            {
-                var card = FootballNewsStoryCard.Create(saved, null, DynastyTheme.Accent);
-                var tap = new TapGestureRecognizer();
-                tap.Tapped += async (_, _) => { state = state! with { ReadNewsIds = FootballNewsReadStateService.MarkRead(state.ReadNewsIds, [saved.Id]).ToList() }; await Save(); await GameDialogs.AlertAsync(this, saved.Headline, saved.Body, "Close"); };
-                card.GestureRecognizers.Add(tap);
-                body.Add(card);
-                body.Add(Action("Remove saved story", async () => { state = state! with { SavedNews = FootballNewsReadStateService.ToggleSaved(state.SavedNews, saved).ToList() }; await Save(); Render(); }));
-            }
-            return;
-        }
-        var stories = s.News.Where(n => newsFilter is "All" or "Social" || newsFilter == "My team" && (n.Team == s.UserTeam || n.Headline.Contains(s.UserTeam)) || newsFilter == "Unread" && !s.ReadNewsIds.Contains(n.Id) || n.Category == newsFilter).Take(60).ToArray();
-        if (stories.Length == 0) body.Add(Text("No stories in this view yet. Completed games and league activity will appear here."));
-        foreach (var story in stories)
+            Id = story.Id,
+            Category = story.Category,
+            Headline = story.Headline,
+            Body = story.Body,
+            TeamName = story.Team ?? s.UserTeam,
+            SeasonYear = story.Year,
+            Week = story.Week,
+            RelatedId = story.GameId,
+            MediaKind = FootballNewsMediaKind.Story
+        }).ToArray();
+        state = s with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(s.NarrativeMemory, sources, s.Year) };
+        s = state;
+        var socialPosts = FootballNewsSocialService.Build(sources, s.NarrativeMemory);
+        var socialCount = socialPosts.Count;
+        var tools = new ActionRow();
+        tools.Add(Action("Filter: " + newsFilter, async () =>
         {
-            var mapped = new FootballNewsStory
-            {
-                Id = story.Id,
-                Category = story.Category,
-                Headline = story.Headline,
-                Body = story.Body,
-                TeamName = story.Team ?? s.UserTeam,
-                SeasonYear = story.Year,
-                Week = story.Week,
-                RelatedId = story.GameId,
-                MediaKind = FootballNewsMediaKind.Story
-            };
-            if (newsFilter == "Social") mapped = FootballNewsSocialService.Build([mapped]).Single();
+            var filter = await GameDialogs.ActionSheetAsync(this, "News", "Cancel", null,
+                new[] { "All", "My team", "Unread", "Social" }.Concat(s.News.Select(n => n.Category).Distinct()).ToArray());
+            if (filter is null or "Cancel") return;
+            newsFilter = filter;
+            Render();
+        }));
+        var social = Action($"Social network · {socialCount}", async () => { newsFilter = "Social"; Render(); await Task.CompletedTask; }, "pro-news-social");
+        social.BackgroundColor = newsFilter == "Social" ? DynastyTheme.Selected : DynastyTheme.Panel;
+        tools.Add(social);
+        body.Add(tools);
+
+        var stories = s.News.Where(n => newsFilter == "All"
+            || newsFilter == "My team" && (n.Team == s.UserTeam || n.Headline.Contains(s.UserTeam))
+            || newsFilter == "Unread" && !s.ReadNewsIds.Contains(n.Id)
+            || n.Category == newsFilter).Take(60).ToArray();
+        var displayed = newsFilter == "Social"
+            ? socialPosts.Select(post => (Story: s.News.First(item => item.Id == post.RelatedId),
+                    Mapped: post)).Take(60).ToArray()
+            : stories.Select(story => (Story: story,
+                Mapped: sources.First(item => item.Id == story.Id))).ToArray();
+        if (displayed.Length == 0) body.Add(Text(newsFilter == "Social"
+            ? "No social posts yet. Completed games and league activity will appear here."
+            : "No stories in this view yet. Completed games and league activity will appear here."));
+        foreach (var (story, mapped) in displayed)
+        {
             var card = FootballNewsStoryCard.Create(mapped, NewsThumbnail(story), DynastyTheme.Accent);
             if (!s.ReadNewsIds.Contains(mapped.Id)) { card.Stroke = DynastyTheme.Accent; card.StrokeThickness = 1; }
             var tap = new TapGestureRecognizer();
@@ -207,18 +219,18 @@ public sealed partial class FranchisePage
             {
                 state = state! with { ReadNewsIds = FootballNewsReadStateService.MarkRead(state.ReadNewsIds, [mapped.Id]).ToList() }; await Save();
                 var game = state.Games.Concat(state.History.SelectMany(h => h.Games)).FirstOrDefault(g => g.Football.GameId == story.GameId);
-                if (game is not null && !mapped.IsSocial) await BoxScore(game.Football); else await GameDialogs.AlertAsync(this, mapped.Headline, mapped.Body, "Close");
+                if (game is not null && !mapped.IsSocial) await BoxScore(game.Football);
+                else await GameDialogs.AlertAsync(this, mapped.Headline, NewsStoryDetail(mapped), "Close");
                 Render();
             };
             card.GestureRecognizers.Add(tap);
             body.Add(card);
-            body.Add(Action(s.SavedNews.Any(item => item.Id == mapped.Id) ? "Remove saved story" : "Save story", async () =>
-            {
-                state = state! with { SavedNews = FootballNewsReadStateService.ToggleSaved(state.SavedNews, mapped).ToList() };
-                await Save(); Render();
-            }));
         }
     }
+
+    static string NewsStoryDetail(FootballNewsStory story) => story.IsSocial
+        ? $"{story.AuthorName} {story.AuthorHandle}\n\n{story.Body}\n\n{story.ReplyCount} replies · {story.RepostCount} reposts · {story.LikeCount} likes\n\nFictional in-game social activity."
+        : story.Body;
 
     View NewsThumbnail(ProNewsStory story)
     {

@@ -39,10 +39,19 @@ public class SpecialistAndDepthTests
         var s = ProLeagueService.Create("Seattle Seahawks", generatedPlayers: true, applyOpeningTrades: false);
         var team = s.League.Teams.Single(t => t.Name == s.UserTeam);
         var story = (string id, int week, string category) => new ProNewsStory(id, s.Year, week, category, id, id);
-        s = s with { News = [story("regular-18", 18, "Results"), story("playoff-round", 2, "Playoffs"), story("award", 18, "Awards")] };
+        s = s with { News =
+        [
+            story("preseason-3", 3, "Preseason"),
+            story("regular-1", 1, "Results"),
+            story("regular-18", 18, "Results"),
+            story("playoff-round", 2, "Playoffs"),
+            story("award", 18, "Awards")
+        ] };
         var refreshed = ProNews.Refresh(s);
         Assert.Equal("award", refreshed.News[0].Id);
         Assert.Equal("playoff-round", refreshed.News[1].Id);
         Assert.Equal("regular-18", refreshed.News[2].Id);
+        Assert.Equal("regular-1", refreshed.News[3].Id);
+        Assert.Equal("preseason-3", refreshed.News[4].Id);
     }
 }

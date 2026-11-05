@@ -13,9 +13,10 @@ public static class ProNews
         foreach (var g in s.Games.Where(g => g.Football.HasPlayed))
         {
             var f = g.Football; var margin = Math.Abs((f.HomeScore ?? 0) - (f.AwayScore ?? 0));
-            Add(new("game-" + f.GameId, f.SeasonYear, f.Week, g.Phase == ProPhase.Playoffs ? "Playoffs" : "Results",
+            Add(new("game-" + f.GameId, f.SeasonYear, f.Week,
+                g.Phase == ProPhase.Preseason ? "Preseason" : g.Phase == ProPhase.Playoffs ? "Playoffs" : "Results",
                 f.HomeScore == f.AwayScore ? "All square: " + f.AwayTeamName + " and " + f.HomeTeamName : f.WinnerTeamName + (margin >= 21 ? " rolls to a convincing win" : margin <= 3 ? " survives a close finish" : " takes the win"),
-                $"{g.Phase} · {f.AwayTeamName} {f.AwayScore} – {f.HomeScore} {f.HomeTeamName}", f.WinnerTeamName, f.GameId));
+                $"{g.Phase} · {f.AwayTeamName} {f.AwayScore} – {f.HomeScore} {f.HomeTeamName}", f.WinnerTeamName, f.GameId, g.Phase));
         }
         foreach (var player in s.Players.Where(p => p.Football.CurrentInjury is { WeeksRemaining: > 0 }))
         {
@@ -29,7 +30,7 @@ public static class ProNews
             {
                 var run = s.Games.Where(g => g.Phase == ProPhase.RegularSeason && g.Football.HasPlayed && g.Football.Week <= group.Key && g.Football.InvolvesTeam(team.Name)).OrderByDescending(g => g.Football.Week).TakeWhile(g => g.Football.HomeScore != g.Football.AwayScore && g.Football.WinnerTeamName == team.Name).ToArray();
                 if (run.Length < 3) continue;
-                Add(new($"streak-{s.Year}-{group.Key}-{team.Id}", s.Year, group.Key, "Form", team.Name + $" wins {run.Length} straight", "Consecutive regular-season wins keep the momentum building.", team.Name));
+                Add(new($"streak-{s.Year}-{group.Key}-{team.Id}", s.Year, group.Key, "Form", team.Name + $" wins {run.Length} straight", "Consecutive regular-season wins keep the momentum building.", team.Name, Phase: ProPhase.RegularSeason));
             }
         }
         foreach(var week in s.Games.Where(g=>g.Phase==ProPhase.RegularSeason&&g.Football.SeasonYear==s.Year).GroupBy(g=>g.Football.Week))
@@ -42,7 +43,7 @@ public static class ProNews
                 var leader=week.SelectMany(g=>g.Football.PlayerStats).GroupBy(p=>p.PlayerId).Select(g=>new{Name=g.First().PlayerName,Yards=g.Sum(p=>p.PassYards)}).OrderByDescending(p=>p.Yards).FirstOrDefault();
                 var detail=$"{week.Count()} games completed. Largest margin: {biggest.AwayTeamName} {biggest.AwayScore} – {biggest.HomeScore} {biggest.HomeTeamName}.";
                 if(leader is {Yards:>0})detail+=$" Passing leader: {leader.Name}, {leader.Yards:N0} yards.";
-                Add(new(id,s.Year,week.Key,"Weekly review",$"Week {week.Key} around the league",detail));
+                Add(new(id,s.Year,week.Key,"Weekly review",$"Week {week.Key} around the league",detail,Phase: ProPhase.RegularSeason));
             }
             if(week.Key<14)continue;
             var snapshot=s with{Games=s.Games.Where(g=>g.Phase==ProPhase.RegularSeason&&g.Football.Week<=week.Key).ToList()};
@@ -51,14 +52,14 @@ public static class ProNews
                 var raceId=$"race-{s.Year}-{week.Key}-{conference}";if(stories.ContainsKey(raceId))continue;
                 var seeds=ProStandings.Seeds(snapshot,conference);
                 Add(new(raceId,s.Year,week.Key,"Playoff race",conference+" playoff picture · Week "+week.Key,
-                    "Current projected qualifiers: "+string.Join(", ",seeds.Select((r,i)=>$"{i+1}. {r.Team.Name} ({r.Wins}–{r.Losses}–{r.Ties})"))+". Projection from completed results, not a clinching announcement."));
+                    "Current projected qualifiers: "+string.Join(", ",seeds.Select((r,i)=>$"{i+1}. {r.Team.Name} ({r.Wins}–{r.Losses}–{r.Ties})"))+". Projection from completed results, not a clinching announcement.",Phase: ProPhase.RegularSeason));
             }
         }
         foreach(var honors in s.Honors)
         {
-            foreach(var award in honors.Awards)Add(new($"award-{honors.Year}-{award.Title}",honors.Year,18,"Awards",award.Name+" wins "+award.Title,$"{award.Team} · {honors.Year} regular-season award.",award.Team));
+            foreach(var award in honors.Awards)Add(new($"award-{honors.Year}-{award.Title}",honors.Year,18,"Awards",award.Name+" wins "+award.Title,$"{award.Team} · {honors.Year} regular-season award.",award.Team, Phase: ProPhase.Playoffs));
             foreach(var conference in honors.Selections.GroupBy(p=>p.Conference))Add(new($"allstars-{honors.Year}-{conference.Key}",honors.Year,18,"Awards",conference.Key+" all-star selections announced",$"{conference.Count()} players selected for the {honors.Year} conference showcase."));
-            if(honors.Showcase is {HasPlayed:true} game)Add(new($"showcase-{honors.Year}",honors.Year,19,"Awards","All-star showcase final",$"{game.AwayTeamName} {game.AwayScore} – {game.HomeScore} {game.HomeTeamName}. Exhibition statistics are separate from league totals."));
+            if(honors.Showcase is {HasPlayed:true} game)Add(new($"showcase-{honors.Year}",honors.Year,19,"Awards","All-star showcase final",$"{game.AwayTeamName} {game.AwayScore} – {game.HomeScore} {game.HomeTeamName}. Exhibition statistics are separate from league totals.",Phase: ProPhase.Playoffs));
         }
         foreach (var trade in s.TradeHistory)
             Add(new("trade-" + trade.Id, trade.Year, trade.Week, "Trades", trade.From + " and " + trade.To + " complete deal",
@@ -72,15 +73,29 @@ public static class ProNews
             var week = stamp.Success ? int.Parse(stamp.Groups[2].Value) : s.Week;
             Add(new(Key("transaction:" + text), year, week, category, text, "Confirmed league transaction."));
         }
-// Playoffs and awards occur after the regular season but carry small week numbers,
-        // so week-only ordering buried them at the bottom of the feed.
+        // Phase precedes week because preseason and postseason weeks reset. Older saved
+        // stories without Phase retain deterministic category/body inference.
+        static int PhaseRank(ProNewsStory n) => n.Phase switch
+        {
+            ProPhase.Offseason => 0,
+            ProPhase.Preseason => 1,
+            ProPhase.RegularSeason => 2,
+            ProPhase.Playoffs => 3,
+            _ when n.Category == "Preseason" || n.Body.StartsWith("Preseason ·", StringComparison.OrdinalIgnoreCase) => 1,
+            _ when n.Category is "Playoffs" or "Awards" => 3,
+            _ => 2
+        };
         static int Stage(ProNewsStory n) => n.Category switch
         {
-            "Awards" => 3,
-            "Playoffs" => 2,
+            "Awards" => 2,
+            "Playoffs" => 1,
             _ => 0
         };
-        var news = stories.Values.OrderByDescending(n => n.Year).ThenByDescending(Stage).ThenByDescending(n => n.Week).Take(1000).ToList();
+        var news = stories.Values.OrderByDescending(n => n.Year)
+            .ThenByDescending(PhaseRank)
+            .ThenByDescending(Stage)
+            .ThenByDescending(n => n.Week)
+            .Take(1000).ToList();
         return s with { News = news, ReadNewsIds = s.ReadNewsIds.Where(id => news.Any(n => n.Id == id || "social/" + n.Id == id) || s.SavedNews.Any(n => n.Id == id)).Distinct().ToList() };
     }
 }

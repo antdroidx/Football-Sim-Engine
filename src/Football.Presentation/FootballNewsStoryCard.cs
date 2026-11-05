@@ -27,7 +27,7 @@ public static class FootballNewsStoryCard
             }
         };
 
-        var media = story.IsSocial ? "IN-GAME MEDIA" : story.Category.ToUpperInvariant();
+        var media = story.IsSocial ? "SOCIAL NETWORK · IN-GAME MEDIA" : story.Category.ToUpperInvariant();
         var metadata = new Label
         {
             Text = $"{media} · {story.SeasonYear} · Week {story.Week}",
@@ -55,7 +55,7 @@ public static class FootballNewsStoryCard
         };
         var read = new Label
         {
-            Text = story.IsSocial ? "Open in-game media ›" : "Read story ›",
+            Text = story.IsSocial ? "Open post ›" : "Read story ›",
             TextColor = accent,
             FontSize = 12,
             FontAttributes = FontAttributes.Bold,
@@ -73,7 +73,29 @@ public static class FootballNewsStoryCard
         heading.Add(new VerticalStackLayout { Spacing = 4, Children = { metadata, headline } }, 1, 0);
         heading.VerticalOptions = LayoutOptions.Start;
 
-        var layout = new VerticalStackLayout { Spacing = 10, Children = { heading, preview, read } };
+        var layout = new VerticalStackLayout { Spacing = 10 };
+        if (story.IsSocial && !string.IsNullOrWhiteSpace(story.AuthorName))
+        {
+            layout.Add(new Label
+            {
+                Text = $"{story.AuthorName} {story.AuthorHandle}",
+                TextColor = DynastyTheme.Text,
+                FontSize = 12,
+                FontAttributes = FontAttributes.Bold
+            });
+        }
+        layout.Add(heading);
+        layout.Add(preview);
+        if (story.IsSocial)
+        {
+            layout.Add(new Label
+            {
+                Text = $"{story.ReplyCount} replies · {story.RepostCount} reposts · {story.LikeCount} likes",
+                TextColor = DynastyTheme.Muted,
+                FontSize = 11
+            });
+        }
+        layout.Add(read);
         var content = new Grid
         {
             ColumnDefinitions = new ColumnDefinitionCollection { new(4), new(GridLength.Star) }

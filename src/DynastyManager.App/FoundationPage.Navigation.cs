@@ -15,7 +15,6 @@ public sealed partial class FoundationPage
     private readonly VerticalStackLayout _seasonHub = new() { Spacing = 12 };
     private readonly VerticalStackLayout _matchupHub = new() { Spacing = 12 };
     private readonly VerticalStackLayout _newsRows = new() { Spacing = 10 };
-    private readonly Picker _newsScope = new() { ItemsSource = new[] { "All", "My team", "Unread", "Social", "Saved" }, SelectedIndex = 0 };
     private string _newsFilter = "All";
     private readonly VerticalStackLayout _injuryRows = new() { Spacing = 10 };
     private readonly Picker _injuryScope = new() { ItemsSource = new[] { "Your team", "Entire league" }, SelectedIndex = 0 };
@@ -318,11 +317,7 @@ public sealed partial class FoundationPage
         return button;
     }
 
-    private View BuildNewsSection()
-    {
-        _newsScope.SelectedIndexChanged += (_, _) => { _newsFilter = _newsScope.SelectedIndex switch { 1 => "My team", 2 => "Unread", 3 => "Social", 4 => "Saved", _ => "All" }; RenderNews(); };
-        return _newsRows;
-    }
+    private View BuildNewsSection() => _newsRows;
 
     private View NewsCard(DynastyNewsStory story, FootballNewsStory? media = null)
     {
@@ -397,11 +392,11 @@ public sealed partial class FoundationPage
                     Children =
                     {
                         close,
-                        SchoolBanner(story.TeamName, $"{story.Category} · {story.SeasonYear} · Week {story.Week}"),
+                        SchoolBanner(story.TeamName, mapped.IsSocial ? $"{mapped.AuthorName} {mapped.AuthorHandle} · Week {mapped.Week}" : $"{story.Category} · {story.SeasonYear} · Week {story.Week}"),
                         new Label { Text = mapped.Headline, FontSize = 18, FontAttributes = FontAttributes.Bold },
                         new Label { Text = mapped.Body, FontSize = 14 },
                         new Label { Text = DynastyManager.Data.Presentation.NewsEditorial.Context(story.Category, story.TeamName), FontSize = 14 },
-                        new Label { Text = "Dynasty Wire · stories from around your league. ", FontSize = 11, TextColor = DynastyTheme.Muted },
+                        new Label { Text = mapped.IsSocial ? $"{mapped.ReplyCount} replies · {mapped.RepostCount} reposts · {mapped.LikeCount} likes · Fictional in-game social activity." : "Dynasty Wire · stories from around your league. ", FontSize = 11, TextColor = DynastyTheme.Muted },
                         destination
                     }
                 }
@@ -409,48 +404,64 @@ public sealed partial class FoundationPage
             await Navigation.PushModalAsync(page);
         };
         card.GestureRecognizers.Add(open);
-        var bookmark = new Button { Text = _currentDynasty?.SavedNews.Any(item => item.Id == mapped.Id) == true ? "Remove saved story" : "Save story" };
-        bookmark.Clicked += async (_, _) =>
-        {
-            if (_currentDynasty is null) return;
-            _currentDynasty = _currentDynasty with { SavedNews = FootballNewsReadStateService.ToggleSaved(_currentDynasty.SavedNews, mapped) };
-            await SaveCurrentAsync(SaveKind.AutosaveCurrent);
-            RenderNews();
-        };
-        return new VerticalStackLayout { Spacing = 4, Children = { card, bookmark } };
+        return card;
     }
 
     private void RenderNews()
     {
         if (_currentDynasty is null) return;
-        var requestedScope = _newsFilter switch { "My team" => 1, "Unread" => 2, "Social" => 3, "Saved" => 4, _ => 0 };
-        if (_newsScope.SelectedIndex != requestedScope) _newsScope.SelectedIndex = requestedScope;
-        _newsRows.Children.Clear();
-        _newsRows.Children.Add(SectionTitle("News & headlines", "Dynasty Wire · results, people and stories from around the league"));
-        _newsRows.Children.Add(_newsScope);
-        if (_newsFilter == "Saved")
+        var requestedScope = _newsFilter switch { "My team" => 1, "Unread" => 2, "Social" => 3, _ => 0 };
+        var newsScope = new Picker
         {
-            var saved = _currentDynasty.SavedNews;
-            if (saved.Count == 0) _newsRows.Children.Add(new Label { Text = "Save a story to keep it here across seasons." });
-            else _newsRows.Children.Add(FootballNewsCard.Layout(saved.Select(post => NewsCard(new DynastyNewsStory(
-                post.Id, post.Category, post.Headline, post.Body, post.TeamName, post.SeasonYear, post.Week), post))));
-            return;
-        }
+            ItemsSource = new[] { "All", "My team", "Unread", "Social" },
+            SelectedIndex = requestedScope,
+            AutomationId = "college-news-scope"
+        };
+        newsScope.SelectedIndexChanged += (_, _) =>
+        {
+            _newsFilter = newsScope.SelectedIndex switch { 1 => "My team", 2 => "Unread", 3 => "Social", _ => "All" };
+            RenderNews();
+        };
+        _newsRows.Children.Clear();
+        _newsRows.Children.Add(SectionTitle("News & headlines", "Dynasty Wire · factual stories and the Social network"));
         var stories = DynastyNewsService.Build(_currentDynasty);
+        var sources = stories.Select(story => new FootballNewsStory
+        {
+            Id = story.Id, Category = story.Category, Headline = story.Headline, Body = story.Body,
+            TeamName = story.TeamName, SeasonYear = story.SeasonYear, Week = story.Week,
+            RelatedId = story.PlayerId?.ToString(), MediaKind = FootballNewsMediaKind.Story
+        }).ToArray();
+        _currentDynasty = _currentDynasty with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(_currentDynasty.NarrativeMemory, sources, _currentDynasty.SeasonYear) };
+        var socialPosts = FootballNewsSocialService.Build(sources, _currentDynasty.NarrativeMemory);
+        var socialButton = new Button
+        {
+            Text = $"Social network · {socialPosts.Count}",
+            AutomationId = "college-news-social",
+            BackgroundColor = _newsFilter == "Social" ? DynastyTheme.Selected : DynastyTheme.Panel,
+            TextColor = DynastyTheme.Text
+        };
+        socialButton.Clicked += (_, _) => { _newsFilter = "Social"; newsScope.SelectedIndex = 3; RenderNews(); };
+        var tools = new Grid
+        {
+            ColumnSpacing = 8,
+            ColumnDefinitions = new ColumnDefinitionCollection { new(GridLength.Star), new(GridLength.Auto) }
+        };
+        tools.Add(newsScope, 0, 0);
+        tools.Add(socialButton, 1, 0);
+        _newsRows.Children.Add(tools);
+
         if (_newsFilter == "My team") stories = stories.Where(s => s.TeamName == _currentDynasty.UserTeamName).ToArray();
         if (_newsFilter == "Unread") stories = stories.Where(s => !_currentDynasty.ReadNewsIds.Contains(s.Id)).ToArray();
         if (_newsFilter == "Social")
         {
-            var sources = stories.ToDictionary(story => story.Id);
-            var posts = FootballNewsSocialService.Build(stories.Select(story => new FootballNewsStory
-            {
-                Id = story.Id, Category = story.Category, Headline = story.Headline, Body = story.Body,
-                TeamName = story.TeamName, SeasonYear = story.SeasonYear, Week = story.Week
-            }).ToArray());
-            _newsRows.Children.Add(FootballNewsCard.Layout(posts.Select(post => NewsCard(sources[post.RelatedId!], post))));
+            var sourceById = stories.ToDictionary(story => story.Id);
+            var linkedPosts = socialPosts.Where(post => post.RelatedId is not null && sourceById.ContainsKey(post.RelatedId)).ToArray();
+            if (linkedPosts.Length > 0)
+                _newsRows.Children.Add(FootballNewsCard.Layout(linkedPosts.Select(post => NewsCard(sourceById[post.RelatedId!], post))));
+            else _newsRows.Children.Add(new Label { Text = "No social posts yet. Completed games and league activity will appear here." });
         }
         else if (stories.Count > 0) _newsRows.Children.Add(FootballNewsCard.Layout(stories.Select(story => NewsCard(story))));
-        if (stories.Count == 0) _newsRows.Children.Add(new Label { Text = "No stories yet. Check back as your season develops." });
+        if (_newsFilter != "Social" && stories.Count == 0) _newsRows.Children.Add(new Label { Text = "No stories yet. Check back as your season develops." });
     }
     private View BuildInjurySection()
     {

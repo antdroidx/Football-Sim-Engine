@@ -12,6 +12,11 @@ public sealed record FootballNewsStory
     public int SeasonYear { get; init; }
     public int Week { get; init; }
     public string? RelatedId { get; init; }
+    public string? AuthorName { get; init; }
+    public string? AuthorHandle { get; init; }
+    public int LikeCount { get; init; }
+    public int RepostCount { get; init; }
+    public int ReplyCount { get; init; }
     public FootballNewsMediaKind MediaKind { get; init; } = FootballNewsMediaKind.Story;
 
     public bool IsSocial => MediaKind is FootballNewsMediaKind.Social;

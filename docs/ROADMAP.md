@@ -11,27 +11,28 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
 - Existing saves must load without destructive migration. New records default safely and remain backward compatible.
 - Do not publish a release or merge without explicit review and approval.
 
-## User review and immediate priorities — November 5, 2026
+## User review and implementation checkpoint — November 5, 2026
 
-This is a documentation-only review of `codex/feature-roadmap-plan` at `9a28a7f`. The original audit inventory below describes the main-branch baseline, not current feature-branch completion. Latest recorded branch builds are College455 / Pro166 from source `9f7af9c`; the published release baseline above remains separate. Successful packaging did not establish device visual acceptance.
+This checkpoint follows the original review at `9a28a7f`. It applies to both Android hosts through shared Presentation/Engine code. The published release baseline above remains separate, and these local debug APKs are not a release.
 
-1. **Live View field defect: highest priority.** User screenshot `534722.jpg` shows SEA at LAR in landscape with a blue team-color band spanning the top of the playing surface. The shared `src/Football.Presentation/GameFieldDrawable.cs` explicitly fills the full width at `rect.Height * .12f` with `HomeColor`, matching the reported band. Remove this unintended playing-surface overlay while preserving end-zone branding and field markings. Reported in Pro; shared renderer means both hosts need visual regression checks. Not fixed or device-reproduced in this review.
-2. **News density and saved-story feature reassessment.** User dislikes the new layout, specifically the separate full-width Save story row, and sees little value in saving stories. Both hosts currently add that action below each card. Next News revision should restore a compact feed and remove the standalone bookmark row; deprioritize saved-story UI rather than treating it as a core requirement. Preserve existing saved data if the UI is simplified. Final placement or removal of the feature remains a design decision; no UI change has been made here.
-3. **Deliver the intended social experience.** Both hosts expose Social through the News filter, but current posts are deterministic, labeled reactions derived from recorded headlines. Independent read state exists; persistent narrative memory and richer social interactions do not. User expected a social media element and did not perceive the current implementation as delivering it. Improve discoverability and define a distinct, useful social feed before claiming this milestone complete; use recorded events and explicitly fictional in-game media labels.
+1. **Live View field defect: fixed in the shared renderer.** The full-width `HomeColor` rectangle that covered the top 12% of the field was removed from `GameFieldDrawable.Draw`. The exact Pro APK was visually checked in portrait and landscape with end-zone branding, yard lines, hashes and team markers intact. College compiles against the same renderer and packaged successfully; the reported Pro defect has direct device evidence.
+2. **News density: compact feed restored.** Both hosts removed the standalone Save story/Remove saved story controls and the Saved filter from the main News page. Existing `SavedNews` payloads remain intact for save compatibility but receive no prominent UI. A persistent Social shortcut now sits beside the filter control.
+3. **Social experience: first usable pass delivered.** Social is directly discoverable, uses authored in-game media posts derived from recorded stories, and displays reply/repost/like counts. Posts have independent read state. Each save now retains idempotent team/season/category narrative memory and can produce factual multi-story season threads without inventing results, quotes or statistics. Comments, replies, follows and richer user participation remain open.
+4. **News chronology: fixed.** Pro stories now carry season phase and sort by year, phase, playoff/award stage and week. Preseason Week 3 therefore sits below regular-season Week 1. Older records without phase use deterministic category/body fallback. This fixes both the full News feed and the Overview cards that take the first sorted stories.
 
 ### Near-term checkpoint
 
 | Workstream | Implemented on the feature branch | Still open |
 |---|---|---|
-| Rivalries | Shared records/service, schedule labels, College traditional rivalry catalog | Complete team/game-center/history exposure and verify durable rivalry history against the original acceptance criteria; no rivalry simulation effect planned in the first increment. |
-| Playbooks / pre-snap | Shared catalog; None/Shift/Motion choices recorded in live/replay without changing randomness | Play-outcome adaptation, league-specific legality, marker choreography and device acceptance. |
-| Captains / chemistry | Deterministic captains, cohesion/familiarity, bounded GameCast effect, both hosts' team UI | Season-aware memory, roster turnover, coaching/plan continuity and discipline inputs. |
-| Morale / locker room | Existing league-specific morale, discipline, transfer and trade systems retained | New shared locker-room events, motivation state and narrative hooks. No completed new locker-room batch is recorded. |
-| News / social | Shared cards, filters, persistent read state, derived Social posts and saved snapshots | User-requested layout revision, useful/discoverable social experience, persistent narrative memory and richer interactions. |
-| GameCast / replay | Shared venue styling, indoor turf, replay angle selection and recorded pre-snap choices | Field-band defect, visual acceptance, replay highlights/selection and pre-snap choreography. |
+| Rivalries | Shared records/service, schedule labels, College traditional rivalry catalog | Complete team/game-center/history exposure and durable rivalry-history acceptance; no rivalry simulation effect in the first increment. |
+| Playbooks / pre-snap | Shared catalog; None/Shift/Motion choices recorded in live/replay without changing randomness | Play-outcome adaptation, league-specific legality, marker choreography and remaining device acceptance. |
+| Captains / chemistry | Deterministic captains, cohesion/familiarity, bounded GameCast effect, both hosts' team UI | Per-season memory, roster turnover, coaching/plan continuity and discipline inputs. |
+| Morale / locker room | Existing league-specific morale, discipline, transfer and trade systems retained; factual narratives now have persistent memory | Shared locker-room events, motivation state and explicit locker-room narrative hooks. |
+| News / social | Compact both-host feed, visible Social shortcut, authored posts, engagement labels, independent read state, phase-aware order and persistent season threads | Richer interactions such as replies/follows/user participation, broader player/coach/rivalry memory and broader visual acceptance. |
+| GameCast / replay | Shared venue styling, indoor turf, replay angle selection, recorded pre-snap choices and repaired field branding | Replay highlights/selection, pre-snap choreography and broader device coverage. |
 | Hall of Fame | Existing College player HOF, Pro player HOF derivation, shared coach scoring and both hosts' views | Persistent coach induction records, retirement eligibility, richer citations/team attribution and lifecycle parity. |
 
-Recommended next work: fix and visually verify the shared field defect; revise the News feed around this feedback and make Social discoverable; then continue narrative memory and season-aware chemistry/locker-room work, replay/highlights/choreography, and HOF lifecycle handling. These are priorities for subsequent implementation, not completed changes or authorization to publish.
+Recommended next implementation order: season-aware chemistry and locker-room events; replay highlights and pre-snap choreography; persistent HOF lifecycle handling. Within Social, add meaningful interaction and richer player/coach/rivalry threads after those state foundations. No release or merge is authorized by this checkpoint.
 
 ## Audit-based feature inventory
 
@@ -83,13 +84,13 @@ Recommended next work: fix and visually verify the shared field defect; revise t
    - Add persistent narrative memory keyed by team, player, coach, rivalry, and season.
    - Build a shared News Hub with league adapters, filters, saved/social/story views, and read state.
    - Reference only recorded facts and explicitly label fictional social posts as in-game media.
-   - Status: Both games use shared modern story cards and expose labeled Social views derived from recorded stories, with independent persistent post read IDs. College supports All/My-team/Unread/Social filtering (including the corrected Unread picker). Both games also persist full bookmarked story snapshots and provide Saved views. Persistent narrative memory remains open.
+   - Status: Both games use a compact shared story feed and a visible Social shortcut. Posts are explicitly labeled authored in-game media derived from recorded facts, with independent read state. Saves retain idempotent season memory and expose factual multi-story season threads. The bookmark UI was removed after user review; existing saved snapshots remain backward-compatible. User replies/follows and broader player/coach/rivalry memory remain open.
 
 6. **GameCast immersion and broadcast replay**
    - Improve venue styling, visual markers, replay angles, highlight selection, and mobile readability. Shared venue styling now reaches the live renderer in both hosts, including indoor turf palettes; device visual acceptance remains open.
    - Replays must consume recorded state only and never reroll simulation.
    - Preserve portrait/landscape and light/dark usability.
-   - Status: Shared GameCast persists and applies a replay angle. The shared call sheet also offers None, left/right shifts, and left/right motion; the selected choice is recorded on scrimmage/replay and rejects illegal kickoff, try, or special situations. It does not consume or change simulation randomness. Play-outcome simulation, league-specific legality/adaptation, and marker choreography remain open.
+   - Status: Shared GameCast removes the unintended team-color field band, persists and applies a replay angle, and records None/Shift/Motion choices without changing simulation randomness. The exact Pro APK passed portrait and landscape field checks. Play-outcome simulation, league-specific legality/adaptation, marker choreography, highlights and broader device coverage remain open.
 
 7. **Player and coach Hall of Fame**
    - Create a shared scoring and citation core.

@@ -80,8 +80,48 @@ public class NewsStoryTests
         var reaction = Assert.Single(social);
         Assert.Equal(FootballNewsMediaKind.Social, reaction.MediaKind);
         Assert.Equal("social/game/123", reaction.Id);
-        Assert.StartsWith("In-game media reaction to Home", reaction.Body);
-        Assert.Contains(recorded.Headline, reaction.Body);
+        Assert.Equal(recorded.Headline, reaction.Headline);
+        Assert.StartsWith("Home update ·", reaction.Body);
+        Assert.Contains(recorded.Body, reaction.Body);
+        Assert.False(string.IsNullOrWhiteSpace(reaction.AuthorName));
+        Assert.StartsWith("@", reaction.AuthorHandle!);
+        Assert.InRange(reaction.LikeCount, 12, 100);
+        Assert.InRange(reaction.RepostCount, 1, 14);
+        Assert.InRange(reaction.ReplyCount, 0, 17);
+    }
+
+
+    [Fact]
+    public void NarrativeMemoryIsIdempotentAndCreatesFactualSeasonThreadPosts()
+    {
+        var first = new FootballNewsStory
+        {
+            Id = "game/1", Category = "Results", Headline = "Home wins opener", Body = "Recorded opener.",
+            TeamName = "Home", SeasonYear = 2026, Week = 1
+        };
+        var second = first with { Id = "game/2", Headline = "Home wins again", Body = "Recorded second result.", Week = 2 };
+        var initial = FootballNarrativeMemoryService.Refresh([], [first], 2026);
+        var refreshed = FootballNarrativeMemoryService.Refresh(initial, [first, second], 2026);
+        var repeated = FootballNarrativeMemoryService.Refresh(refreshed, [first, second], 2026);
+
+        var memory = Assert.Single(repeated);
+        Assert.Equal(2, memory.SourceStoryIds.Count);
+        Assert.Equal(1, memory.FirstWeek);
+        Assert.Equal(2, memory.LastWeek);
+        Assert.Equal(second.Headline, memory.LatestHeadline);
+        var thread = Assert.Single(FootballNewsSocialService.Build([first, second], repeated), post => post.Id == "social/" + memory.Id);
+        Assert.Equal(second.Id, thread.RelatedId);
+        Assert.StartsWith("Recorded 2026 updates · Latest:", thread.Body);
+        Assert.Contains(second.Headline, thread.Body);
+    }
+
+    [Fact]
+    public void OlderSavedStoryRecordsDefaultNarrativeMemoryToEmpty()
+    {
+        var state = new DynastyState { DynastyName = "Test", UserTeamName = "Home" };
+        Assert.Empty(state.NarrativeMemory);
+        var restored = System.Text.Json.JsonSerializer.Deserialize<DynastyState>("""{"DynastyName":"Legacy","UserTeamName":"Home"}""")!;
+        Assert.Empty(restored.NarrativeMemory);
     }
 
     [Fact]
