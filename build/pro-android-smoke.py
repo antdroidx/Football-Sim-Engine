@@ -87,12 +87,16 @@ try:
     roster=s.wait_for("pro-profile-roster",lambda r:any((t or "").startswith("Active roster ·") for t in s.texts(r)),timeout=180)
     # Names are the same interactive cells used by the college-style profile flow.
     click("player-profile-open","Sam Darnold")
-    ready("player-profile","Player profile")
+    # The player profile is a modal page, so its title is not rendered; the player's name is the heading.
+    ready("player-profile","Sam Darnold")
     growth=ready("player-growth-delta","Change since season start")
-    assert any((t or "").startswith("OVR ") and "Projected ceiling" in t for t in s.texts(growth))
-    assert any((t or "").startswith("Remaining growth ·") for t in s.texts(growth))
+    assert "Ceiling" in s.texts(growth)
     s.capture("pro-player-growth-delta")
-    profile=ready("player-attributes","Character traits")
+    # The OVR header and the attribute groups live on the Attributes tab.
+    click("player-attributes-tab","Attributes")
+    profile=s.wait_for("pro-player-attributes",lambda r:any((t or "").startswith("OVR ") for t in s.texts(r)),timeout=120)
+    assert any((t or "").startswith("OVR ") and "Projected ceiling" in t for t in s.texts(profile))
+    assert any((t or "").startswith("Remaining growth ·") for t in s.texts(profile))
     assert not any("Madden" in (t or "") for t in s.texts(profile))
     s.capture("pro-player-profile")
     s.scroll_to_text("pro-player-skill-ratings","Kicking accuracy",max_swipes=20)
@@ -100,7 +104,7 @@ try:
     edit=ready("appearance-editor","Skin tone");s.tap_id(edit,"pro-skin-tone")
     tone=ready("appearance-tones","Deep");s.tap(tone,"Deep")
     click("save-appearance","Save appearance")
-    ready("appearance-saved","Player profile")
+    ready("appearance-saved","Sam Darnold")
 
     profile=s.scroll_to_text("pro-player-profile-back","‹ Back",max_swipes=20,toward_start=True)
     s.tap(profile,"‹ Back")
