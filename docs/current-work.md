@@ -44,6 +44,14 @@ Focused passing: Engine PreSnap 4; segmented GameDay classes passed 124 cases (C
 
 A single `Category=Fast` Engine tier run was not successfully completed locally. One 90-second run aborted at testhost connection, and retries stayed quiet/hung. Segmented Owner Engine Fast filters above cover all Fast test classes, but are not claimed as one uninterrupted tier run. No Android package/device acceptance, College/Pro release, merge, or simulation-effect claim is made. Remaining next steps are pre-snap play-outcome adaptation, league-specific legality, marker choreography, mobile device verification, and the remaining roadmap items.
 
+## Shared coach Hall of Fame — November 4, 2026
+
+Branch `codex/feature-roadmap-plan` adds a league-neutral `CoachHallOfFameService` over recorded coach-season summaries. College uses existing coach state history; Pro maps the user's saved coaching history into the same shape. Both render a coach Hall of Fame view alongside their existing player HOF, with no new save schema and no changes to player HOF eligibility.
+
+Executed: Coach HOF Engine tests 2 passed; Pro Honors/Pro HOF tests 4 passed; College Hall of Fame test 1 passed. Football.Engine, Football.Presentation, DynastyManager.App and ProFootball.App Android builds passed with 0 code errors; Presentation may show the known local offline NU1900 package-vulnerability warning. No APK, device walkthrough, release or merge was run.
+
+Remaining: persistent coach HOF records, retirement-specific eligibility, richer citation/team handling, and further coach lifecycle parity.
+
 ## Historical notes below
 
 Release/status wording in the entries below is retained as evidence. Where it says a batch was unmerged,

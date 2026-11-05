@@ -6,6 +6,10 @@ Builds: Football.Engine and Football.Presentation build 0 errors (one NU1900 off
 
 Not claimed: no engine simulation effect, league-specific legality, marker choreography, all-screen GameCast device acceptance, Pro/College full regression suites, APK packaging, release, merge, or save rewrite. Use only the new `PreSnap` event metadata for presentation; old events safely deserialize it as null.
 
+## Shared coach Hall of Fame — November 4, 2026
+
+Executed: `CoachHallOfFameTests` 2, Pro `HonorsTests`/`ProHallOfFameTests` 4, College Hall of Fame 1, all passed. Builds: Football.Engine 0, Football.Presentation 0 (one offline NU1900 warning), DynastyManager.App 0, ProFootball.App 0 errors. No APK, device walkthrough, release or merge was run. The implementation is dynamic and does not add a save schema. More detailed coach tenure/retirement history remains open.
+
 ## Released Pro165 / College454 — November 4, 2026
 
 Scope: shared roster identity/acquisition scoring, CPU game-plan drift, Flexbone service academies and their documentation. College and Pro remain separate hosts with their existing save/package identities.

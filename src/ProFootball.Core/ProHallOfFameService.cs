@@ -57,5 +57,31 @@ public static class ProHallOfFameService
         return entries.OrderByDescending(e => e.HonorsScore).ThenByDescending(e => e.CareerScore)
             .ThenBy(e => e.PlayerName, StringComparer.OrdinalIgnoreCase).ToArray();
     }
-}
 
+    public static IReadOnlyList<CoachCareerSummary> CoachSummaries(ProFranchise state) => state
+        .CoachingHistory
+        .GroupBy(h => h.Team, StringComparer.OrdinalIgnoreCase)
+        .Select(g =>
+        {
+            var seasons = g.OrderBy(h => h.Year).ToArray();
+            var idBytes = System.Security.Cryptography.SHA256.HashData(
+                System.Text.Encoding.UTF8.GetBytes($"{state.Id}:{g.Key}:{seasons.Length}"));
+            var coachId = new Guid(idBytes.AsSpan(0, 16));
+            return new CoachCareerSummary
+            {
+                StaffId = coachId,
+                CoachName = state.Career?.Name ?? $"{g.Key} coach",
+                Seasons = seasons.Select(h => new CoachSeasonRecord
+                {
+                    StaffId = coachId,
+                    CoachName = state.Career?.Name ?? $"{h.Team} coach",
+                    SeasonYear = h.Year,
+                    TeamName = h.Team,
+                    Role = h.Role,
+                    Wins = h.Wins,
+                    Losses = h.Losses
+                }).ToArray()
+            };
+        })
+        .ToArray();
+}

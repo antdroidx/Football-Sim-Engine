@@ -73,7 +73,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Create a shared scoring and citation core.
    - Preserve College player HOF eligibility and add Pro player HOF.
    - Add coach HOF with College and Pro eligibility separated at league boundaries.
-   - Status: Pro player Hall of Fame now derives retired major-award players from recorded history; coach HOF remains open.
+   - Status: Player HOF remains league-specific College/Pro derivation. A shared coach Hall of Fame service now scores recorded coach-season summaries and is rendered in College center and Pro honors.
 
 ## Updated long-term roadmap
 
