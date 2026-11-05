@@ -456,7 +456,7 @@ def check_remaining_management():
     tap(staff,coach.get("text"))
     profile=wait_for("management-coach-profile",lambda r:"Career history" in texts(r))
     tap(profile,"Attributes")
-    wait_for("management-coach-attributes",lambda r:"Coaching traits" in texts(r))
+    wait_for("management-coach-attributes",lambda r:"Coaching attributes" in texts(r))
     adb("shell","input","keyevent","4")
     staff=scroll_to_text("management-staff-candidates-button","Candidates")
     tap(staff,"Candidates")
