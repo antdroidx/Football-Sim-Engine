@@ -72,6 +72,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Create a shared scoring and citation core.
    - Preserve College player HOF eligibility and add Pro player HOF.
    - Add coach HOF with College and Pro eligibility separated at league boundaries.
+   - Status: Pro player Hall of Fame now derives retired major-award players from recorded history; coach HOF remains open.
 
 ## Updated long-term roadmap
 
@@ -141,7 +142,3 @@ Acceptance criteria:
 - Do not claim simulation, save, mobile-ui, or device acceptance without an actual focused check.
 - Android packaging and device acceptance require successful focused tests first.
 - No release or merge is part of planning.
-
-
-
-

@@ -10,13 +10,15 @@ public sealed partial class FranchisePage
     {
         var s=state!;body.Add(PageHeader("Awards & All-Pros","Season honors and all-star selections"));
         if(s.Honors.Count==0){body.Add(Text("Season awards and All-Pro teams are announced after the regular season."));return;}
-        var years=s.Honors.OrderByDescending(h=>h.Year).ToArray();var year=new Picker{ItemsSource=years.Select(h=>h.Year.ToString()).ToArray(),SelectedIndex=0};body.Add(year);var tabs=new Picker {ItemsSource=new[]{"Awards","All-Pros","Pro Bowl"},SelectedIndex=Array.IndexOf(new[]{"Awards","All-Pros","Pro Bowl"},honorsTab)};body.Add(tabs);var details=new VerticalStackLayout{Spacing=10};body.Add(details);
+        var years=s.Honors.OrderByDescending(h=>h.Year).ToArray();var year=new Picker{ItemsSource=years.Select(h=>h.Year.ToString()).ToArray(),SelectedIndex=0};body.Add(year);var tabs=new Picker {ItemsSource=new[]{"Awards","All-Pros","Pro Bowl","Hall of Fame"},SelectedIndex=Array.IndexOf(new[]{"Awards","All-Pros","Pro Bowl","Hall of Fame"},honorsTab)};body.Add(tabs);var details=new VerticalStackLayout{Spacing=10};body.Add(details);
         void Draw()
         {
             details.Clear();var h=years[year.SelectedIndex];details.Add(Text(h.Year+" season honors",21,true));
             if(honorsTab=="Awards") details.Add(Table([("Award",240),("Winner",190),("Team",180)],h.Awards.Select(a=>new View[]{Text(a.Title),Text(a.Name),Text(a.Team)})));
             if(honorsTab=="All-Pros") { details.Add(Text("First and second All-Pro teams",21,true));details.Add(Text("League-wide recognition by position.",12));
             details.Add(Table([("All-Pro team",105),("Pos",55),("Player",200),("Team",180),("OVR",55)],(h.AllPros.Count>0?h.AllPros:ProHonors.SelectAllPros(h.Selections.Select(x=>x.Player))).Select(x=>new View[]{Text(x.Team==1?"First team":"Second team"),Text(OffensiveLineService.Label(x.Player.Football)),Text(x.Player.Football.FullName),Text(x.Player.Football.TeamName),Text(x.Player.Football.OverallRating.ToString())}))); }
+            if(honorsTab=="Hall of Fame") { details.Add(Text("Hall of Fame",21,true));details.Add(Text("Derived from retired players with recorded league honors. No save schema is added.",12));
+                var entries=ProHallOfFameService.Build(state!);details.Add(entries.Count==0?Text("Players appear after retirement with major recorded honors."):Table([("Player",205),("Team",180),("Seasons",55),("Career",95),("Honors",55)],entries.Select(e=>new View[]{Text(e.PlayerName),Text(e.TeamName),Text(e.RecordedSeasons.ToString()),Text(e.CareerScore.ToString("N0")),Text(e.HonorsScore.ToString())}))); }
             if(honorsTab!="Pro Bowl")return;
             var actions=new ActionRow();
             if(h.Showcase?.HasPlayed==true)actions.Add(Action("Pro Bowl box score",()=>ShowBoxScore(h.Showcase)));
