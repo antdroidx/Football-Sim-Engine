@@ -61,7 +61,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Add persistent narrative memory keyed by team, player, coach, rivalry, and season.
    - Build a shared News Hub with league adapters, filters, saved/social/story views, and read state.
    - Reference only recorded facts and explicitly label fictional social posts as in-game media.
-   - Status: Both games use shared modern story cards and expose labeled Social views derived from recorded stories, with independent persistent post read IDs. College supports All/My-team/Unread/Social filtering (including the corrected Unread picker). Persistent narrative memory and saved-story views remain open.
+   - Status: Both games use shared modern story cards and expose labeled Social views derived from recorded stories, with independent persistent post read IDs. College supports All/My-team/Unread/Social filtering (including the corrected Unread picker). Both games also persist full bookmarked story snapshots and provide Saved views. Persistent narrative memory remains open.
 
 6. **GameCast immersion and broadcast replay**
    - Improve venue styling, visual markers, replay angles, highlight selection, and mobile readability. Shared venue styling now reaches the live renderer in both hosts, including indoor turf palettes; device visual acceptance remains open.

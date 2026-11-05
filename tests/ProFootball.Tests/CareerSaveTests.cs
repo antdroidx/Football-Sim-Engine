@@ -35,8 +35,19 @@ public class CareerSaveTests
         var s = ProLeagueService.Create("Seattle Seahawks");
         s = ProNews.Refresh(s with { Transactions = ["Seattle Seahawks hired Test Coach."] });
         var story = Assert.Single(s.News);
-        var next = ProNews.Refresh(s with { ReadNewsIds = [story.Id] });
+        var next = ProNews.Refresh(s with { ReadNewsIds = [story.Id, "social/" + story.Id] });
         Assert.Single(next.News); Assert.Contains(story.Id, next.ReadNewsIds);
+        Assert.Contains("social/" + story.Id, next.ReadNewsIds);
+        Assert.Empty(next.SavedNews);
+        var snapshot = new FootballNewsStory
+        {
+            Id = "archived/1", Category = "Results", Headline = "Saved result", Body = "Recorded facts",
+            TeamName = s.UserTeam, SeasonYear = s.Year, Week = 1
+        };
+        var archived = ProNews.Refresh(next with { SavedNews = [snapshot], ReadNewsIds = [snapshot.Id] });
+        Assert.Contains(snapshot.Id, archived.ReadNewsIds);
+        var restored = System.Text.Json.JsonSerializer.Deserialize<ProFranchise>(System.Text.Json.JsonSerializer.Serialize(archived))!;
+        Assert.Equal(snapshot, Assert.Single(restored.SavedNews));
         Assert.Empty(next.News.Where(n => n.Headline.Contains("GM declined")));
     }
     [Fact] public void ThreeFutureDraftClassesPreserveTransferredPickOwnership()

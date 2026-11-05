@@ -168,7 +168,21 @@ public sealed partial class FranchisePage
     {
         state = ProNews.Refresh(state!); var s = state!;
         body.Add(PageHeader("League news","Results, headlines, awards and transactions"));
-        body.Add(Action("Filter: " + newsFilter, async () => { var filter = await GameDialogs.ActionSheetAsync(this, "News", "Cancel", null, new[] { "All", "My team", "Unread", "Social" }.Concat(s.News.Select(n => n.Category).Distinct()).ToArray()); if (filter is null or "Cancel") return; newsFilter = filter; Render(); }));
+        body.Add(Action("Filter: " + newsFilter, async () => { var filter = await GameDialogs.ActionSheetAsync(this, "News", "Cancel", null, new[] { "All", "My team", "Unread", "Social", "Saved" }.Concat(s.News.Select(n => n.Category).Distinct()).ToArray()); if (filter is null or "Cancel") return; newsFilter = filter; Render(); }));
+        if (newsFilter == "Saved")
+        {
+            if (s.SavedNews.Count == 0) body.Add(Text("Save a story to keep it here across seasons."));
+            foreach (var saved in s.SavedNews)
+            {
+                var card = FootballNewsStoryCard.Create(saved, null, DynastyTheme.Accent);
+                var tap = new TapGestureRecognizer();
+                tap.Tapped += async (_, _) => { state = state! with { ReadNewsIds = FootballNewsReadStateService.MarkRead(state.ReadNewsIds, [saved.Id]).ToList() }; await Save(); await GameDialogs.AlertAsync(this, saved.Headline, saved.Body, "Close"); };
+                card.GestureRecognizers.Add(tap);
+                body.Add(card);
+                body.Add(Action("Remove saved story", async () => { state = state! with { SavedNews = FootballNewsReadStateService.ToggleSaved(state.SavedNews, saved).ToList() }; await Save(); Render(); }));
+            }
+            return;
+        }
         var stories = s.News.Where(n => newsFilter is "All" or "Social" || newsFilter == "My team" && (n.Team == s.UserTeam || n.Headline.Contains(s.UserTeam)) || newsFilter == "Unread" && !s.ReadNewsIds.Contains(n.Id) || n.Category == newsFilter).Take(60).ToArray();
         if (stories.Length == 0) body.Add(Text("No stories in this view yet. Completed games and league activity will appear here."));
         foreach (var story in stories)
@@ -198,6 +212,11 @@ public sealed partial class FranchisePage
             };
             card.GestureRecognizers.Add(tap);
             body.Add(card);
+            body.Add(Action(s.SavedNews.Any(item => item.Id == mapped.Id) ? "Remove saved story" : "Save story", async () =>
+            {
+                state = state! with { SavedNews = FootballNewsReadStateService.ToggleSaved(state.SavedNews, mapped).ToList() };
+                await Save(); Render();
+            }));
         }
     }
 

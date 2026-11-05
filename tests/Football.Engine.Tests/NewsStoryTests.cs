@@ -8,6 +8,24 @@ namespace Football.Engine.Tests;
 public class NewsStoryTests
 {
     [Fact]
+    public void SavedSnapshotRoundTripsAndToggleRemovesOnlySelectedStory()
+    {
+        var source = new FootballNewsStory
+        {
+            Id = "result/1", Category = "Results", Headline = "Recorded result", Body = "Recorded facts",
+            TeamName = "Home", SeasonYear = 2026, Week = 1
+        };
+        var state = new DynastyState { DynastyName = "Test", UserTeamName = "Home" };
+        Assert.Empty(state.SavedNews);
+        state = state with { SavedNews = FootballNewsReadStateService.ToggleSaved(state.SavedNews, source) };
+        var restored = System.Text.Json.JsonSerializer.Deserialize<DynastyState>(System.Text.Json.JsonSerializer.Serialize(state))!;
+        Assert.Equal(source, Assert.Single(restored.SavedNews));
+        var post = Assert.Single(FootballNewsSocialService.Build([source]));
+        var both = FootballNewsReadStateService.ToggleSaved(restored.SavedNews, post);
+        Assert.Equal(post, Assert.Single(FootballNewsReadStateService.ToggleSaved(both, source)));
+    }
+
+    [Fact]
     public void ReadingSocialPostPreservesUnreadSourceAndDoesNotGenerateReactionsToReactions()
     {
         var source = new FootballNewsStory

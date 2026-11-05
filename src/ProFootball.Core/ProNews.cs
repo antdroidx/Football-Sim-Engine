@@ -81,6 +81,6 @@ public static class ProNews
             _ => 0
         };
         var news = stories.Values.OrderByDescending(n => n.Year).ThenByDescending(Stage).ThenByDescending(n => n.Week).Take(1000).ToList();
-        return s with { News = news, ReadNewsIds = s.ReadNewsIds.Where(id => news.Any(n => n.Id == id)).Distinct().ToList() };
+        return s with { News = news, ReadNewsIds = s.ReadNewsIds.Where(id => news.Any(n => n.Id == id || "social/" + n.Id == id) || s.SavedNews.Any(n => n.Id == id)).Distinct().ToList() };
     }
 }

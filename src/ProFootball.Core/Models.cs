@@ -99,6 +99,7 @@ public sealed record ProFranchise
     public List<WaiverEntry> Waivers { get; init; } = [];
     public List<ProNewsStory> News { get; init; } = [];
     public List<string> ReadNewsIds { get; init; } = [];
+    public List<DynastyManager.Core.Models.FootballNewsStory> SavedNews { get; init; } = [];
     public List<ProTransactionEntry> TransactionLog { get; init; } = [];
     public List<string> Transactions { get; init; } = [];
     public List<string> TaggedTeams { get; init; } = [];
