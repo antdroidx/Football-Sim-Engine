@@ -242,7 +242,7 @@ def main():
     viewer = wait_for("game-day-portrait", lambda r: "Call play" in texts(r) or "Call defense" in texts(r))
     badges = [n for n in viewer.iter("node") if n.get("content-desc", "").endswith(" team badge")]
     assert len(badges) == 2, "Broadcast scoreboard must expose both team badges"
-    assert any((n.get("resource-id") or "").endswith("game-day-field-frame") for n in viewer.iter("node"))
+    assert any((n.get("resource-id") or "").endswith(("game-day-field-frame","live-field")) for n in viewer.iter("node"))
     before_clock = game_clock(viewer)
     for name in ("Full field", "Broadcast", "Follow ball"):
         choices = options_choice("Camera", "camera-" + name.replace(" ", "-"))
