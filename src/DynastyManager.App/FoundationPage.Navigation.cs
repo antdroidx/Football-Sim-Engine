@@ -1,4 +1,5 @@
 using Microsoft.Maui.Layouts;
+using DynastyManager.Data.Persistence;
 using DynastyManager.Core.Models;
 using DynastyManager.Core.Simulation;
 using Microsoft.Maui.Controls;
@@ -14,7 +15,7 @@ public sealed partial class FoundationPage
     private readonly VerticalStackLayout _seasonHub = new() { Spacing = 12 };
     private readonly VerticalStackLayout _matchupHub = new() { Spacing = 12 };
     private readonly VerticalStackLayout _newsRows = new() { Spacing = 10 };
-    private readonly Picker _newsScope = new() { ItemsSource = new[] { "All", "My team" }, SelectedIndex = 0 };
+    private readonly Picker _newsScope = new() { ItemsSource = new[] { "All", "My team", "Unread" }, SelectedIndex = 0 };
     private string _newsFilter = "All";
     private readonly VerticalStackLayout _injuryRows = new() { Spacing = 10 };
     private readonly Picker _injuryScope = new() { ItemsSource = new[] { "Your team", "Entire league" }, SelectedIndex = 0 };
@@ -319,7 +320,7 @@ public sealed partial class FoundationPage
 
     private View BuildNewsSection()
     {
-        _newsScope.SelectedIndexChanged += (_, _) => { _newsFilter = _newsScope.SelectedIndex == 1 ? "My team" : "All"; RenderNews(); };
+        _newsScope.SelectedIndexChanged += (_, _) => { _newsFilter = _newsScope.SelectedIndex switch { 1 => "My team", 2 => "Unread", _ => "All" }; RenderNews(); };
         return _newsRows;
     }
 
@@ -337,6 +338,9 @@ public sealed partial class FoundationPage
         SemanticProperties.SetDescription(card, story.Category + ": " + story.Headline + ". Open story.");
         var open = new TapGestureRecognizer(); open.Tapped += async (_, _) =>
         {
+            if (_currentDynasty is not null)
+                _currentDynasty = DynastyNewsService.MarkRead(_currentDynasty, [story.Id]);
+            await SaveCurrentAsync(SaveKind.AutosaveCurrent);
             var close = new Button { Text = "‹ Back to headlines" };
             var page = new ContentPage(); close.Clicked += async (_, _) => await Navigation.PopModalAsync();
             var destination = new Button { Text = story.Category == "Injuries" ? "Open injury report" : story.Category == "Recruiting" ? "Open recruiting" : "Open schedule" };
@@ -378,6 +382,7 @@ public sealed partial class FoundationPage
         _newsRows.Children.Add(_newsScope);
         var stories = DynastyNewsService.Build(_currentDynasty);
         if (_newsFilter == "My team") stories = stories.Where(s => s.TeamName == _currentDynasty.UserTeamName).ToArray();
+        if (_newsFilter == "Unread") stories = stories.Where(s => !_currentDynasty.ReadNewsIds.Contains(s.Id)).ToArray();
         if (stories.Count > 0) _newsRows.Children.Add(FootballNewsCard.Layout(stories.Select(NewsCard)));
         if (stories.Count == 0) _newsRows.Children.Add(new Label { Text = "No stories yet. Check back as your season develops." });
     }

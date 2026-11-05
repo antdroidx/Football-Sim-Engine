@@ -62,6 +62,10 @@ Executed: `TeamChemistryTests` 3 passed; combined GameDay engine/control/polish/
 
 Branch `codex/feature-roadmap-plan` identifies a fixed list of enclosed Pro homes as indoor. Those games now skip wind/precipitation and use the neutral indoor weather rules. Added focused College tests for Dallas/Atlanta/Detroit and the GameDay weather suite passes 19 cases. No release or merge was run. Broader stadium/turf profiles remain open.
 
+## College News persistent read state — November 4, 2026
+
+Branch `codex/feature-roadmap-plan` adds `ReadNewsIds` to the College dynasty save and a shared `DynastyNewsService.MarkRead` helper. The College news page now supports All/My-team/Unread filters and marks stories read when opened. Focused `NewsReadStateTests` pass 2 cases and the College Android app build passes with 0 errors. No APK/device walkthrough or release is claimed. Social-post generation, shared Pro/College adapter and narrative memory remain open.
+
 ## Historical notes below
 
 Release/status wording in the entries below is retained as evidence. Where it says a batch was unmerged,

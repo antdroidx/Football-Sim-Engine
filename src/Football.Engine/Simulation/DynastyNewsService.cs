@@ -30,6 +30,19 @@ public static class DynastyNewsService
         return selected.Take(limit).ToArray();
     }
 
+    public static DynastyState MarkRead(DynastyState state, IReadOnlyList<string> storyIds)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(storyIds);
+        var read = state.ReadNewsIds.Concat(storyIds)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct()
+            .ToArray();
+        return state with { ReadNewsIds = read };
+    }
+
+    public static IReadOnlyList<DynastyNewsStory> Unread(DynastyState state, int limit = 24) =>
+        Build(state, limit).Where(story => !state.ReadNewsIds.Contains(story.Id)).ToArray();
     public static IReadOnlyList<DynastyNewsStory> Build(DynastyState state, int limit = 24)
     {
         var stories = new List<DynastyNewsStory>();

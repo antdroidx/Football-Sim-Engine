@@ -18,6 +18,10 @@ Executed: `TeamChemistryTests` 3 passed; GameDay-related Engine suites passed 12
 
 Executed: `GameConditionsAndAwardsTests` 19 passed, including three new enclosed Pro venue tests (Dallas/Atlanta/Detroit). No APK, device walkthrough, release or merge was run. Broader stadium/turf profiles remain open.
 
+## College News persistent read state — November 4, 2026
+
+Executed: `NewsReadStateTests` 2 passed. College Android app build passed with 0 errors. No APK, device walkthrough, release or merge was run. Shared narrative generation remains open.
+
 ## Released Pro165 / College454 — November 4, 2026
 
 Scope: shared roster identity/acquisition scoring, CPU game-plan drift, Flexbone service academies and their documentation. College and Pro remain separate hosts with their existing save/package identities.
