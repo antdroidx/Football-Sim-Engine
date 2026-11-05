@@ -186,6 +186,17 @@ public sealed partial class FoundationPage
                         new Label { Text = p.Citation, FontSize = 11, TextColor = DynastyTheme.Muted } } } });
         }
         scope.SelectedIndexChanged += (_, _) => Render(); Render();
+
+        body.Children.Add(SectionTitle("Coaches", "Inducted after a completed head coaching career · recorded seasons and honors only"));
+        if (state.CoachHallOfFame.Count == 0)
+            body.Children.Add(new Label { Text = "No coaches have been inducted yet. A coach qualifies once the program no longer lists them and the record meets the bar." });
+        foreach (var coach in state.CoachHallOfFame)
+            body.Children.Add(new Border { StrokeThickness = 0, Padding = 10, BackgroundColor = DynastyTheme.Palette("#203342"), Content =
+                new VerticalStackLayout { Spacing = 4, Children = {
+                    new Label { Text = coach.CoachName, FontSize = 15, FontAttributes = FontAttributes.Bold, TextColor = DynastyTheme.Text },
+                    new Label { Text = $"{coach.InductionYear} · {coach.HeadCoachSeasons} head coaching seasons · {coach.HeadCoachWins}-{coach.HeadCoachLosses}", TextColor = DynastyTheme.Accent },
+                    new Label { Text = string.Join(" · ", coach.TeamCitations), FontSize = 11, TextColor = DynastyTheme.Muted },
+                    new Label { Text = coach.Citation, FontSize = 11, TextColor = DynastyTheme.Muted } } } });
     }
 
     private void RenderHonors(VerticalStackLayout body)

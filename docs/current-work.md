@@ -1,3 +1,25 @@
+## Persistent coach hall of fame in both games — November 5, 2026
+
+Branch `codex/feature-roadmap-plan`: the shared coach hall of fame is now rendered, recorded and persistent. Until now `CoachHallOfFameService` had no production caller, so the roadmap's claim that it appeared in both hosts' views was wrong; the College and Pro Hall of Fame screens showed players only.
+
+The shared core scores a recorded coaching career the same way for both games: at least five head coaching seasons, a .550 win percentage and some recorded honor. It now also produces one citation line per team the coach led, with the seasons and the record at each stop, so a coach who moved schools is attributed to every school rather than only the last one.
+
+Eligibility stays a league decision. A College coach becomes eligible once the program no longer lists them on staff, or once a retirement record exists; a Pro coach becomes eligible once the coaching job is over. College draws the career from the recorded coach season history, Pro from the recorded coaching career plus the league's own playoff and championship results.
+
+Both hosts persist the induction. `DynastyState` and `ProFranchise` gained a coach hall of fame collection with an empty default and no schema-version bump, so older saves load with empty fields and are not rewritten. An induction is recorded once: the coach keeps the year they were first inducted, and a later season refresh does not move it.
+
+Both surfaces show the new section. The College Hall of Fame screen lists the inducted coaches with their season counts, records and per-team citations, and the Pro Hall of Fame tab lists the same for the recorded Pro coaching career.
+
+The excluded long College career cases were run on this branch with and without this change, case by case, and the outcome is identical. Five of the ten fail on both sides, and they fail on the same cases:
+
+| Case | Baseline | With this change |
+|---|---|---|
+| 12 teams, 5 years, seeds 1 / 2 / 3 | fail, pass, pass | fail, pass, pass |
+| 130 teams, 10 years, seeds 4 / 5 / 6 | pass, pass, pass | pass, pass, pass |
+| 12 teams, 20 years, seeds 7 / 8 | fail, fail | fail, fail |
+| 20-year FBS calibration, seeds 1 / 17 | fail, fail | fail, fail |
+
+The failures are pre-existing on `codex/feature-roadmap-plan` and are not caused by this work.
 ## Replay highlights, pre-snap outcome effect, and league pre-snap rules — November 5, 2026
 
 Branch `codex/feature-roadmap-plan`: the GameCast live view can now replay the recorded moments worth replaying, and a pre-snap alignment action finally changes the play it precedes.

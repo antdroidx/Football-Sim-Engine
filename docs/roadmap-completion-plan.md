@@ -123,6 +123,10 @@ Acceptance
 
 ## Batch C — Persistent Hall of Fame lifecycle
 
+**Status: delivered on `codex/feature-roadmap-plan`.** The shared coach hall of fame is rendered in both hosts,
+the induction records persist in each save, eligibility stays a league decision, and every team a coach led is
+cited with its seasons and record.
+
 Current state
 
 - `CoachHallOfFameService.Build` scores `CoachCareerSummary` lists but is called only from tests.

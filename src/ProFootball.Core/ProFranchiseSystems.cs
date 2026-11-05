@@ -339,7 +339,7 @@ public static class ProOffseason
         }
         s = ProCpu.Manage(ProTermination.ProcessJune1(s with { Phase = ProPhase.Preseason, Week = 1 }));
         var season = s with { Phase = ProPhase.Preseason, Week = 1, OffseasonStep = OffseasonStep.Retention, Games = ProSchedule.Build(s.League, s.Year), TaggedTeams = [], Picks = s.Picks.Concat(ProEconomy.CreatePicks(s, s.Year + 1)).DistinctBy(p => p.Id).ToList() };
-        return ProChemistryService.Refresh(season);
+        return ProCoachHallOfFameService.Refresh(ProChemistryService.Refresh(season));
     }
 }
 

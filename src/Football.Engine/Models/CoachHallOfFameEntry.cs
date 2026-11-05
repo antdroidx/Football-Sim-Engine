@@ -15,4 +15,23 @@ public sealed record CoachHallOfFameEntry
     public int CareerScore { get; init; }
     public int HonorsScore { get; init; }
     public required string Citation { get; init; }
+
+    /// <summary>One line per team the coach led, with the seasons and the record at each stop.</summary>
+    public string[] TeamCitations { get; init; } = [];
+    public bool Retired { get; init; }
+    public int? RetiredYear { get; init; }
+}
+
+/// <summary>One team stop in a coach's recorded head coaching career.</summary>
+public sealed record CoachHallOfFameTeamSpan
+{
+    public required string TeamName { get; init; }
+    public int FirstYear { get; init; }
+    public int LastYear { get; init; }
+    public int Seasons { get; init; }
+    public int Wins { get; init; }
+    public int Losses { get; init; }
+    public string Citation => Seasons == 1
+        ? $"{TeamName} {FirstYear} ({Wins}-{Losses})"
+        : $"{TeamName} {FirstYear}-{LastYear} ({Wins}-{Losses})";
 }

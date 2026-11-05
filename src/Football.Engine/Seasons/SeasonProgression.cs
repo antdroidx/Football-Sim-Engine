@@ -91,7 +91,7 @@ public static class SeasonProgression
                 Phase = SeasonPhase.Offseason
             },
 
-            SeasonPhase.Offseason => CollegeChemistryService.Refresh(state with
+            SeasonPhase.Offseason => CollegeSeasonService.Refresh(state with
             {
                 SeasonYear = state.SeasonYear + 1,
                 Week = 0,

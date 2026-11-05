@@ -1,3 +1,12 @@
+## Persistent coach hall of fame in both games — November 5, 2026
+
+Executed: Engine `CoachHallOfFameTests` 5 passed, covering the qualifying record and honors, a career with no title success, a career that is not complete, the minimum seasons and win percentage, and the per-team citations across two stops. College `CollegeHallOfFameTests` 5 passed, covering the induction at the season rollover, a coach still on the staff not being inducted, the induction being recorded once, an older save loading with an empty collection, and a JSON round-trip. Pro `ProCoachHallOfFameTests` 5 passed, covering the same ground for the Pro coaching career.
+
+Regression: Engine 376 passed. College 624 passed with the standard `DynastyHealthTests` and `OvrCalibrationDynastyTests` exclusions. Pro 468 passed with the standard `TwentySeasons` and `SourcedFiveSeasons` exclusions. College and Pro Android compile targets passed; the only warnings are the known offline `NU1900` package-vulnerability warnings and the two existing Pro `CS8625` nullable warnings.
+
+The excluded long College career cases were run on this branch with and without this change and produced the identical five failures on the identical cases, so this work neither fixes nor causes them. The comparison table is in current-work.md.
+
+Not claimed: no APK packaged, no device or emulator acceptance, no CI dispatch, no PR, merge, or release. The Pro coach hall of fame covers the recorded coaching career only; CPU club coaches have no season-by-season history recorded in this repository yet.
 ## Replay highlights, pre-snap outcome effect, and league pre-snap rules — November 5, 2026
 
 Executed: Engine `PreSnapTests` 8 passed and `ReplayHighlightTests` 4 passed, covering the recorded choice and its bounded effect, the no-action case, league-driven legality in the catalog, the engine rejecting a choice that breaks league rules, the highlight kinds, ordinary plays not becoming highlights, candidates referencing the recorded snaps without resimulating, and stable candidate ids.

@@ -18,7 +18,11 @@ public sealed partial class FranchisePage
             if(honorsTab=="All-Pros") { details.Add(Text("First and second All-Pro teams",21,true));details.Add(Text("League-wide recognition by position.",12));
             details.Add(Table([("All-Pro team",105),("Pos",55),("Player",200),("Team",180),("OVR",55)],(h.AllPros.Count>0?h.AllPros:ProHonors.SelectAllPros(h.Selections.Select(x=>x.Player))).Select(x=>new View[]{Text(x.Team==1?"First team":"Second team"),Text(OffensiveLineService.Label(x.Player.Football)),Text(x.Player.Football.FullName),Text(x.Player.Football.TeamName),Text(x.Player.Football.OverallRating.ToString())}))); }
             if(honorsTab=="Hall of Fame") { details.Add(Text("Hall of Fame",21,true));details.Add(Text("Derived from retired players with recorded league honors. No save schema is added.",12));
-                var entries=ProHallOfFameService.Build(state!);details.Add(entries.Count==0?Text("Players appear after retirement with major recorded honors."):Table([("Player",205),("Team",180),("Seasons",55),("Career",95),("Honors",55)],entries.Select(e=>new View[]{Text(e.PlayerName),Text(e.TeamName),Text(e.RecordedSeasons.ToString()),Text(e.CareerScore.ToString("N0")),Text(e.HonorsScore.ToString())}))); }
+                var entries=ProHallOfFameService.Build(state!);details.Add(entries.Count==0?Text("Players appear after retirement with major recorded honors."):Table([("Player",205),("Team",180),("Seasons",55),("Career",95),("Honors",55)],entries.Select(e=>new View[]{Text(e.PlayerName),Text(e.TeamName),Text(e.RecordedSeasons.ToString()),Text(e.CareerScore.ToString("N0")),Text(e.HonorsScore.ToString())})));
+                var coaches=state!.CoachHallOfFame;
+                details.Add(Text("Coaches",21,true));
+                details.Add(Text("Inducted after a completed coaching career in the Pro. Recorded seasons and honors only.",12));
+                details.Add(coaches.Count==0?Text("Coaches appear once the coaching job is over and the record meets the bar."):Table([("Coach",200),("Inducted",80),("Seasons",70),("Record",80),("Honors",70)],coaches.Select(c=>new View[]{Text(c.CoachName),Text(c.InductionYear.ToString()),Text(c.HeadCoachSeasons.ToString()),Text($"{c.HeadCoachWins}-{c.HeadCoachLosses}"),Text(c.HonorsScore.ToString())}))); }
             if(honorsTab!="Pro Bowl")return;
             var actions=new ActionRow();
             if(h.Showcase?.HasPlayed==true)actions.Add(Action("Pro Bowl box score",()=>ShowBoxScore(h.Showcase)));
