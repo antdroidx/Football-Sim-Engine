@@ -47,7 +47,7 @@ public static class FootballNewsStoryCard
         };
         var preview = new Label
         {
-            Text = string.IsNullOrWhiteSpace(story.RelatedId) ? story.Body : $"{story.Body}\n\nRecorded story · {story.RelatedId}",
+            Text = story.Body,
             TextColor = DynastyTheme.Muted,
             FontSize = 12,
             LineBreakMode = LineBreakMode.TailTruncation,

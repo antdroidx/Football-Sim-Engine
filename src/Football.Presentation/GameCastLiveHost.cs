@@ -12,6 +12,7 @@ public sealed class GameCastLiveHost
     public required Func<GameDaySession, Task> Save { get; init; }
     public required Func<INavigation, GameDayBoxScore, Task> ShowBoxScore { get; init; }
     public Func<string, IDrawable?> Logo { get; init; } = _ => null;
+    public Func<GameDaySession, GameFieldStyle>? FieldStyle { get; init; }
     public bool ChooseTeamOnTakeover { get; init; }
     // Each application already has its own preference store; these keys are shared by all engine hosts.
     public string PreferencesPrefix { get; init; } = "gamecast";

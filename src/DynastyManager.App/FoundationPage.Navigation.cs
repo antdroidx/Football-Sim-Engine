@@ -15,7 +15,7 @@ public sealed partial class FoundationPage
     private readonly VerticalStackLayout _seasonHub = new() { Spacing = 12 };
     private readonly VerticalStackLayout _matchupHub = new() { Spacing = 12 };
     private readonly VerticalStackLayout _newsRows = new() { Spacing = 10 };
-    private readonly Picker _newsScope = new() { ItemsSource = new[] { "All", "My team", "Unread" }, SelectedIndex = 0 };
+    private readonly Picker _newsScope = new() { ItemsSource = new[] { "All", "My team", "Unread", "Social" }, SelectedIndex = 0 };
     private string _newsFilter = "All";
     private readonly VerticalStackLayout _injuryRows = new() { Spacing = 10 };
     private readonly Picker _injuryScope = new() { ItemsSource = new[] { "Your team", "Entire league" }, SelectedIndex = 0 };
@@ -177,7 +177,7 @@ public sealed partial class FoundationPage
             _homeHighlights.Children.Add(recap);
         }
         var stories = DynastyNewsService.BuildOverview(state);
-        if(stories.Count>0) _homeHighlights.Children.Add(FootballNewsCard.Layout(stories.Select(NewsCard)));
+        if(stories.Count>0) _homeHighlights.Children.Add(FootballNewsCard.Layout(stories.Select(story => NewsCard(story))));
         if (stories.Count == 0) _homeHighlights.Children.Add(new Label { Text = "Results, recruiting and injury updates will appear as your dynasty develops.", TextColor = DynastyTheme.Muted });
     }
 
@@ -320,11 +320,11 @@ public sealed partial class FoundationPage
 
     private View BuildNewsSection()
     {
-        _newsScope.SelectedIndexChanged += (_, _) => { _newsFilter = _newsScope.SelectedIndex switch { 1 => "My team", 2 => "Unread", _ => "All" }; RenderNews(); };
+        _newsScope.SelectedIndexChanged += (_, _) => { _newsFilter = _newsScope.SelectedIndex switch { 1 => "My team", 2 => "Unread", 3 => "Social", _ => "All" }; RenderNews(); };
         return _newsRows;
     }
 
-    private View NewsCard(DynastyNewsStory story)
+    private View NewsCard(DynastyNewsStory story, FootballNewsStory? media = null)
     {
         var brand = DynastyManager.Data.Branding.TeamBrandCatalog.Get(story.TeamName);
         var player = story.PlayerId is Guid id ? _currentDynasty?.ActiveRoster.FirstOrDefault(p => p.PlayerId == id) : null;
@@ -358,17 +358,18 @@ public sealed partial class FoundationPage
             RelatedId = story.PlayerId?.ToString(),
             MediaKind = FootballNewsMediaKind.Story
         };
+        mapped = media ?? mapped;
         var card = FootballNewsStoryCard.Create(mapped, icon, ManagementAccent);
-        SemanticProperties.SetDescription(card, story.Category + ": " + story.Headline + ". Open story.");
+        SemanticProperties.SetDescription(card, mapped.Category + ": " + mapped.Headline + ". Open story.");
         var open = new TapGestureRecognizer();
         open.Tapped += async (_, _) =>
         {
             if (_currentDynasty is not null)
-                _currentDynasty = DynastyNewsService.MarkRead(_currentDynasty, [story.Id]);
+                _currentDynasty = DynastyNewsService.MarkRead(_currentDynasty, [mapped.Id]);
             await SaveCurrentAsync(SaveKind.AutosaveCurrent);
             var close = new Button { Text = "‹ Back to headlines" };
             var page = new ContentPage();
-            close.Clicked += async (_, _) => await Navigation.PopModalAsync();
+            close.Clicked += async (_, _) => { await Navigation.PopModalAsync(); RenderNews(); };
             var destination = new Button
             {
                 Text = story.Category == "Injuries" ? "Open injury report" : story.Category == "Recruiting" ? "Open recruiting" : "Open schedule"
@@ -397,8 +398,8 @@ public sealed partial class FoundationPage
                     {
                         close,
                         SchoolBanner(story.TeamName, $"{story.Category} · {story.SeasonYear} · Week {story.Week}"),
-                        new Label { Text = story.Headline, FontSize = 18, FontAttributes = FontAttributes.Bold },
-                        new Label { Text = story.Body, FontSize = 14 },
+                        new Label { Text = mapped.Headline, FontSize = 18, FontAttributes = FontAttributes.Bold },
+                        new Label { Text = mapped.Body, FontSize = 14 },
                         new Label { Text = DynastyManager.Data.Presentation.NewsEditorial.Context(story.Category, story.TeamName), FontSize = 14 },
                         new Label { Text = "Dynasty Wire · stories from around your league. ", FontSize = 11, TextColor = DynastyTheme.Muted },
                         destination
@@ -414,7 +415,7 @@ public sealed partial class FoundationPage
     private void RenderNews()
     {
         if (_currentDynasty is null) return;
-        var requestedScope = _newsFilter == "My team" ? 1 : 0;
+        var requestedScope = _newsFilter switch { "My team" => 1, "Unread" => 2, "Social" => 3, _ => 0 };
         if (_newsScope.SelectedIndex != requestedScope) _newsScope.SelectedIndex = requestedScope;
         _newsRows.Children.Clear();
         _newsRows.Children.Add(SectionTitle("News & headlines", "Dynasty Wire · results, people and stories from around the league"));
@@ -422,7 +423,17 @@ public sealed partial class FoundationPage
         var stories = DynastyNewsService.Build(_currentDynasty);
         if (_newsFilter == "My team") stories = stories.Where(s => s.TeamName == _currentDynasty.UserTeamName).ToArray();
         if (_newsFilter == "Unread") stories = stories.Where(s => !_currentDynasty.ReadNewsIds.Contains(s.Id)).ToArray();
-        if (stories.Count > 0) _newsRows.Children.Add(FootballNewsCard.Layout(stories.Select(NewsCard)));
+        if (_newsFilter == "Social")
+        {
+            var sources = stories.ToDictionary(story => story.Id);
+            var posts = FootballNewsSocialService.Build(stories.Select(story => new FootballNewsStory
+            {
+                Id = story.Id, Category = story.Category, Headline = story.Headline, Body = story.Body,
+                TeamName = story.TeamName, SeasonYear = story.SeasonYear, Week = story.Week
+            }).ToArray());
+            _newsRows.Children.Add(FootballNewsCard.Layout(posts.Select(post => NewsCard(sources[post.RelatedId!], post))));
+        }
+        else if (stories.Count > 0) _newsRows.Children.Add(FootballNewsCard.Layout(stories.Select(story => NewsCard(story))));
         if (stories.Count == 0) _newsRows.Children.Add(new Label { Text = "No stories yet. Check back as your season develops." });
     }
     private View BuildInjurySection()

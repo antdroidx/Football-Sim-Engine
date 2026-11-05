@@ -74,8 +74,9 @@ public class GameCastLivePage : ContentPage
         replayAngle = BroadcastReplayService.AngleFor(Preferences.Get(Key("replay-angle"), BroadcastReplayService.Angles[0].ToString()));
         autoReplay = Preferences.Get(Key("auto-replay"), true); showNames = Preferences.Get(Key("names"), true);
         var home = Brand(session.Game.HomeTeamName);
-        art = new() { HomeName = (home.FieldName ?? home.Abbreviation).ToUpperInvariant(), HomeInitial = home.Abbreviation,
-            HomeColor = Primary(session.Game.HomeTeamName), HomeSecondaryColor = Secondary(session.Game.HomeTeamName),
+        var style = host.FieldStyle?.Invoke(session) ?? GameFieldStyle.From(session, home, Brand(session.Game.AwayTeamName));
+        art = new() { Style = style, HomeName = style.HomeName.ToUpperInvariant(), HomeInitial = style.HomeInitial,
+            HomeColor = style.Home, HomeSecondaryColor = Secondary(session.Game.HomeTeamName),
             HashMarkFraction = session.Rules.HashMarkFraction, Weather = session.Weather };
         turf = new() { Drawable = art, InputTransparent = true };
         highlight = GameCastHighlight.Create(out highlightText);

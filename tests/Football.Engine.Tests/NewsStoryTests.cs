@@ -8,6 +8,21 @@ namespace Football.Engine.Tests;
 public class NewsStoryTests
 {
     [Fact]
+    public void ReadingSocialPostPreservesUnreadSourceAndDoesNotGenerateReactionsToReactions()
+    {
+        var source = new FootballNewsStory
+        {
+            Id = "result/1", Category = "Results", Headline = "Recorded result", Body = "Recorded facts",
+            TeamName = "Home", SeasonYear = 2026, Week = 1
+        };
+        var post = Assert.Single(FootballNewsSocialService.Build([source]));
+        var read = FootballNewsReadStateService.MarkRead([], [post.Id]);
+        Assert.Equal(source.Id, Assert.Single(FootballNewsReadStateService.Unread([source, post], read)).Id);
+        Assert.Empty(FootballNewsSocialService.Build([post]));
+        Assert.Equal(post, Assert.Single(FootballNewsSocialService.Build([source])));
+    }
+
+    [Fact]
     public void StoryDefaultsToRecordedNarrativeAndReadStateIsFiltered()
     {
         var story = new FootballNewsStory

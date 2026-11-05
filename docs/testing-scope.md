@@ -1,3 +1,11 @@
+## Shared venue styling and social-feed wiring — November 5, 2026
+
+Branch `codex/feature-roadmap-plan`: both College and Pro now consume a shared venue style in GameCast. Indoor turf stays green with a distinct mowing palette and readable markings; the host callback is connected to the renderer. Both news screens expose explicitly labeled in-game Social views derived from recorded headlines. Social posts have independent persistent read IDs; opening a post does not mark its source story read. Fixed College Unread selection resetting to All, refreshed headlines after closing a story, made Pro unread borders visible, and removed internal record identifiers from card previews.
+
+Validation: six focused Engine news/replay tests passed, including independent social/source read state and no reactions-to-reactions. Shared Presentation build and both Android app Compile targets passed. Initial sandboxed app Compile calls failed silently; rerunning outside the sandbox succeeded. A sandboxed testhost stalled and was stopped; the outside-sandbox run passed. Existing offline NU1900 warnings remain; the initial Pro compile also reported the two existing CS8625 warnings. No APK packaging, emulator visual acceptance, CI dispatch, merge, PR, or release was performed.
+
+Next: persistent narrative memory and saved-story views, season-aware chemistry/locker-room events, replay highlights and pre-snap choreography, then persistent HOF lifecycle handling. These remain open; this checkpoint does not complete the near-term roadmap.
+
 ## Pre-snap call sheet wiring — November 4, 2026
 
 Executed: `dotnet test tests/Football.Engine.Tests/Football.Engine.Tests.csproj -c Debug --no-restore --filter "FullyQualifiedName~PreSnapTests"` and the combined LiveControl/PreSnap filter passed 4 and 27 cases, respectively. Segmented Engine Fast filters covered GameDay and remaining Fast classes as follows: GameDay 124 (Clock/YAC 20, Completion 4, Engine 27, LivePolish 27, Recommendation 11, Situational 12, LiveControl/PreSnap combined 23), goal-line/kick/penalty/phase 48, safety/live-ball 65, stats/position/query/core 20, rules boundary 36, replay/toss/adapters/kickoff 27, rivalry/leadership/chemistry 9. All passed. College GameDay-filtered Core checks passed 56 and Pro rules/foundation checks passed 17.

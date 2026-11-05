@@ -4,6 +4,7 @@ using Microsoft.Maui.Graphics;
 namespace DynastyManager.App;
 public sealed class GameFieldDrawable : IDrawable
     {
+        public GameFieldStyle? Style { get; set; }
         public double HashMarkFraction { get; set; } = .30;
         public IDrawable? HomeLogo { get; set; }
         public int YardLine { get; set; } = 25;
@@ -20,7 +21,7 @@ public sealed class GameFieldDrawable : IDrawable
 
         public void Draw(ICanvas canvas, RectF rect)
         {
-            canvas.FillColor = DynastyTheme.Palette("#245B38");
+            canvas.FillColor = Style?.Turf ?? DynastyTheme.Palette("#245B38");
             canvas.FillRectangle(rect);
             canvas.FillColor = Color.FromRgba(0, 0, 0, .07);
             canvas.FillRectangle(0, 0, rect.Width, rect.Height);
@@ -28,7 +29,7 @@ public sealed class GameFieldDrawable : IDrawable
             // Stable procedural turf: mowing bands, subtle blades and five-yard lines.
             for (var band = 0; band < 20; band++)
             {
-                canvas.FillColor = Color.FromArgb(band % 2 == 0 ? "#2E6944" : "#285D3D");
+                canvas.FillColor = band % 2 == 0 ? (Style?.Turf ?? Color.FromArgb("#2E6944")) : (Style?.TurfAccent ?? Color.FromArgb("#285D3D"));
                 canvas.FillRectangle(rect.Width * (10 + band * 5) / 120f, 0, rect.Width * 5 / 120f, rect.Height);
             }
             for (var blade = 0; blade < 900; blade++)
@@ -82,20 +83,20 @@ public sealed class GameFieldDrawable : IDrawable
             canvas.DrawLine(rightPost, postTop, rightPost, postBottom);
             canvas.DrawLine(rightPost, postTop, rect.Width * .954f, postTop);
             canvas.DrawLine(rightPost, postBottom, rect.Width * .954f, postBottom);
-            canvas.StrokeColor = DynastyTheme.Palette("#A8CBB5"); canvas.StrokeSize = 1;
-            canvas.FontColor = DynastyTheme.Palette("#D5E6DB"); canvas.FontSize = 11;
+            canvas.StrokeColor = Style?.Line ?? DynastyTheme.Palette("#A8CBB5"); canvas.StrokeSize = 1;
+            canvas.FontColor = Style?.Text ?? DynastyTheme.Palette("#D5E6DB"); canvas.FontSize = 11;
 
             for (var yard = 10; yard < 100; yard += 10)
             {
                 var x = rect.Width * (float)GameDayAnimationPlanner.ProjectYardLine(yard, 1);
                 canvas.DrawLine(x, 0, x, rect.Height);
-                canvas.FontColor = DynastyTheme.Palette("#D5E6DB"); canvas.FontSize = 11;
+                canvas.FontColor = Style?.Text ?? DynastyTheme.Palette("#D5E6DB"); canvas.FontSize = 11;
                 canvas.DrawString((yard <= 50 ? yard : 100 - yard).ToString(), x - 10, 8, 24, 18,
                     HorizontalAlignment.Center, VerticalAlignment.Center);
                 canvas.DrawString((yard <= 50 ? yard : 100 - yard).ToString(), x - 10, rect.Height - 26, 24, 18,
                     HorizontalAlignment.Center, VerticalAlignment.Center);
             }
-            canvas.StrokeColor = DynastyTheme.Palette("#D5E6DB"); canvas.StrokeSize = 1;
+            canvas.StrokeColor = Style?.Text ?? DynastyTheme.Palette("#D5E6DB"); canvas.StrokeSize = 1;
             for (var yard = 1; yard < 100; yard++)
             {
                 var x = rect.Width * (float)GameDayAnimationPlanner.ProjectYardLine(yard, 1);
