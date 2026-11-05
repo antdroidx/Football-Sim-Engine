@@ -47,8 +47,10 @@ public static class GameCastAnimation
         if (snap.IsOnsideKick) { await Task.Delay(350); return; }
         if (!GameDayEngine.IsScrimmage(snap) && !GameDayAnimationPlanner.IsPlaceKick(snap) && snap.Outcome is not (SnapOutcome.Kickoff or SnapOutcome.Punt)) { await Task.Delay(350); return; }
         highlight.IsVisible = false;
-        result.Text = instantReplay ? "REPLAY · " + GameDayCommentaryService.Describe(snap, session.PlayersById)
-            : $"LIVE · {snap.OffenseTeamName} · {PlayEditorService.OffensiveLibrary(controlledPlan).FirstOrDefault(p => p.Id == snap.OffensivePlayId)?.Name ?? (snap.Outcome is SnapOutcome.Punt or SnapOutcome.Kickoff ? "Kick and return" : "Play in progress")}";
+        var preSnapLabel = snap.PreSnap is { HasAlignmentAction: true }
+            ? " · " + PreSnapCatalog.Label(snap.PreSnap) : "";
+        result.Text = instantReplay ? "REPLAY · " + GameDayCommentaryService.Describe(snap, session.PlayersById) + preSnapLabel
+            : $"LIVE · {snap.OffenseTeamName} · {PlayEditorService.OffensiveLibrary(controlledPlan).FirstOrDefault(p => p.Id == snap.OffensivePlayId)?.Name ?? (snap.Outcome is SnapOutcome.Punt or SnapOutcome.Kickoff ? "Kick and return" : "Play in progress")}" + preSnapLabel;
         fieldPlayers.AbortAnimation("snap-movement");
         fieldPlayers.Children.Clear(); context.ClearMarkers();
         fieldArt.SpottingBall = false;

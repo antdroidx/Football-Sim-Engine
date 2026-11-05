@@ -25,7 +25,7 @@ public class GameCastLivePage : ContentPage
     bool? compactFooter;
     readonly VerticalStackLayout headerInfo = new() { Spacing = 2, VerticalOptions = LayoutOptions.Center };
     readonly Label callHeading = TextHeading("NEXT CALL");
-    readonly Button pause, call, choose, team, options, takeOver, replaySkip;
+    readonly Button pause, call, choose, preSnap, team, options, takeOver, replaySkip;
     readonly Grid field = new() { AutomationId = "live-field", IsClippedToBounds = true };
     readonly AbsoluteLayout players = new();
     readonly GameFieldDrawable art;
@@ -50,6 +50,7 @@ public class GameCastLivePage : ContentPage
     int camera;
     ReplayAngle replayAngle = ReplayAngle.Broadcast;
     bool autoReplay, showNames;
+    PreSnapChoice preSnapChoice = PreSnapCatalog.None;
     bool landscape;
     bool? arrangedLandscape;
     int presentedEvents;
@@ -97,6 +98,7 @@ public class GameCastLivePage : ContentPage
         selection.AutomationId = "live-selection"; situation.AutomationId = "live-situation";
         pause = Action("Pause", () => { if (control.IsPaused) control.Resume(); else control.Pause(); Update(); return Task.CompletedTask; }, "live-pause", false);
         call = Action("Call play", () => Snap(true), "live-call", false);
+        preSnap = Action("Pre-snap: None", SetPreSnap, "live-pre-snap");
         call.BackgroundColor = DynastyTheme.Accent; call.TextColor = DynastyTheme.Background; call.FontAttributes = FontAttributes.Bold;
         choose = Action("Playbook", Playbook, "live-playbook");
         team = Action("Team", TeamMenu, "live-team");
@@ -107,7 +109,7 @@ public class GameCastLivePage : ContentPage
             { new(GridLength.Auto), new(GridLength.Auto), new(GridLength.Star), new(GridLength.Auto) } };
         sheetBody.Add(callHeading, 0, 0); sheetBody.Add(selection, 0, 1);
         sheetBody.Add(new ScrollView { Content = quick }, 0, 2);
-        sheetBody.Add(new ActionRow { Children = { choose, call } }, 0, 3);
+        sheetBody.Add(new ActionRow { Children = { choose, preSnap, call } }, 0, 3);
         sheet = new() { Content = sheetBody, BackgroundColor = DynastyTheme.Surface,
             StrokeThickness = 0, Padding = 8, AutomationId = "live-call-sheet" };
         recap = new() { Content = new ScrollView { Content = recent }, Padding = 12, StrokeThickness = 0,
@@ -174,7 +176,9 @@ public class GameCastLivePage : ContentPage
         var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); snapFinished = finished.Task;
         try
         {
-            Update(); last = control.Step(offense, defense); offense = defense = null;
+            Update(); last = control.Step(offense, defense,
+                offense?.StartsWith("special-", StringComparison.Ordinal) == true ? null : preSnapChoice);
+            offense = defense = null; ResetPreSnap();
             var atBreak = await GameCastSnapPresentation.PresentAsync(new()
             {
                 Session = session, Snap = last, Highlight = highlight, HighlightText = highlightText,
@@ -274,6 +278,7 @@ public class GameCastLivePage : ContentPage
         {
             UpdateCalls();
             call.Text = control.CanCall(true) ? "Call defense" : session.TryPending ? "Attempt conversion" : "Call play";
+            preSnap.IsVisible = control.CanChoosePreSnap;            preSnap.Text = "Pre-snap: " + PreSnapCatalog.Label(preSnapChoice);
             if (!wasVisible)
             {
                 sheet.Opacity = 0;
@@ -318,7 +323,17 @@ public class GameCastLivePage : ContentPage
         var defending = control.CanCall(true);
         var id = defending ? defense : offense;
         var selected = choices.FirstOrDefault(p => p.Id == id) ?? choices.FirstOrDefault(p => p.Id == Recommended()) ?? choices[0];
-        if (defending) defense = selected.Id; else offense = selected.Id;
+        if (defending)
+        {
+            defense = selected.Id;
+            ResetPreSnap();
+        }
+        else
+        {
+            offense = selected.Id;
+            if (selected.Id.StartsWith("special-", StringComparison.Ordinal)) ResetPreSnap();
+        }
+        preSnap.IsVisible = !defending && !session.TryPending && !selected.Id.StartsWith("special-", StringComparison.Ordinal);
         selection.Text = selected.Name + " · " + Brand(session.ControlledTeamName!).Abbreviation + (defending ? " defense" : " offense");
         quick.Clear(); quick.ColumnDefinitions.Clear(); quick.RowDefinitions.Clear();
         for (var column = 0; column < (landscape ? 1 : 3); column++) quick.ColumnDefinitions.Add(new(GridLength.Star));
@@ -388,6 +403,7 @@ public class GameCastLivePage : ContentPage
             {
                 control.SetManual(defending, value == "You");
                 if (defending) defense = null; else offense = null;
+                ResetPreSnap();
                 commentary.Text = (defending ? "Defense" : "Offense") + " calls: " + value;
             }
         }
@@ -400,7 +416,7 @@ public class GameCastLivePage : ContentPage
             if (selected is null or "Cancel") return;
             session.ControlledTeamName = selected; session.UserCoachRole = StaffRole.HeadCoach;
         }
-        control.TakeOver(); offense = defense = null;
+        control.TakeOver(); offense = defense = null; ResetPreSnap();
         commentary.Text = "Taking over " + Brand(session.ControlledTeamName!).Abbreviation + " · choose your next call.";
     }
     async Task TeamMenu()
@@ -458,6 +474,21 @@ public class GameCastLivePage : ContentPage
         var index = Array.IndexOf(names, value);
         if (index >= 0) commentary.Text = GameDayCoachingService.Substitute(session, session.ControlledTeamName!, pool[index].PlayerId) ? pool[index].FullName + " in for the next snap." : "Player unavailable.";
     }
+    async Task SetPreSnap()
+    {
+        if (!control.CanChoosePreSnap) return;
+        var labels = PreSnapCatalog.Common.Select(PreSnapCatalog.Label).ToArray();
+        var selected = Array.IndexOf(labels, PreSnapCatalog.Label(preSnapChoice));
+        var index = await GameDialogs.ChooseIndexAsync(this, "Pre-snap alignment", labels, Math.Max(0, selected));
+        if (index >= 0) { preSnapChoice = PreSnapCatalog.Common[index]; preSnap.Text = "Pre-snap: " + PreSnapCatalog.Label(preSnapChoice); }
+    }
+
+    void ResetPreSnap()
+    {
+        preSnapChoice = PreSnapCatalog.None;
+        preSnap.Text = "Pre-snap: None";
+    }
+
     async Task CoachTalk()
     {
         var audience = session.UserCoachRole == StaffRole.OffensiveCoordinator ? CoachTalkAudience.Offense : session.UserCoachRole == StaffRole.DefensiveCoordinator ? CoachTalkAudience.Defense : CoachTalkAudience.Team;

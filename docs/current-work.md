@@ -36,6 +36,14 @@ hot loops. Identity and roster-target memoization restored the market path and t
 November 3 audit checkpoint itself made no release claim; the November 4 release above supersedes its status.
 
 
+## Pre-snap call sheet wiring — November 4, 2026
+
+Branch `codex/feature-roadmap-plan` records the first shared pre-snap catalog wiring. The shared live call sheet offers None, left/right shifts, and left/right motion. The choice is stamped on the resulting scrimmage snap and appears in live/replay presentation. Kickoff, try, kneel, spike, punt/field-goal and invalid choices are rejected; the call remains presentation-only and does not consume the simulation random stream.
+
+Focused passing: Engine PreSnap 4; segmented GameDay classes passed 124 cases (Clock/YAC 20, Completion 4, Engine 27, LivePolish 27, Recommendation 11, Situational 12, LiveControl/PreSnap combined 23). Other segmented Engine Fast groups passed 205 cases: goal-line/kick/penalty/phase 48, safety/live-ball 65, stats/position/query/core 20, rules boundary 36, replay/toss/adapters/kickoff 27, rivalry/leadership/chemistry 9. College GameDay-filtered Core cases passed 56; Pro rules/foundation cases passed 17. Football.Engine and Football.Presentation build with 0 errors; the Presentation project has one local offline NU1900 warning. Android app builds did not complete because local restore returned failure under the offline/restricted package-vulnerability path, so College/Pro packaging is not claimed.
+
+A single `Category=Fast` Engine tier run was not successfully completed locally. One 90-second run aborted at testhost connection, and retries stayed quiet/hung. Segmented Owner Engine Fast filters above cover all Fast test classes, but are not claimed as one uninterrupted tier run. No Android package/device acceptance, College/Pro release, merge, or simulation-effect claim is made. Remaining next steps are pre-snap play-outcome adaptation, league-specific legality, marker choreography, mobile device verification, and the remaining roadmap items.
+
 ## Historical notes below
 
 Release/status wording in the entries below is retained as evidence. Where it says a batch was unmerged,

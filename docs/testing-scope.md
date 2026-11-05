@@ -1,3 +1,11 @@
+## Pre-snap call sheet wiring — November 4, 2026
+
+Executed: `dotnet test tests/Football.Engine.Tests/Football.Engine.Tests.csproj -c Debug --no-restore --filter "FullyQualifiedName~PreSnapTests"` and the combined LiveControl/PreSnap filter passed 4 and 27 cases, respectively. Segmented Engine Fast filters covered GameDay and remaining Fast classes as follows: GameDay 124 (Clock/YAC 20, Completion 4, Engine 27, LivePolish 27, Recommendation 11, Situational 12, LiveControl/PreSnap combined 23), goal-line/kick/penalty/phase 48, safety/live-ball 65, stats/position/query/core 20, rules boundary 36, replay/toss/adapters/kickoff 27, rivalry/leadership/chemistry 9. All passed. College GameDay-filtered Core checks passed 56 and Pro rules/foundation checks passed 17.
+
+Builds: Football.Engine and Football.Presentation build 0 errors (one NU1900 offline package warning from unavailable network). College/Pro Android app packaging was not completed; each app target returned Build FAILED with 0 compiler errors, while local restore remained blocked by the unavailable package-vulnerability source. No new Android APK/package/device flow was run. A single `Category=Fast` Engine tier run was attempted; one vstest connection timeout and one quiet retry/hang mean the segmented results above are not claimed as a single uninterrupted tier pass.
+
+Not claimed: no engine simulation effect, league-specific legality, marker choreography, all-screen GameCast device acceptance, Pro/College full regression suites, APK packaging, release, merge, or save rewrite. Use only the new `PreSnap` event metadata for presentation; old events safely deserialize it as null.
+
 ## Released Pro165 / College454 — November 4, 2026
 
 Scope: shared roster identity/acquisition scoring, CPU game-plan drift, Flexbone service academies and their documentation. College and Pro remain separate hosts with their existing save/package identities.

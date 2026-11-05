@@ -67,7 +67,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Improve venue styling, visual markers, replay angles, highlight selection, and mobile readability.
    - Replays must consume recorded state only and never reroll simulation.
    - Preserve portrait/landscape and light/dark usability.
-   - Status: Shared GameCast now persists and applies a replay angle; Broadcast, FollowBall, and ReverseFollow are wired into the shared live page and engine preset catalog.
+   - Status: Shared GameCast persists and applies a replay angle. The shared call sheet also offers None, left/right shifts, and left/right motion; the selected choice is recorded on scrimmage/replay and rejects illegal kickoff, try, or special situations. It does not consume or change simulation randomness. Play-outcome simulation, league-specific legality/adaptation, and marker choreography remain open.
 
 7. **Player and coach Hall of Fame**
    - Create a shared scoring and citation core.

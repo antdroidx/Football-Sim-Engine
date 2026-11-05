@@ -6,4 +6,5 @@ public enum PreSnapType { None, Shift, Motion }
 public sealed record PreSnapChoice(PreSnapType Type, string Side, double Yards)
 {
     public bool Valid => PreSnapCatalog.IsValid(this);
+    public bool HasAlignmentAction => Type is not PreSnapType.None;
 }

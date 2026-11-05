@@ -178,7 +178,7 @@ public static partial class GameDayEngine
         return snap;
     }
 
-    private static GameSnapEvent? TryPreSnapPenalty(GameDaySession session)
+    private static GameSnapEvent? TryPreSnapPenalty(GameDaySession session, PreSnapChoice? preSnap)
     {
         if (session.Events.Count == 0) return null;
         var random = new Random(unchecked(session.Game.SimulationSeed * 397 ^ session.Events.Count * 7919));
@@ -201,6 +201,7 @@ public static partial class GameDayEngine
             PreSnapSeconds = session.LastPreSnapSeconds,
             OffenseTeamName = session.PossessionTeamName,
             DefenseTeamName = defenseTeam,
+            PreSnap = preSnap,
             OffensivePlayId = "", DefensivePlayId = "", Down = session.Down, Distance = session.Distance,
             StartYardLine = session.YardLine, BallEndYardLine = session.YardLine + yards,
             PenalizedTeamName = penalizedTeam, PenaltyName = foul, PenaltyYards = enforced,

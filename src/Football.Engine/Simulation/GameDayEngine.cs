@@ -45,7 +45,7 @@ public static partial class GameDayEngine
     }
 
     public static GameSnapEvent Step(GameDaySession session, string? userPlayId = null,
-        string? userDefensivePlayId = null)
+        string? userDefensivePlayId = null, PreSnapChoice? preSnap = null)
     {
         if (session.IsComplete) throw new InvalidOperationException("The game is complete.");
         if (session.UserCoachRole != StaffRole.HeadCoach)
@@ -53,6 +53,11 @@ public static partial class GameDayEngine
             if (session.UserCoachRole == StaffRole.DefensiveCoordinator || session.PossessionTeamName != session.ControlledTeamName) userPlayId = null;
             if (session.UserCoachRole == StaffRole.OffensiveCoordinator || session.PossessionTeamName == session.ControlledTeamName) userDefensivePlayId = null;
         }
+        if (preSnap is not null && !preSnap.Valid)
+            throw new ArgumentException("Pre-snap choice is invalid.", nameof(preSnap));
+        var alignmentAction = preSnap is { HasAlignmentAction: true } ? preSnap : null;
+        if (alignmentAction is not null && (session.KickoffPending || session.TryPending))
+            throw new ArgumentException("Pre-snap choices apply only to normal scrimmage plays.", nameof(preSnap));
         if (session.TryPending) return ResolveTry(session, userPlayId);
         if (session.KickoffPending) return ResolveKickoff(session);
         if (session.Quarter is 2 or 4 && session.ClockSeconds <= 90 && (!session.ClockStopped || session.ClockRestartsOnReady))
@@ -70,6 +75,8 @@ public static partial class GameDayEngine
             finalAdvice?.Play?.Name == "Hail Mary" || finalAdvice?.Type == RecommendedCallType.FieldGoal);
         var clockEvent = PrepareSnap(session, userPlayId == "special-spike", quickShot);
         if (clockEvent is not null) return clockEvent;
+        if (alignmentAction is not null && userPlayId is "special-kneel" or "special-spike")
+            throw new ArgumentException("Pre-snap choices apply only to normal scrimmage plays.", nameof(preSnap));
         if (userPlayId is "special-kneel" or "special-spike") return ClockPlay(session, userPlayId == "special-spike");
         if (userPlayId is null && ShouldKneel(session)) return ClockPlay(session, false, userCalled: false);
         var homeOnOffense = session.PossessionTeamName.Equals(session.Game.HomeTeamName, StringComparison.OrdinalIgnoreCase);
@@ -83,13 +90,15 @@ public static partial class GameDayEngine
         var defenseDepthChart = homeOnOffense ? session.AwayDepthChart : session.HomeDepthChart;
         var offensePlan = GamePlanService.Normalize(offense.GamePlan ?? new TeamGamePlan { TeamName = offense.TeamName });
         var defensePlan = GamePlanService.Normalize(defense.GamePlan ?? new TeamGamePlan { TeamName = defense.TeamName });
-        var requestedSpecial = userPlayId is "special-punt" or "special-field-goal" ? userPlayId : null;
+        var requestedSpecial = userPlayId is "special-punt" or "special-field-goal" or "special-kneel" or "special-spike" ? userPlayId : null;
+        if (alignmentAction is not null && (session.KickoffPending || requestedSpecial is not null))
+            throw new ArgumentException("Pre-snap choices apply only to normal scrimmage plays.", nameof(preSnap));
         if (!string.IsNullOrWhiteSpace(userPlayId) && requestedSpecial is null && offensePlan.Offense == OffensivePlaybook.Custom &&
             !offensePlan.CustomOffensivePlayIds.Contains(userPlayId))
             throw new ArgumentException("Offensive play is not in this custom playbook.", nameof(userPlayId));
         if (!string.IsNullOrWhiteSpace(userPlayId) && requestedSpecial is null)
             offensePlan = offensePlan with { OpeningPlayIds = [userPlayId] };
-        var penalty = TryPreSnapPenalty(session);
+        var penalty = TryPreSnapPenalty(session, alignmentAction);
         if (penalty is not null) return penalty;
         var offensivePossessionIndex = session.Events.Count(item => item.Outcome != SnapOutcome.Kickoff);
         var call = GamePlanService.ResolvePlayCall(offensePlan, defensePlan,
@@ -274,6 +283,7 @@ public static partial class GameDayEngine
             Quarter = session.Quarter, ClockSeconds = session.ClockSeconds,
             OffenseTeamName = offense.TeamName, DefenseTeamName = defense.TeamName,
             OffensivePlayId = call.Offense.Id, DefensivePlayId = call.Defense.Id, CallSource = call.Source,
+            PreSnap = alignmentAction,
             DefensiveCallSource = string.IsNullOrWhiteSpace(userDefensivePlayId) ? PlayCallSource.Cpu : PlayCallSource.User,
             Down = session.Down, Distance = session.Distance, StartYardLine = start,
             BallEndYardLine = Math.Clamp(start + yards, 0, 100), Yards = yards, Outcome = outcome,
