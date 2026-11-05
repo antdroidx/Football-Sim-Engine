@@ -104,6 +104,8 @@ public sealed record ProFranchise
     public List<DynastyManager.Core.Simulation.TeamChemistryRecord> TeamChemistry { get; init; } = [];
     public List<DynastyManager.Core.Models.LockerRoomEvent> LockerRoomEvents { get; init; } = [];
     public List<DynastyManager.Core.Models.CoachHallOfFameEntry> CoachHallOfFame { get; init; } = [];
+    public List<DynastyManager.Core.Models.FootballSocialInteraction> SocialInteractions { get; init; } = [];
+    public List<DynastyManager.Core.Models.FootballSocialFollow> SocialFollows { get; init; } = [];
     public List<ProTransactionEntry> TransactionLog { get; init; } = [];
     public List<string> Transactions { get; init; } = [];
     public List<string> TaggedTeams { get; init; } = [];

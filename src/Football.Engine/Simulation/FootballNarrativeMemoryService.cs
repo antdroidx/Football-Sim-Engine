@@ -8,7 +8,8 @@ public static class FootballNarrativeMemoryService
     public static IReadOnlyList<FootballNarrativeMemoryRecord> Refresh(
         IReadOnlyList<FootballNarrativeMemoryRecord> current,
         IReadOnlyList<FootballNewsStory> stories,
-        int seasonYear)
+        int seasonYear,
+        IReadOnlyList<FootballNarrativeMemoryRecord>? extra = null)
     {
         ArgumentNullException.ThrowIfNull(current);
         ArgumentNullException.ThrowIfNull(stories);
@@ -43,6 +44,9 @@ public static class FootballNarrativeMemoryService
                 SourceStoryIds = sourceIds
             };
         }
+
+        foreach (var record in extra ?? [])
+            memories[record.Id] = record;
 
         return memories.Values
             .OrderByDescending(record => record.SeasonYear)

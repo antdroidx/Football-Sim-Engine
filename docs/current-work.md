@@ -1,3 +1,14 @@
+## Social interaction, replies, and rivalry threads — November 5, 2026
+
+Branch `codex/feature-roadmap-plan`: the in-game social network now records what the player actually does with it.
+
+Player activity: a post carries the player's own likes and reposts, and the player can follow a media desk. These are persisted per save, so the feed keeps them across sessions, and they stay apart from the decorative engagement counts, which remain derived from the story ids as before. Following a desk moves its posts to the top of the feed.
+
+Replies: each post gets an authored reply from a different media desk. A reply restates the recorded category behind the post — "Injury report noted." for an injuries story, "Recruiting board updated." for a recruiting story — and never invents a result, a quote or a statistic. A reply has its own identity, so its read state stays separate from the source story.
+
+Rivalry threads: the narrative memory now records a thread per recorded rivalry series, built from the head-to-head results the schedule already holds. The thread states who met, how often and across how many seasons. Both games feed their recorded games into it, so the social feed can carry a rivalry thread and not only team, coaching, health and recruiting threads.
+
+Both games persist the player's activity in their existing saves with empty defaults and no schema-version bump, so older saves load with empty fields.
 ## Persistent coach hall of fame in both games — November 5, 2026
 
 Branch `codex/feature-roadmap-plan`: the shared coach hall of fame is now rendered, recorded and persistent. Until now `CoachHallOfFameService` had no production caller, so the roadmap's claim that it appeared in both hosts' views was wrong; the College and Pro Hall of Fame screens showed players only.

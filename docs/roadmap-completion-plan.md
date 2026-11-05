@@ -158,6 +158,9 @@ Acceptance
 
 ## Batch D — News and social interaction layer
 
+**Status: delivered on `codex/feature-roadmap-plan`.** The player's likes, reposts and followed desks persist,
+replies restate recorded categories, and rivalry threads come from the recorded head-to-head results.
+
 Planned after Batches A-C because it depends on the rivalry, leadership, and discipline state
 those batches produce.
 

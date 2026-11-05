@@ -180,9 +180,12 @@ public sealed partial class FranchisePage
             RelatedId = story.GameId,
             MediaKind = FootballNewsMediaKind.Story
         }).ToArray();
-        state = s with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(s.NarrativeMemory, sources, s.Year) };
+        state = s with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(s.NarrativeMemory, sources, s.Year,
+            FootballRivalryMemoryService.Records(s.Games.Select(game => game.Football).ToArray(), s.Year)) };
         s = state;
         var socialPosts = FootballNewsSocialService.Build(sources, s.NarrativeMemory);
+        var socialReplies = FootballSocialService.ComposeReplies(socialPosts, sources, s.Year, s.Week);
+        var displayedPosts = FootballSocialService.Apply(socialPosts, s.SocialInteractions, s.SocialFollows);
         var socialCount = socialPosts.Count;
         var tools = new ActionRow();
         tools.Add(Action("Filter: " + newsFilter, async () =>
@@ -203,7 +206,7 @@ public sealed partial class FranchisePage
             || newsFilter == "Unread" && !s.ReadNewsIds.Contains(n.Id)
             || n.Category == newsFilter).Take(60).ToArray();
         var displayed = newsFilter == "Social"
-            ? socialPosts.Select(post => (Story: s.News.First(item => item.Id == post.RelatedId),
+            ? displayedPosts.Select(post => (Story: s.News.First(item => item.Id == post.RelatedId),
                     Mapped: post)).Take(60).ToArray()
             : stories.Select(story => (Story: story,
                 Mapped: sources.First(item => item.Id == story.Id))).ToArray();
@@ -225,9 +228,43 @@ public sealed partial class FranchisePage
             };
             card.GestureRecognizers.Add(tap);
             body.Add(card);
+            if (newsFilter == "Social" && mapped.IsSocialPost) body.Add(SocialActions(mapped, socialReplies));
         }
     }
 
+    View SocialActions(FootballNewsStory post, IReadOnlyList<FootballNewsStory> replies)
+    {
+        var row = new ActionRow();
+        var like = Action(post.LikedByPlayer ? "Liked" : "Like", async () =>
+        {
+            state = state! with { SocialInteractions = FootballSocialService.Toggle(state.SocialInteractions,
+                post.Id, FootballSocialInteractionKind.Like, state.Year, state.Week).ToList() };
+            await Save();
+            Render();
+        }, "pro-social-like");
+        var repost = Action(post.RepostedByPlayer ? "Reposted" : "Repost", async () =>
+        {
+            state = state! with { SocialInteractions = FootballSocialService.Toggle(state.SocialInteractions,
+                post.Id, FootballSocialInteractionKind.Repost, state.Year, state.Week).ToList() };
+            await Save();
+            Render();
+        }, "pro-social-repost");
+        var follow = Action(post.FollowedAuthor ? "Following" : "Follow", async () =>
+        {
+            state = state! with { SocialFollows = FootballSocialService.ToggleFollow(state.SocialFollows,
+                post.AuthorHandle ?? string.Empty, post.AuthorName ?? string.Empty, state.Year).ToList() };
+            await Save();
+            Render();
+        }, "pro-social-follow");
+        row.Add(like);
+        row.Add(repost);
+        row.Add(follow);
+        var stack = new VerticalStackLayout { Spacing = 6 };
+        stack.Children.Add(row);
+        foreach (var reply in FootballSocialService.RepliesFor(replies, post.Id))
+            stack.Children.Add(Text($"{reply.AuthorName} {reply.AuthorHandle} · {reply.Body}", 12));
+        return stack;
+    }
     static string NewsStoryDetail(FootballNewsStory story) => story.IsSocial
         ? $"{story.AuthorName} {story.AuthorHandle}\n\n{story.Body}\n\n{story.ReplyCount} replies · {story.RepostCount} reposts · {story.LikeCount} likes\n\nFictional in-game social activity."
         : story.Body;

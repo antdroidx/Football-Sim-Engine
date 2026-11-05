@@ -431,8 +431,11 @@ public sealed partial class FoundationPage
             TeamName = story.TeamName, SeasonYear = story.SeasonYear, Week = story.Week,
             RelatedId = story.PlayerId?.ToString(), MediaKind = FootballNewsMediaKind.Story
         }).ToArray();
-        _currentDynasty = _currentDynasty with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(_currentDynasty.NarrativeMemory, sources, _currentDynasty.SeasonYear) };
+        _currentDynasty = _currentDynasty with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(_currentDynasty.NarrativeMemory, sources, _currentDynasty.SeasonYear,
+            FootballRivalryMemoryService.Records(_currentDynasty.Schedule, _currentDynasty.SeasonYear)) };
         var socialPosts = FootballNewsSocialService.Build(sources, _currentDynasty.NarrativeMemory);
+        var socialReplies = FootballSocialService.ComposeReplies(socialPosts, sources, _currentDynasty.SeasonYear, _currentDynasty.Week);
+        var displayedPosts = FootballSocialService.Apply(socialPosts, _currentDynasty.SocialInteractions, _currentDynasty.SocialFollows);
         var socialButton = new Button
         {
             Text = $"Social network · {socialPosts.Count}",
@@ -455,13 +458,61 @@ public sealed partial class FoundationPage
         if (_newsFilter == "Social")
         {
             var sourceById = stories.ToDictionary(story => story.Id);
-            var linkedPosts = socialPosts.Where(post => post.RelatedId is not null && sourceById.ContainsKey(post.RelatedId)).ToArray();
+            var linkedPosts = displayedPosts.Where(post => post.RelatedId is not null && sourceById.ContainsKey(post.RelatedId)).ToArray();
             if (linkedPosts.Length > 0)
-                _newsRows.Children.Add(FootballNewsCard.Layout(linkedPosts.Select(post => NewsCard(sourceById[post.RelatedId!], post))));
+            {
+                var stack = new VerticalStackLayout { Spacing = 12 };
+                foreach (var post in linkedPosts)
+                {
+                    stack.Children.Add(NewsCard(sourceById[post.RelatedId!], post));
+                    stack.Children.Add(SocialActions(post, socialReplies));
+                }
+                _newsRows.Children.Add(stack);
+            }
             else _newsRows.Children.Add(new Label { Text = "No social posts yet. Completed games and league activity will appear here." });
         }
         else if (stories.Count > 0) _newsRows.Children.Add(FootballNewsCard.Layout(stories.Select(story => NewsCard(story))));
         if (_newsFilter != "Social" && stories.Count == 0) _newsRows.Children.Add(new Label { Text = "No stories yet. Check back as your season develops." });
+
+        View SocialActions(FootballNewsStory post, IReadOnlyList<FootballNewsStory> replies)
+        {
+            var row = new ActionRow();
+            var like = new Button { Text = post.LikedByPlayer ? "Liked" : "Like", AutomationId = "college-social-like" };
+            like.Clicked += async (_, _) =>
+            {
+                if (_currentDynasty is null) return;
+                _currentDynasty = _currentDynasty with { SocialInteractions = FootballSocialService.Toggle(_currentDynasty.SocialInteractions,
+                    post.Id, FootballSocialInteractionKind.Like, _currentDynasty.SeasonYear, _currentDynasty.Week).ToList() };
+                await SaveCurrentAsync(SaveKind.AutosaveCurrent);
+                RenderNews();
+            };
+            var repost = new Button { Text = post.RepostedByPlayer ? "Reposted" : "Repost", AutomationId = "college-social-repost" };
+            repost.Clicked += async (_, _) =>
+            {
+                if (_currentDynasty is null) return;
+                _currentDynasty = _currentDynasty with { SocialInteractions = FootballSocialService.Toggle(_currentDynasty.SocialInteractions,
+                    post.Id, FootballSocialInteractionKind.Repost, _currentDynasty.SeasonYear, _currentDynasty.Week).ToList() };
+                await SaveCurrentAsync(SaveKind.AutosaveCurrent);
+                RenderNews();
+            };
+            var follow = new Button { Text = post.FollowedAuthor ? "Following" : "Follow", AutomationId = "college-social-follow" };
+            follow.Clicked += async (_, _) =>
+            {
+                if (_currentDynasty is null) return;
+                _currentDynasty = _currentDynasty with { SocialFollows = FootballSocialService.ToggleFollow(_currentDynasty.SocialFollows,
+                    post.AuthorHandle ?? string.Empty, post.AuthorName ?? string.Empty, _currentDynasty.SeasonYear).ToList() };
+                await SaveCurrentAsync(SaveKind.AutosaveCurrent);
+                RenderNews();
+            };
+            row.Children.Add(like);
+            row.Children.Add(repost);
+            row.Children.Add(follow);
+            var stack = new VerticalStackLayout { Spacing = 6 };
+            stack.Children.Add(row);
+            foreach (var reply in FootballSocialService.RepliesFor(replies, post.Id))
+                stack.Children.Add(new Label { Text = $"{reply.AuthorName} {reply.AuthorHandle} · {reply.Body}", FontSize = 11, TextColor = DynastyTheme.Muted });
+            return stack;
+        }
     }
     private View BuildInjurySection()
     {

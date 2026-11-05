@@ -1,3 +1,10 @@
+## Social interaction, replies, and rivalry threads — November 5, 2026
+
+Executed: Engine `FootballSocialTests` 6 passed, covering recording and clearing a like and a repost, the player's activity showing on a post, followed desks sorting first, replies restating the recorded category from a different desk, and rivalry threads built from recorded results and staying empty without a recorded series. College `CollegeSocialTests` 2 passed and Pro `ProSocialTests` 2 passed, covering the save round-trip for the player's activity and an older save loading with empty collections.
+
+Regression: Engine 382 passed. College 626 passed with the standard `DynastyHealthTests` and `OvrCalibrationDynastyTests` exclusions. Pro 470 passed with the standard `TwentySeasons` and `SourcedFiveSeasons` exclusions. College and Pro Android compile targets passed; the only warnings are the known offline `NU1900` package-vulnerability warnings and the two existing Pro `CS8625` nullable warnings.
+
+Not claimed: no APK packaged, no device or emulator acceptance, no CI dispatch, no PR, merge, or release. The new social actions were not exercised on a device.
 ## Persistent coach hall of fame in both games — November 5, 2026
 
 Executed: Engine `CoachHallOfFameTests` 5 passed, covering the qualifying record and honors, a career with no title success, a career that is not complete, the minimum seasons and win percentage, and the per-team citations across two stops. College `CollegeHallOfFameTests` 5 passed, covering the induction at the season rollover, a coach still on the staff not being inducted, the induction being recorded once, an older save loading with an empty collection, and a JSON round-trip. Pro `ProCoachHallOfFameTests` 5 passed, covering the same ground for the Pro coaching career.

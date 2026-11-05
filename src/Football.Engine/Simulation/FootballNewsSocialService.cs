@@ -5,7 +5,7 @@ namespace DynastyManager.Core.Simulation;
 /// <summary>Builds explicitly fictional in-game social posts from recorded stories.</summary>
 public static class FootballNewsSocialService
 {
-    private static readonly (string Name, string Handle)[] MediaDesks =
+    public static readonly (string Name, string Handle)[] MediaDesks =
     [
         ("Dynasty Wire", "@DynastyWire"),
         ("Gridiron Pulse", "@GridironPulse"),
