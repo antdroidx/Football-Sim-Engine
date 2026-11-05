@@ -4,15 +4,19 @@ namespace DynastyManager.Core.Simulation;
 
 public static class GameMoraleService
 {
-    public static int SeasonMorale(DynastyState state, string team)
+    public static int SeasonMorale(DynastyState state, string team, int seasonYear = 0)
     {
-        var games = state.Schedule.Where(g => g.SeasonYear == state.SeasonYear && g.HasPlayed && g.InvolvesTeam(team))
+        var year = seasonYear > 0 ? seasonYear : state.SeasonYear;
+        var weekBound = year == state.SeasonYear
+            ? state.Week
+            : state.Schedule.Where(g => g.SeasonYear == year && g.HasPlayed).Select(g => g.Week).DefaultIfEmpty(0).Max();
+        var games = state.Schedule.Where(g => g.SeasonYear == year && g.HasPlayed && g.InvolvesTeam(team))
             .OrderByDescending(g => g.Week).ThenBy(g => g.GameId).Take(4).ToArray();
         var form = games.Sum(g => g.WinnerTeamName == team ? 6 : -4);
         var recovery = games.Take(2).Sum(g => ((g.HomeTeamName == team ? g.HomeEndingMorale : g.AwayEndingMorale) - 50) / 8);
-        var talks = state.CoachTalks.Concat(state.Schedule.Where(g => g.HasPlayed && g.SeasonYear == state.SeasonYear).SelectMany(g => g.CoachTalks.Where(t => t.Quarter == 99 && t.Reactions.Count > 1)))
-            .Where(t => t.Audience == CoachTalkAudience.Team && t.TeamName == team && t.SeasonYear == state.SeasonYear && t.Week <= state.Week && state.Week - t.Week < 3)
-            .Sum(t => t.Reactions.Select(r => (double)r.Change).DefaultIfEmpty().Average() * (3 - (state.Week - t.Week)) / 3);
+        var talks = state.CoachTalks.Concat(state.Schedule.Where(g => g.HasPlayed && g.SeasonYear == year).SelectMany(g => g.CoachTalks.Where(t => t.Quarter == 99 && t.Reactions.Count > 1)))
+            .Where(t => t.Audience == CoachTalkAudience.Team && t.TeamName == team && t.SeasonYear == year && t.Week <= weekBound && weekBound - t.Week < 3)
+            .Sum(t => t.Reactions.Select(r => (double)r.Change).DefaultIfEmpty().Average() * (3 - (weekBound - t.Week)) / 3);
         var coach = state.Staff.FirstOrDefault(s => s.TeamName == team && s.Role == StaffRole.HeadCoach);
         return Math.Clamp(50 + form + recovery + (int)Math.Round(talks) + ((coach?.Leadership ?? 60) - 60) / 12, 25, 75);
     }

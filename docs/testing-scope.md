@@ -1,4 +1,12 @@
-## Roadmap completion plan and stale worktree cleanup — November 5, 2026
+## Season-aware team chemistry and locker-room events — November 5, 2026
+
+Executed: Engine `TeamChemistrySeasonTests` 8 passed, covering the first-season snapshot, turnover and coaching penalties, continuity gains, captain turnover, a changed plan, determinism, the bounded season-memory offset and deterministic locker-room notes. College `CollegeChemistryTests` 5 passed, covering the offseason rollover record, continuity into the next season, a coach change and roster turnover measured against an unchanged-staff control, an older save that loads with empty collections, and a JSON round-trip. Pro `ProChemistryTests` 5 passed, covering the same ground for the preseason handover, including a save written before the collections existed.
+
+Regression: Engine 366 passed. College 619 passed with the standard `DynastyHealthTests` and `OvrCalibrationDynastyTests` exclusions. Pro 463 passed with the standard `TwentySeasons` and `SourcedFiveSeasons` exclusions. College and Pro Android compile targets passed; the only warnings are the known offline `NU1900` package-vulnerability warnings and the two existing Pro `CS8625` nullable warnings.
+
+The excluded long College career cases were run separately and compared against the same branch without this change. The full 10-case set was run on this branch with and without the change and produced the identical five failures on the identical cases, so this work neither fixes nor causes them. The comparison table is in current-work.md.
+
+Not claimed: no APK packaged, no device or emulator acceptance, no CI dispatch, no PR, merge, or release. No simulation claim beyond the bounded cohesion and scheme-familiarity offset described in current-work.md; `GameShift` keeps its existing -1.8 to 1.8 bound.## Roadmap completion plan and stale worktree cleanup — November 5, 2026
 
 Documentation and local repository housekeeping only. No application source changed, so no Engine, College, or Pro test, build, APK packaging, device walkthrough, or CI run applies to this entry. The plan itself defines the validation commands for each of the five batches it describes.
 

@@ -101,6 +101,8 @@ public sealed record ProFranchise
     public List<string> ReadNewsIds { get; init; } = [];
     public List<DynastyManager.Core.Models.FootballNewsStory> SavedNews { get; init; } = [];
     public IReadOnlyList<DynastyManager.Core.Models.FootballNarrativeMemoryRecord> NarrativeMemory { get; init; } = [];
+    public List<DynastyManager.Core.Simulation.TeamChemistryRecord> TeamChemistry { get; init; } = [];
+    public List<DynastyManager.Core.Models.LockerRoomEvent> LockerRoomEvents { get; init; } = [];
     public List<ProTransactionEntry> TransactionLog { get; init; } = [];
     public List<string> Transactions { get; init; } = [];
     public List<string> TaggedTeams { get; init; } = [];

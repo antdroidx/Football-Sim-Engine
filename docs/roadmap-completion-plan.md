@@ -40,6 +40,11 @@ features is recomputed from scratch on load and cannot carry season history.
 
 ## Batch A — Season-aware chemistry and locker-room events
 
+**Status: delivered on `codex/feature-roadmap-plan`.** Team culture is recorded per season and carried
+forward, both hosts persist it, and locker-room events are written from recorded state. The season offset
+reaches the bounded GameCast modifier, and the long College career cases were run with and without the
+change and produce the identical pass/fail set.
+
 Recommended first in the roadmap's own ordering, and the state foundation for Batches C and D.
 
 Current state

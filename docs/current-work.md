@@ -1,4 +1,24 @@
-## Roadmap completion plan and stale worktree cleanup — November 5, 2026
+## Season-aware team chemistry and locker-room events — November 5, 2026
+
+Branch `codex/feature-roadmap-plan`: team culture is now recorded per season and carried forward. The shared engine gains `TeamChemistrySeasonService` (turns the previous season's record into the next season's baseline), `TeamChemistryInputs` (the season facts a host derives from its own records), and `LockerRoomEventService` (writes locker-room notes from recorded facts only). `TeamChemistryRecord` now stores the team name, the live snapshot the baseline was built from, the continuity fields (head coach, plan, captains, turnover) and notes that explain every adjustment.
+
+Cohesion moves from a single snapshot to a season baseline. Roster turnover, a head-coach change, a changed game plan, departing captains, discipline incidents and morale all adjust it inside the existing 20-95 band, and each adjustment is explained in the record's notes. The season offset is applied on top of the live evaluation, so in-season form still moves the value while the season's continuity carries through. `GameDayEngine`'s `GameShift` bound is unchanged.
+
+Both hosts persist the result. College writes `TeamChemistry` and `LockerRoomEvents` on its offseason rollover (`SeasonProgression.Advance`); Pro writes them when the offseason hands over to preseason (`ProOffseason.Advance`). College feeds recorded departures, transfer-portal exits, discipline incidents and season morale; Pro feeds drafted and traded-in players, contract friction and trade requests. League rules stay separate: College uses discipline incidents, Pro uses contract and trade friction.
+
+Both team surfaces show the new state. The College team profile and the Pro team page show the season delta, the momentum, the current captains, the adjustment notes and the recent locker-room notes. Locker-room notes are derived only from recorded facts and never invent quotes, results, injuries or statistics.
+
+Save compatibility: `DynastyState` and `ProFranchise` gained two collections with empty defaults and no schema-version bump, so older saves load with empty fields and are not rewritten. The College save repository refuses a save whose schema version differs from the current one, so the version was deliberately left alone.
+The excluded long College career cases were run on this branch with and without the change, case by case, and the outcome is identical. Five of the ten fail on both sides, and they fail on the same cases:
+
+| Case | Baseline | With this change |
+|---|---|---|
+| 12 teams, 5 years, seeds 1 / 2 / 3 | fail, pass, pass | fail, pass, pass |
+| 130 teams, 10 years, seeds 4 / 5 / 6 | pass, pass, pass | pass, pass, pass |
+| 12 teams, 20 years, seeds 7 / 8 | fail, fail | fail, fail |
+| 20-year FBS calibration, seeds 1 / 17 | fail, fail | fail, fail |
+
+The failures are pre-existing on `codex/feature-roadmap-plan` and are not caused by this work. The 12-team 5-year failure is the "Assistance left too much of the roster dependent on walk-ons" assertion. The 12-team subset also completed in the same 27 seconds with and without the change, so the season refresh adds no measurable cost.## Roadmap completion plan and stale worktree cleanup — November 5, 2026
 
 Branch `codex/feature-roadmap-plan` carries `docs/roadmap-completion-plan.md`, an execution outline for the remaining near-term workstreams. It records the verified branch baseline, the five batches with acceptance criteria and validation commands, and two source-audit corrections to `docs/ROADMAP.md`.
 

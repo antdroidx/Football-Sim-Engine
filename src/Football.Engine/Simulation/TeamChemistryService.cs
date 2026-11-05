@@ -5,7 +5,7 @@ namespace DynastyManager.Core.Simulation;
 public static class TeamChemistryService
 {
     public static TeamChemistryRecord Initialize(string teamKey, int seasonYear) =>
-        new() { TeamId = StableId(teamKey, seasonYear), SeasonYear = seasonYear };
+        new() { TeamId = StableId(teamKey, seasonYear), SeasonYear = seasonYear, TeamName = teamKey };
 
     public static TeamChemistryRecord WithCaptions(TeamChemistryRecord record,
         IReadOnlyList<string> captionValues)
@@ -48,6 +48,7 @@ public static class TeamChemistryService
         {
             TeamId = StableId(teamKey, seasonYear),
             SeasonYear = seasonYear,
+            TeamName = teamKey,
             Cohesion = (int)Math.Round(cohesion, MidpointRounding.AwayFromZero),
             SchemeFamiliarity = (int)Math.Round(scheme, MidpointRounding.AwayFromZero),
             Momentum = cohesion >= 60 ? CohesionMomentum.Rising : CohesionMomentum.Stable,

@@ -11,4 +11,14 @@ public sealed record TeamChemistryRecord
     public int SchemeFamiliarity { get; init; } = 50;
     public CohesionMomentum Momentum { get; init; } = CohesionMomentum.Stable;
     public Guid[] Captains { get; init; } = [];
+    public string TeamName { get; init; } = "";
+
+    /// <summary>Live snapshot the season baseline was built from. The season offset is the difference between the two.</summary>
+    public int EvaluatedCohesion { get; init; } = 50;
+    public int EvaluatedSchemeFamiliarity { get; init; } = 50;
+    public int RosterTurnoverPercent { get; init; }
+    public string HeadCoachKey { get; init; } = "";
+    public string PlanKey { get; init; } = "";
+    public string[] CaptainNames { get; init; } = [];
+    public string[] Notes { get; init; } = [];
 }

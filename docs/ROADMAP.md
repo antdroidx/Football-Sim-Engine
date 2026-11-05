@@ -28,8 +28,8 @@ This checkpoint follows the original review at `9a28a7f`. It applies to both And
 |---|---|---|
 | Rivalries | Shared records/service, schedule labels, College traditional rivalry catalog | Complete team/game-center/history exposure and durable rivalry-history acceptance; no rivalry simulation effect in the first increment. |
 | Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; preset motion entries in every offensive formation family; choices recorded in live/replay without changing randomness | Play-outcome adaptation, league-specific legality, broader marker choreography and remaining device acceptance. |
-| Captains / chemistry | Deterministic captains, cohesion/familiarity, bounded GameCast effect, both hosts' team UI | Per-season memory, roster turnover, coaching/plan continuity and discipline inputs. |
-| Morale / locker room | Existing league-specific morale, discipline, transfer and trade systems retained; factual narratives now have persistent memory | Shared locker-room events, motivation state and explicit locker-room narrative hooks. |
+| Captains / chemistry | Deterministic captains, cohesion/familiarity, bounded GameCast effect, both hosts' team UI, per-season memory fed by roster turnover, coaching and plan continuity, captain changes and discipline | Deeper continuity effects and remaining discipline inputs. |
+| Morale / locker room | Existing league-specific morale, discipline, transfer and trade systems retained; factual narratives now have persistent memory; shared locker-room events recorded from real state | Motivation state and further locker-room narrative hooks. |
 | News / social | Compact both-host feed, visible Social shortcut, authored posts, engagement labels, independent read state, phase-aware order and persistent season threads | Richer interactions such as replies/follows/user participation, broader player/coach/rivalry memory and broader visual acceptance. |
 | GameCast / replay | Shared venue styling, indoor turf, replay angle selection, recorded pre-snap choices and repaired field branding | Replay highlights/selection, pre-snap choreography and broader device coverage. |
 | Hall of Fame | Existing College player HOF, Pro player HOF derivation, shared coach scoring service with no production caller yet | Render the shared coach scoring in both hosts' Hall of Fame views; persistent coach induction records, retirement eligibility, richer citations/team attribution and lifecycle parity. |
@@ -75,12 +75,13 @@ Recommended next implementation order: season-aware chemistry and locker-room ev
    - Add shared captain, player-leadership, team-cohesion, and scheme-familiarity records.
    - Feed from tenure, roster turnover, coaching change, plan usage, injuries, and discipline.
    - Apply bounded simulation modifiers with player-facing explanations.
-   - Status: Shared captain selection, cohesion, scheme familiarity, and a bounded GameCast advantage are wired to both profile builders. Team chemistry is visible in College team profiles and Pro team pages.
+   - Status: Shared captain selection, cohesion, scheme familiarity, and a bounded GameCast advantage are wired to both profile builders. Team chemistry is visible in College team profiles and Pro team pages. Culture is now recorded per season and carried forward: roster turnover, a head-coach change, a changed plan, departing captains, discipline and morale adjust the next season's baseline inside the existing bounds, and every adjustment is explained to the player.
 
 4. **Morale, discipline, locker room, transfers, and trade requests**
    - Keep College discipline/transfer rules and Pro contract/trade rules separate.
    - Add shared locker-room events, motivation state, and narrative hooks.
    - Preserve existing morale decay, coach-talk, transfer-protection, and trade-market safeguards.
+   - Status: Shared locker-room events are now recorded each season from real state. College uses its discipline incidents and Pro uses contract and trade friction, so the league rules stay separate. Motivation state remains open.
 
 5. **News Hub, narratives, and fictional social media**
    - Add persistent narrative memory keyed by team, player, coach, rivalry, and season.

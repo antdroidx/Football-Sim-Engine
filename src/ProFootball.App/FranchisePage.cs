@@ -211,6 +211,30 @@ public sealed partial class FranchisePage : ContentPage
         foreach (var group in ProStandings.Build(state!).GroupBy(r => r.Team.Conference + " · " + r.Team.Division))
         { body.Add(SectionCard(group.Key,null,Table([("Team", 210), ("W", 40), ("L", 40), ("T", 40), ("Pct", 65), ("Diff", 65)], group.Select(r => new View[] { TeamCell(r.Team), Text(r.Wins.ToString()), Text(r.Losses.ToString()), Text(r.Ties.ToString()), Text(r.Percentage.ToString(".000")), Text(r.Differential.ToString()) })))); }
     }
+    View ChemistryPanel(ProFranchise s,string teamName,TeamSimulationProfile profile)
+    {
+        var record=ProChemistryService.Record(s,teamName,s.Year);
+        var stack=new VerticalStackLayout{Spacing=4};
+        stack.Children.Add(Text($"Cohesion {profile.Cohesion}/100 · Scheme familiarity {profile.SchemeFamiliarity}/100",13,true));
+        if(record is null)stack.Children.Add(Text("No season culture record yet. Culture values follow the current roster and staff.",12));
+        else
+        {
+            var prior=ProChemistryService.Record(s,teamName,s.Year-1);
+            stack.Children.Add(Text(prior is null
+                ? "First recorded season"
+                : $"{record.Cohesion-prior.Cohesion:+0;-0;0} vs last season · {TeamChemistrySeasonService.MomentumLabel(record.Momentum)}",12,true));
+            if(record.CaptainNames.Length>0)stack.Children.Add(Text($"Captains: {string.Join(", ",record.CaptainNames)}",12));
+            foreach(var note in record.Notes)stack.Children.Add(Text(note,12));
+        }
+        var notes=s.LockerRoomEvents.Where(item=>item.TeamName.Equals(teamName,StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(item=>item.SeasonYear).ThenByDescending(item=>item.Week).Take(6).ToArray();
+        if(notes.Length>0)
+        {
+            stack.Children.Add(Text("Locker room",13,true));
+            foreach(var item in notes)stack.Children.Add(Text($"{LockerRoomEventService.Label(item.Kind)} · {item.Headline} — {item.Detail}",12));
+        }
+        return stack;
+    }
     View TeamCell(ProTeam team)
     {
         var row=new HorizontalStackLayout{Spacing=8,Children={new TeamBadgeView(team,28),Text(team.Name,12)}};
@@ -226,7 +250,7 @@ public sealed partial class FranchisePage : ContentPage
         var profile = ProLeagueService.Profile(state!, team.Name);
         return ShowPage(team.Name,new TeamBadgeView(team,56),Text(team.Conference+" · "+team.Division),Text($"{standing.Wins}–{standing.Losses}–{standing.Ties} · {SeasonCapLabel(s,team.Name)}"),
             Panel("Identity",Text($"{GamePlanService.Label(plan.Offense)} offense · {GamePlanService.Label(plan.Defense)} defense · {GamePlanService.Label(plan.Approach)} approach",13,true)),
-            Panel("Team chemistry",Text($"Cohesion {profile.Cohesion}/100 · Scheme familiarity {profile.SchemeFamiliarity}/100",13,true)),
+            Panel("Team chemistry",ChemistryPanel(s,team.Name,profile)),
             Panel("Coaching staff",Table([("Role",150),("Name",190),("Age",45),("OVR",50)],coaches.Select(c=>new View[]{Text(RoleName(c.Role)),c.Vacant?Text(c.Name):StaffDirectoryComponents.Name(CoachId(c),c.Name,Link,id=>CoachProfile(state!.Coaches.FirstOrDefault(x=>x.TeamId==c.TeamId&&CoachId(x)==id)??c)),Text(c.Age.ToString()),Text(c.Vacant?"—":ProStaff.Profile(c).Coaching.ToString())}))),
             Panel("Medical staff",Table([("Role",150),("Name",190),("Age",45),("OVR",55)],medical.Select(c=>new View[]{Text(RoleName(c.Staff.Role)),StaffDirectoryComponents.Name(c.Staff.StaffId,c.Staff.FullName,Link,_=>MedicalProfile(c)),Text(c.Staff.Age.ToString()),Text(StaffAttributeService.Medical(c.Staff).Overall().ToString())}))),
             Panel("Scouting staff",Table([("Coverage",90),("Name",190),("Age",45),("Quality",65)],scouts.Select(c=>new View[]{Text(c.Regional?"Regional":"National"),StaffDirectoryComponents.Name(c.Staff.ScoutId,c.Staff.FullName,Link,_=>ShowPage("Scout profile",Text(c.Staff.FullName,22,true),Text($"Age {c.Staff.Age}"),CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(c.Staff)))),Text(c.Staff.Age.ToString()),Text(ScoutAttributes.FromLegacy(c.Staff).PredictionQuality(c.Regional).ToString())}))),

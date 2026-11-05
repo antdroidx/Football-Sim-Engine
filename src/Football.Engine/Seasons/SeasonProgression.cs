@@ -91,12 +91,12 @@ public static class SeasonProgression
                 Phase = SeasonPhase.Offseason
             },
 
-            SeasonPhase.Offseason => state with
+            SeasonPhase.Offseason => CollegeChemistryService.Refresh(state with
             {
                 SeasonYear = state.SeasonYear + 1,
                 Week = 0,
                 Phase = SeasonPhase.Preseason
-            },
+            }),
 
             _ => throw new ArgumentOutOfRangeException(
                 nameof(state),

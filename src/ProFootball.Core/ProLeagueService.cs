@@ -121,7 +121,12 @@ public static class ProLeagueService
             DefensiveCoordinatorScheme = Ability(StaffRole.DefensiveCoordinator, p => p.Defense)
         };
         var chemistry = TeamChemistryService.Evaluate(team, state.Year, players, profile);
-        profile = profile with { Cohesion = chemistry.Cohesion, SchemeFamiliarity = chemistry.SchemeFamiliarity };
+        var seasonRecord = ProChemistryService.Record(state, team, state.Year);
+        profile = profile with
+        {
+            Cohesion = TeamChemistrySeasonService.ApplySeasonMemory(seasonRecord, chemistry.Cohesion),
+            SchemeFamiliarity = TeamChemistrySeasonService.ApplySchemeMemory(seasonRecord, chemistry.SchemeFamiliarity)
+        };
         return profile;
     }
     public static GameDaySession Start(ProFranchise state, ProGame game, GameDayMode mode, string? controlled = null)

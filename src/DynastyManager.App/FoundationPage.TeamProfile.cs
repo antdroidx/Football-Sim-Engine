@@ -35,6 +35,28 @@ public sealed partial class FoundationPage
             foreach(var view in views) stack.Children.Add(view);
             return ManagementPanel(title,stack);
         }
+        View ChemistrySummary()
+        {
+            var record=CollegeChemistryService.Record(state,team.Name,state.SeasonYear);
+            if(record is null)return T("No season culture record yet. Culture values follow the current roster and staff.");
+            var prior=CollegeChemistryService.Record(state,team.Name,state.SeasonYear-1);
+            var stack=new VerticalStackLayout{Spacing=4};
+            stack.Children.Add(T(prior is null
+                ? "First recorded season"
+                : $"{record.Cohesion-prior.Cohesion:+0;-0;0} vs last season · {TeamChemistrySeasonService.MomentumLabel(record.Momentum)}",true));
+            if(record.CaptainNames.Length>0)stack.Children.Add(T($"Captains: {string.Join(", ",record.CaptainNames)}"));
+            foreach(var note in record.Notes)stack.Children.Add(T(note));
+            return stack;
+        }
+        View LockerRoomSummary()
+        {
+            var notes=state.LockerRoomEvents.Where(item=>item.TeamName.Equals(team.Name,StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(item=>item.SeasonYear).ThenByDescending(item=>item.Week).Take(6).ToArray();
+            if(notes.Length==0)return T("No locker-room notes have been recorded yet.");
+            var stack=new VerticalStackLayout{Spacing=4};
+            foreach(var item in notes)stack.Children.Add(T($"{LockerRoomEventService.Label(item.Kind)} · {item.Headline} — {item.Detail}"));
+            return stack;
+        }
         View ScoutDirectory()
         {
             if(!team.Name.Equals(state.UserTeamName,StringComparison.OrdinalIgnoreCase))
@@ -67,7 +89,9 @@ public sealed partial class FoundationPage
                 TableText(audit.ExpectedWins.ToString()), TableText($"{audit.Wins}-{audit.Losses}"),
                 TableText($"{audit.PerformanceChange:+0;-0;0}"), TableText(audit.Summary)}))),            Box("Scouting department",ScoutDirectory()),
             Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true)),
-            Box("Team chemistry",T($"Cohesion {profile.Cohesion} / 100 · Scheme familiarity {profile.SchemeFamiliarity} / 100",true))
+            Box("Team chemistry",T($"Cohesion {profile.Cohesion} / 100 · Scheme familiarity {profile.SchemeFamiliarity} / 100",true),
+                ChemistrySummary(),
+                LockerRoomSummary())
         }};
         await Navigation.PushModalAsync(new ContentPage{Title=team.Name+" profile",AutomationId="college-team-profile-page",BackgroundColor=DynastyTheme.Background,Content=new ScrollView{Content=content}});
     }

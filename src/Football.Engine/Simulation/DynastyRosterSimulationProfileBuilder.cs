@@ -154,10 +154,11 @@ public static class DynastyRosterSimulationProfileBuilder
                 RosterSize = roster.Length
             };
             var chemistry = TeamChemistryService.Evaluate(team.Name, state.SeasonYear, roster, profiles[team.Name]);
+            var seasonRecord = CollegeChemistryService.Record(state, team.Name, state.SeasonYear);
             profiles[team.Name] = profiles[team.Name] with
             {
-                Cohesion = chemistry.Cohesion,
-                SchemeFamiliarity = chemistry.SchemeFamiliarity,
+                Cohesion = TeamChemistrySeasonService.ApplySeasonMemory(seasonRecord, chemistry.Cohesion),
+                SchemeFamiliarity = TeamChemistrySeasonService.ApplySchemeMemory(seasonRecord, chemistry.SchemeFamiliarity),
                 GamePlan = GamePlanService.GetPlan(state, profiles[team.Name])
             };
         }
