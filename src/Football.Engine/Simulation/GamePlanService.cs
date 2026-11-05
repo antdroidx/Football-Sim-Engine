@@ -119,6 +119,15 @@ public static class GamePlanService
         var selected = orderedFormations.SelectMany((formation, formationIndex) =>
             Curated(formation, formationIndex == 0 ? 7 : 5));
         var book = selected.DistinctBy(play => play.Id).ToList();
+        // Keep one explicit motion-preset call visible without expanding the call sheet.
+        var motion = PlaybookCatalog.OffensivePlays.FirstOrDefault(play => play.Formation == orderedFormations[0] &&
+            play.PreSnapAction?.Type == PreSnapType.Motion);
+        if (motion is not null && book.All(play => play.Id != motion.Id))
+        {
+            if (book.Count > 1) book[^2] = motion;
+            else book.Add(motion);
+            book = book.DistinctBy(play => play.Id).ToList();
+        }
         // Reserve a situational last-heave call inside the same playbook size.
         var heave = PlaybookCatalog.OffensivePlays.FirstOrDefault(p => p.Formation == orderedFormations[0] && p.Name == "Hail Mary");
         if (heave is not null && book.All(p => p.Name != "Hail Mary") && book.Count > 0) book[^1] = heave;

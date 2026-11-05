@@ -15,6 +15,7 @@ public sealed record OffensivePlayDefinition(string Id, string Name, OffensiveFo
     OffensivePersonnel Personnel, OffensiveConcept Concept, string Description)
 {
     public IReadOnlyList<PlayAssignment> Assignments { get; init; } = [];
+    public Simulation.PreSnapChoice? PreSnapAction { get; init; }
 }
 public sealed record DefensivePlayDefinition(string Id, string Name, DefensiveFormation Formation,
     DefensivePersonnel Personnel, DefensiveApproach Approach, string Description)

@@ -42,6 +42,26 @@ public class PreSnapTests
         Assert.Equal(baseline, aligned);
     }
 
+
+    [Fact]
+    public void PlaybookExposesMotionPresetCallsAndTheyRemainValid()
+    {
+        var motionPlays = PlaybookCatalog.OffensivePlays
+            .Where(play => play.PreSnapAction?.Type == PreSnapType.Motion).ToArray();
+        Assert.NotEmpty(motionPlays);
+        Assert.All(motionPlays, play => Assert.True(PreSnapCatalog.IsValid(play.PreSnapAction!)));
+        Assert.All(Enum.GetValues<OffensiveFormation>(),
+            formation => Assert.Contains(motionPlays, play => play.Formation == formation));
+
+        var spread = new TeamGamePlan
+        {
+            TeamName = "Home", Offense = OffensivePlaybook.Spread,
+            OffensiveFormation = OffensiveFormation.ShotgunSpread
+        };
+        Assert.Contains(GamePlanService.AvailableOffensivePlays(spread),
+            play => play.PreSnapAction?.Type == PreSnapType.Motion);
+    }
+
     [Fact]
     public void PresnapChoicesRejectIllegalSituations()
     {

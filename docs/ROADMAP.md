@@ -25,7 +25,7 @@ This checkpoint follows the original review at `9a28a7f`. It applies to both And
 | Workstream | Implemented on the feature branch | Still open |
 |---|---|---|
 | Rivalries | Shared records/service, schedule labels, College traditional rivalry catalog | Complete team/game-center/history exposure and durable rivalry-history acceptance; no rivalry simulation effect in the first increment. |
-| Playbooks / pre-snap | Shared catalog; None/Shift/Motion choices recorded in live/replay without changing randomness | Play-outcome adaptation, league-specific legality, marker choreography and remaining device acceptance. |
+| Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; preset motion entries in every offensive formation family; choices recorded in live/replay without changing randomness | Play-outcome adaptation, league-specific legality, broader marker choreography and remaining device acceptance. |
 | Captains / chemistry | Deterministic captains, cohesion/familiarity, bounded GameCast effect, both hosts' team UI | Per-season memory, roster turnover, coaching/plan continuity and discipline inputs. |
 | Morale / locker room | Existing league-specific morale, discipline, transfer and trade systems retained; factual narratives now have persistent memory | Shared locker-room events, motivation state and explicit locker-room narrative hooks. |
 | News / social | Compact both-host feed, visible Social shortcut, authored posts, engagement labels, independent read state, phase-aware order and persistent season threads | Richer interactions such as replies/follows/user participation, broader player/coach/rivalry memory and broader visual acceptance. |
@@ -64,9 +64,9 @@ Recommended next implementation order: season-aware chemistry and locker-room ev
    - College schedule labels now prefer the traditional catalog and distinguish annual rivalries from other historical pairings.
 
 2. **Expanded playbooks and pre-snap football**
-   - Started a shared pre-snap model and catalog focused on non-simulation presentation intent.
    - Add legal situational actions and keep College/Pro personnel and rules separate.
    - Preserve deterministic simulation, mobile call-sheet density, and replay compatibility.
+   - Status: Manual offensive Call play now holds the formation for roughly 900 ms before the snap. Shift/motion choices animate a pre-snap preview, and the recorded snap starts from that adjusted alignment. The catalog exposes a MOTION-labeled preset play for every offensive formation family; motion remains a play modifier rather than a new simulation outcome category. Play-outcome adaptation, league-specific legality, marker choreography and broader device acceptance remain open.
 
 3. **Captains, leadership, cohesion, and scheme familiarity**
    - Added a shared team-chemistry record and deterministic captain/id helper.

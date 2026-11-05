@@ -98,6 +98,9 @@ public static class GameCastAnimation
             session.PlayersById.TryGetValue(id, out var player);
             return player;
         }).ToArray();
+        var motionPlayerId = snap.PreSnap?.Type == PreSnapType.Motion
+            ? offense.FirstOrDefault(player => player?.Position is Position.WR or Position.TE or Position.RB or Position.FB)?.PlayerId
+            : null;
         var defense = snap.DefensePersonnel.Select(id =>
         {
             session.PlayersById.TryGetValue(id, out var player);
@@ -215,6 +218,12 @@ public static class GameCastAnimation
             {
                 var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65, snap.UsesDynamicKickoff, snap.IsOnsideKick);
                 x = formation.From.X; y = formation.From.Y;
+            }
+            if (snap.PreSnap is { HasAlignmentAction: true } preSnapAlignment &&
+                (preSnapAlignment.Type == PreSnapType.Shift || player?.PlayerId == motionPlayerId))
+            {
+                var lateral = preSnapAlignment.Yards / Math.Max(1, session.Rules.FieldWidthYards);
+                y = Math.Clamp(y + (preSnapAlignment.Side == "Right" ? lateral : -lateral), .06, .94);
             }
             x = Math.Clamp(x, .025, .96);
             var isEligible = playerAssignment?.Task != AssignmentTask.Block && player?.Position is Position.WR or Position.TE or Position.RB or Position.FB;

@@ -9,6 +9,8 @@ namespace DynastyManager.App;
 /// <summary>One live screen for every league. Hosts supply branding, a session and persistence only.</summary>
 public class GameCastLivePage : ContentPage
 {
+    const int ManualFormationHoldMilliseconds = 900;
+    const int PreSnapActionLeadMilliseconds = 180;
     readonly GameDaySession session;
     readonly GameCastLiveHost host;
     readonly GameDayLiveControl control;
@@ -45,12 +47,13 @@ public class GameCastLivePage : ContentPage
     Action? closePicker;
     string? offense, defense;
     GameSnapEvent? last;
-    bool started, menuOpen, closing, replaying, finishing;
+    bool started, menuOpen, closing, replaying, finishing, preSnapHolding;
     double speed, replaySpeed;
     int camera;
     ReplayAngle replayAngle = ReplayAngle.Broadcast;
     bool autoReplay, showNames;
     PreSnapChoice preSnapChoice = PreSnapCatalog.None;
+    bool preSnapFromPlay;
     bool landscape;
     bool? arrangedLandscape;
     int presentedEvents;
@@ -175,10 +178,31 @@ public class GameCastLivePage : ContentPage
     {
         if (!control.TryBegin(manual)) return;
         var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); snapFinished = finished.Task;
+        var calledOffense = offense;
+        var calledDefense = defense;
+        var calledPreSnap = calledOffense?.StartsWith("special-", StringComparison.Ordinal) == true
+            ? PreSnapCatalog.None : preSnapChoice;
         try
         {
-            Update(); last = control.Step(offense, defense,
-                offense?.StartsWith("special-", StringComparison.Ordinal) == true ? null : preSnapChoice);
+            preSnapHolding = manual;
+            Update();
+            if (manual)
+            {
+                // Hold the called formation before simulating the snap. Motion/shift starts
+                // as a presentation preview, then the snap starts from the adjusted alignment.
+                RenderHuddles();
+                var calledPlay = GamePlanService.AvailableOffensivePlays(Plan).FirstOrDefault(play => play.Id == calledOffense);
+                commentary.Text = "PRE-SNAP · " + (calledPlay?.Name ?? "Formation") +
+                    (calledPreSnap.HasAlignmentAction ? " · " + PreSnapCatalog.Label(calledPreSnap) : "");
+                var hold = Task.Delay(ManualFormationHoldMilliseconds, lifetime.Token);
+                if (calledPreSnap.HasAlignmentAction)
+                {
+                    await Task.Delay(PreSnapActionLeadMilliseconds, lifetime.Token);
+                    await AnimatePreSnapChoice(calledPreSnap);
+                }
+                await hold;
+            }
+            last = control.Step(calledOffense, calledDefense, calledPreSnap);
             offense = defense = null; ResetPreSnap();
             var atBreak = await GameCastSnapPresentation.PresentAsync(new()
             {
@@ -190,7 +214,7 @@ public class GameCastLivePage : ContentPage
             if (atBreak) { control.Pause(); commentary.Text += " · Break: Team for coach talk or substitutions."; }
             if (session.IsComplete) await Save();
         }
-        finally { control.End(); finished.TrySetResult(); Update(); }
+        finally { preSnapHolding = false; control.End(); finished.TrySetResult(); Update(); }
     }
     Task Save() => completion.EnsureSavedAsync(() => host.Save(session));
 
@@ -265,7 +289,7 @@ public class GameCastLivePage : ContentPage
         situation.Text = session.IsComplete ? completion.IsSaved ? "FINAL · Saved" : "FINAL · Save pending"
             : clock + " · " + (session.KickoffPending ? "Kickoff" : session.TryPending ? "Conversion" : $"{session.Down} & {session.Distance} · {GameDayEngine.BallOn(session, name => Brand(name).Abbreviation)}");
         ownership.Text = $"{(control.HasTeam ? Brand(session.ControlledTeamName!).Abbreviation + " · " : "")}Offense: {control.Ownership(false)}  ·  Defense: {control.Ownership(true)}";
-        state.Text = replaying ? "Replay" : control.Status;
+        state.Text = replaying ? "Replay" : preSnapHolding ? "Pre-snap formation" : control.Status;
         SemanticProperties.SetDescription(state, state.Text);
         pause.Text = control.IsPaused ? "Resume" : "Pause"; pause.IsVisible = !session.IsComplete;
         pause.IsEnabled = !menuOpen && !finishing && !closing;
@@ -287,9 +311,10 @@ public class GameCastLivePage : ContentPage
             }
         }
         else { sheet.AbortAnimation("call-sheet-enter"); sheet.Opacity = 1; }
-        recent.Clear(); recent.Add(TextHeading(control.IsBusy ? "LIVE PLAY" : session.IsComplete ? "GAME COMPLETE" : "RECENT PLAYS"));
+        recent.Clear(); recent.Add(TextHeading(preSnapHolding ? "PRE-SNAP FORMATION" : control.IsBusy ? "LIVE PLAY" : session.IsComplete ? "GAME COMPLETE" : "RECENT PLAYS"));
         var hint = Text(14, true);
-        hint.Text = control.IsBusy ? "Play in progress · the call sheet returns at your next decision."
+        hint.Text = preSnapHolding ? "Formation set · the ball snaps in a moment."
+            : control.IsBusy ? "Play in progress · the call sheet returns at your next decision."
             : session.IsComplete ? completion.IsSaved ? "Final result saved." : "Result pending · Options → Retry save."
             : control.IsPaused ? "Game paused · Resume continues CPU play." : "CPU is calling this unit · Pause or take over at any time.";
         recent.Add(hint);
@@ -306,8 +331,13 @@ public class GameCastLivePage : ContentPage
     {
         if (control.CanCall(true)) return GamePlanService.AvailableDefensivePlays(Plan).Select(p => new GameDayCallChoice(p.Id, p.Name,
             GamePlanService.Label(p.Formation), GamePlanService.Label(p.Approach), new PlayArtDrawable(p.Id, p.Name, false, p.Approach.ToString(), defensiveDefinition: p))).ToList();
-        var choices = session.TryPending ? new List<GameDayCallChoice>() : GamePlanService.AvailableOffensivePlays(Plan).Select(p => new GameDayCallChoice(p.Id, p.Name,
-            GamePlanService.Label(p.Formation), p.Concept is OffensiveConcept.InsideRun or OffensiveConcept.OutsideRun ? "RUN" : "PASS", new PlayArtDrawable(p.Id, p.Name, true, p.Concept.ToString(), p))).ToList();
+        var choices = session.TryPending ? new List<GameDayCallChoice>() : GamePlanService.AvailableOffensivePlays(Plan).Select(p =>
+        {
+            var run = p.Concept is OffensiveConcept.InsideRun or OffensiveConcept.OutsideRun;
+            var type = p.PreSnapAction?.Type == PreSnapType.Motion ? "MOTION · " + (run ? "RUN" : "PASS") : run ? "RUN" : "PASS";
+            return new GameDayCallChoice(p.Id, p.Name, GamePlanService.Label(p.Formation), type,
+                new PlayArtDrawable(p.Id, p.Name, true, p.Concept.ToString(), p));
+        }).ToList();
         foreach (var id in control.SpecialCalls())
         {
             var name = id switch { "special-punt" => "Punt", "special-field-goal" => "Field goal", "special-kneel" => "Kneel", "special-spike" => "Spike", "special-extra-point" => "Extra point", _ => "Two-point conversion" };
@@ -329,11 +359,7 @@ public class GameCastLivePage : ContentPage
             defense = selected.Id;
             ResetPreSnap();
         }
-        else
-        {
-            offense = selected.Id;
-            if (selected.Id.StartsWith("special-", StringComparison.Ordinal)) ResetPreSnap();
-        }
+        else SelectOffense(selected.Id);
         preSnap.IsVisible = !defending && !session.TryPending && !selected.Id.StartsWith("special-", StringComparison.Ordinal);
         selection.Text = selected.Name + " · " + Brand(session.ControlledTeamName!).Abbreviation + (defending ? " defense" : " offense");
         quick.Clear(); quick.ColumnDefinitions.Clear(); quick.RowDefinitions.Clear();
@@ -344,7 +370,7 @@ public class GameCastLivePage : ContentPage
         {
             var choice = shortList[i];
             var card = GameDayCallPicker.Card(choice.Name, choice.Formation, choice.Id == selected.Id ? "SELECTED · " + choice.Type : choice.Type,
-                choice.Art, () => { if (!control.NeedsCall || control.IsBusy || menuOpen) return; if (defending) defense = choice.Id; else offense = choice.Id; Update(); }, true, !landscape);
+                choice.Art, () => { if (!control.NeedsCall || control.IsBusy || menuOpen) return; if (defending) defense = choice.Id; else SelectOffense(choice.Id); Update(); }, true, !landscape);
             if (!landscape && card.Content is VerticalStackLayout content && content.Children.FirstOrDefault() is GraphicsView diagram)
                 diagram.HeightRequest = Math.Clamp(Height * .12, 58, 120);
             if (landscape && card.Content is Grid row)
@@ -365,7 +391,7 @@ public class GameCastLivePage : ContentPage
         var closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         closePicker = () => { picker.IsVisible = false; picker.Clear(); closePicker = null; closed.TrySetResult(); };
         picker.Clear(); picker.Add(new GameDayCallPicker(defending ? "Choose defense" : session.TryPending ? "Choose conversion" : "Choose play",
-            choices, (defending ? defense : offense) ?? "", id => { if (defending) defense = id; else offense = id; closePicker?.Invoke(); }, () => closePicker?.Invoke()));
+            choices, (defending ? defense : offense) ?? "", id => { if (defending) defense = id; else SelectOffense(id); closePicker?.Invoke(); }, () => closePicker?.Invoke()));
         picker.IsVisible = true; await closed.Task;
     }
 
@@ -481,13 +507,48 @@ public class GameCastLivePage : ContentPage
         var labels = PreSnapCatalog.Common.Select(PreSnapCatalog.Label).ToArray();
         var selected = Array.IndexOf(labels, PreSnapCatalog.Label(preSnapChoice));
         var index = await GameDialogs.ChooseIndexAsync(this, "Pre-snap alignment", labels, Math.Max(0, selected));
-        if (index >= 0) { preSnapChoice = PreSnapCatalog.Common[index]; preSnap.Text = "Pre-snap: " + PreSnapCatalog.Label(preSnapChoice); }
+        if (index >= 0) { preSnapChoice = PreSnapCatalog.Common[index]; preSnapFromPlay = false; preSnap.Text = "Pre-snap: " + PreSnapCatalog.Label(preSnapChoice); }
     }
 
     void ResetPreSnap()
     {
         preSnapChoice = PreSnapCatalog.None;
+        preSnapFromPlay = false;
         preSnap.Text = "Pre-snap: None";
+    }
+
+    void SelectOffense(string id)
+    {
+        var changed = offense != id;
+        offense = id;
+        if (id.StartsWith("special-", StringComparison.Ordinal)) { ResetPreSnap(); return; }
+        if (!changed) return;
+        var preset = PlaybookCatalog.OffensivePlays.Concat(Plan.CreatedOffensivePlays)
+            .FirstOrDefault(play => play.Id == id)?.PreSnapAction;
+        if (preset is { HasAlignmentAction: true })
+        {
+            preSnapChoice = preset;
+            preSnapFromPlay = true;
+            preSnap.Text = "Pre-snap: " + PreSnapCatalog.Label(preSnapChoice);
+        }
+        else if (preSnapFromPlay) ResetPreSnap();
+    }
+
+    async Task AnimatePreSnapChoice(PreSnapChoice choice)
+    {
+        if (!choice.HasAlignmentAction || field.Height <= 0) return;
+        var offenseMarkers = markerHosts.Where(item => item.Value.Player?.TeamName == session.PossessionTeamName).ToArray();
+        if (offenseMarkers.Length == 0) return;
+        var targets = choice.Type == PreSnapType.Shift
+            ? offenseMarkers
+            : offenseMarkers.Where(item => item.Value.Player?.Position is Position.WR or Position.TE or Position.RB or Position.FB)
+                .OrderBy(item => item.Value.Player?.Position == Position.WR ? 0 : item.Value.Player?.Position == Position.TE ? 1 : 2)
+                .ThenBy(item => item.Value.Player?.PlayerId).Take(1).ToArray();
+        if (targets.Length == 0) return;
+        var fieldWidth = Math.Max(1, session.Rules.FieldWidthYards);
+        var pixels = field.Height * choice.Yards / fieldWidth;
+        var delta = choice.Side == "Right" ? pixels : -pixels;
+        await Task.WhenAll(targets.Select(item => item.Key.TranslateToAsync(0, delta, 260, Easing.CubicOut)));
     }
 
     async Task CoachTalk()
