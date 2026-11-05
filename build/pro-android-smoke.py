@@ -100,6 +100,8 @@ try:
     assert not any("Madden" in (t or "") for t in s.texts(profile))
     s.capture("pro-player-profile")
     s.scroll_to_text("pro-player-skill-ratings","Kicking accuracy",max_swipes=20)
+    # Edit appearance lives on the Overview tab.
+    s.scroll_to_text("pro-player-overview-tab","Overview",max_swipes=20,toward_start=True)
     click("edit-appearance","Edit appearance")
     edit=ready("appearance-editor","Skin tone");s.tap_id(edit,"pro-skin-tone")
     tone=ready("appearance-tones","Deep");s.tap(tone,"Deep")
