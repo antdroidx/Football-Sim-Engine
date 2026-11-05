@@ -10,6 +10,10 @@ Not claimed: no engine simulation effect, league-specific legality, marker chore
 
 Executed: `CoachHallOfFameTests` 2, Pro `HonorsTests`/`ProHallOfFameTests` 4, College Hall of Fame 1, all passed. Builds: Football.Engine 0, Football.Presentation 0 (one offline NU1900 warning), DynastyManager.App 0, ProFootball.App 0 errors. No APK, device walkthrough, release or merge was run. The implementation is dynamic and does not add a save schema. More detailed coach tenure/retirement history remains open.
 
+## Shared captaincy and chemistry wiring — November 4, 2026
+
+Executed: `TeamChemistryTests` 3 passed; GameDay-related Engine suites passed 124. Football.Engine, Football.Presentation, DynastyManager.App and ProFootball.App Android builds pass with 0 errors. No APK/device acceptance is claimed. Simulation modifier is bounded in `TeamChemistryService.GameShift`. Per-season history and explicit roster/discipline inputs remain open.
+
 ## Released Pro165 / College454 — November 4, 2026
 
 Scope: shared roster identity/acquisition scoring, CPU game-plan drift, Flexbone service academies and their documentation. College and Pro remain separate hosts with their existing save/package identities.

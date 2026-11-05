@@ -210,6 +210,7 @@ public static partial class GameDayEngine
         advantage += MatchupShift(call.Offense.Concept, call.Defense.Approach);
         advantage += GameMoraleService.MatchupShift(session, offense.TeamName, defense.TeamName);
         advantage += GameDayCoachingService.IndividualTalkShift(session, offensePlayers) - GameDayCoachingService.IndividualTalkShift(session, defensePlayers);
+        advantage += TeamChemistryService.GameShift(offense, defense);
         advantage += GameDayMatchupService.FormationAdvantage(call.Offense, call.Defense, isPass);
         advantage += GameDayMatchupService.PersonnelAdvantage(offensePlayers, defensePlayers, isPass);
         if (!session.Game.IsNeutralSite)

@@ -18,9 +18,9 @@ public sealed record TeamSimulationProfile
     public int DefensiveCoordinatorScheme { get; init; } = 60;
     public int DefensiveCoordinatorGameManagement { get; init; } = 60;
 
-    public double OffenseRating =>
-        (PassOffenseRating + RushOffenseRating) / 2.0;
+    public int Cohesion { get; init; } = 50;
+    public int SchemeFamiliarity { get; init; } = 50;
 
-    public double DefenseRating =>
-        (PassDefenseRating + RushDefenseRating) / 2.0;
+    public double OffenseRating => (PassOffenseRating + RushOffenseRating) / 2.0;
+    public double DefenseRating => (PassDefenseRating + RushDefenseRating) / 2.0;
 }

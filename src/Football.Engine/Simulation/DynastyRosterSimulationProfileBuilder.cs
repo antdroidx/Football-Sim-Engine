@@ -153,7 +153,13 @@ public static class DynastyRosterSimulationProfileBuilder
                 Morale = GameMoraleService.SeasonMorale(state, team.Name),
                 RosterSize = roster.Length
             };
-            profiles[team.Name] = profiles[team.Name] with { GamePlan = GamePlanService.GetPlan(state, profiles[team.Name]) };
+            var chemistry = TeamChemistryService.Evaluate(team.Name, state.SeasonYear, roster, profiles[team.Name]);
+            profiles[team.Name] = profiles[team.Name] with
+            {
+                Cohesion = chemistry.Cohesion,
+                SchemeFamiliarity = chemistry.SchemeFamiliarity,
+                GamePlan = GamePlanService.GetPlan(state, profiles[team.Name])
+            };
         }
 
         return profiles;

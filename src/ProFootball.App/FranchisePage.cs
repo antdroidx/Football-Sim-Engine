@@ -223,8 +223,10 @@ public sealed partial class FranchisePage : ContentPage
         var coaches=s.Coaches.Where(c=>c.TeamId==team.Id).OrderBy(c=>c.Role).ToArray();
         var medical=ProMedicalStaffDepartment.Team(s,team.Name);
         var scouts=ProScoutDepartment.Team(s,team.Name);
+        var profile = ProLeagueService.Profile(state!, team.Name);
         return ShowPage(team.Name,new TeamBadgeView(team,56),Text(team.Conference+" · "+team.Division),Text($"{standing.Wins}–{standing.Losses}–{standing.Ties} · {SeasonCapLabel(s,team.Name)}"),
             Panel("Identity",Text($"{GamePlanService.Label(plan.Offense)} offense · {GamePlanService.Label(plan.Defense)} defense · {GamePlanService.Label(plan.Approach)} approach",13,true)),
+            Panel("Team chemistry",Text($"Cohesion {profile.Cohesion}/100 · Scheme familiarity {profile.SchemeFamiliarity}/100",13,true)),
             Panel("Coaching staff",Table([("Role",150),("Name",190),("Age",45),("OVR",50)],coaches.Select(c=>new View[]{Text(RoleName(c.Role)),c.Vacant?Text(c.Name):StaffDirectoryComponents.Name(CoachId(c),c.Name,Link,id=>CoachProfile(state!.Coaches.FirstOrDefault(x=>x.TeamId==c.TeamId&&CoachId(x)==id)??c)),Text(c.Age.ToString()),Text(c.Vacant?"—":ProStaff.Profile(c).Coaching.ToString())}))),
             Panel("Medical staff",Table([("Role",150),("Name",190),("Age",45),("OVR",55)],medical.Select(c=>new View[]{Text(RoleName(c.Staff.Role)),StaffDirectoryComponents.Name(c.Staff.StaffId,c.Staff.FullName,Link,_=>MedicalProfile(c)),Text(c.Staff.Age.ToString()),Text(StaffAttributeService.Medical(c.Staff).Overall().ToString())}))),
             Panel("Scouting staff",Table([("Coverage",90),("Name",190),("Age",45),("Quality",65)],scouts.Select(c=>new View[]{Text(c.Regional?"Regional":"National"),StaffDirectoryComponents.Name(c.Staff.ScoutId,c.Staff.FullName,Link,_=>ShowPage("Scout profile",Text(c.Staff.FullName,22,true),Text($"Age {c.Staff.Age}"),CoachAttributeViews.Scouting(ScoutAttributes.FromLegacy(c.Staff)))),Text(c.Staff.Age.ToString()),Text(ScoutAttributes.FromLegacy(c.Staff).PredictionQuality(c.Regional).ToString())}))),

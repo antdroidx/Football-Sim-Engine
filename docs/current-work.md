@@ -52,6 +52,12 @@ Executed: Coach HOF Engine tests 2 passed; Pro Honors/Pro HOF tests 4 passed; Co
 
 Remaining: persistent coach HOF records, retirement-specific eligibility, richer citation/team handling, and further coach lifecycle parity.
 
+## Shared captaincy and chemistry wiring — November 4, 2026
+
+Branch `codex/feature-roadmap-plan` adds shared `TeamChemistryService.Evaluate`, deterministic captains from the existing leadership helper, and bounded cohesion/scheme-familiarity modifiers inside `GameDayEngine`. The College and Pro profile builders fill these values from actual roster/staff state. College team profiles and Pro team pages now show the values, making the captaincy/chemistry path reviewable.
+
+Executed: `TeamChemistryTests` 3 passed; combined GameDay engine/control/polish/situational/completion suite 124 passed. Both Android app builds passed with 0 errors. No APK/device acceptance is claimed. This is a bounded first simulation effect; per-season memory, roster turnover, and explicit discipline/plan-continuity inputs remain open.
+
 ## Historical notes below
 
 Release/status wording in the entries below is retained as evidence. Where it says a batch was unmerged,

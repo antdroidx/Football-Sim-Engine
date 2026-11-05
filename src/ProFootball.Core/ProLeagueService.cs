@@ -103,7 +103,7 @@ public static class ProLeagueService
             ?? (role == StaffRole.DefensiveCoordinator ? state.Coaches.FirstOrDefault(c => c.TeamId == clubId && c.Role == StaffRole.HeadCoach && !c.Vacant) : null);
         int Ability(StaffRole role, Func<ProStaff.CoachAbilities, int> select) { var c = Staff(role); return c is null ? 65 : select(ProStaff.Profile(c)); }
         static double Blend(double roster, int ability) => Math.Clamp(roster + (ability - 65) * 0.15, 1, 99);
-        return new()
+        TeamSimulationProfile profile = new()
         {
             TeamName = team,
             PassOffenseRating = Blend(Rating(Position.QB, Position.WR, Position.TE), Ability(StaffRole.OffensiveCoordinator, p => p.Offense)),
@@ -120,6 +120,9 @@ public static class ProLeagueService
             OffensiveCoordinatorScheme = Ability(StaffRole.OffensiveCoordinator, p => p.Offense),
             DefensiveCoordinatorScheme = Ability(StaffRole.DefensiveCoordinator, p => p.Defense)
         };
+        var chemistry = TeamChemistryService.Evaluate(team, state.Year, players, profile);
+        profile = profile with { Cohesion = chemistry.Cohesion, SchemeFamiliarity = chemistry.SchemeFamiliarity };
+        return profile;
     }
     public static GameDaySession Start(ProFranchise state, ProGame game, GameDayMode mode, string? controlled = null)
     {

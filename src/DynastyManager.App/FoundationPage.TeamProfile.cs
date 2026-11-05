@@ -66,7 +66,8 @@ public sealed partial class FoundationPage
                 TableText(FormatStaffRole(audit.Role)), CoachLink(state.Staff.First(item=>item.StaffId==audit.StaffId)),
                 TableText(audit.ExpectedWins.ToString()), TableText($"{audit.Wins}-{audit.Losses}"),
                 TableText($"{audit.PerformanceChange:+0;-0;0}"), TableText(audit.Summary)}))),            Box("Scouting department",ScoutDirectory()),
-            Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true))
+            Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true)),
+            Box("Team chemistry",T($"Cohesion {profile.Cohesion} / 100 · Scheme familiarity {profile.SchemeFamiliarity} / 100",true))
         }};
         await Navigation.PushModalAsync(new ContentPage{Title=team.Name+" profile",AutomationId="college-team-profile-page",BackgroundColor=DynastyTheme.Background,Content=new ScrollView{Content=content}});
     }
