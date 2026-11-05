@@ -20,7 +20,11 @@ public sealed class GameFieldDrawable : IDrawable
 
         public void Draw(ICanvas canvas, RectF rect)
         {
-            canvas.FillColor = DynastyTheme.Palette("#245B38"); canvas.FillRectangle(rect);
+            canvas.FillColor = DynastyTheme.Palette("#245B38");
+            canvas.FillRectangle(rect);
+            canvas.FillColor = Color.FromRgba(0, 0, 0, .07);
+            canvas.FillRectangle(0, 0, rect.Width, rect.Height);
+
             // Stable procedural turf: mowing bands, subtle blades and five-yard lines.
             for (var band = 0; band < 20; band++)
             {
@@ -41,7 +45,9 @@ public sealed class GameFieldDrawable : IDrawable
                 canvas.DrawLine(x, 0, x, rect.Height);
             }
             canvas.FillColor = HomeColor;
+            canvas.FillRectangle(0, 0, rect.Width, rect.Height * .12f);
             var leftGoal = (float)GameDayAnimationPlanner.ProjectYardLine(0, 1);
+
             var rightGoal = (float)GameDayAnimationPlanner.ProjectYardLine(100, 1);
             canvas.FillRectangle(0, 0, rect.Width * leftGoal, rect.Height);
             canvas.FillRectangle(rect.Width * rightGoal, 0, rect.Width * leftGoal, rect.Height);
@@ -59,7 +65,11 @@ public sealed class GameFieldDrawable : IDrawable
             canvas.DrawRectangle(1, 1, rect.Width - 2, rect.Height - 2);
             canvas.DrawLine(rect.Width * leftGoal, 0, rect.Width * leftGoal, rect.Height);
             canvas.DrawLine(rect.Width * rightGoal, 0, rect.Width * rightGoal, rect.Height);
-            canvas.StrokeColor = DynastyTheme.Palette("#FFD447"); canvas.StrokeSize = 4;
+            canvas.StrokeColor = DynastyTheme.Palette("#FFD447");
+            canvas.StrokeSize = 4;
+            canvas.StrokeDashOffset = 0;
+            canvas.StrokeDashPattern = [];
+
             var leftPost = rect.Width * .026f;
             var rightPost = rect.Width * .974f;
             var postTop = rect.Height * .41f;
@@ -73,6 +83,8 @@ public sealed class GameFieldDrawable : IDrawable
             canvas.DrawLine(rightPost, postTop, rect.Width * .954f, postTop);
             canvas.DrawLine(rightPost, postBottom, rect.Width * .954f, postBottom);
             canvas.StrokeColor = DynastyTheme.Palette("#A8CBB5"); canvas.StrokeSize = 1;
+            canvas.FontColor = DynastyTheme.Palette("#D5E6DB"); canvas.FontSize = 11;
+
             for (var yard = 10; yard < 100; yard += 10)
             {
                 var x = rect.Width * (float)GameDayAnimationPlanner.ProjectYardLine(yard, 1);

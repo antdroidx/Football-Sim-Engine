@@ -330,20 +330,49 @@ public sealed partial class FoundationPage
         var player = story.PlayerId is Guid id ? _currentDynasty?.ActiveRoster.FirstOrDefault(p => p.PlayerId == id) : null;
         View icon = player is not null
             ? PersonPortrait.Create(player.PlayerId, player.FullName, Color.FromArgb(brand.Primary), Color.FromArgb(brand.Secondary), 44, appearance: player.Appearance)
-            : new Border { WidthRequest = 44, HeightRequest = 44, Padding = 0, BackgroundColor = Color.FromArgb(brand.Primary),
-                Content = new Label { Text = story.TeamName.Length > 0 ? story.TeamName[..1] : "•", FontSize = 27,
-                    FontAttributes = FontAttributes.Bold, TextColor = BrandInk(Color.FromArgb(brand.Primary)),
-                    HorizontalTextAlignment = TextAlignment.Center, VerticalTextAlignment = TextAlignment.Center } };
-        var card=FootballNewsCard.Create(icon,$"{story.Category.ToUpperInvariant()} · {story.SeasonYear} · Week {story.Week}",story.Headline,story.Body,ManagementAccent);
+            : new Border
+            {
+                WidthRequest = 44,
+                HeightRequest = 44,
+                Padding = 0,
+                BackgroundColor = Color.FromArgb(brand.Primary),
+                Content = new Label
+                {
+                    Text = story.TeamName.Length > 0 ? story.TeamName[..1] : "•",
+                    FontSize = 27,
+                    FontAttributes = FontAttributes.Bold,
+                    TextColor = BrandInk(Color.FromArgb(brand.Primary)),
+                    HorizontalTextAlignment = TextAlignment.Center,
+                    VerticalTextAlignment = TextAlignment.Center
+                }
+            };
+        var mapped = new FootballNewsStory
+        {
+            Id = story.Id,
+            Category = story.Category,
+            Headline = story.Headline,
+            Body = story.Body,
+            TeamName = story.TeamName,
+            SeasonYear = story.SeasonYear,
+            Week = story.Week,
+            RelatedId = story.PlayerId?.ToString(),
+            MediaKind = FootballNewsMediaKind.Story
+        };
+        var card = FootballNewsStoryCard.Create(mapped, icon, ManagementAccent);
         SemanticProperties.SetDescription(card, story.Category + ": " + story.Headline + ". Open story.");
-        var open = new TapGestureRecognizer(); open.Tapped += async (_, _) =>
+        var open = new TapGestureRecognizer();
+        open.Tapped += async (_, _) =>
         {
             if (_currentDynasty is not null)
                 _currentDynasty = DynastyNewsService.MarkRead(_currentDynasty, [story.Id]);
             await SaveCurrentAsync(SaveKind.AutosaveCurrent);
             var close = new Button { Text = "‹ Back to headlines" };
-            var page = new ContentPage(); close.Clicked += async (_, _) => await Navigation.PopModalAsync();
-            var destination = new Button { Text = story.Category == "Injuries" ? "Open injury report" : story.Category == "Recruiting" ? "Open recruiting" : "Open schedule" };
+            var page = new ContentPage();
+            close.Clicked += async (_, _) => await Navigation.PopModalAsync();
+            var destination = new Button
+            {
+                Text = story.Category == "Injuries" ? "Open injury report" : story.Category == "Recruiting" ? "Open recruiting" : "Open schedule"
+            };
             destination.Clicked += async (_, _) =>
             {
                 _managementActionDepth++;
@@ -358,14 +387,24 @@ public sealed partial class FoundationPage
                     if (_systemThemePending) await RefreshPendingThemeAsync();
                 }
             };
-            page.Content = new ScrollView { Content = new VerticalStackLayout { Padding = 14, Spacing = 14, Children =
+            page.Content = new ScrollView
             {
-                close, SchoolBanner(story.TeamName, $"{story.Category} · {story.SeasonYear} · Week {story.Week}"),
-                new Label { Text = story.Headline, FontSize = 18, FontAttributes = FontAttributes.Bold },
-                new Label { Text = story.Body, FontSize = 14 },
-                new Label { Text = DynastyManager.Data.Presentation.NewsEditorial.Context(story.Category, story.TeamName), FontSize = 14 },
-                new Label { Text = "Dynasty Wire · stories from around your league. ", FontSize = 11, TextColor = DynastyTheme.Muted }, destination
-            } } };
+                Content = new VerticalStackLayout
+                {
+                    Padding = 14,
+                    Spacing = 14,
+                    Children =
+                    {
+                        close,
+                        SchoolBanner(story.TeamName, $"{story.Category} · {story.SeasonYear} · Week {story.Week}"),
+                        new Label { Text = story.Headline, FontSize = 18, FontAttributes = FontAttributes.Bold },
+                        new Label { Text = story.Body, FontSize = 14 },
+                        new Label { Text = DynastyManager.Data.Presentation.NewsEditorial.Context(story.Category, story.TeamName), FontSize = 14 },
+                        new Label { Text = "Dynasty Wire · stories from around your league. ", FontSize = 11, TextColor = DynastyTheme.Muted },
+                        destination
+                    }
+                }
+            };
             await Navigation.PushModalAsync(page);
         };
         card.GestureRecognizers.Add(open);

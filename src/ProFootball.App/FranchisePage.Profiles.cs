@@ -173,16 +173,32 @@ public sealed partial class FranchisePage
         if (stories.Length == 0) body.Add(Text("No stories in this view yet. Completed games and league activity will appear here."));
         foreach (var story in stories)
         {
-            var n = story; var heading=new Grid {ColumnSpacing=10,ColumnDefinitions=new(){new(GridLength.Auto),new(GridLength.Star)}};
-            heading.Add(NewsThumbnail(n),0,0);heading.Add(Text((s.ReadNewsIds.Contains(n.Id)?"":"● ")+n.Headline,18,true),1,0);
-            body.Add(Panel("", heading, Text($"{n.Year} · Week {n.Week} · {n.Category}", 12), Text(n.Body), Action(n.GameId is null ? "Read story" : "Game report ›", async () =>
+            var mapped = new FootballNewsStory
             {
-                state = state! with { ReadNewsIds = state.ReadNewsIds.Append(n.Id).Distinct().ToList() }; await Save();
-                var game = state.Games.Concat(state.History.SelectMany(h => h.Games)).FirstOrDefault(g => g.Football.GameId == n.GameId);
-                if (game is not null) await BoxScore(game.Football); else await GameDialogs.AlertAsync(this, n.Headline, n.Body, "Close");
-            })));
+                Id = story.Id,
+                Category = story.Category,
+                Headline = story.Headline,
+                Body = story.Body,
+                TeamName = story.Team ?? s.UserTeam,
+                SeasonYear = story.Year,
+                Week = story.Week,
+                RelatedId = story.GameId,
+                MediaKind = FootballNewsMediaKind.Story
+            };
+            var card = FootballNewsStoryCard.Create(mapped, NewsThumbnail(story), DynastyTheme.Accent);
+            if (!s.ReadNewsIds.Contains(story.Id)) card.Stroke = DynastyTheme.Accent;
+            var tap = new TapGestureRecognizer();
+            tap.Tapped += async (_, _) =>
+            {
+                state = state! with { ReadNewsIds = state.ReadNewsIds.Append(story.Id).Distinct().ToList() }; await Save();
+                var game = state.Games.Concat(state.History.SelectMany(h => h.Games)).FirstOrDefault(g => g.Football.GameId == story.GameId);
+                if (game is not null) await BoxScore(game.Football); else await GameDialogs.AlertAsync(this, story.Headline, story.Body, "Close");
+            };
+            card.GestureRecognizers.Add(tap);
+            body.Add(card);
         }
     }
+
     View NewsThumbnail(ProNewsStory story)
     {
         var team = state!.League.Teams.FirstOrDefault(t => t.Name == story.Team);
