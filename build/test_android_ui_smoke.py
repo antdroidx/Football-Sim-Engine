@@ -176,5 +176,24 @@ class SmokeSynchronizationTests(unittest.TestCase):
                 os.chdir(original_cwd)
 
 
+    def test_library_settings_button_is_not_a_leaked_career_control(self):
+        root=ET.Element("hierarchy")
+        ET.SubElement(root,"node",text="Your dynasties")
+        ET.SubElement(root,"node",text="New dynasty")
+        ET.SubElement(root,"node",attrib={"resource-id":"antdroid.cfbcoach.dev:id/startup-options","text":"Settings"})
+        forbidden={"Advance Week","Start season","Advance to Week 1","Overview","Roster","Coach","Recruit","Season","Settings"}
+        self.assertIn("Settings",smoke.texts(root))
+        self.assertFalse(forbidden & smoke.texts_excluding(root,":id/startup-options"))
+
+    def test_career_controls_still_fail_the_library_leak_check(self):
+        root=ET.Element("hierarchy")
+        ET.SubElement(root,"node",text="Your dynasties")
+        ET.SubElement(root,"node",text="New dynasty")
+        ET.SubElement(root,"node",attrib={"resource-id":"antdroid.cfbcoach.dev:id/startup-options","text":"Settings"})
+        ET.SubElement(root,"node",text="Advance Week")
+        forbidden={"Advance Week","Start season","Advance to Week 1","Overview","Roster","Coach","Recruit","Season","Settings"}
+        self.assertTrue(forbidden & smoke.texts_excluding(root,":id/startup-options"))
+
+
 if __name__ == "__main__":
     unittest.main()

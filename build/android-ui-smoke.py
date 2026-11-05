@@ -47,6 +47,12 @@ def texts(root):
     return {node.get("text") for node in root.iter("node")}
 
 
+def texts_excluding(root, resource_suffix):
+    # The save library owns its own Settings button; it is not a leaked career control.
+    return {node.get("text") for node in root.iter("node")
+            if not (node.get("resource-id") or "").endswith(resource_suffix)}
+
+
 def tap(root, text):
     matches = [node for node in root.iter("node") if node.get("text") == text]
     node = next((n for n in matches if "Button" in n.get("class", "")), next((n for n in matches if n.get("clickable") == "true" and "EditText" not in n.get("class", "")), matches[0]))
@@ -163,7 +169,7 @@ def main():
     home = wait_for("launch", lambda r: {"Your dynasties", "New dynasty"} <= texts(r) and
         not any(t.startswith("Loading ") for t in texts(r)))
     assert {"Your dynasties", "New dynasty"} <= texts(home), "Launch must open the save library"
-    assert not {"Advance Week", "Start season", "Advance to Week 1", "Overview", "Roster", "Coach", "Recruit", "Season", "Settings"} & texts(home), "Career controls leaked onto Home"
+    assert not {"Advance Week", "Start season", "Advance to Week 1", "Overview", "Roster", "Coach", "Recruit", "Season", "Settings"} & texts_excluding(home, ":id/startup-options"), "Career controls leaked onto Home"
     assert any((n.get("resource-id") or "").endswith("opening-logo") for n in home.iter("node"))
     assert any(t and t.startswith("Pre-release 0.20 · Build ") for t in texts(home))
     assert "Settings" in texts(home)
