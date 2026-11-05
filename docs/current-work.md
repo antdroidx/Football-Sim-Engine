@@ -58,6 +58,10 @@ Branch `codex/feature-roadmap-plan` adds shared `TeamChemistryService.Evaluate`,
 
 Executed: `TeamChemistryTests` 3 passed; combined GameDay engine/control/polish/situational/completion suite 124 passed. Both Android app builds passed with 0 errors. No APK/device acceptance is claimed. This is a bounded first simulation effect; per-season memory, roster turnover, and explicit discipline/plan-continuity inputs remain open.
 
+## Pro indoor venue awareness — November 4, 2026
+
+Branch `codex/feature-roadmap-plan` identifies a fixed list of enclosed Pro homes as indoor. Those games now skip wind/precipitation and use the neutral indoor weather rules. Added focused College tests for Dallas/Atlanta/Detroit and the GameDay weather suite passes 19 cases. No release or merge was run. Broader stadium/turf profiles remain open.
+
 ## Historical notes below
 
 Release/status wording in the entries below is retained as evidence. Where it says a batch was unmerged,

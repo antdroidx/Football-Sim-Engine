@@ -5,12 +5,23 @@ namespace DynastyManager.Core.Simulation;
 public static class GameWeatherService
 {
     // Fictional, repeatable football conditions, not forecasts or a meteorological database.
+    static readonly string[] ProfessionalIndoors =
+    [
+        "Arizona Cardinals", "Atlanta Falcons", "Detroit Lions", "Dallas Cowboys",
+        "Houston Texans", "Las Vegas Raiders", "Los Angeles Chargers", "Los Angeles Rams",
+        "Minnesota Vikings", "New Orleans Saints", "St. Louis Rams"
+    ];
+
+    public static bool IsIndoorVenue(string? venue) => venue is not null &&
+        (ProfessionalIndoors.Contains(venue, StringComparer.OrdinalIgnoreCase) ||
+         new[] { "Syracuse", "UNLV", "Texas San Antonio", "UTSA", "Idaho State", "Sugar Bowl" }
+             .Any(n => venue.Equals(n, StringComparison.OrdinalIgnoreCase)));
+
     public static GameWeather ForGame(ScheduledGame game)
     {
         if (game.Weather is not null) return Normalize(game.Weather);
         var site = game.IsNeutralSite ? game.BowlName ?? "Neutral site" : game.HomeTeamName;
-        var indoors = new[] { "Syracuse", "UNLV", "Texas San Antonio", "UTSA", "Idaho State", "Sugar Bowl" }
-            .Any(n => site.Equals(n, StringComparison.OrdinalIgnoreCase));
+        var indoors = IsIndoorVenue(site);
         if (indoors) return new() { Indoors = true, TemperatureFahrenheit = 72 };
         var hash = site.Aggregate(17, (h,c) => unchecked(h * 31 + c));
         var random = new Random(unchecked(hash ^ game.SimulationSeed ^ game.SeasonYear * 397 ^ game.Week * 7919));

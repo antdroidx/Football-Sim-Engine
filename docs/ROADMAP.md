@@ -25,7 +25,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
 | Team cohesion and scheme familiarity | Missing | Missing | Add shared models with league-specific turnover/scheme inputs. |
 | Captaincy and leadership | Partial leadership | Partial leadership | Add actual captain records and leadership hierarchy while retaining existing player/coach leadership effects. |
 | Hall of Fame | College player HOF implemented | Missing player HOF | Extract a shared career-score core; preserve College rules and add Pro player/coach HOF. |
-| Weather / field conditions | Partial | Partial | Weather affects simulation and visual presentation; add broader venue/turf model and Pro indoor awareness. |
+| Weather / field conditions | Partial | Better | Weather affects simulation and visual presentation. Pro indoor venues now skip precipitation and wind effects. Broader venue/turf model remains open. |
 | Weekly prep / opponent scouting | Partial | Partial | Game plans and staff attributes affect simulation; opponent scouting is currently informational only. |
 | Historical records / memorable games | Partial | Partial | College has weekly highlights; Pro needs replay/highlight exposure and stronger career-record UI. |
 

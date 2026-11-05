@@ -14,6 +14,10 @@ Executed: `CoachHallOfFameTests` 2, Pro `HonorsTests`/`ProHallOfFameTests` 4, Co
 
 Executed: `TeamChemistryTests` 3 passed; GameDay-related Engine suites passed 124. Football.Engine, Football.Presentation, DynastyManager.App and ProFootball.App Android builds pass with 0 errors. No APK/device acceptance is claimed. Simulation modifier is bounded in `TeamChemistryService.GameShift`. Per-season history and explicit roster/discipline inputs remain open.
 
+## Pro indoor venue awareness — November 4, 2026
+
+Executed: `GameConditionsAndAwardsTests` 19 passed, including three new enclosed Pro venue tests (Dallas/Atlanta/Detroit). No APK, device walkthrough, release or merge was run. Broader stadium/turf profiles remain open.
+
 ## Released Pro165 / College454 — November 4, 2026
 
 Scope: shared roster identity/acquisition scoring, CPU game-plan drift, Flexbone service academies and their documentation. College and Pro remain separate hosts with their existing save/package identities.

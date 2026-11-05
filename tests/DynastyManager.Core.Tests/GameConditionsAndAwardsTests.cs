@@ -14,6 +14,15 @@ public class GameConditionsAndAwardsTests
         var result = GameDayEngine.Start(s.Game with { Weather=weather },s.HomeProfile,s.AwayProfile,s.Roster,mode);
         result.KickoffPending=false; return result;
     }
+    [Theory]
+    [InlineData("Dallas Cowboys")] [InlineData("Atlanta Falcons")] [InlineData("Detroit Lions")]
+    public void ProfessionalIndoorVenuesSkipPrecipitation(string homeTeam)
+    {
+        var game = GameDayFixture.Session(GameDayMode.Play).Game with { HomeTeamName = homeTeam, SeasonYear = 2026, Week = 8 };
+        var weather = GameWeatherService.ForGame(game);
+        Assert.True(weather.Indoors);
+        Assert.Equal(72, weather.TemperatureFahrenheit);
+    }
     [Fact]
     public void WeatherIsRepeatableStoredAndOverridesAreNormalized()
     {
