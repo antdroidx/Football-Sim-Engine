@@ -133,6 +133,9 @@ def calendar(root):
     values = [node.get("text") for node in root.iter("node")]
     header = next((value for value in values if value and re.search(r" · \d{4} · (?:Week \d+(?: · Opening week)?|Preseason)$", value)), None)
     phase = next((value for value in values if value and value.endswith((" · Preseason", " · Regular season"))), None)
+    if phase is None and header:
+        # The current shell shows the period inside the header instead of a separate label.
+        phase = " · Preseason" if header.endswith(" · Preseason") else " · Regular season"
     return (header, phase)
 
 

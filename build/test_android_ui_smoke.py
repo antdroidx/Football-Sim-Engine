@@ -195,5 +195,20 @@ class SmokeSynchronizationTests(unittest.TestCase):
         self.assertTrue(forbidden & smoke.texts_excluding(root,":id/startup-options"))
 
 
+    def test_calendar_reads_the_period_from_the_header_when_no_phase_label_exists(self):
+        root=ET.Element("hierarchy")
+        ET.SubElement(root,"node",text="Air Force · 2026 · Preseason")
+        header,phase=smoke.calendar(root)
+        self.assertEqual("Air Force · 2026 · Preseason",header)
+        self.assertIsNotNone(phase)
+
+    def test_calendar_reads_a_regular_season_header_without_a_phase_label(self):
+        root=ET.Element("hierarchy")
+        ET.SubElement(root,"node",text="Air Force · 2026 · Week 0 · Opening week")
+        header,phase=smoke.calendar(root)
+        self.assertEqual("Air Force · 2026 · Week 0 · Opening week",header)
+        self.assertIsNotNone(phase)
+
+
 if __name__ == "__main__":
     unittest.main()
