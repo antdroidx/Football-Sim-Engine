@@ -50,6 +50,7 @@ This replaces the older forward-looking roadmap. Completed release evidence rema
    - Add shared captain, player-leadership, team-cohesion, and scheme-familiarity records.
    - Feed from tenure, roster turnover, coaching change, plan usage, injuries, and discipline.
    - Apply bounded simulation modifiers with player-facing explanations.
+   - Status: Started a shared deterministic captain-selection helper using recorded roster traits; leadership hierarchy and simulation effects remain open.
 
 4. **Morale, discipline, locker room, transfers, and trade requests**
    - Keep College discipline/transfer rules and Pro contract/trade rules separate.
