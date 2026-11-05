@@ -1,3 +1,12 @@
+## Feature branch APK verification — November 5, 2026
+
+Source `9f7af9c` on `codex/feature-roadmap-plan` is verified on GitHub. Existing Actions workflows manually dispatched against that exact branch both succeeded:
+
+- College455: run [41991820982](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41991820982), full management scope (extended career/calibration disabled). Engine Fast343, Balance12 and Core/College614 passed. Debug APK packaging: zero warnings/errors. [Exact APK artifact](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41991820982/artifacts/13398433679).
+- Pro166: run [41991825930](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41991825930), fast validation scope. Pro458 passed. Debug APK packaging: two existing nullable warnings, zero errors. [Exact APK artifact](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41991825930/artifacts/13398389671).
+
+Both artifact archives downloaded; exact signed APK filenames, sizes and SHA-256 values are recorded in `docs/audits/roadmap-ci-2026-11-05.json`. Local files: `.artifacts/roadmap-ci/college455/antdroid.cfbcoach.dev-Signed.apk` and `.artifacts/roadmap-ci/pro166/antdroid.profootball.franchise-Signed.apk`. Artifacts are CI downloads, not a release. No device jobs, merge, PR or publication performed. Documentation-only follow-up commits do not change these source identities.
+
 ## Persistent saved news — November 5, 2026
 
 Both games now offer Save/Remove actions and a Saved news filter. Full shared story snapshots (including in-game media) persist in each existing league save, so retained articles survive feed pruning and season changes. New SavedNews collections default empty for older saves. Pro news refresh now preserves social read IDs while their source remains in the feed, and read IDs of saved snapshots after the source disappears.

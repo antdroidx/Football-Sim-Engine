@@ -1,0 +1,29 @@
+{
+  "source_commit": "9f7af9ca3051e5b4f463c4c511584f2e37bd9aa8",
+  "branch": "codex/feature-roadmap-plan",
+  "device_validation": false,
+  "apps": [
+    {
+      "game": "College",
+      "version": "0.20.455",
+      "variant": "Debug",
+      "run_id": 41991820982,
+      "artifact_id": 13398433679,
+      "artifact_url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41991820982/artifacts/13398433679",
+      "apk_name": "antdroid.cfbcoach.dev-Signed.apk",
+      "bytes": 91420722,
+      "sha256": "91375a49cc04af05c3a6fde350fe981427a7f8002b5f41d7ef1687fc1189baff"
+    },
+    {
+      "game": "Pro",
+      "version": "0.1.166",
+      "variant": "Debug",
+      "run_id": 41991825930,
+      "artifact_id": 13398389671,
+      "artifact_url": "https://github.com/antdroidx/Football-Sim-Engine/actions/runs/41991825930/artifacts/13398389671",
+      "apk_name": "antdroid.profootball.franchise-Signed.apk",
+      "bytes": 90108425,
+      "sha256": "82211b65492e14741d7e74cd27c6c11f6046671dbdfccc1028c0459a9d647fbb"
+    }
+  ]
+}
