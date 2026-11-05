@@ -202,7 +202,7 @@ public class GameCastLivePage : ContentPage
                 }
                 await hold;
             }
-            last = control.Step(calledOffense, calledDefense, calledPreSnap);
+            preSnapHolding = false; Update(); last = control.Step(calledOffense, calledDefense, calledPreSnap);
             offense = defense = null; ResetPreSnap();
             var atBreak = await GameCastSnapPresentation.PresentAsync(new()
             {
