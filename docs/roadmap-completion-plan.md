@@ -84,6 +84,11 @@ Acceptance
 
 ## Batch B — Replay highlights and pre-snap choreography
 
+**Status: delivered on `codex/feature-roadmap-plan`.** The shared engine reads a game's recorded snaps and
+returns the moments worth replaying, the live game's Options menu replays the chosen one, and a pre-snap
+alignment action now carries a bounded, recorded effect on the play it precedes. League rules own the
+shift and motion limits.
+
 Current state
 
 - `BroadcastReplayService` (`src/Football.Engine/Simulation/BroadcastReplayService.cs`) exposes

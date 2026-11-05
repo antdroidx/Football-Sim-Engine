@@ -209,7 +209,8 @@ public class GameCastLivePage : ContentPage
                 Session = session, Snap = last, Highlight = highlight, HighlightText = highlightText,
                 TeamColor = Primary, Animate = Animate, Replay = Replay, AutoReplay = autoReplay && !menuOpen
             });
-            commentary.Text = GameDayCommentaryService.Describe(last, session.PlayersById);
+            commentary.Text = GameDayCommentaryService.Describe(last, session.PlayersById) +
+                (last.PreSnapEffectNote is null ? "" : " · " + last.PreSnapEffectNote);
             presentedEvents = session.Events.Count;
             if (atBreak) { control.Pause(); commentary.Text += " · Break: Team for coach talk or substitutions."; }
             if (session.IsComplete) await Save();
@@ -320,7 +321,10 @@ public class GameCastLivePage : ContentPage
         recent.Add(hint);
         foreach (var snap in session.Events.Take(presentedEvents).TakeLast(4).Reverse())
         {
-            var line = Text(12); line.Text = $"Q{snap.Quarter} {snap.ClockSeconds / 60}:{snap.ClockSeconds % 60:00} · {GameDayCommentaryService.Describe(snap, session.PlayersById)}";
+            var line = Text(12);
+            var preSnapLabel = snap.PreSnap is { HasAlignmentAction: true } ? " · " + PreSnapCatalog.Label(snap.PreSnap) : "";
+            var effectLabel = snap.PreSnapEffectYards > 0 ? $" · {snap.PreSnapEffectYards:+0;-0;0} yd pre-snap" : "";
+            line.Text = $"Q{snap.Quarter} {snap.ClockSeconds / 60}:{snap.ClockSeconds % 60:00} · {GameDayCommentaryService.Describe(snap, session.PlayersById)}{preSnapLabel}{effectLabel}";
             recent.Add(line);
         }
         Arrange();
@@ -401,12 +405,31 @@ public class GameCastLivePage : ContentPage
         if (!session.IsComplete) actions.Add(new("Play calling", PlayCalling));
         actions.Add(new("Box score", () => host.ShowBoxScore(Navigation, GameDayEngine.BoxScore(session))));
         if (last is not null) actions.Add(new("Replay last play", () => Replay(last)));
+        if (ReplayHighlightService.Candidates(session.Events).Count > 0) actions.Add(new("Replay highlights", Highlights));
         actions.Add(new("Viewing options", ViewingOptions));
         actions.Add(new("Weather", () => GameDialogs.AlertAsync(this, "Game conditions", session.Weather.Summary, "Close")));
         if (!session.IsComplete) actions.Add(new("Finish game", Finish));
         else if (!completion.IsSaved) actions.Add(new("Retry save", Save));
         actions.Add(new("Exit game", Close));
         await GameCastLiveMenu.InvokeAsync(this, "Game options", actions);
+    }
+    async Task Highlights()
+    {
+        var candidates = ReplayHighlightService.Candidates(session.Events);
+        if (candidates.Count == 0)
+        {
+            await GameDialogs.AlertAsync(this, "Highlights", "No highlight-worthy moments have been recorded yet.", "Close");
+            return;
+        }
+
+        var labels = candidates
+            .Select(candidate => $"Q{candidate.Quarter} {candidate.ClockSeconds / 60}:{candidate.ClockSeconds % 60:00} · {candidate.Headline}")
+            .ToArray();
+        var choice = await GameDialogs.ActionSheetAsync(this, "Highlights", "Cancel", null, labels);
+        if (choice is null) return;
+        var index = Array.IndexOf(labels, choice);
+        if (index < 0) return;
+        await Replay(candidates[index].Snap);
     }
     async Task PlayCalling()
     {
@@ -549,6 +572,8 @@ public class GameCastLivePage : ContentPage
         var pixels = field.Height * choice.Yards / fieldWidth;
         var delta = choice.Side == "Right" ? pixels : -pixels;
         await Task.WhenAll(targets.Select(item => item.Key.TranslateToAsync(0, delta, 260, Easing.CubicOut)));
+        if (choice.Type == PreSnapType.Motion)
+            await Task.WhenAll(targets.Select(item => item.Key.TranslateToAsync(0, 0, 220, Easing.CubicIn)));
     }
 
     async Task CoachTalk()

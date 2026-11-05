@@ -23,7 +23,7 @@ public class PreSnapTests
     }
 
     [Fact]
-    public void PresnapChoiceIsRecordedOnScrimmageWithoutChangingTheDeterministicResult()
+    public void PresnapChoiceIsRecordedAndAppliesItsBoundedEffect()
     {
         var plain = GameDayFixture.Session(GameDayMode.Play);
         var presnap = GameDayFixture.Session(GameDayMode.Play);
@@ -33,13 +33,64 @@ public class PreSnapTests
 
         Assert.Null(plainSnap.PreSnap);
         Assert.Equal(choice, alignedSnap.PreSnap);
-        var baseline = (plainSnap.Outcome, plainSnap.Yards, plainSnap.OffensivePlayId, plainSnap.DefensivePlayId,
-            plainSnap.ClockSeconds, plainSnap.PreSnapSeconds, plainSnap.LiveBallSeconds,
-            plainSnap.CallSource, plainSnap.DefensiveCallSource);
-        var aligned = (alignedSnap.Outcome, alignedSnap.Yards, alignedSnap.OffensivePlayId, alignedSnap.DefensivePlayId,
-            alignedSnap.ClockSeconds, alignedSnap.PreSnapSeconds, alignedSnap.LiveBallSeconds,
-            alignedSnap.CallSource, alignedSnap.DefensiveCallSource);
-        Assert.Equal(baseline, aligned);
+
+        // The call, the outcome and the defensive read are untouched; only the recorded gain moves.
+        Assert.Equal(plainSnap.Outcome, alignedSnap.Outcome);
+        Assert.Equal(plainSnap.OffensivePlayId, alignedSnap.OffensivePlayId);
+        Assert.Equal(plainSnap.DefensivePlayId, alignedSnap.DefensivePlayId);
+        Assert.Equal(plainSnap.CallSource, alignedSnap.CallSource);
+        Assert.Equal(plainSnap.DefensiveCallSource, alignedSnap.DefensiveCallSource);
+        Assert.True(Math.Abs(plainSnap.ClockSeconds - alignedSnap.ClockSeconds) <= 1);
+
+        var effect = PreSnapCatalog.Effect(choice, alignedSnap.Outcome == SnapOutcome.Completion);
+        Assert.NotNull(effect);
+        if (plainSnap.Yards > 0)
+        {
+            Assert.Equal(effect!.Yards, alignedSnap.PreSnapEffectYards);
+            Assert.Equal(effect.Note, alignedSnap.PreSnapEffectNote);
+            Assert.Equal(plainSnap.Yards + effect.Yards, alignedSnap.Yards);
+        }
+        else
+        {
+            Assert.Equal(0, alignedSnap.PreSnapEffectYards);
+            Assert.Null(alignedSnap.PreSnapEffectNote);
+            Assert.Equal(plainSnap.Yards, alignedSnap.Yards);
+        }
+    }
+
+    [Fact]
+    public void PresnapWithoutAnAlignmentActionHasNoEffect()
+    {
+        var plain = GameDayFixture.Session(GameDayMode.Play);
+        var presnap = GameDayFixture.Session(GameDayMode.Play);
+        var plainSnap = GameDayEngine.Step(plain, "off-spread-zone");
+        var alignedSnap = GameDayEngine.Step(presnap, "off-spread-zone", userDefensivePlayId: null, preSnap: PreSnapCatalog.None);
+
+        Assert.Equal(0, alignedSnap.PreSnapEffectYards);
+        Assert.Equal(plainSnap.Yards, alignedSnap.Yards);
+        Assert.Equal(plainSnap.Outcome, alignedSnap.Outcome);
+    }
+
+    [Fact]
+    public void LeagueRulesDecideHowFarAFormationMayMove()
+    {
+        var tight = FootballRules.College with { MaximumMotionYards = 3, MaximumShiftYards = 1 };
+        var wide = FootballRules.College with { MaximumMotionYards = 5 };
+
+        Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.Motion("Left", 3), tight));
+        Assert.False(PreSnapCatalog.IsValid(PreSnapCatalog.Motion("Left", 4), tight));
+        Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.Motion("Left", 4), wide));
+        Assert.False(PreSnapCatalog.IsValid(new(PreSnapType.Shift, "Left", 2), tight));
+    }
+
+    [Fact]
+    public void EngineRejectsAPreSnapChoiceThatBreaksLeagueRules()
+    {
+        var session = GameDayFixture.Session(GameDayMode.Play,
+            rules: FootballRules.College with { MaximumMotionYards = 1 });
+
+        Assert.Throws<ArgumentException>(() =>
+            GameDayEngine.Step(session, "off-spread-zone", null, PreSnapCatalog.Motion("Left", 2)));
     }
 
 

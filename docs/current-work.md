@@ -1,3 +1,14 @@
+## Replay highlights, pre-snap outcome effect, and league pre-snap rules — November 5, 2026
+
+Branch `codex/feature-roadmap-plan`: the GameCast live view can now replay the recorded moments worth replaying, and a pre-snap alignment action finally changes the play it precedes.
+
+Replay highlights: the shared engine gains `ReplayHighlightService`, which reads a game's recorded snaps and returns the moments worth replaying — scores, turnovers, fourth-down conversions and big plays. Every candidate carries the recorded snap it came from, so a replay never reruns the simulation. The live game's Options menu gains a "Replay highlights" entry that lists the candidates with their quarter and clock and replays the chosen one.
+
+Pre-snap outcome effect: a shift or motion now has a small bounded effect on the recorded play — a motion adds two yards to a pass and one to a run, a shift adds one yard. The effect is recorded on the snap as `PreSnapEffectYards` and `PreSnapEffectNote`, shown in the live commentary and in the recent-play list. The play call, the outcome and the defensive read are untouched, and the random stream is not disturbed. A pre-snap choice only exists on a user-controlled play, so CPU seasons are unaffected.
+
+League pre-snap legality: `FootballRules` now carries `MaximumShiftYards` and `MaximumMotionYards`, and `PreSnapCatalog.IsValid` validates against the session's rules instead of a fixed range. Both leagues keep the current limits because the repository holds no sourced rule for a different one; the hook is what a future league rule will use.
+
+Pre-snap choreography: a motion now animates out and returns to the formation before the snap, which is what a motion is, while a shift keeps the shifted alignment at the snap.
 ## Season-aware team chemistry and locker-room events — November 5, 2026
 
 Branch `codex/feature-roadmap-plan`: team culture is now recorded per season and carried forward. The shared engine gains `TeamChemistrySeasonService` (turns the previous season's record into the next season's baseline), `TeamChemistryInputs` (the season facts a host derives from its own records), and `LockerRoomEventService` (writes locker-room notes from recorded facts only). `TeamChemistryRecord` now stores the team name, the live snapshot the baseline was built from, the continuity fields (head coach, plan, captains, turnover) and notes that explain every adjustment.

@@ -5,14 +5,14 @@ namespace Football.Testing;
 
 public static class GameDayFixture
 {
-    public static GameDaySession Session(GameDayMode mode, bool includeOpeningKickoff = false, int seed = 7123, bool neutral = false)
+    public static GameDaySession Session(GameDayMode mode, bool includeOpeningKickoff = false, int seed = 7123, bool neutral = false, FootballRules? rules = null)
     {
         var homePlan = new TeamGamePlan { TeamName = "Home", Offense = OffensivePlaybook.Spread,
             OffensiveFormation = OffensiveFormation.ShotgunSpread, DefensiveFormation = DefensiveFormation.Nickel };
         var awayPlan = homePlan with { TeamName = "Away" };
         var session = GameDayEngine.Start(new ScheduledGame { GameId = "game-day", SeasonYear = 2026, Week = 1,
                 HomeTeamName = "Home", AwayTeamName = "Away", SimulationSeed = seed, IsNeutralSite = neutral },
-            Profile("Home", homePlan), Profile("Away", awayPlan), Roster(), mode);
+            Profile("Home", homePlan), Profile("Away", awayPlan), Roster(), mode, rules: rules);
         session.PossessionTeamName = "Home"; session.OpeningReceivingTeam = "Home"; session.KickoffTeamName = "Away";
         session.KickoffPending = includeOpeningKickoff;
         return session;

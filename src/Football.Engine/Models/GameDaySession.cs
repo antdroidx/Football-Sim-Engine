@@ -80,6 +80,10 @@ public sealed record GameSnapEvent
     public int AirYards { get; init; }
     public int YardsAfterCatch { get; init; }
     public int PreSnapSeconds { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int PreSnapEffectYards { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? PreSnapEffectNote { get; init; }
     public int LiveBallSeconds { get; init; }
     public int ReturnYards { get; init; }
     public double KickHangTimeSeconds { get; init; }

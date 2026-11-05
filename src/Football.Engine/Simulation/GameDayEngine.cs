@@ -53,7 +53,7 @@ public static partial class GameDayEngine
             if (session.UserCoachRole == StaffRole.DefensiveCoordinator || session.PossessionTeamName != session.ControlledTeamName) userPlayId = null;
             if (session.UserCoachRole == StaffRole.OffensiveCoordinator || session.PossessionTeamName == session.ControlledTeamName) userDefensivePlayId = null;
         }
-        if (preSnap is not null && !preSnap.Valid)
+        if (preSnap is not null && !PreSnapCatalog.IsValid(preSnap, session.Rules))
             throw new ArgumentException("Pre-snap choice is invalid.", nameof(preSnap));
         var alignmentAction = preSnap is { HasAlignmentAction: true } ? preSnap : null;
         if (alignmentAction is not null && (session.KickoffPending || session.TryPending))
@@ -255,6 +255,13 @@ public static partial class GameDayEngine
         // A loss can reach the offense's goal line for a safety. Statistical
         // yardage stops there rather than counting distance inside the end zone.
         yards = Math.Clamp(yards, -session.YardLine, 100 - session.YardLine);
+        var preSnapEffect = alignmentAction is null ? null : PreSnapCatalog.Effect(alignmentAction, isPass);
+        var appliedPreSnapYards = 0;
+        if (preSnapEffect is not null && yards > 0)
+        {
+            appliedPreSnapYards = preSnapEffect.Yards;
+            yards = Math.Clamp(yards + appliedPreSnapYards, -session.YardLine, 100 - session.YardLine);
+        }
         var liveSeconds = Math.Clamp((int)Math.Round(isPass ? read.ReleaseSeconds + 1.2 + Math.Max(0, yards) / 8d : 3 + Math.Max(0, yards) / 6d), 4, 17);
 
         var carrierLane = .50;
@@ -291,6 +298,8 @@ public static partial class GameDayEngine
             CarrierLane = carrierLane, TackleAttemptIds = sack && defender is not null ? [defender.PlayerId] : pursuit.AttemptIds,
             AirYards = complete ? gain.AirYards : 0, YardsAfterCatch = complete ? gain.YardsAfterCatch : 0,
             PreSnapSeconds = session.LastPreSnapSeconds, LiveBallSeconds = liveSeconds,
+            PreSnapEffectYards = appliedPreSnapYards,
+            PreSnapEffectNote = appliedPreSnapYards > 0 ? preSnapEffect?.Note : null,
             PassReleaseProgress = Math.Clamp(read.ReleaseSeconds / 5, .3, .75), TargetSeparation = read.Separation,
             IsDrop = isPass && !complete && !turnover && !sack && read.Separation >= 2 && session.Random.NextDouble() < .18,
             BrokeTackle = brokeTackle || complete && gain.BrokeTackle, IsQuarterbackScramble = scramble, IsQuarterbackKeep = designedKeep,

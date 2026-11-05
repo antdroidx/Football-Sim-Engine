@@ -17,12 +17,29 @@ public static class PreSnapCatalog
 
     public static PreSnapChoice Motion(string side, double yards) => new(PreSnapType.Motion, side, yards);
 
-    public static bool IsValid(PreSnapChoice choice) => choice.Type switch
+    public static bool IsValid(PreSnapChoice choice) => IsValid(choice, FootballRules.College);
+
+    /// <summary>League rules decide how far a formation may shift or motion before the snap.</summary>
+    public static bool IsValid(PreSnapChoice choice, FootballRules rules)
     {
-        PreSnapType.None => choice.Yards == 0,
-        PreSnapType.Shift => choice.Yards >= 0 && choice.Yards <= 1,
-        PreSnapType.Motion => choice.Yards >= 0 && choice.Yards <= 3,
-        _ => false
+        ArgumentNullException.ThrowIfNull(rules);
+        return choice.Type switch
+        {
+            PreSnapType.None => choice.Yards == 0,
+            PreSnapType.Shift => choice.Yards >= 0 && choice.Yards <= rules.MaximumShiftYards,
+            PreSnapType.Motion => choice.Yards >= 0 && choice.Yards <= rules.MaximumMotionYards,
+            _ => false
+        };
+    }
+
+    /// <summary>The bounded outcome effect of a pre-snap alignment action.</summary>
+    public static PreSnapEffect? Effect(PreSnapChoice choice, bool isPass) => choice.Type switch
+    {
+        PreSnapType.Motion => isPass
+            ? new(2, "Motion created separation and added 2 yards.")
+            : new(1, "Motion shifted the defense and added 1 yard."),
+        PreSnapType.Shift => new(1, "The shift opened a lane and added 1 yard."),
+        _ => null
     };
 
     public static string Label(PreSnapChoice choice) => choice.Type switch

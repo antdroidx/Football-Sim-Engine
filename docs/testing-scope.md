@@ -1,3 +1,12 @@
+## Replay highlights, pre-snap outcome effect, and league pre-snap rules — November 5, 2026
+
+Executed: Engine `PreSnapTests` 8 passed and `ReplayHighlightTests` 4 passed, covering the recorded choice and its bounded effect, the no-action case, league-driven legality in the catalog, the engine rejecting a choice that breaks league rules, the highlight kinds, ordinary plays not becoming highlights, candidates referencing the recorded snaps without resimulating, and stable candidate ids.
+
+Regression: Engine 373 passed. College 619 passed with the standard `DynastyHealthTests` and `OvrCalibrationDynastyTests` exclusions. Pro 463 passed with the standard `TwentySeasons` and `SourcedFiveSeasons` exclusions. College and Pro Android compile targets passed; the only warnings are the known offline `NU1900` package-vulnerability warnings and the two existing Pro `CS8625` nullable warnings.
+
+The Pro suite takes about eleven minutes on this machine. The same suite was run on this branch without this change and took 10m52s against 10m38s with it, so the runtime is a property of the machine and not of this work. The pre-snap effect only applies to a user-controlled play, so the long CPU-driven career cases are untouched by it.
+
+Not claimed: no APK packaged, no device or emulator acceptance, no CI dispatch, no PR, merge, or release. The pre-snap effect and the highlight picker were not exercised on a device.
 ## Season-aware team chemistry and locker-room events — November 5, 2026
 
 Executed: Engine `TeamChemistrySeasonTests` 8 passed, covering the first-season snapshot, turnover and coaching penalties, continuity gains, captain turnover, a changed plan, determinism, the bounded season-memory offset and deterministic locker-room notes. College `CollegeChemistryTests` 5 passed, covering the offseason rollover record, continuity into the next season, a coach change and roster turnover measured against an unchanged-staff control, an older save that loads with empty collections, and a JSON round-trip. Pro `ProChemistryTests` 5 passed, covering the same ground for the preseason handover, including a save written before the collections existed.

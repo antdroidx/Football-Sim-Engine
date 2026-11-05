@@ -26,4 +26,6 @@ public sealed record FootballRules
     public bool StopClockOnFirstDown { get; init; } = true;
     public int KickoffTouchbackYardLine { get; init; } = 25;
     public int ExtraPointDistance { get; init; } = 20;
+    public double MaximumShiftYards { get; init; } = 1;
+    public double MaximumMotionYards { get; init; } = 3;
 }
