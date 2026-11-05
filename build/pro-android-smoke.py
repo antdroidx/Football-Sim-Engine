@@ -100,12 +100,12 @@ try:
     assert not any("Madden" in (t or "") for t in s.texts(profile))
     s.capture("pro-player-profile")
     s.scroll_to_text("pro-player-skill-ratings","Kicking accuracy",max_swipes=20)
-    # Edit appearance lives on the Overview tab.
-    s.scroll_to_text("pro-player-overview-tab","Overview",max_swipes=20,toward_start=True)
-    click("edit-appearance","Edit appearance")
+    # Edit appearance lives on the Overview tab, near the top of that tab.
+    s.tap(s.scroll_to_text("pro-player-overview-tab","Overview",max_swipes=20,toward_start=True),"Overview")
+    s.tap(s.scroll_to_text("pro-edit-appearance","Edit appearance",max_swipes=20,toward_start=True),"Edit appearance")
     edit=ready("appearance-editor","Skin tone");s.tap_id(edit,"pro-skin-tone")
     tone=ready("appearance-tones","Deep");s.tap(tone,"Deep")
-    click("save-appearance","Save appearance")
+    s.tap(s.scroll_to_text("pro-save-appearance","Save appearance",max_swipes=20,toward_start=True),"Save appearance")
     ready("appearance-saved","Sam Darnold")
 
     profile=s.scroll_to_text("pro-player-profile-back","‹ Back",max_swipes=20,toward_start=True)
