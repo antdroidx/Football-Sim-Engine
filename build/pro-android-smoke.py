@@ -66,6 +66,9 @@ try:
     click("start-franchise","Start franchise")
     overview=ready("overview","Advance week")
     assert any("Preseason" in (t or "") for t in s.texts(overview))
+    # The weekly coach talk button lives on the Staff page.
+    click("staff-tab","Staff")
+    staff=ready("staff","Mike Macdonald")
     click("weekly-talk","Weekly coach talk")
     talk=ready("weekly-talk-audience","Team");s.tap(talk,"Team")
     tone=ready("weekly-talk-tone","Praise");s.tap(tone,"Praise")
@@ -73,8 +76,6 @@ try:
     cooldown=ready("weekly-talk-cooldown","Weekly coach talk · Used this week")
     assert any(n.get("text")=="Weekly coach talk · Used this week" and n.get("enabled")=="false" for n in cooldown.iter("node"))
     s.capture("pro-weekly-talk-disabled")
-    click("staff-tab","Staff")
-    staff=ready("staff","Mike Macdonald")
     staff=s.scroll_to_text("pro-offensive-staff","Brian Fleury",max_swipes=12)
     assert "Brian Fleury" in s.texts(staff)
     s.capture("pro-real-staff")
