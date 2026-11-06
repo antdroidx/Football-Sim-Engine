@@ -42,8 +42,18 @@ A focused emulator walk of the changed Pro surfaces passes end to end on both ha
 alternate call selection, snap, box score, landscape quick calls inside the viewport, finished/saved/exited game,
 then the played game's Playbook picker, snap, and exit confirmation.
 
-Not claimed here: the GitHub Actions device jobs and their APK artifacts, the full Pro harness run, any release,
-merge or publication.
+**GitHub Actions.** Both device workflows pass on `7c6b377`. College build 475 (run `42189956817`) passes its
+build job and both device jobs; the launch log reaches "System appearance refresh preserved the completed week
+while processing was active", so the light/dark theme and roster step that previously wedged now completes.
+Pro build 189 (run `42192520288`, `live` scope) passes the standard Pro suite and the full device harness, ending
+at "Pro launch, franchise creation, watch/replay, landscape, saved final, reload, advance and coach mode passed",
+which includes the rewritten coordinator career. The APKs are Actions artifacts `dynasty-manager-build-475` and
+`pro-football-apk-189`. An earlier `full`-scope Pro dispatch (run `42189956967`) was cancelled at the job's
+20-minute timeout because that scope also runs the long career tests; `live` is the scope that runs the device
+harness inside the job budget.
+
+Not claimed here: no release, merge or publication. The excluded long Pro and College career cases were not
+rerun for this batch.
 
 ## Roadmap rewrite, harness cleanup, and APK handover — November 5, 2026
 

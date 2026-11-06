@@ -19,8 +19,15 @@ alternate call selection, snap, box score, landscape quick calls inside the view
 exited game, and then the played game's Playbook picker ("Choose play", "All formations"), snap, and exit through
 "Exit game?" to "Discard and exit".
 
-Not claimed: the GitHub Actions device jobs and their APK artifacts, the full Pro harness run, the excluded long
-College career cases, any release, merge or publication.
+GitHub Actions on `7c6b377`: College build 475 (run `42189956817`) passes `build-test-android`, `android-launch`
+and `android-career-options`, with the launch log reaching "System appearance refresh preserved the completed
+week while processing was active". Pro build 189 (run `42192520288`, `live` scope) passes `pro-build` and
+`pro-device`, ending at "Pro launch, franchise creation, watch/replay, landscape, saved final, reload, advance and
+coach mode passed". APK artifacts: `dynasty-manager-build-475` and `pro-football-apk-189`. The earlier `full`-scope
+Pro dispatch (run `42189956967`) was cancelled at the 20-minute build timeout because that scope includes the
+long career tests.
+
+Not claimed: the excluded long Pro and College career cases, any release, merge or publication.
 
 ## Roadmap rewrite, harness cleanup, and APK handover — November 5, 2026
 
