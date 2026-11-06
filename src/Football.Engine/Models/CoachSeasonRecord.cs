@@ -9,6 +9,7 @@ public sealed record CoachSeasonRecord
     public StaffRole Role { get; init; }
     public int Wins { get; init; }
     public int Losses { get; init; }
+    public int Ties { get; init; }
     public int ConferenceWins { get; init; }
     public int ConferenceLosses { get; init; }
     public int FinalRanking { get; init; }
@@ -27,7 +28,8 @@ public sealed record CoachCareerSummary
     public int HeadCoachSeasons => Seasons.Count(season => season.Role == StaffRole.HeadCoach);
     public int HeadCoachWins => Seasons.Where(season => season.Role == StaffRole.HeadCoach).Sum(season => season.Wins);
     public int HeadCoachLosses => Seasons.Where(season => season.Role == StaffRole.HeadCoach).Sum(season => season.Losses);
-    public double HeadCoachWinPercentage => HeadCoachWins + HeadCoachLosses == 0 ? 0 : (double)HeadCoachWins / (HeadCoachWins + HeadCoachLosses);
+    public int HeadCoachTies => Seasons.Where(season => season.Role == StaffRole.HeadCoach).Sum(season => season.Ties);
+    public double HeadCoachWinPercentage => HeadCoachWins + HeadCoachLosses + HeadCoachTies == 0 ? 0 : (double)(HeadCoachWins + HeadCoachTies * .5) / (HeadCoachWins + HeadCoachLosses + HeadCoachTies);
     public int ConferenceTitles => Seasons.Count(season => season.Role == StaffRole.HeadCoach && season.ConferenceChampion);
     public int PlayoffAppearances => Seasons.Count(season => season.Role == StaffRole.HeadCoach && season.PlayoffParticipant);
     public int NationalTitles => Seasons.Count(season => season.Role == StaffRole.HeadCoach && season.NationalChampion);

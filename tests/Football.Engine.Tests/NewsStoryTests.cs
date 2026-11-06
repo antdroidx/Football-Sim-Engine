@@ -116,6 +116,30 @@ public class NewsStoryTests
     }
 
     [Fact]
+    public void PlayerAndCoachThreadsKeepStableIdentityAcrossSeasons()
+    {
+        var playerId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var coachId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var player2026 = Story("player/2026", 2026, "Player update", FootballPersonKind.Player, playerId, "Test Player");
+        var player2027 = Story("player/2027", 2027, "Player update again", FootballPersonKind.Player, playerId, "Test Player");
+        var coach2026 = Story("coach/2026", 2026, "Coach update", FootballPersonKind.Coach, coachId, "Test Coach");
+        var coach2027 = Story("coach/2027", 2027, "Coach update again", FootballPersonKind.Coach, coachId, "Test Coach");
+
+        var first = FootballNarrativeMemoryService.Refresh([], [player2026, coach2026], 2026);
+        var next = FootballNarrativeMemoryService.Refresh(first, [player2026, player2027, coach2026, coach2027], 2027);
+
+        var player = Assert.Single(next, record => record.PersonId == playerId);
+        var coach = Assert.Single(next, record => record.PersonId == coachId);
+        Assert.Equal(2, player.SourceStoryIds.Count);
+        Assert.Equal(2026, player.FirstSeasonYear);
+        Assert.Equal(2027, player.LastSeasonYear);
+        Assert.Equal(FootballNarrativeKind.Player, player.Kind);
+        Assert.Equal(FootballNarrativeKind.Coach, coach.Kind);
+        Assert.Equal("Player update again", player.LatestHeadline);
+        Assert.Equal("Coach update again", coach.LatestHeadline);
+    }
+
+    [Fact]
     public void OlderSavedStoryRecordsDefaultNarrativeMemoryToEmpty()
     {
         var state = new DynastyState { DynastyName = "Test", UserTeamName = "Home" };
@@ -123,6 +147,20 @@ public class NewsStoryTests
         var restored = System.Text.Json.JsonSerializer.Deserialize<DynastyState>("""{"DynastyName":"Legacy","UserTeamName":"Home"}""")!;
         Assert.Empty(restored.NarrativeMemory);
     }
+
+    static FootballNewsStory Story(string id, int year, string headline, FootballPersonKind kind, Guid personId, string name) => new()
+    {
+        Id = id,
+        Category = kind == FootballPersonKind.Player ? "Injuries" : "Coaching",
+        Headline = headline,
+        Body = "Recorded person update.",
+        TeamName = "Home",
+        SeasonYear = year,
+        Week = 1,
+        PersonKind = kind,
+        PersonId = personId,
+        PersonName = name
+    };
 
     [Fact]
     public void HubMergesRecordedAndSocialStoriesWithoutDuplicates()

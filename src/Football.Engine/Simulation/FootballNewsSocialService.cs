@@ -39,7 +39,10 @@ public static class FootballNewsSocialService
                     LikeCount = likes,
                     RepostCount = likes / 7,
                     ReplyCount = Math.Abs(seed * 13) % 18,
-                    MediaKind = FootballNewsMediaKind.Social
+                    MediaKind = FootballNewsMediaKind.Social,
+                    PersonKind = story.PersonKind,
+                    PersonId = story.PersonId,
+                    PersonName = story.PersonName
                 };
             })
             .ToList();
@@ -56,7 +59,9 @@ public static class FootballNewsSocialService
                 Id = "social/" + memory.Id,
                 Category = "Season thread",
                 Headline = $"{memory.TeamName} · {memory.Topic} storyline",
-                Body = $"Recorded {memory.SeasonYear} updates · Latest: {memory.LatestHeadline}",
+                Body = memory.FirstSeasonYear > 0 && memory.FirstSeasonYear != memory.LastSeasonYear
+                    ? $"Recorded {memory.FirstSeasonYear}–{memory.LastSeasonYear} updates · Latest: {memory.LatestHeadline}"
+                    : $"Recorded {memory.SeasonYear} updates · Latest: {memory.LatestHeadline}",
                 TeamName = memory.TeamName,
                 SeasonYear = memory.SeasonYear,
                 Week = memory.LastWeek,
@@ -66,7 +71,10 @@ public static class FootballNewsSocialService
                 LikeCount = likes,
                 RepostCount = likes / 8,
                 ReplyCount = Math.Abs(seed * 11) % 16,
-                MediaKind = FootballNewsMediaKind.Social
+                MediaKind = FootballNewsMediaKind.Social,
+                PersonKind = memory.PersonKind,
+                PersonId = memory.PersonId,
+                PersonName = memory.PersonName
             });
         }
         return posts.DistinctBy(post => post.Id).ToArray();

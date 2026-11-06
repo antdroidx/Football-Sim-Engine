@@ -20,7 +20,7 @@ public sealed partial class FranchisePage
         var team = state!.League.Teams.FirstOrDefault(t => t.Name == p.Football.TeamName) ?? state.League.Teams.Single(t => t.Name == state.UserTeam);
         return PersonPortrait.Create(p.Football.PlayerId, p.Football.FullName, Color.FromArgb(team.Primary), Color.FromArgb(team.Secondary), size, age: p.Age, appearance: p.Football.Appearance);
     }
-    static Guid CoachId(ProCoach c) => new(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(c.Name))[..16]);
+    Guid CoachId(ProCoach c) => ProCoachHistoryService.Identity(state!, c);
     View CoachIdentity(ProCoach c, ProTeam team)
     {
         if(c.Vacant)return Text("Vacant",22,true);
@@ -178,7 +178,10 @@ public sealed partial class FranchisePage
             SeasonYear = story.Year,
             Week = story.Week,
             RelatedId = story.GameId,
-            MediaKind = FootballNewsMediaKind.Story
+            MediaKind = FootballNewsMediaKind.Story,
+            PersonKind = story.PersonKind,
+            PersonId = story.PersonId,
+            PersonName = story.PersonName
         }).ToArray();
         state = s with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(s.NarrativeMemory, sources, s.Year,
             FootballRivalryMemoryService.Records(s.Games.Select(game => game.Football).ToArray(), s.Year)) };

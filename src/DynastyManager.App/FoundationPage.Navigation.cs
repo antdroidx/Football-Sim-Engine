@@ -429,7 +429,10 @@ public sealed partial class FoundationPage
         {
             Id = story.Id, Category = story.Category, Headline = story.Headline, Body = story.Body,
             TeamName = story.TeamName, SeasonYear = story.SeasonYear, Week = story.Week,
-            RelatedId = story.PlayerId?.ToString(), MediaKind = FootballNewsMediaKind.Story
+            RelatedId = (story.PlayerId ?? story.CoachId)?.ToString(), MediaKind = FootballNewsMediaKind.Story,
+            PersonKind = story.PlayerId.HasValue ? FootballPersonKind.Player : story.CoachId.HasValue ? FootballPersonKind.Coach : null,
+            PersonId = story.PlayerId ?? story.CoachId,
+            PersonName = story.PersonName
         }).ToArray();
         _currentDynasty = _currentDynasty with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(_currentDynasty.NarrativeMemory, sources, _currentDynasty.SeasonYear,
             FootballRivalryMemoryService.Records(_currentDynasty.Schedule, _currentDynasty.SeasonYear)) };

@@ -1,3 +1,34 @@
+## Roadmap state/identity completion batch — November 6, 2026
+
+This resumed batch closes four near-term state gaps across both games. Team motivation is now a persisted,
+season-advanced record in College and Pro, with bounded drivers shown in both team surfaces. The Pro scouting
+department repairs duplicate, missing and stale slots to exactly three unique scouts per club; a 512-seed
+invariant check covers the generated franchise population.
+
+CPU club coaching now has a real lifecycle record. Completed Pro seasons are recorded once per staff identity
+and season, the coach Hall of Fame consumes those histories after employment ends, and per-team citations keep
+the record attached to the clubs a coach led. Pro coach and retirement records carry an optional stable
+`StaffId`; older saves deserialize with an empty default and existing user-career IDs remain compatible.
+Same-name coaches on different clubs or roles no longer share an identity.
+
+Person memory is now fed by Pro player-specific facts as well as College facts. Pro injury, player-of-game,
+weekly passing leader, award, all-star and showcase stories carry `PersonKind`, `PersonId` and `PersonName`, so
+the shared narrative service forms durable player threads across seasons just as it does for coaches. Refresh also backfills identity onto matching legacy saved stories instead of preserving an untagged duplicate.
+
+One shared result bug surfaced during validation: a tied `ScheduledGame` previously named the away team in
+`WinnerTeamName`. It now returns null for ties, keeping standings and coach conference-loss accounting correct.
+
+Validation actually run on this working tree:
+
+- `dotnet test tests/ProFootball.Tests/ProFootball.Tests.csproj -c Debug --no-restore --filter 'FullyQualifiedName~ProCoachHallOfFameTests|FullyQualifiedName~ProNewsIdentityTests|FullyQualifiedName~HonorsTests|FullyQualifiedName~CareerSaveTests|FullyQualifiedName~StandingsTiebreakTests|FullyQualifiedName~StaffBalanceTests'` — 63 passed.
+- `dotnet test tests/Football.Engine.Tests/Football.Engine.Tests.csproj -c Debug --no-restore --filter 'FullyQualifiedName~NewsStoryTests|FullyQualifiedName~TeamChemistrySeasonTests'` — 18 passed.
+- `dotnet test tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj -c Debug --no-restore --filter 'FullyQualifiedName~BowlServiceTests|FullyQualifiedName~SchedulePersistenceTests|FullyQualifiedName~StartingLibraryTests'` — 24 passed.
+- `dotnet build src/ProFootball.App/ProFootball.App.csproj -c Debug --no-restore -t:Compile` — passed with one offline `NU1900` warning and the two existing `CS8625` warnings.
+- `dotnet build src/DynastyManager.App/DynastyManager.App.csproj -c Debug --no-restore -t:Compile` — passed with three offline `NU1900` warnings.
+
+Not claimed here: final full suites, College/Pro APK packaging, device acceptance, CI completion, merge, release,
+branch deletion or repository cleanup.
+
 ## Device harness races and the College roster native-handle wedge — November 6, 2026
 
 **What the device jobs found.** Both GitHub Actions device jobs were still failing, for different reasons. The

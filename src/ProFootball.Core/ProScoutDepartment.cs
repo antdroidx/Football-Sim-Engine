@@ -13,32 +13,107 @@ public static class ProScoutDepartment
     static readonly string[] Last=["Hart","Mercer","Wallace","Pierce","Caldwell","Kim","Ortiz","Vaughn"];
     public static ProFranchise Ensure(ProFranchise s)
     {
-        var scouts=s.Scouts.Select(Normalize).ToList();
-        var changed=!scouts.SequenceEqual(s.Scouts);
-        foreach(var team in s.League.Teams)
+        var unique = s.Scouts.Select(Normalize)
+            .GroupBy(scout => scout.Staff.ScoutId)
+            .Select(group => group.First())
+            .ToList();
+        var usedIds = unique.Select(scout => scout.Staff.ScoutId).ToHashSet();
+        var rebuilt = new List<ProScout>();
+
+        foreach (var team in s.League.Teams)
         {
-            var teamScouts=scouts.Where(c=>c.Team==team.Name).ToList();
-            var usedNames=teamScouts.Select(c=>c.Staff.FullName).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            var attempt=0;
-            while(teamScouts.Count<3)
+            var existing = unique.Where(scout => scout.Team == team.Name).ToList();
+            var selected = new List<ProScout>();
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var regionalCount = 0;
+            var nationalCount = 0;
+            foreach (var scout in existing)
             {
-                var regional=teamScouts.Count(c=>c.Regional)<2;
-                var bytes=SHA256.HashData(Encoding.UTF8.GetBytes($"{s.Id:N}|{s.Year}|{team.Id}|scout|{regional}|{attempt++}"));
-                var identity=ProTeamStrategyCatalog.TryGet(team.Id,out var strategy)?strategy:null;
-                var baseline=identity?.ScoutingQuality??70;
-                int Rating(int salt)=>Math.Clamp(baseline+bytes[salt]%13-6,48,88);
-                var first=First[bytes[16]%First.Length];var lastIndex=bytes[17]%Last.Length;var last=Last[lastIndex];
-                while(!usedNames.Add(first+" "+last)){lastIndex=(lastIndex+1)%Last.Length;last=Last[lastIndex];}
-                var attributes=new ScoutAttributes{Evaluation=Rating(18),Communication=Rating(21),RegionalKnowledge=Rating(20),NationalKnowledge=Rating(19)};
-                var scout=new ProScout(team.Name,new ScoutStaff{
-                    ScoutId=new Guid(bytes.AsSpan(0,16)),FullName=first+" "+last,
-                    Age=31+bytes[22]%31,CareerYears=1+bytes[23]%20,TenureYears=bytes[24]%7,GrowthPotential=1+bytes[25]%5,
-                    TalentEvaluation=attributes.Evaluation,PotentialEvaluation=attributes.NationalKnowledge,
-                    RegionalKnowledge=attributes.RegionalKnowledge,WorkRate=attributes.Communication,Attributes=attributes},regional);
-                teamScouts.Add(scout);scouts.Add(scout);changed=true;
+                if (!names.Add(scout.Staff.FullName)) continue;
+                if (scout.Regional && regionalCount < 2)
+                {
+                    selected.Add(scout);
+                    regionalCount++;
+                }
+                else if (!scout.Regional && nationalCount < 1)
+                {
+                    selected.Add(scout);
+                    nationalCount++;
+                }
             }
+
+            var identity = ProTeamStrategyCatalog.TryGet(team.Id, out var strategy) ? strategy : null;
+            var baseline = identity?.ScoutingQuality ?? 70;
+            foreach (var slot in new[] { true, true, false })
+            {
+                if (slot && regionalCount >= 2 || !slot && nationalCount >= 1) continue;
+                var scout = CreateScout(s.Id, s.Year, team, slot, baseline, usedIds, names);
+                selected.Add(scout);
+                usedIds.Add(scout.Staff.ScoutId);
+                names.Add(scout.Staff.FullName);
+                if (slot) regionalCount++; else nationalCount++;
+            }
+
+            rebuilt.AddRange(selected);
         }
-        return changed?s with{Scouts=scouts}:s;
+
+        if (rebuilt.Count != s.League.Teams.Count * 3 ||
+            rebuilt.Select(scout => scout.Staff.ScoutId).Distinct().Count() != rebuilt.Count ||
+            s.League.Teams.Any(team => rebuilt.Count(scout => scout.Team == team.Name) != 3))
+            throw new InvalidDataException("Every club must receive three unique scouts.");
+
+        return rebuilt.SequenceEqual(s.Scouts) ? s : s with { Scouts = rebuilt };
+    }
+
+    static ProScout CreateScout(
+        Guid franchiseId,
+        int year,
+        ProTeam team,
+        bool regional,
+        int baseline,
+        HashSet<Guid> usedIds,
+        HashSet<string> usedNames)
+    {
+        var slot = regional ? "regional" : "national";
+        var attempt = 0;
+        byte[] bytes;
+        Guid id;
+        do
+        {
+            bytes = SHA256.HashData(Encoding.UTF8.GetBytes(
+                $"{franchiseId:N}|{year}|{team.Id}|scout|{slot}|{attempt++}"));
+            id = new Guid(bytes.AsSpan(0, 16));
+        } while (usedIds.Contains(id) && attempt < 10_000);
+        if (usedIds.Contains(id)) throw new InvalidDataException("Could not allocate a unique scout identity.");
+
+        int Rating(int salt) => Math.Clamp(baseline + bytes[salt] % 13 - 6, 48, 88);
+        var names = from firstIndex in Enumerable.Range(0, First.Length)
+                    from lastIndex in Enumerable.Range(0, Last.Length)
+                    select First[(firstIndex + bytes[16]) % First.Length] + " " +
+                           Last[(lastIndex + bytes[17]) % Last.Length];
+        var name = names.FirstOrDefault(candidate => !usedNames.Contains(candidate))
+            ?? throw new InvalidDataException("Could not allocate a unique scout name.");
+        var attributes = new ScoutAttributes
+        {
+            Evaluation = Rating(18),
+            Communication = Rating(21),
+            RegionalKnowledge = Rating(20),
+            NationalKnowledge = Rating(19)
+        };
+        return new ProScout(team.Name, new ScoutStaff
+        {
+            ScoutId = id,
+            FullName = name,
+            Age = 31 + bytes[22] % 31,
+            CareerYears = 1 + bytes[23] % 20,
+            TenureYears = bytes[24] % 7,
+            GrowthPotential = 1 + bytes[25] % 5,
+            TalentEvaluation = attributes.Evaluation,
+            PotentialEvaluation = attributes.NationalKnowledge,
+            RegionalKnowledge = attributes.RegionalKnowledge,
+            WorkRate = attributes.Communication,
+            Attributes = attributes
+        }, regional);
     }
 
     public static ProFranchise AdvanceSeason(ProFranchise s)

@@ -1,6 +1,7 @@
 namespace DynastyManager.Core.Models;
 
 public enum FootballNewsMediaKind { Story, Social, SocialReply }
+public enum FootballPersonKind { Player, Coach }
 
 public sealed record FootballNewsStory
 {
@@ -18,6 +19,9 @@ public sealed record FootballNewsStory
     public int RepostCount { get; init; }
     public int ReplyCount { get; init; }
     public FootballNewsMediaKind MediaKind { get; init; } = FootballNewsMediaKind.Story;
+    public FootballPersonKind? PersonKind { get; init; }
+    public Guid? PersonId { get; init; }
+    public string? PersonName { get; init; }
 
     /// <summary>The player's own activity on this post. The derived counts stay decorative.</summary>
     public bool LikedByPlayer { get; init; }

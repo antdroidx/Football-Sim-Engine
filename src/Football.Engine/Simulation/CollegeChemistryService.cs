@@ -43,11 +43,27 @@ public static class CollegeChemistryService
             .ThenBy(record => record.TeamName, StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
-        var events = LockerRoomEventService.Build(Signals(state, records, prior, rosters, completedSeason));
+        var signals = Signals(state, records, prior, rosters, completedSeason);
+        var events = LockerRoomEventService.Build(signals);
+        var motivation = state.LeagueTeams.Select(team =>
+            {
+                var priorMotivation = state.TeamMotivation
+                    .Where(item => item.TeamName.Equals(team.Name, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(item => item.SeasonYear)
+                    .FirstOrDefault();
+                return TeamMotivationService.Advance(priorMotivation, signals, team.Name, state.SeasonYear);
+            })
+            .ToArray();
 
         return state with
         {
             TeamChemistry = history,
+            TeamMotivation = state.TeamMotivation
+                .Where(item => item.SeasonYear != state.SeasonYear)
+                .Concat(motivation)
+                .OrderBy(item => item.SeasonYear)
+                .ThenBy(item => item.TeamName, StringComparer.OrdinalIgnoreCase)
+                .ToArray(),
             LockerRoomEvents = state.LockerRoomEvents
                 .Where(item => item.SeasonYear != state.SeasonYear)
                 .Concat(events)
@@ -194,6 +210,14 @@ public static class CollegeChemistryService
                 });
             }
 
+            signals.Add(new LockerRoomSignal
+            {
+                TeamName = record.TeamName,
+                Kind = LockerRoomEventKind.Morale,
+                Value = Math.Clamp((GameMoraleService.SeasonMorale(state, record.TeamName, completedSeason) - 60) * 2, -100, 100),
+                SeasonYear = state.SeasonYear,
+                Week = 0
+            });
             signals.Add(new LockerRoomSignal
             {
                 TeamName = record.TeamName,

@@ -81,6 +81,18 @@ public sealed class FootballRulesConformanceTests
     }
 
     [Fact]
+    public void UnsourcedRivalryAndPreSnapLimitsKeepTheSharedPolicyBoundary()
+    {
+        Assert.Equal(1, FootballRules.College.MaximumShiftYards);
+        Assert.Equal(3, FootballRules.College.MaximumMotionYards);
+        Assert.Equal(FootballRules.College.MaximumShiftYards, FootballRules.Professional.MaximumShiftYards);
+        Assert.Equal(FootballRules.College.MaximumMotionYards, FootballRules.Professional.MaximumMotionYards);
+        Assert.All(typeof(RivalryRecord).GetProperties(), property =>
+            Assert.DoesNotContain("Effect", property.Name, StringComparison.OrdinalIgnoreCase));
+        Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.Motion("Left", 3), FootballRules.Professional));
+    }
+
+    [Fact]
     public void ProPunterAndKickerHaveExplicitCareerPeaks()
     {
         Assert.Equal(32, ProDevelopment.PeakAge(Position.P));

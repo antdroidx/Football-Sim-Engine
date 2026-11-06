@@ -37,6 +37,44 @@ public class StaffBalanceTests
     static ProFranchise New()=>ProLeagueService.Create("Seattle Seahawks",generatedPlayers:true,applyOpeningTrades:false)
         with{Id=Guid.Parse("7c9e6679-7425-40de-944b-e07fc1f90ae7")};
 
+    [Fact]
+    public void FreshFranchiseSeedsAlwaysCreateNinetySixUniqueScouts()
+    {
+        var template = New() with { Scouts = [] };
+        for (var seed = 0; seed < 512; seed++)
+        {
+            var bytes = System.Security.Cryptography.SHA256.HashData(BitConverter.GetBytes(seed));
+            var state = ProScoutDepartment.Ensure(template with { Id = new Guid(bytes.AsSpan(0, 16)) });
+            Assert.Equal(96, state.Scouts.Count);
+            Assert.Equal(96, state.Scouts.Select(scout => scout.Staff.ScoutId).Distinct().Count());
+            Assert.All(state.League.Teams, team =>
+            {
+                var teamScouts = state.Scouts.Where(scout => scout.Team == team.Name).ToArray();
+                Assert.Equal(3, teamScouts.Length);
+                Assert.Equal(3, teamScouts.Select(scout => scout.Staff.FullName).Distinct().Count());
+                Assert.Equal(2, teamScouts.Count(scout => scout.Regional));
+                Assert.Single(teamScouts.Where(scout => !scout.Regional));
+            });
+        }
+    }
+
+    [Fact]
+    public void ScoutEnsureRepairsDuplicateIdsAndMissingSlotsWithoutChangingHealthyIdentity()
+    {
+        var healthy = ProScoutDepartment.Ensure(New() with { Scouts = [] });
+        var damaged = healthy with
+        {
+            Scouts = healthy.Scouts.Take(95)
+                .Append(healthy.Scouts[0] with { Team = healthy.League.Teams[^1].Name })
+                .ToList()
+        };
+        var repaired = ProScoutDepartment.Ensure(damaged);
+
+        Assert.Equal(96, repaired.Scouts.Count);
+        Assert.Equal(96, repaired.Scouts.Select(scout => scout.Staff.ScoutId).Distinct().Count());
+        Assert.Contains(repaired.Scouts, scout => scout.Staff.ScoutId == healthy.Scouts[1].Staff.ScoutId);
+    }
+
     [Fact] public void EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity()
     {
         var s=New();

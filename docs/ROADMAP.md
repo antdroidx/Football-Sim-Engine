@@ -4,15 +4,15 @@ This is the active planning source. Completed release evidence remains in `curre
 
 ## Planning baseline
 
-- Latest published release: Pro165 / College454 (`preview-2026-11-04-roster-identity`).
+- Latest published release: Pro165 / College454 (`preview-2026-11-04-roster-identity`). The next prerelease is pending final APK and CI verification.
 - Active branch: `codex/feature-roadmap-plan`. The near-term work below is implemented there and pushed, but it is not merged and not published.
 - Shared engine and presentation are the default home for league-neutral behavior.
 - College and Pro keep league-specific roster, financial, career, persistence, branding, and rule adapters.
 - Existing factual news systems are retained; do not fabricate statistics, outcomes, interviews, or social activity.
 - Existing saves must load without destructive migration. New records default safely and remain backward compatible. The College save repository rejects a mismatched schema version, so a schema version is only bumped when the format truly changes.
-- Do not publish a release or merge without explicit review and approval.
+- The current execution has explicit authorization to merge to `main`, publish one prerelease, clean generated files and delete completed feature branches after final verification.
 
-## Near-term status — November 5, 2026
+## Near-term status — November 6, 2026
 
 All seven near-term workstreams were carried through five implementation batches. The batches, their commits, their acceptance criteria and their validation commands are recorded in [roadmap-completion-plan.md](roadmap-completion-plan.md).
 
@@ -22,20 +22,26 @@ All seven near-term workstreams were carried through five implementation batches
 | Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; a MOTION preset in every offensive formation family; a bounded outcome effect recorded on the snap; league rules own the shift and motion limits; a motion returns to the formation before the snap | Device acceptance of the pre-snap effect, and any sourced league-specific limit. Both leagues keep shift at one yard and motion at three because no sourced rule differs. |
 | Captains / chemistry | Deterministic captains; cohesion and scheme familiarity; a bounded GameCast effect; both hosts' team UI; per-season memory fed by turnover, coaching change, plan continuity, captain changes, discipline and morale; every adjustment explained to the player | Deeper continuity effects and the remaining discipline inputs. |
 | Morale / locker room | Existing league morale, discipline, transfer and trade systems retained; persistent factual narrative memory; shared locker-room events recorded each season from real state, with College discipline incidents and Pro contract and trade friction kept separate | Motivation state, and further locker-room narrative hooks. |
-| News / social | Compact both-host feed; visible Social shortcut; authored posts with engagement labels and independent read state; phase-aware order; persistent season threads; player likes, reposts and followed desks; authored replies; rivalry threads | Player and coach level memory, and broader visual acceptance. |
+| News / social | Compact both-host feed; visible Social shortcut; authored posts with engagement labels and independent read state; phase-aware order; persistent player/coach/team season threads; player likes, reposts, followed desks, generated replies and rivalry threads; Pro player story identity | Player-authored reply action and explicit device acceptance. |
 | GameCast / replay | Shared venue styling and indoor turf; replay angle selection; recorded pre-snap choices; replay highlight selection from the recorded snaps; repaired field branding | Device acceptance of the highlight picker and the pre-snap choreography. |
-| Hall of Fame | College player HOF; Pro player HOF derivation; the shared coach scoring is now rendered in both hosts' Hall of Fame views; persistent coach induction records with per-team citations; induction happens once and keeps its year | Coach lifecycle parity for CPU club coaches, whose season-by-season history is not recorded yet. |
+| Hall of Fame | College player HOF; Pro player HOF derivation; shared coach scoring in both hosts; persistent coach induction records with per-team citations; CPU club coach season history with stable staff identity | Final broad validation and device acceptance. |
 
 ### What is left in the near term
 
-These are the open items above, in a sensible order. Each is small next to the delivered batches.
+The durable state and identity work is implemented on the active branch: CPU club coach seasons use distinct
+staff identities and conference accounting, Pro player-specific stories carry player identity into persistent
+person threads, motivation is a persisted season state, and the Pro scouting department repairs itself to the
+required three scouts per club. The remaining near-term work is now release-facing:
 
-1. **Explicit action-level device acceptance of the new surfaces.** The GitHub Actions device jobs now pass end to end on `7c6b377`, and their walks cover the coach Hall of Fame and the team, roster and news screens where the new panels render. The gap that remains is an explicit device assertion on the new actions themselves: a social like/repost/reply, a rivalry series panel, a chemistry note and the replay highlight picker.
-2. **Coach lifecycle parity for CPU club coaches.** The Pro coach Hall of Fame can only induct the user's recorded career because CPU club coaches have no season-by-season history. Recording CPU coach seasons would let both leagues induct the same way.
-3. **Player and coach level narrative memory.** Season threads are keyed by team, topic and season. A thread per player or per coach needs a stable identity for that person across seasons.
-4. **Motivation state.** Locker-room events record what happened. Motivation would be the durable state those events read from and write to.
-5. **Sourced league rules for the two open limits.** A rivalry effect on a play, and any league-specific pre-snap limit, both wait on a rule this repository does not currently hold. Neither should be invented.
-6. **The Pro scout-count intermittency.** The staff-balance fixture now uses a fixed franchise id, because the staff lifecycle is seeded from that id and the count could land on 95 instead of 96 about once in twenty runs. The underlying intermittency predates this work and is recorded in `current-work.md`. What is still open is proving that a freshly created franchise can never end up with a short scouting department, rather than only proving that one fixture does not.
+1. **Explicit action-level device acceptance of the new surfaces.** Assert a player-authored social reply,
+   like/repost state, rivalry series panel, chemistry/motivation note and replay highlight picker on fresh
+   College and Pro APKs.
+2. **Sourced rule boundary.** Encode the sourced NCAA/NFL motion count, direction and set requirements, and
+   document that the repository's one-yard shift and three-yard motion values are internal simulation/catalog
+   bounds rather than league rules. Keep rivalry records simulation-neutral because neither rulebook supplies a
+   rivalry play modifier.
+3. **Final broad validation and packaging.** Run the required Engine, College and Pro checks for the completed
+   state work, then build and verify both exact Debug APKs before the authorized merge and prerelease.
 
 ## Audit-based feature inventory
 

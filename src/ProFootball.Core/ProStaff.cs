@@ -49,6 +49,7 @@ public static class ProStaff
     public static ProFranchise DevelopSeason(ProFranchise s)
     {
         if (s.StaffLifecycleYear >= s.Year) return s;
+        s = ProCoachHistoryService.RecordCompletedSeason(s);
         var standings=ProStandings.Build(s).ToDictionary(r=>r.Team.Id);
         var userClub=s.League.Teams.FirstOrDefault(team=>team.Name==s.UserTeam);
         var protectedRole=ProCareer.Role(s);
@@ -91,7 +92,7 @@ public static class ProStaff
             if(retire)
             {
                 retirements.Add(new(s.Year,row.Team.Name,coach.Role,coach.Name,age,"Coaching",
-                    performanceBonus<0?"Retired after a difficult season at the age of "+age:"Retired at the age of "+age));
+                    performanceBonus<0?"Retired after a difficult season at the age of "+age:"Retired at the age of "+age){StaffId=coach.StaffId});
                 coaches.Add(applied with{Name="Vacant",Vacant=true,Title="Vacant franchise role"});
             }
             else coaches.Add(applied);
@@ -158,7 +159,10 @@ public static class ProStaff
     }
     public static ProCoach InitializeMetadata(ProCoach coach, Guid franchiseId)
     {
-        if (coach.Age > 0) return coach;
+        var staffId = coach.StaffId.HasValue && coach.StaffId.Value != Guid.Empty
+            ? coach.StaffId.Value
+            : ProCoachHistoryService.CoachId(franchiseId, coach.TeamId, coach.Role, coach.Name);
+        if (coach.Age > 0) return coach with { StaffId = staffId };
         unchecked
         {
             var hash = 2166136261u;
@@ -167,6 +171,7 @@ public static class ProStaff
             var age = coach.Role == StaffRole.HeadCoach ? 38 + (int)(hash % 25) : 32 + (int)(hash % 31);
             return coach with
             {
+                StaffId = staffId,
                 Age = age,
                 CareerYears = Math.Clamp(age - 27 - (int)(hash / 17 % 7), 1, 35),
                 TenureYears = (int)(hash / 31 % 9),

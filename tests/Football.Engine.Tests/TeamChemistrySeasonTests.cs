@@ -107,6 +107,30 @@ public class TeamChemistrySeasonTests
     }
 
     [Fact]
+    public void MotivationIsDurableBoundedAndExplainedByRecordedSignals()
+    {
+        var signals = new[]
+        {
+            new LockerRoomSignal { TeamName = "Washington", Kind = LockerRoomEventKind.CoachingChange, SeasonYear = 2027 },
+            new LockerRoomSignal { TeamName = "Washington", Kind = LockerRoomEventKind.RosterTurnover, Value = 30, SeasonYear = 2027 },
+            new LockerRoomSignal { TeamName = "Washington", Kind = LockerRoomEventKind.Morale, Value = 25, SeasonYear = 2027 }
+        };
+
+        var first = TeamMotivationService.Advance(null, signals, "Washington", 2027);
+        var second = TeamMotivationService.Advance(first, signals, "Washington", 2028);
+
+        var repeated = TeamMotivationService.Advance(null, signals, "Washington", 2027);
+        Assert.Equal(first.TeamId, repeated.TeamId);
+        Assert.Equal(first.Value, repeated.Value);
+        Assert.Equal(first.Drivers, repeated.Drivers);
+        Assert.InRange(first.Value, TeamMotivationService.Minimum, TeamMotivationService.Maximum);
+        Assert.Contains(first.Drivers, driver => driver.Contains("head coach"));
+        Assert.Contains(first.Drivers, driver => driver.Contains("turnover"));
+        Assert.Contains(first.Drivers, driver => driver.Contains("morale"));
+        Assert.Equal(2028, second.SeasonYear);
+    }
+
+    [Fact]
     public void LockerRoomEventsAreDeterministicAndUseRecordedFactsOnly()
     {
         var signals = new[]

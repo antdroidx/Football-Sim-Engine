@@ -1,3 +1,17 @@
+## Roadmap completion checkpoint — November 6, 2026
+
+- [x] Persist team motivation in both save models and advance it deterministically by season.
+- [x] Maintain exactly three unique Pro scouts per club across 512 generated franchise seeds.
+- [x] Record completed CPU club coach seasons once with stable staff identities and per-team career citations.
+- [x] Keep same-name Pro coaches distinct across clubs and roles without changing legacy user-career IDs.
+- [x] Count cross-division conference games in coach conference records and keep ties out of losses.
+- [x] Tag Pro injury, result, weekly leader, award, all-star and showcase stories with stable player identity.
+- [x] Keep tied game results from naming an away-team winner.
+- [x] Pass 63 focused Pro regressions, 18 focused Engine regressions, 24 focused College regressions and both Android compile targets.
+
+Still required before acceptance: player-authored social reply and action-level device checks, sourced pre-snap
+rule boundaries, full required suites, exact College/Pro APKs, established workflow runs and the authorized
+prerelease.
 > **Historical acceptance log:** See [current roadmap](ROADMAP.md) and [parity audit](audits/pro-college-parity-2026-11-01.md) for completed milestones and remaining work.
 
 ## Accepted Pro115 / College412 — guided offseason, compact overview and backfield corrections

@@ -40,7 +40,7 @@ public sealed partial class FoundationPage
             var record=CollegeChemistryService.Record(state,team.Name,state.SeasonYear);
             if(record is null)return T("No season culture record yet. Culture values follow the current roster and staff.");
             var prior=CollegeChemistryService.Record(state,team.Name,state.SeasonYear-1);
-            var stack=new VerticalStackLayout{Spacing=4};
+            var stack=new VerticalStackLayout{Spacing=4,AutomationId="college-chemistry-note"};
             stack.Children.Add(T(prior is null
                 ? "First recorded season"
                 : $"{record.Cohesion-prior.Cohesion:+0;-0;0} vs last season · {TeamChemistrySeasonService.MomentumLabel(record.Momentum)}",true));
@@ -61,7 +61,7 @@ public sealed partial class FoundationPage
         {
             var rivalries=RivalryRecordService.For(state.Rivalries,team.Name);
             if(rivalries.Count==0)return T("No rivalry series are recorded for this program yet.");
-            var stack=new VerticalStackLayout{Spacing=4};
+            var stack=new VerticalStackLayout{Spacing=4,AutomationId="college-rivalry-series"};
             foreach(var rivalry in rivalries)
                 stack.Children.Add(T($"{RivalryRecordService.Opponent(rivalry,team.Name)} · {RivalryRecordService.Series(rivalry,team.Name)}",true));
             return stack;
@@ -99,6 +99,8 @@ public sealed partial class FoundationPage
                 TableText($"{audit.PerformanceChange:+0;-0;0}"), TableText(audit.Summary)}))),            Box("Scouting department",ScoutDirectory()),
             Box("Team ratings",T($"Offense {profile.PassOffenseRating:0} pass / {profile.RushOffenseRating:0} run · Defense {profile.PassDefenseRating:0} pass / {profile.RushDefenseRating:0} run · Special teams {profile.SpecialTeamsRating:0}",true)),
             Box("Team chemistry",T($"Cohesion {profile.Cohesion} / 100 · Scheme familiarity {profile.SchemeFamiliarity} / 100",true),
+
+                new Label{Text=TeamMotivationService.Label(state.TeamMotivation.Where(item=>item.TeamName.Equals(team.Name,StringComparison.OrdinalIgnoreCase)).OrderByDescending(item=>item.SeasonYear).FirstOrDefault()),AutomationId="college-team-motivation",FontSize=12,TextColor=DynastyTheme.Muted},
                 ChemistrySummary(),
                 LockerRoomSummary()),
             Box("Rivalries",RivalrySummary())

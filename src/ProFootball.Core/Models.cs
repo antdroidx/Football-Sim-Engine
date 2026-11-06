@@ -102,6 +102,9 @@ public sealed record ProFranchise
     public List<DynastyManager.Core.Models.FootballNewsStory> SavedNews { get; init; } = [];
     public IReadOnlyList<DynastyManager.Core.Models.FootballNarrativeMemoryRecord> NarrativeMemory { get; init; } = [];
     public List<DynastyManager.Core.Simulation.TeamChemistryRecord> TeamChemistry { get; init; } = [];
+    public List<DynastyManager.Core.Models.TeamMotivationRecord> TeamMotivation { get; init; } = [];
+    public List<DynastyManager.Core.Models.CoachSeasonRecord> CoachSeasonHistory { get; init; } = [];
+    public int CoachHistoryLastRecordedSeasonYear { get; init; }
     public List<DynastyManager.Core.Models.LockerRoomEvent> LockerRoomEvents { get; init; } = [];
     public List<DynastyManager.Core.Models.CoachHallOfFameEntry> CoachHallOfFame { get; init; } = [];
     public List<DynastyManager.Core.Models.FootballSocialInteraction> SocialInteractions { get; init; } = [];
@@ -125,6 +128,7 @@ public sealed record ProStanding(ProTeam Team, int Wins, int Losses, int Ties, d
 public enum OffseasonStep { Retention, FreeAgency, Draft, RosterCuts }
 public sealed record ProCoach(string TeamId, StaffRole Role, string Name, string Title, string Source)
 {
+    public Guid? StaffId { get; init; }
     public CoachingAttributes? Coaching { get; init; }
     public int Age { get; init; }
     public int CareerYears { get; init; }
@@ -160,7 +164,10 @@ public sealed record WaiverEntry(Guid PlayerId, int ExpiresAfterWeek, List<strin
 public sealed record OwnerExpectation(string Team, int TargetWins, int Security, bool Fired = false);
 
 public sealed record CoachCandidate(string Name, string SourceTeam, string Title, string Source);
-public sealed record ProStaffRetirement(int Year, string Team, StaffRole Role, string Name, int Age, string Department, string Reason);
+public sealed record ProStaffRetirement(int Year, string Team, StaffRole Role, string Name, int Age, string Department, string Reason)
+{
+    public Guid? StaffId { get; init; }
+}
 
 public sealed record ProUserCareer(string Name, StaffRole Role, bool FiringEnabled)
 { public int Reputation { get; init; } = 50; public int Security { get; init; } = 65; public bool Unemployed { get; init; } public int LastReviewedYear { get; init; } }
@@ -170,7 +177,12 @@ public sealed record ProGmDecision(Guid Id, int Year, int Week, string Action, b
 
 public sealed record ProTradeRecord(Guid Id, int Year, int Week, string From, string To, List<Guid> GivenPlayers, List<Guid> ReceivedPlayers, List<ProDraftPick> GivenPicks, List<ProDraftPick> ReceivedPicks) { public int TransactionTick {get;init;}=-1; }
 
-public sealed record ProNewsStory(string Id, int Year, int Week, string Category, string Headline, string Body, string? Team = null, string? GameId = null, ProPhase? Phase = null);
+public sealed record ProNewsStory(string Id, int Year, int Week, string Category, string Headline, string Body, string? Team = null, string? GameId = null, ProPhase? Phase = null)
+{
+    public DynastyManager.Core.Models.FootballPersonKind? PersonKind { get; init; }
+    public Guid? PersonId { get; init; }
+    public string? PersonName { get; init; }
+};
 
 public sealed record ProWeeklyTalk(int Year,int Week,ProPhase Phase,int Tick,DynastyManager.Core.Simulation.CoachTalkRecord Talk);
 public sealed record ProMoraleEffect(Guid PlayerId,string Reason,int RemainingChange,int NextDecayTick);

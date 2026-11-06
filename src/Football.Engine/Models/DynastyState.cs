@@ -49,6 +49,7 @@ public sealed record DynastyState
     public IReadOnlyList<FootballNewsStory> SavedNews { get; init; } = [];
     public IReadOnlyList<FootballNarrativeMemoryRecord> NarrativeMemory { get; init; } = [];
     public IReadOnlyList<DynastyManager.Core.Simulation.TeamChemistryRecord> TeamChemistry { get; init; } = [];
+    public IReadOnlyList<TeamMotivationRecord> TeamMotivation { get; init; } = Array.Empty<TeamMotivationRecord>();
     public IReadOnlyList<LockerRoomEvent> LockerRoomEvents { get; init; } = [];
     public IReadOnlyList<CoachHallOfFameEntry> CoachHallOfFame { get; init; } = [];
     public IReadOnlyList<FootballSocialInteraction> SocialInteractions { get; init; } = [];

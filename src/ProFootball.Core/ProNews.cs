@@ -9,20 +9,46 @@ public static class ProNews
     public static ProFranchise Refresh(ProFranchise s)
     {
         var stories = s.News.ToDictionary(n => n.Id);
-        void Add(ProNewsStory story) => stories.TryAdd(story.Id, story);
+        void Add(ProNewsStory story)
+        {
+            if (!stories.TryGetValue(story.Id, out var existing))
+            {
+                stories.Add(story.Id, story);
+                return;
+            }
+            if (existing.PersonId is null && story.PersonId.HasValue)
+                stories[story.Id] = existing with
+                {
+                    PersonKind = story.PersonKind,
+                    PersonId = story.PersonId,
+                    PersonName = story.PersonName
+                };
+        }
         foreach (var g in s.Games.Where(g => g.Football.HasPlayed))
         {
             var f = g.Football; var margin = Math.Abs((f.HomeScore ?? 0) - (f.AwayScore ?? 0));
-            Add(new("game-" + f.GameId, f.SeasonYear, f.Week,
+            var gameStory = new ProNewsStory("game-" + f.GameId, f.SeasonYear, f.Week,
                 g.Phase == ProPhase.Preseason ? "Preseason" : g.Phase == ProPhase.Playoffs ? "Playoffs" : "Results",
                 f.HomeScore == f.AwayScore ? "All square: " + f.AwayTeamName + " and " + f.HomeTeamName : f.WinnerTeamName + (margin >= 21 ? " rolls to a convincing win" : margin <= 3 ? " survives a close finish" : " takes the win"),
-                $"{g.Phase} · {f.AwayTeamName} {f.AwayScore} – {f.HomeScore} {f.HomeTeamName}", f.WinnerTeamName, f.GameId, g.Phase));
+                $"{g.Phase} · {f.AwayTeamName} {f.AwayScore} – {f.HomeScore} {f.HomeTeamName}", f.WinnerTeamName, f.GameId, g.Phase);
+            if (f.PlayerOfGame is { } standout) gameStory = gameStory with
+            {
+                PersonKind = DynastyManager.Core.Models.FootballPersonKind.Player,
+                PersonId = standout.PlayerId,
+                PersonName = standout.PlayerName
+            };
+            Add(gameStory);
         }
         foreach (var player in s.Players.Where(p => p.Football.CurrentInjury is { WeeksRemaining: > 0 }))
         {
             var f = player.Football; var injury = f.CurrentInjury!;
-            Add(new("injury-" + injury.InjuryId, injury.SeasonYear, injury.StartWeek, "Injuries", f.FullName + " sidelined",
-                $"{f.TeamName} · {injury.BodyArea} · initial recovery estimate {injury.InitialWeeks} weeks.", f.TeamName));
+            Add(new ProNewsStory("injury-" + injury.InjuryId, injury.SeasonYear, injury.StartWeek, "Injuries", f.FullName + " sidelined",
+                $"{f.TeamName} · {injury.BodyArea} · initial recovery estimate {injury.InitialWeeks} weeks.", f.TeamName) with
+            {
+                PersonKind = DynastyManager.Core.Models.FootballPersonKind.Player,
+                PersonId = f.PlayerId,
+                PersonName = f.FullName
+            });
         }
         foreach (var group in s.Games.Where(g => g.Phase == ProPhase.RegularSeason && g.Football.HasPlayed).GroupBy(g => g.Football.Week))
         {
@@ -40,10 +66,12 @@ public static class ProNews
             if(!stories.ContainsKey(id))
             {
                 var biggest=week.OrderByDescending(g=>Math.Abs(g.Football.HomeScore!.Value-g.Football.AwayScore!.Value)).First().Football;
-                var leader=week.SelectMany(g=>g.Football.PlayerStats).GroupBy(p=>p.PlayerId).Select(g=>new{Name=g.First().PlayerName,Yards=g.Sum(p=>p.PassYards)}).OrderByDescending(p=>p.Yards).FirstOrDefault();
+                var leader=week.SelectMany(g=>g.Football.PlayerStats).GroupBy(p=>p.PlayerId).Select(g=>new{Id=g.Key,Name=g.First().PlayerName,Yards=g.Sum(p=>p.PassYards)}).OrderByDescending(p=>p.Yards).FirstOrDefault();
                 var detail=$"{week.Count()} games completed. Largest margin: {biggest.AwayTeamName} {biggest.AwayScore} – {biggest.HomeScore} {biggest.HomeTeamName}.";
                 if(leader is {Yards:>0})detail+=$" Passing leader: {leader.Name}, {leader.Yards:N0} yards.";
-                Add(new(id,s.Year,week.Key,"Weekly review",$"Week {week.Key} around the league",detail,Phase: ProPhase.RegularSeason));
+                var weekly=new ProNewsStory(id,s.Year,week.Key,"Weekly review",$"Week {week.Key} around the league",detail,Phase: ProPhase.RegularSeason);
+                if(leader is {Yards:>0})weekly=weekly with{PersonKind=DynastyManager.Core.Models.FootballPersonKind.Player,PersonId=leader.Id,PersonName=leader.Name};
+                Add(weekly);
             }
             if(week.Key<14)continue;
             var snapshot=s with{Games=s.Games.Where(g=>g.Phase==ProPhase.RegularSeason&&g.Football.Week<=week.Key).ToList()};
@@ -57,9 +85,14 @@ public static class ProNews
         }
         foreach(var honors in s.Honors)
         {
-            foreach(var award in honors.Awards)Add(new($"award-{honors.Year}-{award.Title}",honors.Year,18,"Awards",award.Name+" wins "+award.Title,$"{award.Team} · {honors.Year} regular-season award.",award.Team, Phase: ProPhase.Playoffs));
-            foreach(var conference in honors.Selections.GroupBy(p=>p.Conference))Add(new($"allstars-{honors.Year}-{conference.Key}",honors.Year,18,"Awards",conference.Key+" all-star selections announced",$"{conference.Count()} players selected for the {honors.Year} conference showcase."));
-            if(honors.Showcase is {HasPlayed:true} game)Add(new($"showcase-{honors.Year}",honors.Year,19,"Awards","All-star showcase final",$"{game.AwayTeamName} {game.AwayScore} – {game.HomeScore} {game.HomeTeamName}. Exhibition statistics are separate from league totals.",Phase: ProPhase.Playoffs));
+            foreach(var award in honors.Awards)Add(new ProNewsStory($"award-{honors.Year}-{award.Title}",honors.Year,18,"Awards",award.Name+" wins "+award.Title,$"{award.Team} · {honors.Year} regular-season award.",award.Team, Phase: ProPhase.Playoffs) with{PersonKind=DynastyManager.Core.Models.FootballPersonKind.Player,PersonId=award.PlayerId,PersonName=award.Name});
+            foreach(var selection in honors.Selections)Add(new ProNewsStory($"allstars-{honors.Year}-{selection.Conference}-{selection.Player.Football.PlayerId:N}",honors.Year,18,"Awards",selection.Player.Football.FullName+" named to the "+selection.Conference+" showcase",$"{selection.Player.Football.TeamName} · {honors.Year} all-star selection.",selection.Player.Football.TeamName, Phase: ProPhase.Playoffs) with{PersonKind=DynastyManager.Core.Models.FootballPersonKind.Player,PersonId=selection.Player.Football.PlayerId,PersonName=selection.Player.Football.FullName});
+            if(honors.Showcase is {HasPlayed:true} game)
+            {
+                var showcase=new ProNewsStory($"showcase-{honors.Year}",honors.Year,19,"Awards","All-star showcase final",$"{game.AwayTeamName} {game.AwayScore} – {game.HomeScore} {game.HomeTeamName}. Exhibition statistics are separate from league totals.",Phase: ProPhase.Playoffs);
+                if(game.PlayerOfGame is {} standout)showcase=showcase with{PersonKind=DynastyManager.Core.Models.FootballPersonKind.Player,PersonId=standout.PlayerId,PersonName=standout.PlayerName};
+                Add(showcase);
+            }
         }
         foreach (var trade in s.TradeHistory)
             Add(new("trade-" + trade.Id, trade.Year, trade.Week, "Trades", trade.From + " and " + trade.To + " complete deal",
@@ -71,7 +104,19 @@ public static class ProNews
             var stamp = System.Text.RegularExpressions.Regex.Match(text, @"^(\d{4}) W(\d+) · ");
             var year = stamp.Success ? int.Parse(stamp.Groups[1].Value) : s.Year;
             var week = stamp.Success ? int.Parse(stamp.Groups[2].Value) : s.Week;
-            Add(new(Key("transaction:" + text), year, week, category, text, "Confirmed league transaction."));
+            var transaction = new ProNewsStory(Key("transaction:" + text), year, week, category, text, "Confirmed league transaction.");
+            var namedCoach = s.Coaches.Where(c => !c.Vacant && text.Contains(c.Name, StringComparison.OrdinalIgnoreCase))
+                .Select(c => (c.Name, Id: ProCoachHistoryService.Identity(s, c)))
+                .Concat(s.StaffRetirements.Where(r => text.Contains(r.Name, StringComparison.OrdinalIgnoreCase))
+                    .Select(r => (r.Name, Id: ProCoachHistoryService.Identity(s, r))))
+                .OrderByDescending(item => item.Name.Length).FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(namedCoach.Name)) transaction = transaction with
+            {
+                PersonKind = DynastyManager.Core.Models.FootballPersonKind.Coach,
+                PersonId = namedCoach.Id,
+                PersonName = namedCoach.Name
+            };
+            Add(transaction);
         }
         // Phase precedes week because preseason and postseason weeks reset. Older saved
         // stories without Phase retain deterministic category/body inference.

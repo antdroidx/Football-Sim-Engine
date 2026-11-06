@@ -1,3 +1,29 @@
+# Final near-term completion plan — November 6, 2026
+
+The resumed execution is closing the remaining near-term work in three small batches, followed by the already
+authorized release sequence.
+
+| Batch | Scope | Status |
+|---|---|---|
+| F | Persisted motivation and scout replenishment from the resumed work; CPU coach season history with stable staff identity; Pro person-level story identity | Implemented and focused-tested; 63 Pro, 18 Engine, 24 College and both app compiles passed |
+| G | Player-authored social reply plus sourced NCAA/NFL pre-snap rule boundaries | Next |
+| H | Explicit College/Pro action-level device assertions for social, rivalry, chemistry/motivation and replay highlights | After G |
+
+After H: run the final broad checks, package both Debug APKs, dispatch the established workflows, merge to
+`main`, publish the prerelease with verified APKs/checksums/manifest, clean generated files and delete only the
+completed `codex/feature-roadmap-plan` branch locally and remotely.
+
+## Batch F implementation notes
+
+- `ProCoach` and `ProStaffRetirement` carry optional `StaffId` values with safe defaults for older saves.
+- `ProCoachHistoryService` records completed CPU club seasons once, uses stable staff IDs and counts all
+  same-conference games while keeping tied games out of conference losses.
+- Pro injury, player-of-game, weekly leader, award, all-star and showcase stories carry player identity into
+  the shared person-thread service.
+- `TeamMotivation` is persisted by both hosts and `ProScoutDepartment.Ensure` maintains exactly three unique
+  scouts per club.
+- The tie-result fix in `ScheduledGame.WinnerTeamName` is shared model behavior and is covered by the coach
+  conference-record regression.
 # Roadmap completion plan — November 5, 2026
 
 Derived from `docs/ROADMAP.md` (planning source, November 5, 2026) plus a source audit of

@@ -18,6 +18,7 @@ public class ProChemistryTests
         Assert.InRange(record!.Cohesion, TeamChemistrySeasonService.Minimum, TeamChemistrySeasonService.Maximum);
         Assert.NotEmpty(record.Notes);
 
+        Assert.NotEmpty(state.TeamMotivation);
         Assert.NotEmpty(state.LockerRoomEvents);
         Assert.All(state.LockerRoomEvents, item => Assert.StartsWith("locker/", item.Id));
         Assert.Contains(state.LockerRoomEvents, item => item.TeamName == "Seattle Seahawks");
@@ -67,6 +68,7 @@ public class ProChemistryTests
         var restored = JsonSerializer.Deserialize<ProFranchise>(legacy)!;
 
         Assert.Empty(restored.TeamChemistry);
+        Assert.Empty(restored.TeamMotivation);
         Assert.Empty(restored.LockerRoomEvents);
         Assert.Equal("Test franchise", restored.Name);
     }
@@ -78,6 +80,7 @@ public class ProChemistryTests
         var restored = JsonSerializer.Deserialize<ProFranchise>(JsonSerializer.Serialize(state))!;
 
         Assert.Equal(state.TeamChemistry.Count, restored.TeamChemistry.Count);
+        Assert.Equal(state.TeamMotivation.Count, restored.TeamMotivation.Count);
         Assert.Equal(state.LockerRoomEvents.Count, restored.LockerRoomEvents.Count);
         Assert.Equal(
             ProChemistryService.Record(state, "Seattle Seahawks", 2027)!.Cohesion,

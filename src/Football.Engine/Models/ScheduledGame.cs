@@ -43,5 +43,5 @@ public sealed record ScheduledGame
     public string? WinnerTeamName =>
         !HasPlayed || HomeScore is null || AwayScore is null
             ? null
-            : HomeScore > AwayScore ? HomeTeamName : AwayTeamName;
+            : HomeScore == AwayScore ? null : HomeScore > AwayScore ? HomeTeamName : AwayTeamName;
 }

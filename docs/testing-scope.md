@@ -1,3 +1,20 @@
+## Roadmap state and identity validation — November 6, 2026
+
+Executed on the dirty feature working tree:
+
+- Engine `NewsStoryTests|TeamChemistrySeasonTests`: 18 passed. This covers save-compatible narrative memory,
+  stable player/coach threads across seasons and deterministic motivation advancement.
+- Pro `ProCoachHallOfFameTests|ProNewsIdentityTests|HonorsTests|CareerSaveTests|StandingsTiebreakTests|StaffBalanceTests`:
+  63 passed. This covers CPU coach season idempotence, distinct same-name staff identities, conference accounting
+  across divisions, tied results, player-tagged Pro stories, legacy-story identity backfill, honors refresh,
+  read/save behavior and complete scout populations.
+- College `BowlServiceTests|SchedulePersistenceTests|StartingLibraryTests`: 24 passed.
+- Pro Android compile target: passed with one offline `NU1900` warning and two existing `CS8625` warnings.
+- College Android compile target: passed with three offline `NU1900` warnings.
+
+Focused evidence only. Full Engine/College/Pro suites, APKs, emulator action acceptance and GitHub Actions are
+not claimed by this entry.
+
 ## Device harness races and the College roster native-handle wedge — November 6, 2026
 
 Executed: `python -m unittest discover -s build -p 'test_android_ui_smoke.py'` — 22 passed, including focused

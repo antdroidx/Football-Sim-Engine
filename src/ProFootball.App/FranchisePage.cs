@@ -221,7 +221,7 @@ public sealed partial class FranchisePage : ContentPage
     {
         var rivalries=RivalryRecordService.For(s.Rivalries,teamName);
         if(rivalries.Count==0)return Text("No rivalry series are recorded for this club yet.",13);
-        var stack=new VerticalStackLayout{Spacing=4};
+        var stack=new VerticalStackLayout{Spacing=4,AutomationId="pro-rivalry-series"};
         foreach(var rivalry in rivalries)
             stack.Children.Add(Text($"{RivalryRecordService.Opponent(rivalry,teamName)} · {RivalryRecordService.Series(rivalry,teamName)}",13,true));
         return stack;
@@ -229,7 +229,8 @@ public sealed partial class FranchisePage : ContentPage
     View ChemistryPanel(ProFranchise s,string teamName,TeamSimulationProfile profile)
     {
         var record=ProChemistryService.Record(s,teamName,s.Year);
-        var stack=new VerticalStackLayout{Spacing=4};
+        var stack=new VerticalStackLayout{Spacing=4,AutomationId="pro-chemistry-note"};
+        stack.Children.Add(Text(TeamMotivationService.Label(s.TeamMotivation.Where(item=>item.TeamName.Equals(teamName,StringComparison.OrdinalIgnoreCase)).OrderByDescending(item=>item.SeasonYear).FirstOrDefault()),12));
         stack.Children.Add(Text($"Cohesion {profile.Cohesion}/100 · Scheme familiarity {profile.SchemeFamiliarity}/100",13,true));
         if(record is null)stack.Children.Add(Text("No season culture record yet. Culture values follow the current roster and staff.",12));
         else

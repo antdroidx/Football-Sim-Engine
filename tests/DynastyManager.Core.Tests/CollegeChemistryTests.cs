@@ -22,6 +22,7 @@ public class CollegeChemistryTests
         Assert.InRange(record.SchemeFamiliarity, TeamChemistrySeasonService.Minimum, TeamChemistrySeasonService.Maximum);
         Assert.NotEmpty(record.Notes);
 
+        Assert.NotEmpty(next.TeamMotivation);
         Assert.NotEmpty(next.LockerRoomEvents);
         Assert.All(next.LockerRoomEvents, item => Assert.StartsWith("locker/", item.Id));
         Assert.Contains(next.LockerRoomEvents, item => item.TeamName == "Washington");
@@ -97,6 +98,7 @@ public class CollegeChemistryTests
         var restored = JsonSerializer.Deserialize<DynastyState>(JsonSerializer.Serialize(state))!;
 
         Assert.Equal(state.TeamChemistry.Count, restored.TeamChemistry.Count);
+        Assert.Equal(state.TeamMotivation.Count, restored.TeamMotivation.Count);
         Assert.Equal(state.LockerRoomEvents.Count, restored.LockerRoomEvents.Count);
         Assert.Equal(
             CollegeChemistryService.Record(state, "Washington", 2027)!.Cohesion,

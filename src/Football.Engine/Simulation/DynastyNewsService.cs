@@ -3,7 +3,7 @@ using DynastyManager.Core.Models;
 namespace DynastyManager.Core.Simulation;
 
 public sealed record DynastyNewsStory(string Id, string Category, string Headline, string Body,
-    string TeamName, int SeasonYear, int Week, Guid? PlayerId = null);
+    string TeamName, int SeasonYear, int Week, Guid? PlayerId = null, Guid? CoachId = null, string? PersonName = null);
 
 /// <summary>Deterministic stories derived from recorded events; no invented interviews or outcomes.</summary>
 public static class DynastyNewsService
@@ -117,7 +117,7 @@ public static class DynastyNewsService
             stories.Add(new(injuryId, "Injuries", injuryHeadline,
                 $"{player.Position} {player.FullName} is listed with a {injury.Severity.ToString().ToLowerInvariant()} {injury.BodyArea} injury. " +
                 $"The current estimate is {injury.WeeksRemaining} week(s) remaining. Check the injury report for the latest roster status.",
-                player.TeamName, state.SeasonYear, state.Week, player.PlayerId));
+                player.TeamName, state.SeasonYear, state.Week, player.PlayerId, PersonName: player.FullName));
         }
         foreach (var commitment in state.RecruitingCommitments.Where(c => c.SeasonYear == state.SeasonYear))
             stories.Add(new($"commit/{commitment.SeasonYear}/{commitment.ProspectId}", "Recruiting",
@@ -136,12 +136,17 @@ public static class DynastyNewsService
         foreach (var incident in state.DisciplineHistory.Where(i => i.SeasonYear == state.SeasonYear).TakeLast(30))
             stories.Add(new($"conduct-{incident.SeasonYear}-{incident.Week}-{incident.TeamName}-{incident.EventId}", "Program conduct",
                 $"{incident.TeamName}: {incident.Title}", incident.Description, incident.TeamName, incident.SeasonYear, incident.Week));
+        foreach (var move in state.StaffMovementHistory.Where(move => move.SeasonYear == state.SeasonYear &&
+                     StaffAttributeService.IsFootballCoach(move.Role)).TakeLast(30))
+            stories.Add(new($"staff/{move.SeasonYear}/{move.StaffId:N}/{move.MovementType}", "Coaching",
+                $"{move.FullName}: {move.MovementType}", move.Reason, move.ToTeamName ?? move.FromTeamName ?? state.UserTeamName,
+                move.SeasonYear, 0, CoachId: move.StaffId, PersonName: move.FullName));
         foreach (var move in state.LeagueMovementHistory.Where(m => m.SeasonYear == state.SeasonYear))
             stories.Add(new($"move-{move.SeasonYear}-{move.TeamName}", "Realignment", $"{move.TeamName} joins {move.ToConference}",
                 $"{move.TeamName} moves from {move.FromConference} to {move.ToConference}{(move.Promotion ? " as a new FBS member" : "")}. Conference strength and this season's schedule reflect the change.", move.TeamName, move.SeasonYear, 0));
         foreach (var award in state.PlayerAwardHistory.Where(a => a.SeasonYear == state.SeasonYear && !a.IsPreseason && !a.IsAllAmerican && a.ConferenceName is null))
             stories.Add(new($"award-{award.SeasonYear}-{award.AwardName}", "Awards", $"{award.PlayerName} wins the {award.AwardName}",
-                $"{award.TeamName}'s {award.Position} earns national recognition. {award.Summary}.", award.TeamName, award.SeasonYear, state.Week, award.PlayerId));
+                $"{award.TeamName}'s {award.Position} earns national recognition. {award.Summary}.", award.TeamName, award.SeasonYear, state.Week, award.PlayerId, PersonName: award.PlayerName));
         return stories.OrderByDescending(s => s.SeasonYear).ThenByDescending(s => s.Week)
             .ThenByDescending(s => s.Category is "Championships" or "Playoff" or "Upsets" or "Streaks" or "Shutouts" or "Blowouts" or "Bowls")
             .ThenByDescending(s => s.TeamName == state.UserTeamName)

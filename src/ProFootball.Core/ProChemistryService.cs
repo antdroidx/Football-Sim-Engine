@@ -23,10 +23,19 @@ public static class ProChemistryService
         var history=state.TeamChemistry.Where(r=>r.SeasonYear!=state.Year).Concat(records)
             .OrderBy(r=>r.SeasonYear).ThenBy(r=>r.TeamName,StringComparer.OrdinalIgnoreCase).ToList();
 
-        var events=LockerRoomEventService.Build(Signals(state,records,prior,completedSeason));
+        var signals=Signals(state,records,prior,completedSeason);
+        var events=LockerRoomEventService.Build(signals);
+        var motivation=state.League.Teams.Select(team=>
+        {
+            var previous=state.TeamMotivation.Where(item=>item.TeamName.Equals(team.Name,StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(item=>item.SeasonYear).FirstOrDefault();
+            return TeamMotivationService.Advance(previous,signals,team.Name,state.Year);
+        }).ToList();
 
         return state with{
             TeamChemistry=history,
+            TeamMotivation=state.TeamMotivation.Where(item=>item.SeasonYear!=state.Year).Concat(motivation)
+                .OrderBy(item=>item.SeasonYear).ThenBy(item=>item.TeamName,StringComparer.OrdinalIgnoreCase).ToList(),
             LockerRoomEvents=state.LockerRoomEvents.Where(e=>e.SeasonYear!=state.Year).Concat(events)
                 .OrderBy(e=>e.SeasonYear).ThenBy(e=>e.Week).ThenBy(e=>e.TeamName,StringComparer.OrdinalIgnoreCase).ToList()};
     }
@@ -107,6 +116,10 @@ public static class ProChemistryService
                     Subject=player.Football.FullName,SubjectId=player.Football.PlayerId,SeasonYear=state.Year,Week=0,
                     Detail=$"{player.Football.FullName} requested a trade."});
 
+            var roster=state.Players.Where(p=>p.Football.TeamName==record.TeamName&&!p.Retired&&!p.Reserve&&!p.PracticeSquad).ToArray();
+            var morale=Math.Clamp(((int)roster.Select(p=>(double)p.Morale).DefaultIfEmpty(60).Average()-60)*2,-100,100);
+            signals.Add(new LockerRoomSignal{TeamName=record.TeamName,Kind=LockerRoomEventKind.Morale,
+                Value=morale,SeasonYear=state.Year,Week=0});
             signals.Add(new LockerRoomSignal{TeamName=record.TeamName,Kind=LockerRoomEventKind.Chemistry,
                 Value=record.Cohesion,SeasonYear=state.Year,Week=0});
         }
