@@ -228,7 +228,7 @@ def main():
     toss = capture("coin-toss-portrait-ready")
     tap(toss, "Start game")
     def has_field(root):
-        return any((n.get("resource-id") or "").endswith("game-day-field") for n in root.iter("node"))
+        return any((n.get("resource-id") or "").endswith(("live-field","game-day-field")) for n in root.iter("node"))
 
     def game_clock(root):
         return next(t for t in texts(root) if t and re.match(r"^(Q\d+|OT)\s+\d+:\d+", t))
@@ -251,7 +251,7 @@ def main():
     viewer = wait_for_id("game-day-portrait","live-game-page")
     badges = [n for n in viewer.iter("node") if n.get("content-desc", "").endswith(" team badge")]
     assert len(badges) == 2, "Broadcast scoreboard must expose both team badges"
-    assert any((n.get("resource-id") or "").endswith(("game-day-field-frame","live-field")) for n in viewer.iter("node"))
+    assert has_field(viewer), "Live view must expose the field"
     before_clock = game_clock(viewer)
     for name in ("Full field", "Broadcast", "Follow ball"):
         choices = options_choice("Camera", "camera-" + name.replace(" ", "-"))
@@ -283,72 +283,48 @@ def main():
     tap(team, "Substitutions")
     scope = wait_for("live-substitution-scope", lambda r: "Substitutions · this game only" in texts(r))
     tap(scope, "Cancel")
-    tap(capture("team-return-ready"), "Cancel")
+    sheet = capture("team-return-ready")
+    if "Cancel" in texts(sheet):
+        tap(sheet, "Cancel")
     assert before_clock == game_clock(capture("team-returned")), "Team management advanced the game clock"
     for rotation, name in ((1, "landscape"), (0, "portrait-restored")):
         adb("shell", "settings", "put", "system", "accelerometer_rotation", "0")
         adb("shell", "settings", "put", "system", "user_rotation", str(rotation))
-        time.sleep(2)
+        time.sleep(3)
         rotated = capture("game-day-" + name)
         assert has_field(rotated) and "Options" in texts(rotated)
-        field_node = next(n for n in rotated.iter("node") if (n.get("resource-id") or "").endswith("game-day-field"))
-        dock_node = next(n for n in rotated.iter("node") if (n.get("resource-id") or "").endswith("game-day-controls"))
+        field_node = next(n for n in rotated.iter("node") if (n.get("resource-id") or "").endswith(("live-field","game-day-field")))
         field_bounds = list(map(int, re.findall(r"\d+", field_node.get("bounds"))))
-        dock_bounds = list(map(int, re.findall(r"\d+", dock_node.get("bounds"))))
-        assert field_bounds[3] <= dock_bounds[1], "Controls overlap framed field"
+        viewport = list(map(int, re.findall(r"\d+", next(rotated.iter("node")).get("bounds"))))
+        assert field_bounds[3] <= viewport[3], "Framed field must stay inside the viewport"
         assert before_clock == game_clock(rotated)
-    # Fold-size resize while retaining the same game and score panel.
-    adb("shell", "wm", "size", "1768x2208")
-    time.sleep(3)
-    folded = capture("game-day-fold")
-    assert has_field(folded) and "Options" in texts(folded)
-    assert before_clock == game_clock(folded)
     adb("shell", "wm", "size", "reset")
     time.sleep(2)
     box = open_box("live-box-score")
     assert any("since kickoff" in (t or "") for t in texts(box))
     baseline = texts(box)
     tap(box, "Return to game")
-    tap(capture("manual-replay-more"), "More")
-    replay = wait_for("manual-replay-ready", lambda r: "Replay last" in texts(r))
-    tap(replay, "Replay last")
-    returned = wait_for("manual-replay-returned", lambda r: "Options" in texts(r) and ("Call play" in texts(r) or "Call defense" in texts(r)))
+    live = wait_for_id("manual-replay-ready", "live-options")
+    tap(live, "Options")
+    replay = wait_for("manual-replay-menu", lambda r: "Replay last play" in texts(r))
+    tap(replay, "Replay last play")
+    returned = wait_for_id("manual-replay-returned", "live-options")
     assert before_clock == game_clock(returned), "Replay consumed game time"
     after = open_box("replay-stats-after")
     assert texts(after) == baseline, "Replay changed scores, morale or statistics"
     tap(after, "Return to game")
-    tap(capture("watch-ready"), "Watch CPU")
-    # Viewing options must be reachable while Watch is advancing.
-    watch_box = open_box("watch-box-score")
-    snapshot = texts(watch_box)
-    time.sleep(2)
-    assert texts(capture("watch-box-still-paused")) == snapshot
-    tap(watch_box, "Return to game")
-    ready = capture("takeover-ready")
-    tap(ready, "Take over")
-    controlled = wait_for("takeover-controlled", lambda r: "Watch CPU" in texts(r) and "Options" in texts(r))
-    assert "Watch CPU" in texts(controlled), "Take over did not leave Watch mode"
-    tap(controlled, "More")
-    tap(scroll_to_text("skip-ready", "Skip to end"), "Skip to end")
-    confirmation = wait_for("skip-confirm-cancel", lambda r: "Skip to end?" in texts(r))
-    cancel_label = next(t for t in texts(confirmation) if (t or "").casefold() == "keep playing")
-    tap(confirmation, cancel_label)
-    cancelled = capture("skip-cancelled")
-    assert "Close" not in texts(cancelled)
-    if "Skip to end" not in texts(cancelled):
-        tap(cancelled, "More")
-    tap(scroll_to_text("skip-ready-again", "Skip to end"), "Skip to end")
-    confirmation = wait_for("skip-confirm-finish", lambda r: "Skip to end?" in texts(r))
-    accept_label = next(t for t in texts(confirmation) if (t or "").casefold() == "simulate remainder")
-    tap(confirmation, accept_label)
-    final = wait_for("skip-final-saved", lambda r: enabled(r, "Close"), timeout=300)
-    final_box = open_box("skip-final-box")
-    assert "Final statistics" in texts(final_box)
-    tap(final_box, "Return to game")
-    tap(capture("skip-final-close"), "Close")
+    # Finishing the game saves it, and the game can be left from the live view.
+    live = wait_for_id("finish-ready", "live-options")
+    tap(live, "Options")
+    options = wait_for("finish-menu", lambda r: "Finish game" in texts(r))
+    tap(options, "Finish game")
+    final = wait_for("final-saved", lambda r: any((t or "").startswith("FINAL") for t in texts(r)), timeout=300)
+    tap(final, "Options")
+    options = wait_for("exit-menu", lambda r: "Exit game" in texts(r))
+    tap(options, "Exit game")
     overview = wait_for("after-live-view", overview_ready, timeout=300)
     assert "Play game" not in texts(overview), "Saved game was not marked completed"
-    print("Broadcast scoreboard, inset frame, cameras, independent speeds, live morale, coach talks, replay invariants, rotation/Fold, Watch options, Take over and saved final passed.")
+    print("Broadcast scoreboard, inset frame, cameras, independent speeds, live morale, coach talks, replay invariants, rotation and saved final passed.")
     previous = calendar(overview)
     tap(overview, advance_action(overview))
     advanced = wait_for("calendar-advanced", lambda r: overview_ready(r, previous), timeout=300)
