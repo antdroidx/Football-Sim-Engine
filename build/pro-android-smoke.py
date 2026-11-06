@@ -161,7 +161,8 @@ try:
     assert "Talk to player" not in s.texts(team),"Individual talks must not be offered"
     s.tap(team,"Cancel");time.sleep(1)
     # The coach picks a play from the call sheet and snaps it.
-    s.tap(live,"Call play")
+    live=s.wait_for_id("call-ready","live-pause")
+    s.tap_id(live,"live-call")
     sheet=s.wait_for("pro-call-sheet",lambda r:any("quick-call-" in n.get("resource-id","") for n in r.iter("node")),timeout=90)
     card=next(n for n in sheet.iter("node") if "quick-call-" in n.get("resource-id",""))
     s.tap(sheet,card.get("text"))
