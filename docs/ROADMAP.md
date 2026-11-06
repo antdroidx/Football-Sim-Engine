@@ -30,7 +30,7 @@ All seven near-term workstreams were carried through five implementation batches
 
 These are the open items above, in a sensible order. Each is small next to the delivered batches.
 
-1. **Device acceptance of the new surfaces.** The social actions, the rivalry panels, the coach Hall of Fame, the chemistry panel and the highlight picker have compile coverage and focused tests, but no device walkthrough yet. The GitHub Actions device jobs are the place to get it.
+1. **Explicit action-level device acceptance of the new surfaces.** The GitHub Actions device jobs now pass end to end on `7c6b377`, and their walks cover the coach Hall of Fame and the team, roster and news screens where the new panels render. The gap that remains is an explicit device assertion on the new actions themselves: a social like/repost/reply, a rivalry series panel, a chemistry note and the replay highlight picker.
 2. **Coach lifecycle parity for CPU club coaches.** The Pro coach Hall of Fame can only induct the user's recorded career because CPU club coaches have no season-by-season history. Recording CPU coach seasons would let both leagues induct the same way.
 3. **Player and coach level narrative memory.** Season threads are keyed by team, topic and season. A thread per player or per coach needs a stable identity for that person across seasons.
 4. **Motivation state.** Locker-room events record what happened. Motivation would be the durable state those events read from and write to.

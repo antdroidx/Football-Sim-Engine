@@ -8,7 +8,8 @@ release and audit documents.
 
 ## Where the work stands
 
-All five near-term batches are delivered on `codex/feature-roadmap-plan` and pushed: season-aware chemistry
+The GitHub Actions College and Pro device jobs pass end to end on `7c6b377`; the run and artifact details are in
+`testing-scope.md`. All five near-term batches are delivered on `codex/feature-roadmap-plan` and pushed: season-aware chemistry
 and locker-room events, replay highlights and pre-snap choreography, the persistent coach hall of fame, the
 social interaction layer, and the persisted rivalry set with series exposure. The batch commits, their
 acceptance criteria and their validation commands are in `roadmap-completion-plan.md`.
@@ -17,7 +18,10 @@ acceptance criteria and their validation commands are in `roadmap-completion-pla
 
 The near-term items that remain, in the order `ROADMAP.md` lists them:
 
-1. Device acceptance of the new surfaces, through the GitHub Actions device jobs.
+1. Explicit action-level device acceptance for the new surfaces. The GitHub Actions device jobs pass end to end
+   (`7c6b377`) and cover the coach Hall of Fame and the screens where the new panels render; the remaining gap is
+   asserting the new actions themselves — a social like/repost/reply, a rivalry series panel, a chemistry note and
+   the replay highlight picker.
 2. Coach lifecycle parity for CPU club coaches, which needs a recorded CPU coach season history.
 3. Player and coach level narrative memory, which needs a stable person identity across seasons.
 4. Motivation state behind the locker-room events.
