@@ -243,6 +243,8 @@ jobs:
           api-level: 36
           arch: x86_64
           profile: pixel_6
+          ram-size: 4096
+          heap-size: 512
           disable-animations: true
           script: |
             adb install -r "$APK_PATH"
@@ -325,6 +327,8 @@ jobs:
           api-level: 36
           arch: x86_64
           profile: pixel_6
+          ram-size: 4096
+          heap-size: 512
           disable-animations: true
           script: |
             adb install -r "$APK_PATH"
