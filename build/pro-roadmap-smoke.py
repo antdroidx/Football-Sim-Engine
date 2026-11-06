@@ -153,15 +153,21 @@ def presentation():
         load(data[key]);navigate("Front Office");click_desc("presentation-"+key,"Draft & scouting. Prospects and visit slots" if key=="draft" else "Expiring contracts. Retention decisions",target)
         root=s.scroll_to_text("pro-presentation-"+key,header,max_swipes=20)
         cell_visible(root,header);action_visible(root,target);s.capture("pro-presentation-portrait-"+key)
-    navigate("Front Office");click("presentation-camp","Training camp")
-    root=s.scroll_to_text("pro-presentation-camp","Change",max_swipes=20);cell_visible(root,"Change");s.capture("pro-presentation-portrait-camp")
+    navigate("Front Office")
+    front=ready("presentation-front-office",lambda r:"Expiring contracts" in s.texts(r) or "Draft & scouting" in s.texts(r) or "Training camp" in s.texts(r))
+    camp_checked="Training camp" in s.texts(front)
+    if camp_checked:
+        click("presentation-camp","Training camp")
+        root=s.scroll_to_text("pro-presentation-camp","Change",max_swipes=20);cell_visible(root,"Change");s.capture("pro-presentation-portrait-camp")
+    else:
+        s.capture("pro-presentation-front-office")
     s.adb("shell","wm","size","1768x2208");s.adb("shell","wm","density","320")
     navigate("Analytics");ready("fold-analytics",lambda r:"Franchise analytics" in s.texts(r));category("Draft outcomes");s.capture("pro-roadmap-fold-draft-outcomes")
     for theme in ["Light","Dark"]:
         click("theme-options","Settings");click("appearance","Appearance");click(theme.lower(),theme)
         navigate("Analytics");ready(theme.lower()+"-analytics",lambda r:"Franchise analytics" in s.texts(r));s.capture("pro-roadmap-fold-"+theme.lower()+"-analytics")
     s.adb("shell","wm","size","reset");s.adb("shell","wm","density","reset")
-    Path("pro-presentation-check.json").write_text(json.dumps({"samePackagedAPK":True,"portraitPrimaryNumbers":True,"draftGradeAndAction":True,"retentionDemandAndAction":True,"campRatings":True,"foldLayout":True,"lightTheme":True,"darkTheme":True},indent=2),encoding="utf-8")
+    Path("pro-presentation-check.json").write_text(json.dumps({"samePackagedAPK":True,"portraitPrimaryNumbers":True,"draftGradeAndAction":True,"retentionDemandAndAction":True,"campRatings":camp_checked,"foldLayout":True,"lightTheme":True,"darkTheme":True},indent=2),encoding="utf-8")
 
 if "--team-actions-only" in sys.argv:
     try:
