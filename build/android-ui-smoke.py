@@ -226,7 +226,7 @@ def main():
         return any((n.get("resource-id") or "").endswith("game-day-field") for n in root.iter("node"))
 
     def game_clock(root):
-        return next(t for t in texts(root) if t and re.match(r"^Q\d+\s+\d+:\d+$", t))
+        return next(t for t in texts(root) if t and re.match(r"^(Q\d+|OT)\s+\d+:\d+", t))
 
     def options_choice(item, name):
         tap(capture(name + "-ready"), "Options")
