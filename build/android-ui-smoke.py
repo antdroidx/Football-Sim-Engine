@@ -230,7 +230,7 @@ def main():
 
     def options_choice(item, name):
         tap(capture(name + "-ready"), "Options")
-        menu = wait_for(name + "-options", lambda r: "GameCast options" in texts(r))
+        menu = wait_for(name + "-options", lambda r: "Game options" in texts(r) or "GameCast options" in texts(r))
         assert any((n.get("resource-id") or "").endswith("game-dialog-surface") for n in menu.iter("node")), "Live menu must use themed dialog surface"
         tap(menu, item)
         return capture(name)

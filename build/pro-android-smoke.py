@@ -112,7 +112,7 @@ try:
     s.tap(profile,"‹ Back")
     click("front-office-tab","Front Office")
     finance=ready("finance","Salary cap")
-    assert any("available" in (t or "") for t in s.texts(finance))
+    assert any("cap space" in (t or "") or "over season cap" in (t or "") for t in s.texts(finance))
     s.capture("pro-contracts-cap")
     click("trade-workspace","Trade center")
     trade=ready("trade-workspace-ready","Suggest additional picks")
