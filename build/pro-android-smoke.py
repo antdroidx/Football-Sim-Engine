@@ -320,7 +320,8 @@ try:
     live=s.tap_expect("oc-takeover","Take over",lambda r:any("Offense: You" in (t or "") for t in s.texts(r)))
     assert any("Offense: You" in (t or "") and "Defense: CPU" in (t or "") for t in s.texts(live)),"The coordinator must own only one unit"
     own=s.wait_for("pro-oc-own-unit",lambda r:any((n.get("resource-id") or "").endswith("live-call") for n in r.iter("node")),timeout=240)
-    assert s.selection_text(own).endswith("offense"),"The coordinator must wait for their own unit"
+    assert any("Offense: You" in (t or "") and "Defense: CPU" in (t or "") for t in s.texts(own)),"The coordinator must own only their offensive unit"
+    assert s.has_id_label(own,"live-call","Call play"),"The coordinator must wait for their own offensive call"
     assert "Choose defense" not in s.texts(own)
     clock_own={t for t in s.texts(own) if t and re.match(r"^(Q\d|OT) ",t)}
     assert clock_own, "Coordinator game clock is not visible"
