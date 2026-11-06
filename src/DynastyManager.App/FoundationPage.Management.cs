@@ -66,7 +66,24 @@ public sealed partial class FoundationPage
         header.Add(_menuButton, 0, 0);
         _menuButton.Clicked += (_, _) => { _navigationExpanded = !_navigationExpanded; ArrangeManagementShell(); };
         root.SizeChanged += (_, _) => ArrangeManagementShell();
-        Loaded += (_, _) => { ArrangeManagementShell(); if (Window is { } window) window.SizeChanged += (_, _) => ArrangeManagementShell(); };
+        Loaded += (_, _) =>
+        {
+            ArrangeManagementShell();
+            // The window outlives every page, so never subscribe a page-capturing
+            // handler twice and always release it before a theme rebuild discards us.
+            if (Window is { } window && _windowSizeHandler is null)
+            {
+                _windowSizeHandler = (_, _) => ArrangeManagementShell();
+                window.SizeChanged += _windowSizeHandler;
+            }
+        };
+    }
+
+    private void DetachWindowSizing(Window hostWindow)
+    {
+        if (_windowSizeHandler is null) return;
+        hostWindow.SizeChanged -= _windowSizeHandler;
+        _windowSizeHandler = null;
     }
 
     private void ArrangeManagementShell()
@@ -144,6 +161,7 @@ public sealed partial class FoundationPage
     }
 
     private readonly Dictionary<string, int> _managementTabs = new();
+    private EventHandler? _windowSizeHandler;
 
     private View ProfileTabs(params (string Title, View Content)[] panels) => ProfileTabs(null, panels);
 

@@ -1,3 +1,50 @@
+## Device harness races and the College roster native-handle wedge — November 6, 2026
+
+**What the device jobs found.** Both GitHub Actions device jobs were still failing, for different reasons. The
+Pro job's live-game step drove the shared GameCast view by labels the app no longer renders, and its landscape
+check demanded quick-call cards in a watched game where the call sheet is deliberately closed until the coach
+takes over. The College job wedged on the roster screen after a theme switch: the app stayed alive with no crash,
+no ANR and no managed exception, while Mono logged "N outstanding GREFs. Performing a full GC!" roughly every
+550 ms. The app was at its global-reference ceiling, so every new native view handle paid a full garbage
+collection and the render crawled until the harness gave up.
+
+**College native-handle leak.** `FoundationPage` subscribed a page-capturing handler to the long-lived
+`Window.SizeChanged` event every time a page loaded. A theme rebuild replaces the page, but the window kept the
+old page — and its entire view tree — alive, so every rebuild piled another set of native handles onto the app.
+The handler is now stored, subscribed once, and detached before `RebuildThemeAsync` installs the rebuilt page.
+On a local 4 GB / 8-core API 36 emulator the roster step after a Dark to Light switch now settles in 11.8 seconds
+with the Morale column rendered, and the run logs zero GREF warnings and 9 explicit garbage collections instead
+of 177 warnings and 457 explicit collections.
+
+**Pro live-game harness.** The watch flow now asserts that a watched game does not ask the coach to call, then
+takes over to earn the shared call sheet, picks an alternate quick call and snaps it. The landscape check
+verifies that the field stays inside the viewport and that the quick calls fit, instead of assuming an older
+collapse-after-selection behaviour. The play flow is rewritten against the current GameCast actions — Playbook,
+`live-call`, and Options to Exit game to Discard and exit — and finishing now confirms "Finish game?" and
+"Simulate remainder" before waiting for the final.
+
+The play flow and the coordinator-career flow were rewritten the same way. Playing a game now waits for the
+shared `live-call` sheet, opens the Playbook picker (asserting "Choose play" and "All formations"), snaps, and
+leaves through Options to Exit game to "Discard and exit". A coordinator career now asserts that taking over
+flips only its own unit ("Offense: You" with "Defense: CPU"), waits for that unit's call sheet instead of an
+obsolete "Pause CPU unit" label, holds the game clock while the call is pending, and opens a Playbook that covers
+only its own unit.
+
+**Tap races.** The live toolbar relayouts while a play animates: button labels change (Pause becomes Resume) and
+a transient Skip replay action can shift every button, so a tap taken from an older capture could land on its
+neighbour and the expected menu would never open. `build/android-ui-smoke.py` gains `tap_expect`, which
+re-captures before every tap and retries until the expected surface actually appears. The live menus in the Pro
+harness use it.
+
+Two harness-side behaviours stay as they were: the College save repository still refuses a mismatched schema
+version, so no schema version was bumped, and the harness still refuses to dismiss an application ANR dialog.
+A focused emulator walk of the changed Pro surfaces passes end to end on both halves: watch controls, take over,
+alternate call selection, snap, box score, landscape quick calls inside the viewport, finished/saved/exited game,
+then the played game's Playbook picker, snap, and exit confirmation.
+
+Not claimed here: the GitHub Actions device jobs and their APK artifacts, the full Pro harness run, any release,
+merge or publication.
+
 ## Roadmap rewrite, harness cleanup, and APK handover — November 5, 2026
 
 **Roadmap rewrite.** `docs/ROADMAP.md` was rewritten to match the state of the branch. It now opens with the

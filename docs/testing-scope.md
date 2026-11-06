@@ -1,3 +1,27 @@
+## Device harness races and the College roster native-handle wedge — November 6, 2026
+
+Executed: `python -m unittest discover -s build -p 'test_android_ui_smoke.py'` — 22 passed, including focused
+cases for the live call-sheet selection text and for `tap_expect` retrying a toolbar whose buttons shifted
+between the capture and the tap. The College app was packaged locally for `net10.0-android` Debug with 0 errors;
+the only warnings are the known offline `NU1900` package-vulnerability notices.
+
+Device evidence on a local 4 GB / 8-core API 36 emulator: the College repro (create a dynasty, switch Dark to
+Light, open Roster) settles in 11.8 seconds with the Morale column rendered. Its logcat records zero
+`outstanding GREFs` warnings and 9 explicit garbage collections, versus 177 warnings and 457 explicit collections
+in the failing state. The Pro watch flow was exercised end to end on the same emulator: a watched game keeps both
+units with the CPU and offers no call sheet, Take over opens the shared call sheet, selecting an alternate quick
+call changes the called play, the snap shows a game clock, the call sheet returns after the box score, the
+landscape layout keeps the field and three quick calls inside the viewport, and the game finishes, saves and
+exits to the franchise.
+
+A focused emulator walk of the changed Pro surfaces also passes end to end: the watch flow through take over,
+alternate call selection, snap, box score, landscape quick calls inside the viewport and the finished, saved,
+exited game, and then the played game's Playbook picker ("Choose play", "All formations"), snap, and exit through
+"Exit game?" to "Discard and exit".
+
+Not claimed: the GitHub Actions device jobs and their APK artifacts, the full Pro harness run, the excluded long
+College career cases, any release, merge or publication.
+
 ## Roadmap rewrite, harness cleanup, and APK handover — November 5, 2026
 
 Executed: the smoke harness unit tests in `build/test_android_ui_smoke.py` pass, including new cases for the

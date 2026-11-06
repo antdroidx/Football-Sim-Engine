@@ -56,6 +56,33 @@ class SmokeSynchronizationTests(unittest.TestCase):
         self.assertTrue(smoke.library_entry_ready(root,"Synthetic option QA"))
         self.assertFalse(smoke.library_entry_ready(root,"Another save"))
 
+    def test_tap_expect_retries_a_shifted_live_toolbar(self):
+        def screen(text, bounds):
+            root = ET.Element("hierarchy")
+            ET.SubElement(root, "node", attrib={"text": text, "class": "android.widget.Button", "bounds": bounds})
+            return root
+        first = screen("Options", "[633,2209][804,2325]")
+        missed = ET.Element("hierarchy")
+        ET.SubElement(missed, "node", attrib={"text": "Resume"})
+        moved = screen("Options", "[658,2209][829,2325]")
+        menu = ET.Element("hierarchy")
+        ET.SubElement(menu, "node", attrib={"text": "Game options"})
+        with patch.object(smoke, "capture", side_effect=[first, missed, moved, menu]) as captured, patch.object(smoke, "adb") as command, patch.object(smoke, "time") as clock:
+            clock.monotonic.side_effect = [0, 0, 1, 2, 3, 4]
+            root = smoke.tap_expect("live-menu", "Options", "Game options")
+        self.assertIs(menu, root)
+        self.assertEqual(4, captured.call_count)
+        self.assertEqual(2, command.call_count)
+
+    def test_live_selection_text_tracks_the_called_play(self):
+        root=ET.Element("hierarchy")
+        self.assertEqual("",smoke.selection_text(root))
+        ET.SubElement(root,"node",attrib={"resource-id":"antdroid.profootball.franchise:id/live-selection","text":"Slant \u00b7 SEA offense"})
+        self.assertEqual("Slant \u00b7 SEA offense",smoke.selection_text(root))
+        other=ET.fromstring(ET.tostring(root))
+        other.find("node").set("text","Fade \u00b7 SEA offense")
+        self.assertNotEqual(smoke.selection_text(root),smoke.selection_text(other))
+
     def test_enabled_button_does_not_imply_an_advance_finished(self):
         old = overview()
         self.assertFalse(smoke.overview_ready(overview(), smoke.calendar(old)))

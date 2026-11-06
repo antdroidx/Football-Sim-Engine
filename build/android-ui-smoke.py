@@ -91,6 +91,34 @@ def scroll_to_text(name, text, max_swipes=6, toward_start=False):
         adb("shell", "input", "swipe", x, str(top + (bottom-top)*start//4), x, str(top + (bottom-top)*end//4), "350")
 
 
+def tap_expect(name, text, expected, timeout=120):
+    """Tap a live action from a fresh capture and retry until its surface appears.
+
+    The live view relayouts while plays animate: button labels change and a
+    transient action can shift the toolbar, so a tap taken from an older capture
+    can land on a neighbour. Re-capturing before every attempt keeps the
+    coordinates current without weakening the check.
+    """
+    match = expected if callable(expected) else lambda root: expected in texts(root)
+    deadline = time.monotonic() + timeout
+    last = None
+    while time.monotonic() < deadline:
+        root = capture(name)
+        last = root
+        try:
+            if text in texts(root):
+                tap(root, text)
+                time.sleep(1)
+        except AssertionError:
+            time.sleep(1)
+            continue
+        after = capture(name + "-opened")
+        if match(after):
+            return after
+        time.sleep(1)
+    raise AssertionError(f"Timed out waiting for {expected} after tapping {text}: {sorted(texts(last) or [])}")
+
+
 def wait_for_id(name, resource_suffix, timeout=120):
     # Automation ids survive copy changes; visible labels do not.
     return wait_for(name, lambda r: any((n.get("resource-id") or "").endswith(resource_suffix) for n in r.iter("node")), timeout=timeout)
@@ -657,6 +685,12 @@ def exit_via_settings(kind):
     root=scroll_to_text("exit-choice-"+kind,"Save & exit",max_swipes=20,toward_start=True);tap(root,"Save & exit")
     root=wait_for("exit-confirm-"+kind,lambda r:"Save and exit?" in texts(r));tap(root,"Save & exit")
     return wait_for("exit-library-"+kind,lambda r:library_loaded(r) if kind=="pro" else "Your dynasties" in texts(r) and "New dynasty" in texts(r),timeout=180)
+
+
+def selection_text(root):
+    # The live call sheet reports the called play, so a new choice is confirmed by its change.
+    node = next((n for n in root.iter("node") if (n.get("resource-id") or "").endswith("live-selection")), None)
+    return node.get("text") if node is not None else ""
 
 
 def tap_id(root, suffix):

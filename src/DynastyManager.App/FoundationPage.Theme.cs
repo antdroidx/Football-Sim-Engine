@@ -83,6 +83,9 @@ public sealed partial class FoundationPage
             next.ShowSection(section);
             next._sectionTrail.Clear();
             foreach (var previousSection in _sectionTrail.Reverse()) next._sectionTrail.Push(previousSection);
+            // Release this page's window subscription so the old view tree and its
+            // native handles can be collected instead of piling up across rebuilds.
+            DetachWindowSizing(hostWindow);
             hostWindow.Page = next;
             if (_saveRepository is not null) await next.RefreshSaveSlotsAsync();
             DynastyTheme.ApplyNativeAppearance();

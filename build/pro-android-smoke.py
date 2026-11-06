@@ -149,39 +149,41 @@ try:
     coin("watch")
     live=s.wait_for_id("watch","live-pause")
     # A watch-mode action must work while a snap is animating, without a separate pause.
-    s.tap(live,"Options")
-    options=ready("watch-options","Game options")
+    options=s.tap_expect("pro-watch-menu","Options","Game options")
     s.tap(options,"Viewing options")
     viewing=ready("viewing-options","Camera");s.tap(viewing,"Camera")
     cameras=ready("camera-options","Follow ball");s.tap(cameras,"Follow ball")
     live=s.wait_for_id("watch-camera","live-pause")
     # The team sheet stays available during a live game.
-    s.tap(live,"Team")
-    team=s.wait_for("pro-team-sheet",lambda r:any("Coach talk" in (t or "") for t in s.texts(r)))
+    team=s.tap_expect("pro-team-menu","Team",lambda r:any("Coach talk" in (t or "") for t in s.texts(r)))
     assert "Talk to player" not in s.texts(team),"Individual talks must not be offered"
     s.tap(team,"Cancel");time.sleep(1)
-    # The coach calls a play when the offense is theirs, so wait for the call action to appear.
-    live=s.try_wait_for_id("pro-call-ready","live-call",240)
-    if live is None:
-        print("The offense was not the user's this sequence; the call action was skipped.")
-    else:
-        s.tap_id(live,"live-call")
-        sheet=s.wait_for("pro-call-sheet",lambda r:any("quick-call-" in n.get("resource-id","") for n in r.iter("node")),timeout=90)
-        card=next(n for n in sheet.iter("node") if "quick-call-" in n.get("resource-id",""))
-        s.tap(sheet,card.get("text"))
-        chosen=s.wait_for("pro-call-selected",lambda r:any((t or "").startswith("SELECTED") for t in s.texts(r)),timeout=90)
-        s.tap_id(chosen,"live-call")
-        time.sleep(2)
+    # Watching leaves both units with the CPU, so the call sheet stays closed until the coach takes over.
+    watch=s.capture("pro-watch-mode")
+    assert "Call play" not in s.texts(watch),"A watched game must not ask the coach to call"
+    assert "Take over" in s.texts(watch),"Watching must offer the coach a way to take over"
+    live=s.tap_expect("pro-takeover","Take over",lambda r:any((n.get("resource-id") or "").endswith("live-call") for n in r.iter("node")))
+    # The coach picks an alternate play from the shared quick-call sheet and snaps it.
+    sheet=s.wait_for("pro-call-sheet",lambda r:any("quick-call-" in n.get("resource-id","") for n in r.iter("node")),timeout=120)
+    cards=[n for n in sheet.iter("node") if "live-quick-call-" in (n.get("resource-id") or "")]
+    assert len(cards)>=2,"The call sheet must offer alternate plays"
+    before=s.selection_text(sheet)
+    s.tap_id(sheet,"live-quick-call-1")
+    chosen=s.wait_for("pro-call-selected",lambda r:s.selection_text(r) not in ("",before),timeout=90)
+    s.tap_id(chosen,"live-call")
+    time.sleep(2)
     snapped=s.capture("pro-first-snap")
     assert any((t or "").startswith("Q") for t in s.texts(snapped)),"The live view must show a game clock"
     # Box score is reachable from the live view.
-    s.tap(snapped,"Options")
-    options=ready("live-options","Game options")
+    options=s.tap_expect("pro-live-menu","Options","Game options")
     s.tap(options,"Box score")
     box=ready("live-box-page","Player statistics")
     s.tap(box,"Player statistics");s.capture("pro-live-box-players")
     s.tap(box,"Return to game")
     live=s.wait_for_id("back-to-live","live-pause")
+    # The coach gets the call sheet back at the next stop, and the quick calls travel with it.
+    live=s.try_wait_for_id("pro-landscape-call-ready","live-call",180)
+    assert live is not None,"The coach must get the call sheet back after the box score"
     s.adb("shell","settings","put","system","accelerometer_rotation","0")
     s.adb("shell","settings","put","system","user_rotation","1")
     time.sleep(3)
@@ -192,24 +194,20 @@ try:
     def fits(root,node):
         viewport=bounds(next(root.iter("node")));left,top,right,bottom=bounds(node)
         assert left>=viewport[0] and top>=viewport[1] and right<=viewport[2] and bottom<=viewport[3]-24,"Live control outside visible viewport"
-    cards=[n for n in landscape.iter("node") if "quick-call-" in n.get("resource-id","")]
+    field=bounds(tagged(landscape,"live-field"));viewport=bounds(next(landscape.iter("node")))
+    assert field[3]<=viewport[3],"The live field must stay inside the viewport"
+    cards=[n for n in landscape.iter("node") if "live-quick-call-" in (n.get("resource-id") or "")]
     assert cards,"Landscape must show quick calls"
     for card in cards:fits(landscape,card)
-    field_before=bounds(tagged(landscape,"live-field"))
-    s.tap(landscape,cards[0].get("text"))
-    chosen=s.wait_for("pro-landscape-call-selected",lambda r:any((t or "").startswith("SELECTED") for t in s.texts(r)),timeout=60)
-    assert not any("quick-call-" in n.get("resource-id","") for n in chosen.iter("node")),"Quick calls did not collapse after selection"
-    field_after=bounds(tagged(chosen,"live-field"));assert field_after[3]-field_after[1]>field_before[3]-field_before[1],"Field did not expand after call selection"
     s.adb("shell","settings","put","system","user_rotation","0")
     time.sleep(2)
     # Finish the game, confirm the save, then return to the franchise.
-    live=s.capture("pro-before-finish")
-    s.tap(live,"Options")
-    options=ready("finish-options","Game options")
+    options=s.tap_expect("pro-finish-menu","Options","Game options")
     s.tap(options,"Finish game")
+    confirm=ready("finish-confirm","Finish game?")
+    s.tap(confirm,"Simulate remainder")
     final=s.wait_for("pro-final",lambda r:any((t or "").startswith("FINAL") for t in s.texts(r)),timeout=180)
-    s.tap(final,"Options")
-    options=ready("exit-options","Game options")
+    options=s.tap_expect("pro-exit-menu","Options","Game options")
     s.tap(options,"Exit game")
     ready("completed-overview","Season cap")
     s.exit_via_settings("pro")
@@ -229,20 +227,23 @@ try:
     advanced=s.wait_for("pro-week2",lambda r:any("Week 2" in (t or "") for t in s.texts(r)),timeout=240)
     click("play-open","Play")
     coin("play",True)
-    kickoff=ready("opening-kickoff","Kickoff")
-    assert "Choose offense" not in s.texts(kickoff) and "Choose defense" not in s.texts(kickoff)
-    s.tap(kickoff,"Kickoff")
-    viewer=ready("coach-mode","Next snap")
-    click("offense","Choose offense")
-    choices=ready("play-choices","Choose play")
+    # Playing the game hands the coach the shared call sheet on the live page.
+    live=s.wait_for_id("pro-play-live","live-call")
+    sheet=s.wait_for("pro-play-sheet",lambda r:any("live-quick-call-" in (n.get("resource-id") or "") for n in r.iter("node")),timeout=120)
+    # The playbook opens the shared play picker with its formation filter.
+    choices=s.tap_expect("pro-play-menu","Playbook",lambda r:"Choose play" in s.texts(r) or "Choose defense" in s.texts(r))
     assert "All formations" in s.texts(choices)
     s.capture("pro-shared-playbook")
     s.tap(choices,"Close playbook")
-    click("coach-snap","Next snap")
+    live=s.wait_for_id("pro-play-ready","live-call")
+    s.tap_id(live,"live-call")
     time.sleep(2);s.capture("pro-coach-after-snap")
-    click("leave-coach","Return to franchise")
-    leave=ready("leave-confirm","Leave game?")
-    s.tap(leave,"Leave")
+    # Leaving the game goes through the shared options menu.
+    options=s.tap_expect("pro-leave-menu","Options","Game options")
+    s.tap(options,"Exit game")
+    leave=ready("leave-confirm","Exit game?")
+    s.tap(leave,"Discard and exit")
+    ready("after-live-overview","Season cap")
     s.exit_via_settings("pro")
     library=ready("theme-library","Settings")
     s.tap(library,"Settings")
@@ -304,18 +305,19 @@ try:
     click("oc-watch","Watch")
     coin("oc-watch")
     live=ready("oc-live","Take over")
-    s.tap(live,"Take over")
-    coach=ready("oc-cpu-pause","Pause CPU unit")
-    assert "Choose defense" not in s.texts(coach)
-    s.scroll_to_text("pro-oc-top","SEA",max_swipes=20,toward_start=True)
-    own=s.wait_for("pro-oc-own-unit",lambda r:any("Your unit · choose calls" in (t or "") for t in s.texts(r)),timeout=180)
+    live=s.tap_expect("oc-takeover","Take over",lambda r:any("Offense: You" in (t or "") for t in s.texts(r)))
+    assert any("Offense: You" in (t or "") and "Defense: CPU" in (t or "") for t in s.texts(live)),"The coordinator must own only one unit"
+    own=s.wait_for("pro-oc-own-unit",lambda r:any((n.get("resource-id") or "").endswith("live-call") for n in r.iter("node")),timeout=240)
+    assert s.selection_text(own).endswith("offense"),"The coordinator must wait for their own unit"
+    assert "Choose defense" not in s.texts(own)
     clock_own={t for t in s.texts(own) if t and re.match(r"^(Q\d|OT) ",t)}
     assert clock_own, "Coordinator game clock is not visible"
     time.sleep(3)
     held=s.capture("pro-oc-own-unit-held")
     assert clock_own=={t for t in s.texts(held) if t and re.match(r"^(Q\d|OT) ",t)}, "CPU advanced the coordinator's own unit"
-    own_controls=s.scroll_to_text("pro-oc-own-controls","Choose offense",max_swipes=20)
-    assert "Choose offense" in s.texts(own_controls)
+    controls=s.tap_expect("pro-oc-playbook","Playbook",lambda r:"Choose play" in s.texts(r) or "Choose defense" in s.texts(r))
+    assert "Choose play" in s.texts(controls) and "Choose defense" not in s.texts(controls),"The coordinator playbook must cover only their own unit"
+    s.tap(controls,"Close playbook")
     assert s.adb("shell","pidof","antdroid.profootball.franchise").strip()
     print("Pro launch, franchise creation, watch/replay, landscape, saved final, reload, advance and coach mode passed.",flush=True)
 finally:
