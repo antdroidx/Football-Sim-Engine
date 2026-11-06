@@ -11,6 +11,8 @@ def ready(name,predicate):
     return s.wait_for("pro-roadmap-"+name,check,timeout=180)
 def click(name,label):
     root=s.scroll_to_text("pro-roadmap-"+name,label,max_swipes=20);s.tap(root,label);return root
+def click_desc(name,description):
+    root=s.scroll_to_desc("pro-roadmap-"+name,description,max_swipes=20);s.tap_desc(root,description);return root
 def navigate(label):
     root=s.capture("pro-navigation-"+label.lower())
     if label in s.texts(root):
@@ -126,7 +128,7 @@ def ui_polish():
     root=s.scroll_to_text("pro-polish-selected","You send",max_swipes=20,toward_start=True);s.capture("pro-presentation-light-trade-selected")
     remove=next(n for n in root.iter("node") if n.get("text","").endswith(" ×"));s.tap(root,remove.get("text"))
     rotate(1);navigate("Front Office");click("polish-landscape-trade","Trade center");s.capture("pro-presentation-landscape-trade");rotate(0)
-    load(data["retention"]);navigate("Front Office");click("polish-retention","Expiring contracts");click("polish-negotiate","Negotiate")
+    load(data["retention"]);navigate("Front Office");click_desc("polish-retention","Expiring contracts. Retention decisions");click("polish-negotiate","Negotiate")
     ready("contract-modal",lambda r:"Low offer" in s.texts(r))
     for label in ["Low offer","Agent demand","Strong offer"]:click("polish-preset-"+label,label)
     s.capture("pro-presentation-light-contract-presets")
@@ -141,7 +143,7 @@ def presentation():
         category(label);root=s.scroll_to_text("pro-presentation-"+label,header,max_swipes=20)
         cell_visible(root,header);s.capture("pro-presentation-portrait-"+label.replace(" ","-"))
     for key,label,header,target in [("draft","Draft & scouting","Scouted","Draft"),("retention","Expiring contracts","Demand / yr","Negotiate")]:
-        load(data[key]);navigate("Front Office");click("presentation-"+key,label)
+        load(data[key]);navigate("Front Office");click_desc("presentation-"+key,"Draft & scouting. Prospects and visit slots" if key=="draft" else "Expiring contracts. Retention decisions")
         root=s.scroll_to_text("pro-presentation-"+key,header,max_swipes=20)
         cell_visible(root,header);action_visible(root,target);s.capture("pro-presentation-portrait-"+key)
     navigate("Front Office");click("presentation-camp","Training camp")
@@ -189,7 +191,7 @@ try:
         s.capture("pro-roadmap-front-office")
     navigate("Standings");ready("standings",lambda r:"Standings" in s.texts(r));s.capture("pro-roadmap-standings")
     for label,key in [("Draft & scouting","draft"),("Expiring contracts","retention")]:
-        load(data[key]);navigate("Front Office");click(key,label)
+        load(data[key]);navigate("Front Office");click_desc(key,"Draft & scouting. Prospects and visit slots" if key=="draft" else "Expiring contracts. Retention decisions")
         target="Draft" if key=="draft" else "Negotiate"
         root=s.scroll_to_text("pro-roadmap-portrait-"+key,target,max_swipes=20)
         action_visible(root,target);s.capture("pro-roadmap-portrait-"+key)
