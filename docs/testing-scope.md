@@ -1,3 +1,12 @@
+## Branch validation on GitHub Actions and smoke harness repairs — November 5, 2026
+
+Executed on GitHub Actions against `codex/feature-roadmap-plan`: the College build job (shared engine fast and balance tiers, combined Core/College suite, debug APK packaging) and the Pro build job (standard Pro suite, debug APK packaging) both succeed, and the College career-options device job passes.
+
+The smoke harness unit tests in `build/test_android_ui_smoke.py` pass, including new cases for the library Settings button, the career control leak check and the calendar phase fallback.
+
+The Pro staff-balance failure was reproduced locally once in twenty-two runs with the identical numbers (95 instead of 96 scouts), which matches the known intermittent case in the November 1 entry, so it is not caused by these changes.
+
+Not claimed: the Pro device job does not complete, because its Front Office and live-game sections still expect labels the app no longer renders. That is pre-existing harness drift, proven by a control run on `main` failing at the same assertion. No APK was published, no release was created, and nothing was merged.
 ## Persisted rivalries and rivalry series in both games — November 5, 2026
 
 Executed: Engine `RivalryRecordTests` 5 passed, covering the matchup label, the series record from one team's point of view, the opponent name, the series a team belongs to, and the same games always producing the same rivalry set. College `CollegeRivalryTests` 3 passed, covering the rivalry set recorded at the season rollover, an older save loading with an empty collection, and a save round-trip. Pro `ProRivalryTests` 3 passed, covering the save round-trip, an older save loading with an empty collection, and both games labelling the same matchup the same way.

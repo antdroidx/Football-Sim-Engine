@@ -1,3 +1,23 @@
+## Branch validation on GitHub Actions and smoke harness repairs — November 5, 2026
+
+After the five batches landed, both existing workflows were dispatched against `codex/feature-roadmap-plan` to validate the branch end to end. The College build job runs the shared engine fast and balance tiers and the combined Core/College suite and packages a debug APK with zero warnings; the Pro build job runs the standard Pro suite and packages a debug APK with the two existing nullable warnings. Both build jobs pass on the branch.
+
+The device jobs on this branch had never run before, and the first attempt exposed several pre-existing defects in the smoke harnesses, all of which predate the roadmap work. Each was diagnosed against the app source, confirmed against `main`, and fixed in the harness rather than in the app:
+
+1. The College save library has always shown its own "Settings" button. Commit `09e6e19` on `main` renamed it from "Options" to "Settings", and the College launch check treated any "Settings" text as a leaked career control, so it failed on the library itself. The check now ignores the library's own button by its automation id.
+2. The Pro weekly coach talk button moved to the Staff page in `bc0d37f` on `main`, but the Pro script still looked for it on the Overview page. A control run of the same device job on `main` (run `42122342674`) failed at exactly the same assertion, which shows the failure predates the batches.
+3. The College Settings page can open scrolled past its "Save & exit" button, so the script now scrolls up to it before tapping.
+4. The College shell shows the period inside the header instead of a separate phase label, so the calendar helper reads the phase from the header when no phase label is present.
+5. The staff rows use the shared staff directory component, whose accessibility description is "View staff profile", and the coach attribute group is titled "Coaching attributes"; the College checks now match both.
+6. The College live view is the shared GameCast page, whose field is exposed as "live-field", so the field check accepts either that id or the legacy "game-day-field-frame".
+
+The harness fixes carry focused unit tests in `build/test_android_ui_smoke.py`, which pass.
+
+Two things remain outside the batches. The Pro script's Front Office and live-game sections still expect labels the app no longer renders — "Choose offense", "Next snap", "Game controls", "Pause CPU unit", "Pause watch", "Leave game?" and "Return to franchise" — because the live view was rewritten in the FM touch-style refactor and again in the November 5 live-view batch. That section needs rewriting against the current GameCast actions (Playbook, Call play, Pre-snap, Take over, Options, Skip replay). Separately, `ProFootball.Tests.StaffBalanceTests.EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity` is intermittent: `ProFranchise.Id` defaults to a fresh `Guid` and the staff lifecycle random is seeded from it, so one generated scout occasionally ages out and the total reads 95 instead of 96. The same test was recorded as intermittent in the November 1 coach-attribution entry. It was reproduced locally once in twenty-two runs with the identical numbers, so it is pre-existing and not caused by the batches.
+
+No app crash or ANR appears in the captured logcat for any of these runs, so the device failures are harness drift rather than app defects.
+
+Not claimed: no release, no merge, and no artifact publication. The CI runs are build and device evidence, not a release.
 ## Persisted rivalries and rivalry series in both games — November 5, 2026
 
 Branch `codex/feature-roadmap-plan`: rivalries are now a durable record instead of a label recomputed from the schedule.
