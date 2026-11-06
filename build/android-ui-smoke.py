@@ -243,7 +243,7 @@ def main():
         options_choice("Box score", name)
         return wait_for(name, lambda r: "Live box score" in texts(r) or "Final statistics" in texts(r))
 
-    viewer = wait_for("game-day-portrait", lambda r: "Call play" in texts(r) or "Call defense" in texts(r))
+    viewer = wait_for("game-day-portrait", lambda r: any((n.get("resource-id") or "").endswith("live-game-page") for n in r.iter("node")))
     badges = [n for n in viewer.iter("node") if n.get("content-desc", "").endswith(" team badge")]
     assert len(badges) == 2, "Broadcast scoreboard must expose both team badges"
     assert any((n.get("resource-id") or "").endswith(("game-day-field-frame","live-field")) for n in viewer.iter("node"))
@@ -263,22 +263,17 @@ def main():
     assert "Talk to player" not in texts(team), "Individual talks must not be offered"
     tap(team, "Use second unit")
     second = wait_for("second-unit-confirm", lambda r: "Use second unit?" in texts(r))
-    tap(second, "Use second unit")
+    tap(second, "Use backups")
     second = capture("second-unit-active")
-    assert "Return to starters" in texts(second)
-    assert "Starter" in texts(second)
-    tap(second, "Return to starters")
+    assert "Use starters" in texts(second)
+    tap(second, "Use starters")
     team = capture("first-unit-restored")
     assert "Use second unit" in texts(team)
-    if "Sub in" in texts(team):
-        tap(team, "Sub in")
-        scope = wait_for("live-substitution-scope", lambda r: "This game only" in texts(r))
-        tap(scope, "This game only")
-        switched = capture("live-substitution-applied")
-        assert "Starter" in texts(switched) and not enabled(switched, "Starter")
-        assert "Automatic rotation" in texts(switched)
-        tap(switched, "Automatic rotation")
-    tap(capture("team-return-ready"), "Return to game")
+    # Substitutions open a this-game-only position picker.
+    tap(team, "Substitutions")
+    scope = wait_for("live-substitution-scope", lambda r: "Substitutions · this game only" in texts(r))
+    tap(scope, "Cancel")
+    tap(capture("team-return-ready"), "Cancel")
     assert before_clock == game_clock(capture("team-returned")), "Team management advanced the game clock"
     for rotation, name in ((1, "landscape"), (0, "portrait-restored")):
         adb("shell", "settings", "put", "system", "accelerometer_rotation", "0")

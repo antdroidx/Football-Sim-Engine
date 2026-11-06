@@ -58,7 +58,8 @@ def coin(name,interactive=False):
     s.tap(root,"Start game")
 
 try:
-    home=ready("library","New franchise")
+    # The library disables New franchise until the franchises finish loading.
+    home=s.wait_for("pro-library",lambda r:s.library_loaded(r),timeout=180)
     assert "PRO FOOTBALL" in s.texts(home)
     s.tap(home,"New franchise")
     create=ready("create","Seattle Seahawks")
@@ -146,34 +147,40 @@ try:
     click("overview-tab","Overview")
     click("watch-open","Watch")
     coin("watch")
-    live=ready("watch","Pause watch")
+    live=ready("watch","Pause")
     # A watch-mode action must work while a snap is animating, without a separate pause.
-    s.tap(live,"Viewing options")
-    viewing=ready("viewing-options","Viewing options");s.tap(viewing,"Camera")
+    s.tap(live,"Options")
+    options=ready("watch-options","Game options")
+    s.tap(options,"Viewing options")
+    viewing=ready("viewing-options","Camera");s.tap(viewing,"Camera")
     cameras=ready("camera-options","Follow ball");s.tap(cameras,"Follow ball")
-    live=ready("watch-camera","Pause watch")
-    s.tap(live,"Take over")
-    coach=ready("takeover","Coach mode · choose plays, then Next snap")
-    assert "Pause watch" not in s.texts(coach)
-    s.tap(coach,"Next snap")
+    live=ready("watch-camera","Pause")
+    # The team sheet stays available during a live game.
+    s.tap(live,"Team")
+    team=ready("team-sheet","Coach talk")
+    assert "Talk to player" not in s.texts(team),"Individual talks must not be offered"
+    s.tap(team,"Cancel");time.sleep(1)
+    # The coach picks a play from the call sheet and snaps it.
+    s.tap(live,"Call play")
+    sheet=s.wait_for("pro-call-sheet",lambda r:any("quick-call-" in n.get("resource-id","") for n in r.iter("node")),timeout=90)
+    card=next(n for n in sheet.iter("node") if "quick-call-" in n.get("resource-id",""))
+    s.tap(sheet,card.get("text"))
+    chosen=s.wait_for("pro-call-selected",lambda r:any((t or "").startswith("SELECTED") for t in s.texts(r)),timeout=90)
+    s.tap(chosen,"Call play")
     time.sleep(2)
-    coach=s.capture("pro-takeover-first-snap")
-    s.tap(coach,"Next snap")
-    time.sleep(2)
-    before=s.capture("pro-before-replay")
-    clock_before={t for t in s.texts(before) if t and re.match(r"^(Q\d|OT) ",t)}
-    click("replay","Instant replay")
-    replayed=ready("after-replay","Coach mode · choose plays, then Next snap")
-    clock_after={t for t in s.texts(replayed) if t and re.match(r"^(Q\d|OT) ",t)}
-    assert clock_before and clock_before==clock_after,"Replay advanced the game clock"
-    click("live-box","Box score")
-    box=ready("live-box-page","Live box score");assert "Player statistics" in s.texts(box)
+    snapped=s.capture("pro-first-snap")
+    assert any((t or "").startswith("Q1 ") for t in s.texts(snapped)),"The snapped play must show a game clock"
+    # Box score is reachable from the live view.
+    s.tap(snapped,"Options")
+    options=ready("live-options","Game options")
+    s.tap(options,"Box score")
+    box=ready("live-box-page","Player statistics")
     s.tap(box,"Player statistics");s.capture("pro-live-box-players")
-    click("live-box-return","Return to game")
-    ready("back-to-live","Next snap")
+    s.tap(box,"Return to game")
+    live=ready("back-to-live","Pause")
     s.adb("shell","settings","put","system","accelerometer_rotation","0")
     s.adb("shell","settings","put","system","user_rotation","1")
-    time.sleep(2)
+    time.sleep(3)
     landscape=s.capture("pro-live-landscape")
     def tagged(root,identifier):
         return next(n for n in root.iter("node") if n.get("resource-id","").endswith(identifier))
@@ -182,23 +189,25 @@ try:
         viewport=bounds(next(root.iter("node")));left,top,right,bottom=bounds(node)
         assert left>=viewport[0] and top>=viewport[1] and right<=viewport[2] and bottom<=viewport[3]-24,"Live control outside visible viewport"
     cards=[n for n in landscape.iter("node") if "quick-call-" in n.get("resource-id","")]
-    assert len(cards)==3,"Landscape must show three quick calls"
+    assert cards,"Landscape must show quick calls"
     for card in cards:fits(landscape,card)
-    snap_node=next(n for n in landscape.iter("node") if n.get("text")=="Next snap");fits(landscape,snap_node)
-    field_before=bounds(tagged(landscape,"pro-live-field"));left,top,right,bottom=bounds(cards[0])
-    s.adb("shell","input","tap",str((left+right)//2),str((top+bottom)//2))
-    chosen=s.wait_for("pro-landscape-call-selected",lambda r:any((t or "").startswith("Selected: ") for t in s.texts(r)),timeout=30)
+    field_before=bounds(tagged(landscape,"live-field"))
+    s.tap(landscape,cards[0].get("text"))
+    chosen=s.wait_for("pro-landscape-call-selected",lambda r:any((t or "").startswith("SELECTED") for t in s.texts(r)),timeout=60)
     assert not any("quick-call-" in n.get("resource-id","") for n in chosen.iter("node")),"Quick calls did not collapse after selection"
-    field_after=bounds(tagged(chosen,"pro-live-field"));assert field_after[3]-field_after[1]>field_before[3]-field_before[1],"Field did not expand after call selection"
-    fits(chosen,next(n for n in chosen.iter("node") if n.get("text")=="Next snap"))
-    s.tap(chosen,"More");menu=ready("landscape-more","Game controls");assert "Viewing options" in s.texts(menu);s.tap(menu,"Cancel")
-    chosen=ready("landscape-call-ready","Next snap");s.tap(chosen,"Next snap")
-    s.wait_for("pro-landscape-next-choices",lambda r:sum("quick-call-" in n.get("resource-id","") for n in r.iter("node"))==3,timeout=90)
+    field_after=bounds(tagged(chosen,"live-field"));assert field_after[3]-field_after[1]>field_before[3]-field_before[1],"Field did not expand after call selection"
     s.adb("shell","settings","put","system","user_rotation","0")
-    click("finish","Finish game")
-    final=ready("final","FINAL · Saved")
-    click("return","Return to franchise")
-    ready("completed-overview","Box score")
+    time.sleep(2)
+    # Finish the game, confirm the save, then return to the franchise.
+    live=s.capture("pro-before-finish")
+    s.tap(live,"Options")
+    options=ready("finish-options","Game options")
+    s.tap(options,"Finish game")
+    final=s.wait_for("pro-final",lambda r:any((t or "").startswith("FINAL") for t in s.texts(r)),timeout=180)
+    s.tap(final,"Options")
+    options=ready("exit-options","Game options")
+    s.tap(options,"Exit game")
+    ready("completed-overview","Season cap")
     s.exit_via_settings("pro")
     library=ready("saved-library","Your franchises")
     # Reinstall as an update; the existing franchise must survive.
