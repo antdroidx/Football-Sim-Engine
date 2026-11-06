@@ -157,7 +157,7 @@ try:
     live=s.wait_for_id("watch-camera","live-pause")
     # The team sheet stays available during a live game.
     s.tap(live,"Team")
-    team=ready("team-sheet","Coach talk")
+    team=s.wait_for("pro-team-sheet",lambda r:any("Coach talk" in (t or "") for t in s.texts(r)))
     assert "Talk to player" not in s.texts(team),"Individual talks must not be offered"
     s.tap(team,"Cancel");time.sleep(1)
     # The coach picks a play from the call sheet and snaps it.
