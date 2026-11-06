@@ -172,8 +172,8 @@ try:
         chosen=s.wait_for("pro-call-selected",lambda r:any((t or "").startswith("SELECTED") for t in s.texts(r)),timeout=90)
         s.tap_id(chosen,"live-call")
         time.sleep(2)
-        snapped=s.capture("pro-first-snap")
-        assert any((t or "").startswith("Q") for t in s.texts(snapped)),"The snapped play must show a game clock"
+    snapped=s.capture("pro-first-snap")
+    assert any((t or "").startswith("Q") for t in s.texts(snapped)),"The live view must show a game clock"
     # Box score is reachable from the live view.
     s.tap(snapped,"Options")
     options=ready("live-options","Game options")
