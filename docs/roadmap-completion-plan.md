@@ -5,22 +5,28 @@ Derived from `docs/ROADMAP.md` (planning source, November 5, 2026) plus a source
 and `docs/testing-scope.md`. This file is the execution outline for the remaining near-term
 workstreams. It does not authorize a release, a merge, or a publication.
 
-## Verified starting point
+## Final state
 
-- Branch `codex/feature-roadmap-plan` at `8438f41` ("Verify pre-snap timing and animation transition"),
-  identical to `origin/codex/feature-roadmap-plan` (0 ahead / 0 behind), 33 commits ahead of `main`
-  (`81b7b28`). No pull request exists for this branch.
-- Published release baseline is still Pro165 / College454 (`preview-2026-11-04-roster-identity`,
-  record `8a62a03`). The branch's own CI evidence is College455 (run `41991820982`) and Pro166
-  (run `41991825930`); both are Actions artifacts, not a release.
-- Working tree has no tracked modifications. Untracked leftovers exist and are preserved:
-  `.codex-attachments/`, `.codex-remote-attachments/`, `.codex-coach-fix/`,
-  `.codex-news-patch.py`, `.codex-presnap-patch.py`, `worktrees/`.
-- Three registered git worktrees point at branches whose remote copies are gone
-  (`codex/parity-roadmap-audit` at `6274429`, `codex/pro-scouting-depth` at `0b00b47`) or already
-  merged into `main` (`codex/roster-identity-and-priority` at `81b7b28`). Cleanup is optional
-  housekeeping and needs explicit approval.
+All five batches are delivered on `codex/feature-roadmap-plan`, and the near-term checkpoint in
+`docs/ROADMAP.md` is complete apart from the open items listed there.
 
+| Batch | Commit | Delivered |
+|---|---|---|
+| A | `3710097` | Season-aware chemistry and locker-room events |
+| B | `e0edbbd` | Replay highlights and pre-snap choreography |
+| C | `ae4544c` | Persistent coach hall of fame |
+| D | `da127ed` | Social interaction, replies and rivalry threads |
+| E | `1f9f42c` | Persisted rivalries and rivalry series |
+
+Supporting commits: `ed9973b` and `2bb9176` add the plan itself and correct the hall of fame status,
+`13aa0af` and `fbad74e` record the branch validation, `2b204f5` rewrites the live game checks against the
+shared GameCast view, and `7feb7ba` ignores the local attachment drops and scratch files.
+
+- The branch is pushed and identical to `origin/codex/feature-roadmap-plan`. No pull request exists.
+- The published release baseline is still Pro165 / College454 (`preview-2026-11-04-roster-identity`,
+  record `8a62a03`). The branch has not been merged and nothing has been published from it.
+- The long-term agenda now lives in `docs/ROADMAP.md`, which is the planning source for everything
+  beyond the near-term checkpoint.
 ## Source audit correction to the roadmap
 
 `docs/ROADMAP.md` states the shared coach Hall of Fame service "is rendered in College center and

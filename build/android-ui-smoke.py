@@ -264,11 +264,9 @@ def main():
     tap(team, "Use second unit")
     second = wait_for("second-unit-confirm", lambda r: "Use second unit?" in texts(r))
     tap(second, "Use backups")
-    second = capture("second-unit-active")
-    assert "Use starters" in texts(second)
+    second = wait_for("second-unit-active", lambda r: "Use starters" in texts(r))
     tap(second, "Use starters")
-    team = capture("first-unit-restored")
-    assert "Use second unit" in texts(team)
+    team = wait_for("first-unit-restored", lambda r: "Use second unit" in texts(r))
     # Substitutions open a this-game-only position picker.
     tap(team, "Substitutions")
     scope = wait_for("live-substitution-scope", lambda r: "Substitutions · this game only" in texts(r))

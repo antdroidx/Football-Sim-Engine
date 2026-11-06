@@ -1,171 +1,117 @@
 # Current roadmap — November 5, 2026
 
-This replaces the older forward-looking roadmap. Completed release evidence remains in `current-work.md`, `testing-scope.md`, `pro-completion-checklist.md`, and the individual release/audit records. The plan below is the active planning source and is based on a source-code audit of main at `81b7b28`.
-
-The execution outline for the remaining near-term work is [roadmap-completion-plan.md](roadmap-completion-plan.md). It sequences five batches (A season-aware chemistry and locker-room events, B replay highlights and pre-snap choreography, C persistent Hall of Fame lifecycle, D news and social interactions, E rivalry completion) with per-batch acceptance criteria and validation commands, and it records two source-audit corrections to the checkpoint table below.
+This is the active planning source. Completed release evidence remains in `current-work.md`, `testing-scope.md`, `pro-completion-checklist.md`, and the individual release and audit records. The near-term execution outline is [roadmap-completion-plan.md](roadmap-completion-plan.md); the long-term agenda is the last section of this file.
 
 ## Planning baseline
 
-- Latest release: Pro165 / College454 (`preview-2026-11-04-roster-identity`).
+- Latest published release: Pro165 / College454 (`preview-2026-11-04-roster-identity`).
+- Active branch: `codex/feature-roadmap-plan`. The near-term work below is implemented there and pushed, but it is not merged and not published.
 - Shared engine and presentation are the default home for league-neutral behavior.
 - College and Pro keep league-specific roster, financial, career, persistence, branding, and rule adapters.
 - Existing factual news systems are retained; do not fabricate statistics, outcomes, interviews, or social activity.
-- Existing saves must load without destructive migration. New records default safely and remain backward compatible.
+- Existing saves must load without destructive migration. New records default safely and remain backward compatible. The College save repository rejects a mismatched schema version, so a schema version is only bumped when the format truly changes.
 - Do not publish a release or merge without explicit review and approval.
 
-## User review and implementation checkpoint — November 5, 2026
+## Near-term status — November 5, 2026
 
-This checkpoint follows the original review at `9a28a7f`. It applies to both Android hosts through shared Presentation/Engine code. The published release baseline above remains separate, and these local debug APKs are not a release.
+All seven near-term workstreams were carried through five implementation batches. The batches, their commits, their acceptance criteria and their validation commands are recorded in [roadmap-completion-plan.md](roadmap-completion-plan.md).
 
-1. **Live View field defect: fixed in the shared renderer.** The full-width `HomeColor` rectangle that covered the top 12% of the field was removed from `GameFieldDrawable.Draw`. The exact Pro APK was visually checked in portrait and landscape with end-zone branding, yard lines, hashes and team markers intact. College compiles against the same renderer and packaged successfully; the reported Pro defect has direct device evidence.
-2. **News density: compact feed restored.** Both hosts removed the standalone Save story/Remove saved story controls and the Saved filter from the main News page. Existing `SavedNews` payloads remain intact for save compatibility but receive no prominent UI. A persistent Social shortcut now sits beside the filter control.
-3. **Social experience: first usable pass delivered.** Social is directly discoverable, uses authored in-game media posts derived from recorded stories, and displays reply/repost/like counts. Posts have independent read state. Each save now retains idempotent team/season/category narrative memory and can produce factual multi-story season threads without inventing results, quotes or statistics. Comments, replies, follows and richer user participation remain open.
-4. **News chronology: fixed.** Pro stories now carry season phase and sort by year, phase, playoff/award stage and week. Preseason Week 3 therefore sits below regular-season Week 1. Older records without phase use deterministic category/body fallback. This fixes both the full News feed and the Overview cards that take the first sorted stories.
-
-### Near-term checkpoint
-
-| Workstream | Implemented on the feature branch | Still open |
+| Workstream | Delivered | Still open |
 |---|---|---|
-| Rivalries | Shared records/service, schedule labels, College traditional rivalry catalog, persisted rivalry set with team, game-center and history exposure | A sourced league rule for a rivalry effect on a play, which the first increment deliberately excludes. |
-| Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; preset motion entries in every offensive formation family; choices recorded in live/replay; a bounded outcome effect on the recorded play; league rules own the shift and motion limits | Remaining device acceptance and any sourced league-specific limit. |
-| Captains / chemistry | Deterministic captains, cohesion/familiarity, bounded GameCast effect, both hosts' team UI, per-season memory fed by roster turnover, coaching and plan continuity, captain changes and discipline | Deeper continuity effects and remaining discipline inputs. |
-| Morale / locker room | Existing league-specific morale, discipline, transfer and trade systems retained; factual narratives now have persistent memory; shared locker-room events recorded from real state | Motivation state and further locker-room narrative hooks. |
-| News / social | Compact both-host feed, visible Social shortcut, authored posts, engagement labels, independent read state, phase-aware order, persistent season threads, player likes and reposts, followed desks, authored replies and rivalry threads | Player and coach level memory and broader visual acceptance. |
-| GameCast / replay | Shared venue styling, indoor turf, replay angle selection, recorded pre-snap choices, replay highlight selection and repaired field branding | Broader device coverage of the highlight picker and the pre-snap choreography. |
-| Hall of Fame | Existing College player HOF, Pro player HOF derivation, shared coach scoring rendered in both hosts' Hall of Fame views, persistent coach induction records with per-team citations | Coach lifecycle parity for CPU club coaches, whose season-by-season history is not recorded yet. |
+| Rivalries | Shared records and service; College traditional rivalry catalog; persisted rivalry set in both saves; labels and series in the College team profile, Pro team page, College game center, Pro matchup card and both schedules | A sourced league rule for a rivalry effect on a play. The first increment deliberately excludes one. |
+| Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; a MOTION preset in every offensive formation family; a bounded outcome effect recorded on the snap; league rules own the shift and motion limits; a motion returns to the formation before the snap | Device acceptance of the pre-snap effect, and any sourced league-specific limit. Both leagues keep shift at one yard and motion at three because no sourced rule differs. |
+| Captains / chemistry | Deterministic captains; cohesion and scheme familiarity; a bounded GameCast effect; both hosts' team UI; per-season memory fed by turnover, coaching change, plan continuity, captain changes, discipline and morale; every adjustment explained to the player | Deeper continuity effects and the remaining discipline inputs. |
+| Morale / locker room | Existing league morale, discipline, transfer and trade systems retained; persistent factual narrative memory; shared locker-room events recorded each season from real state, with College discipline incidents and Pro contract and trade friction kept separate | Motivation state, and further locker-room narrative hooks. |
+| News / social | Compact both-host feed; visible Social shortcut; authored posts with engagement labels and independent read state; phase-aware order; persistent season threads; player likes, reposts and followed desks; authored replies; rivalry threads | Player and coach level memory, and broader visual acceptance. |
+| GameCast / replay | Shared venue styling and indoor turf; replay angle selection; recorded pre-snap choices; replay highlight selection from the recorded snaps; repaired field branding | Device acceptance of the highlight picker and the pre-snap choreography. |
+| Hall of Fame | College player HOF; Pro player HOF derivation; the shared coach scoring is now rendered in both hosts' Hall of Fame views; persistent coach induction records with per-team citations; induction happens once and keeps its year | Coach lifecycle parity for CPU club coaches, whose season-by-season history is not recorded yet. |
 
-Recommended next implementation order: season-aware chemistry and locker-room events; replay highlights and pre-snap choreography; persistent HOF lifecycle handling. Within Social, add meaningful interaction and richer player/coach/rivalry threads after those state foundations. These map to batches A, B, and C of [roadmap-completion-plan.md](roadmap-completion-plan.md), with batch D (Social) and batch E (rivalries) following. No release or merge is authorized by this checkpoint.
+### What is left in the near term
+
+These are the open items above, in a sensible order. Each is small next to the delivered batches.
+
+1. **Device acceptance of the new surfaces.** The social actions, the rivalry panels, the coach Hall of Fame, the chemistry panel and the highlight picker have compile coverage and focused tests, but no device walkthrough yet. The GitHub Actions device jobs are the place to get it.
+2. **Coach lifecycle parity for CPU club coaches.** The Pro coach Hall of Fame can only induct the user's recorded career because CPU club coaches have no season-by-season history. Recording CPU coach seasons would let both leagues induct the same way.
+3. **Player and coach level narrative memory.** Season threads are keyed by team, topic and season. A thread per player or per coach needs a stable identity for that person across seasons.
+4. **Motivation state.** Locker-room events record what happened. Motivation would be the durable state those events read from and write to.
+5. **Sourced league rules for the two open limits.** A rivalry effect on a play, and any league-specific pre-snap limit, both wait on a rule this repository does not currently hold. Neither should be invented.
+6. **The intermittent Pro staff-balance test.** `StaffBalanceTests.EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity` fails roughly once in twenty runs because the generated franchise id seeds the staff lifecycle and one scout can age out. It predates this work and is recorded as intermittent in `current-work.md`. It needs either a deterministic staff fixture or a replenished scout department.
 
 ## Audit-based feature inventory
 
 | Area | College | Pro | Planning conclusion |
 |---|---|---|---|
-| Rivalries and rivalry history | Missing | Missing | Start with shared rivalry records/history; no simulation effect in the first batch. |
-| Dynamic news and narratives | Partial | Partial | Reuse existing factual story services; add persistent narrative memory, News Hub redesign, and fictional social posts without inventing stats. |
-| Expanded playbooks | Strong named-play foundation | Same shared foundation | Add pre-snap motion, shifts, trick metadata, and defensive counters in shared play definitions. |
-| Player morale and discipline | Partial | Partial | Keep league-specific morale/discipline services; add shared locker-room and leadership interactions. |
-| Transfers and trade requests | Implemented | Implemented | College uses transfer portal market; Pro uses contract-driven trade requests. Preserve separate rules. |
-| GameCast / presentation | Strong shared foundation | Same shared foundation | Share all future UI; hosts provide branding/rules/save adapters only. |
-| Broadcast replay | Partial | Partial | Current replays are deterministic and shared; add angle metadata and cinematic replay selection. |
-| Team cohesion and scheme familiarity | Missing | Missing | Add shared models with league-specific turnover/scheme inputs. |
-| Captaincy and leadership | Partial leadership | Partial leadership | Add actual captain records and leadership hierarchy while retaining existing player/coach leadership effects. |
-| Hall of Fame | College player HOF implemented | Missing player HOF | Extract a shared career-score core; preserve College rules and add Pro player/coach HOF. |
-| Weather / field conditions | Partial | Better | Weather affects simulation and visual presentation. Pro indoor venues now skip precipitation and wind effects. Broader venue/turf model remains open. |
-| Weekly prep / opponent scouting | Partial | Partial | Game plans and staff attributes affect simulation; opponent scouting is currently informational only. |
-| Historical records / memorable games | Partial | Partial | College has weekly highlights; Pro needs replay/highlight exposure and stronger career-record UI. |
+| Rivalries and rivalry history | Shipped | Shipped | Shared records, persisted set, series exposure. A sourced rule for a play-level effect is still open. |
+| Dynamic news and narratives | Partial | Partial | Factual story services reused; persistent memory, a compact feed, authored posts, player activity and replies are in. Player and coach level threads are open. |
+| Expanded playbooks | Strong named-play foundation | Same shared foundation | Pre-snap motion, shifts and a bounded outcome effect are in. Trick metadata and defensive counters are open. |
+| Player morale and discipline | Partial | Partial | League-specific services kept separate; shared locker-room events are in. Motivation state is open. |
+| Transfers and trade requests | Implemented | Implemented | College uses the transfer portal market; Pro uses contract-driven trade requests. Keep the rules separate. |
+| GameCast / presentation | Strong shared foundation | Same shared foundation | Share all future UI; hosts provide branding, rules and save adapters only. |
+| Broadcast replay | Partial | Partial | Deterministic shared replays with angle selection and highlight selection are in. Cinematic replay treatment is open. |
+| Team cohesion and scheme familiarity | Shipped | Shipped | Shared records with league-specific turnover and scheme inputs, carried per season. |
+| Captaincy and leadership | Partial leadership | Partial leadership | Actual captain records exist; a full leadership hierarchy is open. |
+| Hall of Fame | College player HOF implemented | Pro player HOF and coach HOF implemented | Shared scoring and citation core in both hosts. CPU coach lifecycle parity is open. |
+| Weather / field conditions | Partial | Better | Weather affects simulation and presentation; Pro indoor venues skip precipitation and wind. A broader venue and turf model is open. |
+| Weekly prep / opponent scouting | Partial | Partial | Game plans and staff attributes affect simulation; opponent scouting is informational only. |
+| Historical records / memorable games | Partial | Partial | College has weekly highlights; both hosts now expose replay highlights and rivalry series. Stronger career-record UI is open. |
 
-## Updated near-term roadmap
+## Long-term roadmap
 
-1. **Shared rivalries and rivalry history**
-   - Add shared rivalry definitions and recorded rivalry results to both state models.
-   - Derive rivalry status from conference, division, geography, and history using league adapters.
-   - Show rivalry labels in team, schedule, game-center, and historical-record views.
-   - No simulation effect in the first increment.
-   - Added a shared rivalry model and service plus schedule labels.
-   - College gained a deterministic traditional-rivalry catalog and focused tests.
-   - College schedule labels now prefer the traditional catalog and distinguish annual rivalries from other historical pairings.
+The near-term work above is feature completion on existing systems. The long-term work is new systems that need durable records before they can change behavior. The conventions hold for all of it: shared engine and presentation by default, league adapters where the rules differ, save-compatible records that default safely, and no invented facts.
 
-2. **Expanded playbooks and pre-snap football**
-   - Add legal situational actions and keep College/Pro personnel and rules separate.
-   - Preserve deterministic simulation, mobile call-sheet density, and replay compatibility.
-   - Status: Manual offensive Call play now holds the formation for roughly 900 ms before the snap. Shift/motion choices animate a pre-snap preview, and the recorded snap starts from that adjusted alignment. The catalog exposes a MOTION-labeled preset play for every offensive formation family; motion remains a play modifier rather than a new simulation outcome category. Play-outcome adaptation, league-specific legality, marker choreography and broader device acceptance remain open.
+### 1. College NIL system
 
-3. **Captains, leadership, cohesion, and scheme familiarity**
-   - Added a shared team-chemistry record and deterministic captain/id helper.
-   - Add shared captain, player-leadership, team-cohesion, and scheme-familiarity records.
-   - Feed from tenure, roster turnover, coaching change, plan usage, injuries, and discipline.
-   - Apply bounded simulation modifiers with player-facing explanations.
-   - Status: Shared captain selection, cohesion, scheme familiarity, and a bounded GameCast advantage are wired to both profile builders. Team chemistry is visible in College team profiles and Pro team pages. Culture is now recorded per season and carried forward: roster turnover, a head-coach change, a changed plan, departing captains, discipline and morale adjust the next season's baseline inside the existing bounds, and every adjustment is explained to the player.
+- College-only. A NIL ledger tied to performance, recruiting profile, market size, academics and discipline.
+- Existing recruiting and scholarship rules stay untouched until a save-compatible NIL state is accepted.
+- First slice: an NIL earnings ledger keyed to season and player, with a factual program summary. No recruiting or compensation effect yet.
 
-4. **Morale, discipline, locker room, transfers, and trade requests**
-   - Keep College discipline/transfer rules and Pro contract/trade rules separate.
-   - Add shared locker-room events, motivation state, and narrative hooks.
-   - Preserve existing morale decay, coach-talk, transfer-protection, and trade-market safeguards.
-   - Status: Shared locker-room events are now recorded each season from real state. College uses its discipline incidents and Pro uses contract and trade friction, so the league rules stay separate. Motivation state remains open.
+### 2. College media rights, realignment and finance
 
-5. **News Hub, narratives, and fictional social media**
-   - Add persistent narrative memory keyed by team, player, coach, rivalry, and season.
-   - Build a shared News Hub with league adapters, filters, saved/social/story views, and read state.
-   - Reference only recorded facts and explicitly label fictional social posts as in-game media.
-   - Status: Both games use a compact shared story feed and a visible Social shortcut. Posts are explicitly labeled authored in-game media derived from recorded facts, with independent read state. Saves retain idempotent season memory and expose factual multi-story season threads. The bookmark UI was removed after user review; existing saved snapshots remain backward-compatible. User replies/follows and broader player/coach/rivalry memory remain open.
+- Build on the existing realignment and FCS-history records.
+- Add league and school finance, media contracts, competitive balance and UI summaries.
+- First slice: media-rights records per program with a summary in the program center. No effect on revenue distribution until the ledger is accepted.
 
-6. **GameCast immersion and broadcast replay**
-   - Improve venue styling, visual markers, replay angles, highlight selection, and mobile readability. Shared venue styling now reaches the live renderer in both hosts, including indoor turf palettes; device visual acceptance remains open.
-   - Replays must consume recorded state only and never reroll simulation.
-   - Preserve portrait/landscape and light/dark usability.
-   - Status: Shared GameCast removes the unintended team-color field band, persists and applies a replay angle, and records None/Shift/Motion choices without changing simulation randomness. The exact Pro APK passed portrait and landscape field checks. Play-outcome simulation, league-specific legality/adaptation, marker choreography, highlights and broader device coverage remain open.
+### 3. Pro finance expansion
 
-7. **Player and coach Hall of Fame**
-   - Create a shared scoring and citation core.
-   - Preserve College player HOF eligibility and add Pro player HOF.
-   - Add coach HOF with College and Pro eligibility separated at league boundaries.
-   - Status: Player HOF remains league-specific College/Pro derivation. A shared coach Hall of Fame service now scores recorded coach-season summaries and is rendered in College center and Pro honors.
+- Extend `ProFinance` with stadium and merchandise revenue.
+- Current cap, cash, dead-money, salary-floor and contract-accounting rules must not move.
+- First slice: stadium and merchandise revenue lines alongside the existing ledger, with the season summary updated. The cap math stays byte-for-byte identical.
 
-## Updated long-term roadmap
+### 4. Expansion and relocation
 
-1. **College NIL system**
-   - College-only NIL ledger tied to performance, recruiting profile, market size, academics, and discipline.
-   - Preserve existing recruiting and scholarship rules until a save-compatible NIL state is accepted.
+- Shared league-evolution primitives.
+- College uses FBS and FCS and conference constraints; Pro uses league, owner and market rules.
+- Existing league history and schedule builders must remain compatible.
+- First slice: a candidate-team record with the constraints each league applies, and a read-only review screen. No schedule change until a relocation is accepted.
 
-2. **College media rights, realignment, and finance**
-   - Build on existing realignment/FCS-history records.
-   - Add league and school finance, media contracts, competitive balance, and UI summaries.
+### 5. Stadium construction and training facilities
 
-3. **Pro finance expansion**
-   - Extend `ProFinance` with stadium and merchandise revenue.
-   - Preserve current cap, cash, dead-money, salary-floor, and contract-accounting rules.
+- Stable facility and construction records.
+- Tie facilities to finance, performance, player development, recruiting and staff quality.
+- Concise mobile summaries and phase-gated decisions.
+- First slice: facility records with a construction decision in the existing phase flow, persisted and explained. Finance and performance links wait on the ledgers above.
 
-4. **Expansion and relocation**
-   - Add shared league-evolution primitives.
-   - College uses FBS/FCS and conference constraints; Pro uses league/owner/market rules.
-   - Existing league history and schedule builders must remain compatible.
+### 6. Additional offseason activities
 
-5. **Stadium construction and training facilities**
-   - Introduce stable facility and construction records.
-   - Tie facilities to finance, performance, player development, recruiting, and staff quality.
-   - Use concise mobile summaries and phase-gated decisions.
+- Extend the existing College and Pro phase flows rather than creating parallel calendars.
+- Activity outcomes stay persisted and explainable in the team and career UI.
+- First slice: one new activity per league inside the current phase flow, reusing the phase validation that already exists.
 
-6. **Additional offseason activities**
-   - Extend existing College and Pro phase flows rather than creating parallel calendars.
-   - Keep activity outcomes persisted and explainable in team/career UI.
+### Order and dependencies
 
-## Recommended implementation order and dependencies
-
-| Stage | Dependencies | Rationale |
+| Stage | Depends on | Rationale |
 |---|---|---|
-| Rivalries | Save-compatibility conventions | Low-risk shared foundation for future narrative and history UI. |
-| Playbooks/pre-snap | Existing play engine and call editor | Unlocks richer simulation and replay before leadership/cohesion effects. |
-| Captains/cohesion | Playbook usage and leadership state | Needs meaningful season context before it affects simulation. |
-| Morale/discipline/locker room | Leadership and captain context | Extends current systems without duplicating morale rules. |
-| News/narratives/social | Rivalry, leadership, discipline, and records | Generates meaningful arcs from recorded state. |
-| GameCast/replay | New event/pre-snap metadata | Avoids rebuilding presentation twice. |
-| Hall of Fame | Stable career/honor records | Becomes safer after longer-term history is trustworthy. |
-| NIL/Media/Pro finance | Stable league rules and records | Requires season and save-state foundations. |
-| Expansion/relocation/facilities | Finance and league evolution | Requires durable market/venue state. |
+| College NIL | Save-compatible ledger | Independent of the other long-term areas; safe to start first. |
+| Pro finance expansion | Stable cap ledger | Must not disturb the cap, so it goes on its own. |
+| College media rights and realignment | Existing realignment records | Reuses what is already recorded. |
+| Stadium and facilities | Finance and league evolution | Facilities need a money story and a venue story before they matter. |
+| Expansion and relocation | Finance and league evolution | A new club changes the ledger and the schedule. |
 | Additional offseason activities | Existing phase validation | Must not create a second offseason calendar. |
-
-## First implementation batch: shared rivalries
-
-Scope one session to the rivalry foundation only.
-
-- Define `RivalryRecord` and `RivalryGameRecord` as shared engine records.
-- Add safe default collections to both DynastyState and ProFranchise.
-- Add a deterministic shared derivation/adaptation service.
-- Add league-specific UI labels in Team, Schedule, and Game Center.
-- No simulation, recruiting, finance, or scoring behavior is changed in this batch.
-
-Acceptance criteria:
-
-- College SQLite saves and Pro JSON saves round-trip the new records.
-- Older saves load with empty rivalry fields and no data rewrite.
-- The same save identity produces a stable rivalry set.
-- College and Pro UI label the same matchup consistently without duplicating rivalry logic.
-- Existing engine seeds and presentation outputs remain unchanged.
-- Focused College/Pro/Engine tests pass; Android packaging is deferred to a later milestone unless approved.
 
 ## Validation policy
 
-- Run the narrowest relevant Engine, College, and Pro tests first.
-- Do not claim simulation, save, mobile-ui, or device acceptance without an actual focused check.
+- Run the narrowest relevant Engine, College and Pro tests first.
+- Do not claim simulation, save, mobile-ui or device acceptance without an actual focused check.
 - Android packaging and device acceptance require successful focused tests first.
+- A device failure is a finding: diagnose it, fix the cause, and rerun the affected check. Never dismiss an app ANR to make a harness pass.
 - No release or merge is part of planning.
