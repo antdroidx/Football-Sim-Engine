@@ -166,7 +166,7 @@ try:
     card=next(n for n in sheet.iter("node") if "quick-call-" in n.get("resource-id",""))
     s.tap(sheet,card.get("text"))
     chosen=s.wait_for("pro-call-selected",lambda r:any((t or "").startswith("SELECTED") for t in s.texts(r)),timeout=90)
-    s.tap(chosen,"Call play")
+    s.tap_id(chosen,"live-call")
     time.sleep(2)
     snapped=s.capture("pro-first-snap")
     assert any((t or "").startswith("Q1 ") for t in s.texts(snapped)),"The snapped play must show a game clock"
