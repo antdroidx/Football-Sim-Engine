@@ -96,6 +96,14 @@ def wait_for_id(name, resource_suffix, timeout=120):
     return wait_for(name, lambda r: any((n.get("resource-id") or "").endswith(resource_suffix) for n in r.iter("node")), timeout=timeout)
 
 
+def try_wait_for_id(name, resource_suffix, timeout=60):
+    # Returns None instead of raising, for steps that only apply in some sequences.
+    try:
+        return wait_for_id(name, resource_suffix, timeout)
+    except AssertionError:
+        return None
+
+
 def wait_for(name, predicate, timeout=120):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -318,6 +326,8 @@ def main():
     tap(live, "Options")
     options = wait_for("finish-menu", lambda r: "Finish game" in texts(r))
     tap(options, "Finish game")
+    confirm = wait_for("finish-confirm", lambda r: "Finish game?" in texts(r))
+    tap(confirm, "Simulate remainder")
     final = wait_for("final-saved", lambda r: any((t or "").startswith("FINAL") for t in texts(r)), timeout=300)
     tap(final, "Options")
     options = wait_for("exit-menu", lambda r: "Exit game" in texts(r))

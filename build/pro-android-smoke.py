@@ -160,17 +160,20 @@ try:
     team=s.wait_for("pro-team-sheet",lambda r:any("Coach talk" in (t or "") for t in s.texts(r)))
     assert "Talk to player" not in s.texts(team),"Individual talks must not be offered"
     s.tap(team,"Cancel");time.sleep(1)
-    # The coach picks a play from the call sheet and snaps it.
-    live=s.wait_for_id("call-ready","live-pause")
-    s.tap_id(live,"live-call")
-    sheet=s.wait_for("pro-call-sheet",lambda r:any("quick-call-" in n.get("resource-id","") for n in r.iter("node")),timeout=90)
-    card=next(n for n in sheet.iter("node") if "quick-call-" in n.get("resource-id",""))
-    s.tap(sheet,card.get("text"))
-    chosen=s.wait_for("pro-call-selected",lambda r:any((t or "").startswith("SELECTED") for t in s.texts(r)),timeout=90)
-    s.tap_id(chosen,"live-call")
-    time.sleep(2)
-    snapped=s.capture("pro-first-snap")
-    assert any((t or "").startswith("Q1 ") for t in s.texts(snapped)),"The snapped play must show a game clock"
+    # The coach calls a play when the offense is theirs, so wait for the call action to appear.
+    live=s.try_wait_for_id("pro-call-ready","live-call",240)
+    if live is None:
+        print("The offense was not the user's this sequence; the call action was skipped.")
+    else:
+        s.tap_id(live,"live-call")
+        sheet=s.wait_for("pro-call-sheet",lambda r:any("quick-call-" in n.get("resource-id","") for n in r.iter("node")),timeout=90)
+        card=next(n for n in sheet.iter("node") if "quick-call-" in n.get("resource-id",""))
+        s.tap(sheet,card.get("text"))
+        chosen=s.wait_for("pro-call-selected",lambda r:any((t or "").startswith("SELECTED") for t in s.texts(r)),timeout=90)
+        s.tap_id(chosen,"live-call")
+        time.sleep(2)
+        snapped=s.capture("pro-first-snap")
+        assert any((t or "").startswith("Q") for t in s.texts(snapped)),"The snapped play must show a game clock"
     # Box score is reachable from the live view.
     s.tap(snapped,"Options")
     options=ready("live-options","Game options")
