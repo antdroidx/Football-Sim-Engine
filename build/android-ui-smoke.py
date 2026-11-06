@@ -264,8 +264,15 @@ def main():
     tap(team, "Use second unit")
     second = wait_for("second-unit-confirm", lambda r: "Use second unit?" in texts(r))
     tap(second, "Use backups")
+    time.sleep(1)
+    # The team sheet is built when it opens, so it has to be reopened to show the new state.
+    live = capture("unit-switched")
+    s.tap(live, "Team")
     second = wait_for("second-unit-active", lambda r: "Use starters" in texts(r))
     tap(second, "Use starters")
+    time.sleep(1)
+    live = capture("unit-restored")
+    s.tap(live, "Team")
     team = wait_for("first-unit-restored", lambda r: "Use second unit" in texts(r))
     # Substitutions open a this-game-only position picker.
     tap(team, "Substitutions")

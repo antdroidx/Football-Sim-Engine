@@ -139,7 +139,7 @@ try:
     s.capture("pro-free-agents-filtered")
     offer=horizontal_to_text("free-agent-offer","Make offer");s.tap(offer,"Make offer")
     contract=ready("contract-workspace","Contract negotiation")
-    assert "Salary and bonus adjust in $250K steps" in s.texts(contract)
+    assert "Annual base salary · $250K steps" in s.texts(contract)
     cancel=s.scroll_to_text("pro-contract-cancel","Cancel",max_swipes=12)
     assert "Use player's counter" in s.texts(cancel)
     s.capture("pro-contract-negotiation")
