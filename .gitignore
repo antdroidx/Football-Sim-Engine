@@ -27,3 +27,7 @@ __pycache__/
 
 # Raw dated NFL source evidence is local research data, not APK/build output.
 data/pro/source-snapshots/
+
+# Codex workspace attachment drops and local scratch (not repository content)
+.codex-attachments/
+.codex-remote-attachments/
