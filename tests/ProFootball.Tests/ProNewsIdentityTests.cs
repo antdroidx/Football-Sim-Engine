@@ -7,6 +7,29 @@ namespace ProFootball.Tests;
 public sealed class ProNewsIdentityTests
 {
     [Fact]
+    public async Task SaveLoadMaintainsTheGeneratedNewsSnapshot()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "pro-news-load-" + Guid.NewGuid());
+        try
+        {
+            var state = ProLeagueService.Create("Seattle Seahawks", generatedPlayers: true, applyOpeningTrades: false);
+            state = state with { Transactions = ["2026 W1 · Seattle Seahawks hired Test Coach."] };
+            Assert.Empty(state.News);
+            var store = new ProSaveStore(root);
+            await store.Save(state);
+            var loaded = await store.Load(state.Id);
+
+            Assert.Contains(loaded.News, story => story.Category == "Coaching");
+            Assert.NotEmpty(loaded.NarrativeMemory);
+            Assert.Equal(ProNews.Refresh(loaded).News, loaded.News);
+        }
+        finally
+        {
+            if (Directory.Exists(root)) Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
     public void InjuryStoryCarriesTheRecordedPlayerIdentity()
     {
         var state = ProLeagueService.Create("Seattle Seahawks", generatedPlayers: true, applyOpeningTrades: false);

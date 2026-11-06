@@ -56,6 +56,30 @@ public class FranchiseDepthAnalyticsTests
     {
         var s=New();var own=s.Players.First(p=>p.Football.TeamName==s.UserTeam&&!p.Retired);
         s=s with {Name="Roadmap QA",Phase=ProPhase.RegularSeason,Week=15,Games=s.Games.Select(g=>g.Phase==ProPhase.RegularSeason&&g.Football.Week<=14?g with{Football=g.Football with{HasPlayed=true,HomeScore=21,AwayScore=10,PlayerStats=g.Football.InvolvesTeam(s.UserTeam)?[new(){PlayerId=own.Football.PlayerId,PlayerName=own.Football.FullName,TeamName=s.UserTeam,PassYards=240}]:[]}}:g).ToList(),DraftHistory=[new(s.Year-1,1,12,s.UserTeam,own with{Football=own.Football with{OverallRating=Math.Max(40,own.Football.OverallRating-4)}})]};
+        // Device fixture state is synthetic and isolated from source roster/contract facts.
+        var rivalry = new RivalryRecord(
+            "Seattle Seahawks|San Francisco 49ers",
+            "Seattle Seahawks",
+            "San Francisco 49ers",
+            [
+                new RivalryGameRecord(s.Year - 2, 4, "Seattle Seahawks", "San Francisco 49ers", "Seattle Seahawks", false, null),
+                new RivalryGameRecord(s.Year - 1, 12, "San Francisco 49ers", "Seattle Seahawks", "Seattle Seahawks", false, null)
+            ]);
+        s = s with
+        {
+            Rivalries = [rivalry],
+            TeamMotivation =
+            [
+                new TeamMotivationRecord
+                {
+                    TeamId = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                    TeamName = s.UserTeam,
+                    SeasonYear = s.Year,
+                    Value = 72,
+                    Drivers = ["Synthetic device fixture"]
+                }
+            ]
+        };
         s=ProNews.Refresh(s);
         var draft=ProDraft.AutoUntilUser(ProDraft.Generate(s with{Phase=ProPhase.Offseason,OffseasonStep=OffseasonStep.Draft}));
         var retention=s with{Phase=ProPhase.Offseason,OffseasonStep=OffseasonStep.Retention,Contracts=s.Contracts.Select(c=>c.Active&&c.PlayerId==own.Football.PlayerId?c with{Years=c.Years.Where(y=>y.Year<=s.Year).ToList()}:c).ToList()};
@@ -63,7 +87,7 @@ public class FranchiseDepthAnalyticsTests
         try
         {
             var store=new ProSaveStore(root);
-            foreach(var fixture in new[]{s,draft,retention}){await store.Save(fixture);var loaded=await store.Load(fixture.Id);Assert.Equal(fixture.Career,loaded.Career);Assert.Equal(fixture.Phase,loaded.Phase);Assert.Equal(fixture.Prospects.Count,loaded.Prospects.Count);}
+            foreach(var fixture in new[]{s,draft,retention}){await store.Save(fixture);var loaded=await store.Load(fixture.Id);Assert.Equal(fixture.Career,loaded.Career);Assert.Equal(fixture.Phase,loaded.Phase);Assert.Equal(fixture.Prospects.Count,loaded.Prospects.Count);Assert.Equal(fixture.Rivalries.Count,loaded.Rivalries.Count);Assert.Equal(fixture.TeamMotivation.Count,loaded.TeamMotivation.Count);}
             if(Environment.GetEnvironmentVariable("PRO_COORDINATOR_UI_FIXTURES") is string dir)
             {
                 Directory.CreateDirectory(dir);using var file=File.Create(Path.Combine(dir,"pro-staff-roadmap-ui-fixture.json.gz"));using var gzip=new System.IO.Compression.GZipStream(file,System.IO.Compression.CompressionLevel.SmallestSize);

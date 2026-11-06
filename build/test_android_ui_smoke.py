@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import call, patch
 import xml.etree.ElementTree as ET
 
 spec = importlib.util.spec_from_file_location("ui_smoke", Path(__file__).with_name("android-ui-smoke.py"))
@@ -73,6 +73,31 @@ class SmokeSynchronizationTests(unittest.TestCase):
         self.assertIs(menu, root)
         self.assertEqual(4, captured.call_count)
         self.assertEqual(2, command.call_count)
+
+    def test_content_description_scroll_targets_the_named_view(self):
+        first = ET.Element("hierarchy")
+        ET.SubElement(first, "node", attrib={"class": "android.widget.ScrollView", "scrollable": "true", "bounds": "[0,0][1080,2200]"})
+        second = ET.Element("hierarchy")
+        scroll = ET.SubElement(second, "node", attrib={"class": "android.widget.ScrollView", "scrollable": "true", "bounds": "[0,0][1080,2200]"})
+        ET.SubElement(scroll, "node", attrib={"content-desc": "View team Seattle Seahawks", "bounds": "[40,300][800,420]"})
+        with patch.object(smoke, "capture", side_effect=[first, second]) as captured, patch.object(smoke, "adb") as command:
+            self.assertIs(second, smoke.scroll_to_desc("team", "View team Seattle Seahawks"))
+        self.assertEqual(2, captured.call_count)
+        command.assert_called_once()
+
+    def test_input_text_encodes_spaces_and_dismisses_the_keyboard(self):
+        root = ET.Element("hierarchy")
+        ET.SubElement(root, "node", attrib={"resource-id": "app:id/game-dialog-input", "bounds": "[10,20][300,80]"})
+        with patch.object(smoke, "tap_id") as tapped, patch.object(smoke, "adb") as command:
+            smoke.input_text(root, "game-dialog-input", "Roadmap device reply")
+        tapped.assert_called_once_with(root, "game-dialog-input")
+        self.assertEqual(
+            [
+                call("shell", "input", "text", "Roadmap%sdevice%sreply"),
+                call("shell", "input", "keyevent", "111"),
+            ],
+            command.call_args_list,
+        )
 
     def test_live_selection_text_tracks_the_called_play(self):
         root=ET.Element("hierarchy")

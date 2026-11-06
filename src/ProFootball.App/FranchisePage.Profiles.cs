@@ -166,30 +166,19 @@ public sealed partial class FranchisePage
     string newsFilter = "All";
     void News()
     {
-        state = ProNews.Refresh(state!); var s = state!;
+        var s = state!;
         body.Add(PageHeader("League news", "League Wire · factual stories and the Social network"));
-        var sources = s.News.Select(story => new FootballNewsStory
-        {
-            Id = story.Id,
-            Category = story.Category,
-            Headline = story.Headline,
-            Body = story.Body,
-            TeamName = story.Team ?? s.UserTeam,
-            SeasonYear = story.Year,
-            Week = story.Week,
-            RelatedId = story.GameId,
-            MediaKind = FootballNewsMediaKind.Story,
-            PersonKind = story.PersonKind,
-            PersonId = story.PersonId,
-            PersonName = story.PersonName
-        }).ToArray();
-        state = s with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(s.NarrativeMemory, sources, s.Year,
-            FootballRivalryMemoryService.Records(s.Games.Select(game => game.Football).ToArray(), s.Year)) };
-        s = state;
-        var socialPosts = FootballNewsSocialService.Build(sources, s.NarrativeMemory);
-        var socialReplies = FootballSocialService.BuildReplies(socialPosts, sources, s.SocialInteractions, s.Year, s.Week);
-        var displayedPosts = FootballSocialService.Apply(socialPosts, s.SocialInteractions, s.SocialFollows);
-        var socialCount = socialPosts.Count;
+        var sources = ProNewsPresentation.Sources(s);
+        var socialPosts = newsFilter == "Social"
+            ? FootballNewsSocialService.Build(sources, s.NarrativeMemory)
+            : [];
+        var socialReplies = newsFilter == "Social"
+            ? FootballSocialService.BuildReplies(socialPosts, sources, s.SocialInteractions, s.Year, s.Week)
+            : [];
+        var displayedPosts = newsFilter == "Social"
+            ? FootballSocialService.Apply(socialPosts, s.SocialInteractions, s.SocialFollows)
+            : [];
+        var socialCount = ProNewsPresentation.SocialCount(s);
         var tools = new ActionRow();
         tools.Add(Action("Filter: " + newsFilter, async () =>
         {
@@ -207,10 +196,10 @@ public sealed partial class FranchisePage
         var stories = s.News.Where(n => newsFilter == "All"
             || newsFilter == "My team" && (n.Team == s.UserTeam || n.Headline.Contains(s.UserTeam))
             || newsFilter == "Unread" && !s.ReadNewsIds.Contains(n.Id)
-            || n.Category == newsFilter).Take(60).ToArray();
+            || n.Category == newsFilter).Take(12).ToArray();
         var displayed = newsFilter == "Social"
             ? displayedPosts.Select(post => (Story: s.News.First(item => item.Id == post.RelatedId),
-                    Mapped: post)).Take(60).ToArray()
+                    Mapped: post)).Take(12).ToArray()
             : stories.Select(story => (Story: story,
                 Mapped: sources.First(item => item.Id == story.Id))).ToArray();
         if (displayed.Length == 0) body.Add(Text(newsFilter == "Social"
@@ -234,7 +223,6 @@ public sealed partial class FranchisePage
             if (newsFilter == "Social" && mapped.IsSocialPost) body.Add(SocialActions(mapped, socialReplies));
         }
     }
-
     View SocialActions(FootballNewsStory post, IReadOnlyList<FootballNewsStory> replies)
     {
         var row = new ActionRow();

@@ -11,12 +11,12 @@ def adb(*args):
     return subprocess.check_output(["adb", *args], stderr=subprocess.STDOUT, timeout=30)
 
 
-def capture(name, timeout=90):
+def capture(name, timeout=90, compressed=True):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         try:
             adb("shell", "rm", "-f", "/sdcard/dynasty-ui.xml")
-            dumped = adb("shell", "uiautomator", "dump", "/sdcard/dynasty-ui.xml")
+            dumped = adb("shell", "uiautomator", "dump", *(["--compressed"] if compressed else []), "/sdcard/dynasty-ui.xml")
             if b"dumped to:" not in dumped:
                 time.sleep(1)
                 continue
@@ -60,6 +60,59 @@ def tap(root, text):
     assert right > left and bottom > top, f"Target is not visible: {text}"
     adb("shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2))
     time.sleep(1)
+
+
+def nodes_with_desc(root, description):
+    return [n for n in root.iter("node") if n.get("content-desc") == description]
+
+
+def tap_desc(root, description):
+    node = next((n for n in nodes_with_desc(root, description)), None)
+    assert node is not None, description + " not found"
+    tap_node(root, node)
+
+
+def nodes_with_id(root, suffix):
+    return [n for n in root.iter("node") if (n.get("resource-id") or "").endswith(suffix)]
+
+
+def scroll_to_id(name, suffix, max_swipes=6, toward_start=False):
+    for attempt in range(max_swipes + 1):
+        root = capture(name)
+        node = next((n for n in nodes_with_id(root, suffix)), None)
+        if node is not None:
+            left, top, right, bottom = map(int, re.findall(r"\d+", node.get("bounds")))
+            if right > left and bottom > top:
+                return root
+        scrollables = [n for n in root.iter("node") if n.get("scrollable") == "true"]
+        if not scrollables or attempt == max_swipes:
+            raise AssertionError(f"Could not find visible {suffix}")
+        def area(node):
+            x1,y1,x2,y2=map(int,re.findall(r"\d+",node.get("bounds")))
+            return (x2-x1)*(y2-y1)
+        left, top, right, bottom = map(int, re.findall(r"\d+", max(scrollables,key=area).get("bounds")))
+        x = str((left + right) // 2)
+        start, end = (1, 3) if toward_start else (3, 1)
+        adb("shell", "input", "swipe", x, str(top + (bottom-top)*start//4), x, str(top + (bottom-top)*end//4), "350")
+
+def scroll_to_desc(name, description, max_swipes=6, toward_start=False):
+    for attempt in range(max_swipes + 1):
+        root = capture(name)
+        node = next((n for n in nodes_with_desc(root, description)), None)
+        if node is not None:
+            left, top, right, bottom = map(int, re.findall(r"\d+", node.get("bounds")))
+            if right > left and bottom > top:
+                return root
+        scrollables = [n for n in root.iter("node") if n.get("scrollable") == "true"]
+        if not scrollables or attempt == max_swipes:
+            raise AssertionError(f"Could not find visible {description}")
+        def area(node):
+            x1,y1,x2,y2=map(int,re.findall(r"\d+",node.get("bounds")))
+            return (x2-x1)*(y2-y1)
+        left, top, right, bottom = map(int, re.findall(r"\d+", max(scrollables,key=area).get("bounds")))
+        x = str((left + right) // 2)
+        start, end = (1, 3) if toward_start else (3, 1)
+        adb("shell", "input", "swipe", x, str(top + (bottom-top)*start//4), x, str(top + (bottom-top)*end//4), "350")
 
 
 def scroll_to_text(name, text, max_swipes=6, toward_start=False):
@@ -358,6 +411,12 @@ def main():
     tap(confirm, "Simulate remainder")
     final = wait_for("final-saved", lambda r: any((t or "").startswith("FINAL") for t in texts(r)), timeout=300)
     tap(final, "Options")
+    highlight_menu = wait_for("highlight-menu", lambda r: "Replay highlights" in texts(r))
+    tap(highlight_menu, "Replay highlights")
+    highlight_picker = wait_for("highlight-picker", lambda r: "Highlights" in texts(r) and any(re.match(r"^Q\d+ ", t or "") for t in texts(r)))
+    assert "Cancel" in texts(highlight_picker), "Replay highlight picker must offer Cancel"
+    tap(highlight_picker, "Cancel")
+    tap(capture("highlight-cancelled"), "Options")
     options = wait_for("exit-menu", lambda r: "Exit game" in texts(r))
     tap(options, "Exit game")
     overview = wait_for("after-live-view", overview_ready, timeout=300)
@@ -693,12 +752,39 @@ def selection_text(root):
     return node.get("text") if node is not None else ""
 
 
-def tap_id(root, suffix):
-    node = node_with_id(root, suffix)
+def nodes_with_id(root, suffix):
+    return [n for n in root.iter("node") if (n.get("resource-id") or "").endswith(suffix)]
+
+
+def node_text(root, suffix):
+    return node_with_id(root, suffix).get("text", "")
+
+
+def has_id_label(root, suffix, label):
+    return any(node.get("text") == label for node in nodes_with_id(root, suffix))
+
+
+def tap_node(root, node):
     left, top, right, bottom = map(int, re.findall(r"\d+", node.get("bounds")))
     assert right > left and bottom > top
     adb("shell", "input", "tap", str((left+right)//2), str((top+bottom)//2))
     time.sleep(1)
+
+
+def input_text(root, suffix, value):
+    tap_id(root, suffix)
+    adb("shell", "input", "text", value.replace(" ", "%s"))
+    adb("shell", "input", "keyevent", "111")
+
+
+def tap_id(root, suffix):
+    tap_node(root, node_with_id(root, suffix))
+
+
+def tap_id_label(root, suffix, label):
+    node = next((n for n in nodes_with_id(root, suffix) if n.get("text") == label), None)
+    assert node is not None, f"{label} not found for {suffix}"
+    tap_node(root, node)
 
 
 def check_career_options():

@@ -94,7 +94,13 @@ public sealed partial class FranchisePage : ContentPage
         body.Add(Text("Build your 2026 franchise. Regular-season rosters allow 53 active players, with separate injured reserves."));
         body.Add(Action("Start franchise", async () => { state = await Task.Run(() => ProLeagueService.Create((string)picker.SelectedItem, name.Text, finances.SelectedIndex == 1, role.SelectedIndex == 1 ? StaffRole.OffensiveCoordinator : role.SelectedIndex == 2 ? StaffRole.DefensiveCoordinator : StaffRole.HeadCoach, firing.IsToggled, coachName.Text, generatedPlayers:roster.SelectedIndex==1)); await Save(); section = "Overview"; Render(); }, "pro-start")); body.Add(Action("Cancel", Library)); return Task.CompletedTask;
     }
-    async Task Save() { if (state is not null) { state = ProNews.Refresh(state); await store.Save(state); } }
+    async Task Save()
+    {
+        if (state is null) return;
+        var current = state;
+        state = await Task.Run(() => ProNewsPresentation.RefreshMemory(ProNews.Refresh(current)));
+        await store.Save(state);
+    }
     void Render()
     {
         if (state is null) return;
@@ -173,7 +179,7 @@ public sealed partial class FranchisePage : ContentPage
 
         if(s.UnsignedRookies.Any(rx=>rx.Team==s.UserTeam))body.Add(SectionCard("Unsigned draft picks","Clear cap/roster room to sign the remaining rookie contracts.",Action("Sign rookie contracts",async()=>{state=ProDraft.SignRookies(state!,state!.UserTeam);await Save();Render();})));
         if(s.Phase==ProPhase.Preseason&&s.Week==3&&s.Games.Where(x=>x.Phase==ProPhase.Preseason&&x.Football.Week==3).All(x=>x.Football.HasPlayed)&&ProRoster.Active(s,s.UserTeam)>53)body.Add(SectionCard("Final roster cutdown",$"Reduce {ProRoster.Active(s,s.UserTeam)} active players to 53 before opening day.",Action("Manage roster",()=>Open("Roster"))));
-        state=ProNews.Refresh(state!);s=state;
+        s=state!;
         var newsChildren=new List<View>();
         foreach(var story in s.News.Take(4))
         {

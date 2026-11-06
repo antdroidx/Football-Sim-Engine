@@ -38,9 +38,13 @@ public sealed partial class FoundationPage
         View ChemistrySummary()
         {
             var record=CollegeChemistryService.Record(state,team.Name,state.SeasonYear);
-            if(record is null)return T("No season culture record yet. Culture values follow the current roster and staff.");
-            var prior=CollegeChemistryService.Record(state,team.Name,state.SeasonYear-1);
             var stack=new VerticalStackLayout{Spacing=4,AutomationId="college-chemistry-note"};
+            if(record is null)
+            {
+                stack.Children.Add(T("No season culture record yet. Culture values follow the current roster and staff."));
+                return stack;
+            }
+            var prior=CollegeChemistryService.Record(state,team.Name,state.SeasonYear-1);
             stack.Children.Add(T(prior is null
                 ? "First recorded season"
                 : $"{record.Cohesion-prior.Cohesion:+0;-0;0} vs last season · {TeamChemistrySeasonService.MomentumLabel(record.Momentum)}",true));
@@ -60,8 +64,12 @@ public sealed partial class FoundationPage
         View RivalrySummary()
         {
             var rivalries=RivalryRecordService.For(state.Rivalries,team.Name);
-            if(rivalries.Count==0)return T("No rivalry series are recorded for this program yet.");
             var stack=new VerticalStackLayout{Spacing=4,AutomationId="college-rivalry-series"};
+            if(rivalries.Count==0)
+            {
+                stack.Children.Add(T("No rivalry series are recorded for this program yet."));
+                return stack;
+            }
             foreach(var rivalry in rivalries)
                 stack.Children.Add(T($"{RivalryRecordService.Opponent(rivalry,team.Name)} · {RivalryRecordService.Series(rivalry,team.Name)}",true));
             return stack;

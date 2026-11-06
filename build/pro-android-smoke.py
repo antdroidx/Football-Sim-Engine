@@ -207,6 +207,11 @@ try:
     confirm=ready("finish-confirm","Finish game?")
     s.tap(confirm,"Simulate remainder")
     final=s.wait_for("pro-final",lambda r:any((t or "").startswith("FINAL") for t in s.texts(r)),timeout=180)
+    highlight_menu=s.tap_expect("pro-highlight-menu","Options",lambda r:"Replay highlights" in s.texts(r))
+    s.tap(highlight_menu,"Replay highlights")
+    highlight_picker=s.wait_for("pro-highlight-picker",lambda r:"Highlights" in s.texts(r) and any(re.match(r"^Q\d+ ",t or "") for t in s.texts(r)),timeout=120)
+    assert "Cancel" in s.texts(highlight_picker),"Replay highlight picker must offer Cancel"
+    s.tap(highlight_picker,"Cancel")
     options=s.tap_expect("pro-exit-menu","Options","Game options")
     s.tap(options,"Exit game")
     ready("completed-overview","Season cap")

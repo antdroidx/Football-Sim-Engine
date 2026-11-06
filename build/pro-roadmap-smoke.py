@@ -54,6 +54,41 @@ def rotate(value):
         return (b[2]>b[3]) if value else (b[3]>b[2])
     return ready("rotation-"+str(value),oriented)
 
+def has_id(root,suffix):
+    return any((n.get("resource-id") or "").endswith(suffix) for n in root.iter("node"))
+
+def social_actions():
+    root=ready("social-actions",lambda r:all(has_id(r,suffix) for suffix in ("pro-social-like","pro-social-repost","pro-social-reply","pro-social-follow")))
+    like_label="Like" if s.has_id_label(root,"pro-social-like","Like") else "Liked"
+    s.tap_id_label(root,"pro-social-like",like_label)
+    root=ready("social-liked",lambda r:s.has_id_label(r,"pro-social-like","Like" if like_label=="Liked" else "Liked"))
+    repost_label="Repost" if s.has_id_label(root,"pro-social-repost","Repost") else "Reposted"
+    s.tap_id_label(root,"pro-social-repost",repost_label)
+    root=ready("social-reposted",lambda r:s.has_id_label(r,"pro-social-repost","Repost" if repost_label=="Reposted" else "Reposted"))
+    reply_label="Reply" if s.has_id_label(root,"pro-social-reply","Reply") else "Edit reply"
+    s.tap_id_label(root,"pro-social-reply",reply_label)
+    prompt=ready("social-reply-prompt",lambda r:"Reply to post" in s.texts(r) and has_id(r,"game-dialog-input"))
+    if reply_label=="Reply":s.input_text(prompt,"game-dialog-input","Roadmap device reply")
+    root=ready("social-reply-submit",lambda r:"Post reply" in s.texts(r))
+    s.tap(root,"Post reply")
+    root=ready("social-replied",lambda r:"Your reply · Roadmap device reply" in s.texts(r) and s.has_id_label(r,"pro-social-reply","Edit reply"))
+    s.capture("pro-roadmap-social-actions")
+    return root
+
+def team_actions():
+    standings=s.scroll_to_desc("team-standings","View team Seattle Seahawks",max_swipes=20)
+    s.tap_desc(standings,"View team Seattle Seahawks")
+    ready("team-page",lambda r:"Identity" in s.texts(r))
+    chemistry=s.scroll_to_text("team-chemistry","Team chemistry",max_swipes=20)
+    assert has_id(chemistry,"pro-chemistry-note")
+    assert any((t or "").startswith("Motivation ") for t in s.texts(chemistry))
+    rivalry=s.scroll_to_text("team-rivalry","Rivalries",max_swipes=20)
+    assert has_id(rivalry,"pro-rivalry-series")
+    assert any("meetings" in (t or "") or "meeting" in (t or "") for t in s.texts(rivalry))
+    s.capture("pro-roadmap-team-surfaces")
+    back=s.scroll_to_text("team-back","‹ Back",max_swipes=20,toward_start=True)
+    s.tap(back,"‹ Back")
+
 def action_visible(root,label):
     node=next(n for n in root.iter("node") if n.get("text")==label and n.get("class","").endswith("Button"))
     left,top,right,bottom=map(int,re.findall(r"\d+",node.get("bounds")))
@@ -119,6 +154,15 @@ def presentation():
     s.adb("shell","wm","size","reset");s.adb("shell","wm","density","reset")
     Path("pro-presentation-check.json").write_text(json.dumps({"samePackagedAPK":True,"portraitPrimaryNumbers":True,"draftGradeAndAction":True,"retentionDemandAndAction":True,"campRatings":True,"foldLayout":True,"lightTheme":True,"darkTheme":True},indent=2),encoding="utf-8")
 
+if "--team-actions-only" in sys.argv:
+    try:
+        team_actions()
+        Path("pro-roadmap-check.json").write_text(json.dumps({"teamActionsOnly":True,"rivalrySeries":True,"chemistryMotivation":True},indent=2),encoding="utf-8")
+        print("PASS: Pro team rivalry and chemistry/motivation surfaces.")
+    finally:
+        Path("pro-roadmap-logcat.txt").write_bytes(s.adb("logcat","-d","-t","1000"))
+    raise SystemExit(0)
+
 try:
     data=json.loads(gzip.decompress(next(Path("apk").glob("**/pro-staff-roadmap-ui-fixture.json.gz")).read_bytes()))
     s.adb("shell","settings","put","system","accelerometer_rotation","0")
@@ -131,8 +175,18 @@ try:
         category(label);s.capture("pro-roadmap-portrait-"+label.replace(" ","-"))
     navigate("News");click("news-filter","Filter: All");click("weekly-filter","Weekly review")
     ready("weekly-news",lambda r:any("around the league" in t for t in s.texts(r) if t));s.capture("pro-roadmap-weekly-news")
+    s.tap_id(ready("social-shortcut",lambda r:has_id(r,"pro-news-social")),"pro-news-social")
+    social_actions()
+    navigate("Standings");ready("standings-panel",lambda r:"Standings" in s.texts(r))
+    team_actions()
     navigate("Career");click("expectations","Ownership expectations");s.capture("pro-roadmap-career")
-    navigate("Front Office");click("camp","Training camp");ready("camp",lambda r:"Training camp & roster battles" in s.texts(r));s.capture("pro-roadmap-camp")
+    navigate("Front Office");front=ready("front-office",lambda r:"Expiring contracts" in s.texts(r) or "Draft & scouting" in s.texts(r))
+    camp_checked="Training camp" in s.texts(front)
+    if camp_checked:
+        click("camp","Training camp");ready("camp",lambda r:"Training camp & roster battles" in s.texts(r));s.capture("pro-roadmap-camp")
+    else:
+        assert "Expiring contracts" in s.texts(front) or "Draft & scouting" in s.texts(front)
+        s.capture("pro-roadmap-front-office")
     navigate("Standings");ready("standings",lambda r:"Standings" in s.texts(r));s.capture("pro-roadmap-standings")
     for label,key in [("Draft & scouting","draft"),("Expiring contracts","retention")]:
         load(data[key]);navigate("Front Office");click(key,label)
@@ -144,7 +198,7 @@ try:
         action_visible(root,target);s.capture("pro-roadmap-landscape-"+key)
         rotate(0)
     presentation()
-    Path("pro-roadmap-check.json").write_text(json.dumps({"syntheticFixtures":True,"analyticsCategories":3,"weeklyNews":True,"careerExpectations":True,"camp":True,"standings":True,"portraitLandscapeActions":True,"foldLayout":True,"darkTheme":True},indent=2),encoding="utf-8")
-    print("PASS: analytics categories, factual weekly news, career context, standings and visible portrait/landscape draft/retention actions.")
+    Path("pro-roadmap-check.json").write_text(json.dumps({"syntheticFixtures":True,"analyticsCategories":3,"weeklyNews":True,"socialActions":True,"rivalrySeries":True,"chemistryMotivation":True,"careerExpectations":True,"camp":camp_checked,"standings":True,"portraitLandscapeActions":True,"foldLayout":True,"darkTheme":True},indent=2),encoding="utf-8")
+    print("PASS: analytics categories, factual weekly news, social actions, team rivalry/chemistry, career context, standings and visible portrait/landscape draft/retention actions.")
 finally:
     Path("pro-roadmap-logcat.txt").write_bytes(s.adb("logcat","-d","-t","1000"))
