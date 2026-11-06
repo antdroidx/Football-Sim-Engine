@@ -131,7 +131,7 @@ try:
     agents=ready("free-agents","All positions")
     s.capture("pro-free-agents-compact")
     s.tap(agents,"All positions")
-    position=ready("free-agents-position-options","RB")
+    position=s.scroll_to_text("pro-free-agents-position-options","RB",max_swipes=20)
     s.tap(position,"RB")
     agents=ready("free-agents-rb","DeeJay Dallas")
     assert "Trevon Diggs" not in s.texts(agents)

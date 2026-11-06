@@ -232,6 +232,10 @@ def main():
         tap(capture(name + "-ready"), "Options")
         menu = wait_for(name + "-options", lambda r: "Game options" in texts(r) or "GameCast options" in texts(r))
         assert any((n.get("resource-id") or "").endswith("game-dialog-surface") for n in menu.iter("node")), "Live menu must use themed dialog surface"
+        if item not in texts(menu):
+            # Viewing options such as the camera live in their own sheet.
+            tap(menu, "Viewing options")
+            menu = wait_for(name + "-viewing", lambda r: "Camera" in texts(r))
         tap(menu, item)
         return capture(name)
 
