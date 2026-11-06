@@ -91,6 +91,11 @@ def scroll_to_text(name, text, max_swipes=6, toward_start=False):
         adb("shell", "input", "swipe", x, str(top + (bottom-top)*start//4), x, str(top + (bottom-top)*end//4), "350")
 
 
+def wait_for_id(name, resource_suffix, timeout=120):
+    # Automation ids survive copy changes; visible labels do not.
+    return wait_for(name, lambda r: any((n.get("resource-id") or "").endswith(resource_suffix) for n in r.iter("node")), timeout=timeout)
+
+
 def wait_for(name, predicate, timeout=120):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -243,7 +248,7 @@ def main():
         options_choice("Box score", name)
         return wait_for(name, lambda r: "Live box score" in texts(r) or "Final statistics" in texts(r))
 
-    viewer = wait_for("game-day-portrait", lambda r: any((n.get("resource-id") or "").endswith("live-game-page") for n in r.iter("node")))
+    viewer = wait_for_id("game-day-portrait","live-game-page")
     badges = [n for n in viewer.iter("node") if n.get("content-desc", "").endswith(" team badge")]
     assert len(badges) == 2, "Broadcast scoreboard must expose both team badges"
     assert any((n.get("resource-id") or "").endswith(("game-day-field-frame","live-field")) for n in viewer.iter("node"))
