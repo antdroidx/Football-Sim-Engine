@@ -149,7 +149,7 @@ def presentation():
     for label,header in [("Player development","Pos avg Δ"),("Draft outcomes","League Δ"),("Career records","Total")]:
         category(label);root=s.scroll_to_text("pro-presentation-"+label,header,max_swipes=20)
         cell_visible(root,header);s.capture("pro-presentation-portrait-"+label.replace(" ","-"))
-    for key,label,header,target in [("draft","Draft & scouting","Scouted","Draft"),("retention","Expiring contracts","Demand / yr","Negotiate")]:
+    for key,label,header,target in [("draft","Draft & scouting","Prospect","Delegate remaining picks"),("retention","Expiring contracts","Demand / yr","Negotiate")]:
         load(data[key]);navigate("Front Office");click_desc("presentation-"+key,"Draft & scouting. Prospects and visit slots" if key=="draft" else "Expiring contracts. Retention decisions",target)
         root=s.scroll_to_text("pro-presentation-"+key,header,max_swipes=20)
         cell_visible(root,header);action_visible(root,target);s.capture("pro-presentation-portrait-"+key)
@@ -198,7 +198,7 @@ try:
         s.capture("pro-roadmap-front-office")
     navigate("Standings");ready("standings",lambda r:"Standings" in s.texts(r));s.capture("pro-roadmap-standings")
     for label,key in [("Draft & scouting","draft"),("Expiring contracts","retention")]:
-        target="Draft" if key=="draft" else "Negotiate"
+        target="Delegate remaining picks" if key=="draft" else "Negotiate"
         load(data[key]);navigate("Front Office");click_desc(key,"Draft & scouting. Prospects and visit slots" if key=="draft" else "Expiring contracts. Retention decisions",target)
         root=s.scroll_to_text("pro-roadmap-portrait-"+key,target,max_swipes=20)
         action_visible(root,target);s.capture("pro-roadmap-portrait-"+key)
