@@ -1,3 +1,17 @@
+## Player reply and sourced-rule checkpoint — November 6, 2026
+
+- [x] Add a player-authored reply action to both social feeds with save-backed body text and stable automation IDs.
+- [x] Keep generated media-desk replies separate from the player's "Your reply" content.
+- [x] Replace or remove a player reply without changing derived engagement counts.
+- [x] Encode the sourced one-backfield-player motion boundary.
+- [x] Reject motion toward the goal/line of scrimmage and motion from the line without becoming a back and stopping.
+- [x] Require and preserve the one-second set after the last shift.
+- [x] Label the existing shift/motion yard caps as internal simulation/catalog bounds, not league rules.
+- [x] Keep rivalry records free of a play modifier because neither official rulebook supplies one.
+- [x] Pass 26 Engine, 7 College and 7 Pro focused tests and both Android compile targets.
+
+Remaining before acceptance: explicit action-level device checks on fresh College/Pro APKs, final required
+suites, exact APK packaging and established workflow runs, then the authorized merge and prerelease.
 ## Roadmap completion checkpoint — November 6, 2026
 
 - [x] Persist team motivation in both save models and advance it deterministically by season.

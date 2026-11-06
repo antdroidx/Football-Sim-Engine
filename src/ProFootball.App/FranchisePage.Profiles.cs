@@ -187,7 +187,7 @@ public sealed partial class FranchisePage
             FootballRivalryMemoryService.Records(s.Games.Select(game => game.Football).ToArray(), s.Year)) };
         s = state;
         var socialPosts = FootballNewsSocialService.Build(sources, s.NarrativeMemory);
-        var socialReplies = FootballSocialService.ComposeReplies(socialPosts, sources, s.Year, s.Week);
+        var socialReplies = FootballSocialService.BuildReplies(socialPosts, sources, s.SocialInteractions, s.Year, s.Week);
         var displayedPosts = FootballSocialService.Apply(socialPosts, s.SocialInteractions, s.SocialFollows);
         var socialCount = socialPosts.Count;
         var tools = new ActionRow();
@@ -252,6 +252,21 @@ public sealed partial class FranchisePage
             await Save();
             Render();
         }, "pro-social-repost");
+        var playerReply = replies.FirstOrDefault(reply => reply.AuthoredByPlayer);
+        var reply = Action(playerReply is null ? "Reply" : "Edit reply", async () =>
+        {
+            var body = await GameDialogs.PromptAsync(this, "Reply to post",
+                "Your reply is saved with this franchise and shown beside the in-game media reply.",
+                "Post reply", "Cancel", playerReply?.Body ?? string.Empty);
+            if (body is null) return;
+            state = state! with
+            {
+                SocialInteractions = FootballSocialService.Reply(state.SocialInteractions,
+                    post.Id, body, state.Year, state.Week).ToList()
+            };
+            await Save();
+            Render();
+        }, "pro-social-reply");
         var follow = Action(post.FollowedAuthor ? "Following" : "Follow", async () =>
         {
             state = state! with { SocialFollows = FootballSocialService.ToggleFollow(state.SocialFollows,
@@ -261,13 +276,18 @@ public sealed partial class FranchisePage
         }, "pro-social-follow");
         row.Add(like);
         row.Add(repost);
+        row.Add(reply);
         row.Add(follow);
         var stack = new VerticalStackLayout { Spacing = 6 };
         stack.Children.Add(row);
-        foreach (var reply in FootballSocialService.RepliesFor(replies, post.Id))
-            stack.Children.Add(Text($"{reply.AuthorName} {reply.AuthorHandle} · {reply.Body}", 12));
+        foreach (var item in FootballSocialService.RepliesFor(replies, post.Id))
+        {
+            var author = item.AuthoredByPlayer ? "Your reply" : $"{item.AuthorName} {item.AuthorHandle}";
+            stack.Children.Add(Text($"{author} · {item.Body}", 12));
+        }
         return stack;
     }
+
     static string NewsStoryDetail(FootballNewsStory story) => story.IsSocial
         ? $"{story.AuthorName} {story.AuthorHandle}\n\n{story.Body}\n\n{story.ReplyCount} replies · {story.RepostCount} reposts · {story.LikeCount} likes\n\nFictional in-game social activity."
         : story.Body;

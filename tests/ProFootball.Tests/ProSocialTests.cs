@@ -27,6 +27,15 @@ public class ProSocialTests
                     Kind = FootballSocialInteractionKind.Repost,
                     SeasonYear = 2026,
                     Week = 4
+                },
+                new FootballSocialInteraction
+                {
+                    Id = "post-1:Reply",
+                    PostId = "post-1",
+                    Kind = FootballSocialInteractionKind.Reply,
+                    Body = "Pro reply",
+                    SeasonYear = 2026,
+                    Week = 4
                 }
             ],
             SocialFollows =
@@ -43,9 +52,11 @@ public class ProSocialTests
 
         var restored = JsonSerializer.Deserialize<ProFranchise>(JsonSerializer.Serialize(state))!;
 
-        var interaction = Assert.Single(restored.SocialInteractions);
+        Assert.Equal(2, restored.SocialInteractions.Count);
+        var interaction = restored.SocialInteractions[0];
         Assert.Equal("post-1", interaction.PostId);
         Assert.Equal(FootballSocialInteractionKind.Repost, interaction.Kind);
+        Assert.Equal("Pro reply", restored.SocialInteractions[1].Body);
         var follow = Assert.Single(restored.SocialFollows);
         Assert.Equal("@LeagueSideline", follow.Handle);
     }

@@ -72,7 +72,7 @@ public class PreSnapTests
     }
 
     [Fact]
-    public void LeagueRulesDecideHowFarAFormationMayMove()
+    public void InternalSimulationBoundsDecideCatalogDistance()
     {
         var tight = FootballRules.College with { MaximumMotionYards = 3, MaximumShiftYards = 1 };
         var wide = FootballRules.College with { MaximumMotionYards = 5 };
@@ -81,6 +81,56 @@ public class PreSnapTests
         Assert.False(PreSnapCatalog.IsValid(PreSnapCatalog.Motion("Left", 4), tight));
         Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.Motion("Left", 4), wide));
         Assert.False(PreSnapCatalog.IsValid(new(PreSnapType.Shift, "Left", 2), tight));
+    }
+
+    [Fact]
+    public void SourcedRulesBoundMotionCountDirectionSetAndLineStart()
+    {
+        foreach (var rules in new[] { FootballRules.College, FootballRules.Professional })
+        {
+            Assert.Equal(1, rules.MaximumBackfieldPlayersInMotion);
+            Assert.True(rules.MotionMustBeParallelOrAwayFromGoalLine);
+            Assert.True(rules.MotionFromLineRequiresBackAndCompleteStop);
+            Assert.True(rules.RequiresOneSecondSetAfterShift);
+
+            Assert.True(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2, PreSnapMotionDirection.AwayFromGoalLine), rules));
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2, PreSnapMotionDirection.TowardGoalLine), rules));
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2) with { BackfieldPlayersInMotion = 2 }, rules));
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2) with { AllOtherPlayersStationary = false }, rules));
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2) with { FollowedShift = true, SetForOneSecond = false }, rules));
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Shift("Left", .5) with { SetForOneSecond = false }, rules));
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2) with
+                {
+                    StartedOnLineOfScrimmage = true,
+                    BecameBackAndStopped = false
+                }, rules));
+            Assert.True(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2) with
+                {
+                    StartedOnLineOfScrimmage = true,
+                    BecameBackAndStopped = true
+                }, rules));
+        }
+    }
+
+    [Fact]
+    public void OlderRecordedPreSnapChoiceDefaultsToASourcedLegalMotion()
+    {
+        var restored = System.Text.Json.JsonSerializer.Deserialize<PreSnapChoice>(
+            """{"Type":2,"Side":"Right","Yards":2}""")!;
+
+        Assert.True(restored.Valid);
+        Assert.Equal(PreSnapMotionDirection.Lateral, restored.MotionDirection);
+        Assert.Equal(1, restored.BackfieldPlayersInMotion);
+        Assert.True(restored.AllOtherPlayersStationary);
+        Assert.True(restored.SetForOneSecond);
     }
 
     [Fact]

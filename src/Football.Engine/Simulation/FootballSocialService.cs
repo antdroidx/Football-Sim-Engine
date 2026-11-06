@@ -8,7 +8,9 @@ namespace DynastyManager.Core.Simulation;
 /// </summary>
 public static class FootballSocialService
 {
-    /// <summary>Marks the player's own likes, reposts and followed desks on the derived posts.</summary>
+    private const int MaximumReplyLength = 280;
+
+    /// <summary>Marks the player's own likes, reposts, replies and followed desks on the derived posts.</summary>
     public static IReadOnlyList<FootballNewsStory> Apply(
         IReadOnlyList<FootballNewsStory> posts,
         IReadOnlyList<FootballSocialInteraction> interactions,
@@ -26,6 +28,10 @@ public static class FootballSocialService
             .Where(item => item.Kind == FootballSocialInteractionKind.Repost)
             .Select(item => item.PostId)
             .ToHashSet(StringComparer.Ordinal);
+        var replied = interactions
+            .Where(item => item.Kind == FootballSocialInteractionKind.Reply && !string.IsNullOrWhiteSpace(item.Body))
+            .Select(item => item.PostId)
+            .ToHashSet(StringComparer.Ordinal);
         var followed = follows.Select(item => item.Handle).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         return posts
@@ -33,6 +39,7 @@ public static class FootballSocialService
             {
                 LikedByPlayer = liked.Contains(post.Id),
                 RepostedByPlayer = reposted.Contains(post.Id),
+                RepliedByPlayer = replied.Contains(post.Id),
                 FollowedAuthor = post.AuthorHandle is not null && followed.Contains(post.AuthorHandle)
             })
             .OrderByDescending(post => post.FollowedAuthor)
@@ -41,7 +48,7 @@ public static class FootballSocialService
             .ToArray();
     }
 
-    /// <summary>Records or clears one of the player's actions on a post.</summary>
+    /// <summary>Records or clears one of the player's binary actions on a post.</summary>
     public static IReadOnlyList<FootballSocialInteraction> Toggle(
         IReadOnlyList<FootballSocialInteraction> current,
         string postId,
@@ -50,6 +57,8 @@ public static class FootballSocialService
         int week)
     {
         ArgumentNullException.ThrowIfNull(current);
+        if (kind == FootballSocialInteractionKind.Reply)
+            throw new ArgumentException("Use Reply to author or replace a reply.", nameof(kind));
         if (string.IsNullOrWhiteSpace(postId))
             return current;
 
@@ -64,6 +73,34 @@ public static class FootballSocialService
                 SeasonYear = seasonYear,
                 Week = week
             }).ToArray();
+    }
+
+    /// <summary>Authors or replaces the player's reply to a post. Empty text removes it.</summary>
+    public static IReadOnlyList<FootballSocialInteraction> Reply(
+        IReadOnlyList<FootballSocialInteraction> current,
+        string postId,
+        string? body,
+        int seasonYear,
+        int week)
+    {
+        ArgumentNullException.ThrowIfNull(current);
+        if (string.IsNullOrWhiteSpace(postId))
+            return current;
+
+        var id = $"{postId}:{FootballSocialInteractionKind.Reply}";
+        var without = current.Where(item => item.Id != id).ToArray();
+        var text = (body ?? string.Empty).Trim();
+        if (text.Length == 0)
+            return without;
+        return without.Append(new FootballSocialInteraction
+        {
+            Id = id,
+            PostId = postId,
+            Kind = FootballSocialInteractionKind.Reply,
+            Body = text.Length <= MaximumReplyLength ? text : text[..MaximumReplyLength],
+            SeasonYear = seasonYear,
+            Week = week
+        }).ToArray();
     }
 
     /// <summary>Follows or unfollows a media desk.</summary>
@@ -88,6 +125,20 @@ public static class FootballSocialService
                 SeasonYear = seasonYear
             }).ToArray();
     }
+
+    /// <summary>
+    /// Builds generated media-desk replies and the player's own saved reply. Generated replies restate a recorded
+    /// category; player replies are authored text stored separately in the save.
+    /// </summary>
+    public static IReadOnlyList<FootballNewsStory> BuildReplies(
+        IReadOnlyList<FootballNewsStory> posts,
+        IReadOnlyList<FootballNewsStory> sources,
+        IReadOnlyList<FootballSocialInteraction> interactions,
+        int seasonYear,
+        int week) =>
+        ComposeReplies(posts, sources, seasonYear, week)
+            .Concat(PlayerReplies(posts, interactions))
+            .ToArray();
 
     /// <summary>
     /// Builds authored replies from the recorded story behind each post. A reply restates a recorded category and
@@ -130,6 +181,40 @@ public static class FootballSocialService
         }
 
         return replies;
+    }
+
+    public static IReadOnlyList<FootballNewsStory> PlayerReplies(
+        IReadOnlyList<FootballNewsStory> posts,
+        IReadOnlyList<FootballSocialInteraction> interactions)
+    {
+        ArgumentNullException.ThrowIfNull(posts);
+        ArgumentNullException.ThrowIfNull(interactions);
+
+        var postById = posts.Where(post => post.IsSocialPost)
+            .ToDictionary(post => post.Id, StringComparer.Ordinal);
+        return interactions
+            .Where(item => item.Kind == FootballSocialInteractionKind.Reply &&
+                           !string.IsNullOrWhiteSpace(item.Body) &&
+                           postById.ContainsKey(item.PostId))
+            .Select(item =>
+            {
+                var post = postById[item.PostId];
+                return new FootballNewsStory
+                {
+                    Id = $"player-reply/{item.Id}",
+                    Category = "Your reply",
+                    Headline = $"{post.TeamName} · your reply",
+                    Body = item.Body!,
+                    TeamName = post.TeamName,
+                    SeasonYear = item.SeasonYear,
+                    Week = item.Week,
+                    RelatedId = post.Id,
+                    AuthorName = "You",
+                    MediaKind = FootballNewsMediaKind.SocialReply,
+                    AuthoredByPlayer = true
+                };
+            })
+            .ToArray();
     }
 
     public static IReadOnlyList<FootballNewsStory> RepliesFor(

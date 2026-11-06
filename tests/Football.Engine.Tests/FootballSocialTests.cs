@@ -43,6 +43,38 @@ public class FootballSocialTests
     }
 
     [Fact]
+    public void PlayerReplyIsAuthoredPersistedAndShownSeparately()
+    {
+        var story = new FootballNewsStory
+        {
+            Id = "story-reply",
+            Category = "Results",
+            Headline = "Recorded result",
+            Body = "Recorded facts.",
+            TeamName = "Washington"
+        };
+        var post = Post("post-reply", "@DynastyWire") with { RelatedId = story.Id };
+        var interactions = FootballSocialService.Reply([], post.Id, "My saved reply.", 2026, 4);
+
+        var interaction = Assert.Single(interactions);
+        Assert.Equal(FootballSocialInteractionKind.Reply, interaction.Kind);
+        Assert.Equal("My saved reply.", interaction.Body);
+        Assert.True(Assert.Single(FootballSocialService.Apply([post], interactions, [])).RepliedByPlayer);
+
+        var replies = FootballSocialService.BuildReplies([post], [story], interactions, 2026, 4);
+        Assert.Equal(2, replies.Count);
+        var playerReply = Assert.Single(replies, reply => reply.AuthoredByPlayer);
+        Assert.Equal(post.Id, playerReply.RelatedId);
+        Assert.Equal("My saved reply.", playerReply.Body);
+        Assert.Single(replies, reply => !reply.AuthoredByPlayer);
+
+        var replaced = FootballSocialService.Reply(interactions, post.Id, "Updated reply.", 2026, 4);
+        Assert.Equal("Updated reply.", Assert.Single(replaced).Body);
+        Assert.Empty(FootballSocialService.Reply(replaced, post.Id, "  ", 2026, 4));
+        Assert.Throws<ArgumentException>(() => FootballSocialService.Toggle([], post.Id, FootballSocialInteractionKind.Reply, 2026, 4));
+    }
+
+    [Fact]
     public void FollowedDesksComeFirstInTheFeed()
     {
         var posts = new[]

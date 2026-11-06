@@ -9,7 +9,7 @@ namespace DynastyManager.App;
 /// <summary>One live screen for every league. Hosts supply branding, a session and persistence only.</summary>
 public class GameCastLivePage : ContentPage
 {
-    const int ManualFormationHoldMilliseconds = 900;
+    const int ManualFormationHoldMilliseconds = 1000;
     const int PreSnapActionLeadMilliseconds = 180;
     readonly GameDaySession session;
     readonly GameCastLiveHost host;
@@ -194,13 +194,17 @@ public class GameCastLivePage : ContentPage
                 var calledPlay = GamePlanService.AvailableOffensivePlays(Plan).FirstOrDefault(play => play.Id == calledOffense);
                 commentary.Text = "PRE-SNAP · " + (calledPlay?.Name ?? "Formation") +
                     (calledPreSnap.HasAlignmentAction ? " · " + PreSnapCatalog.Label(calledPreSnap) : "");
-                var hold = Task.Delay(ManualFormationHoldMilliseconds, lifetime.Token);
                 if (calledPreSnap.HasAlignmentAction)
                 {
                     await Task.Delay(PreSnapActionLeadMilliseconds, lifetime.Token);
                     await AnimatePreSnapChoice(calledPreSnap);
+                    // NCAA and NFL require the offense to be set for one full second after the last shift.
+                    await Task.Delay(ManualFormationHoldMilliseconds, lifetime.Token);
                 }
-                await hold;
+                else
+                {
+                    await Task.Delay(ManualFormationHoldMilliseconds, lifetime.Token);
+                }
             }
             preSnapHolding = false; Update(); last = control.Step(calledOffense, calledDefense, calledPreSnap);
             offense = defense = null; ResetPreSnap();

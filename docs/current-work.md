@@ -1,3 +1,43 @@
+## Player replies and sourced pre-snap boundaries — November 6, 2026
+
+Both remaining implementation gaps are now closed. The in-game social feed has a real player-authored reply
+action in College and Pro. A reply is a persisted `FootballSocialInteractionKind.Reply` record with its body,
+shown as "Your reply" beside the separately generated media-desk reply. Re-replying replaces the player's saved
+text, empty text removes it, and older saves continue to load with empty interaction collections. The action
+uses the shared themed prompt and stable `college-social-reply` / `pro-social-reply` automation IDs.
+
+The pre-snap boundary now follows the sourced portions of NCAA Rule 7 and NFL Rule 7:
+
+- One backfield player may be in motion at the snap; all other offensive players remain stationary.
+- Motion must be parallel to or away from the opponent goal line / line of scrimmage, never toward it.
+- Motion from the line of scrimmage requires the player first become a back and come to a complete stop.
+- After the last shift, the offense must be set simultaneously for one full second. The shared live view now
+  preserves a full one-second set after the shift/motion animation before snapping.
+
+`PreSnapChoice` records direction, backfield motion count, stationary-player state, prior-shift/set state and
+line-of-scrimmage start state. Older recorded choices default to one legal lateral motion player with the
+required set complete. `FootballRules` exposes those sourced constraints. The existing one-yard shift and
+three-yard motion values remain explicitly internal catalog and animation bounds: neither official rulebook
+defines a numeric shift or motion yard limit. `RivalryRecord` remains history-only and has no play effect.
+
+Sources reviewed and rendered:
+
+- NCAA football rules: https://ncaaorg.s3.amazonaws.com/championships/sports/football/rules/PRMFB_RulesBook.pdf,
+  especially Rules 2-22-1, 7-1-2 and 7-1-4.
+- NFL 2026 rulebook: https://static.www.nfl.com/image/upload/fl_attachment/league/tqivdkzt9mu6wdgsh1ku.pdf,
+  especially Rule 7, Sections 4, Articles 2 and 6-8.
+
+Validation actually run:
+
+- Engine `FootballSocialTests|PreSnapTests|NewsStoryTests` — 26 passed.
+- College `CollegeSocialTests|CollegeChemistryTests` — 7 passed.
+- Pro `ProSocialTests|FootballRulesConformanceTests` — 7 passed.
+- College and Pro Android compile targets — passed with the existing offline `NU1900` warnings and two Pro
+  `CS8625` warnings.
+
+Not claimed here: action-level device acceptance, full repository suites, APK packaging, CI completion, merge,
+prerelease publication, cleanup or branch deletion.
+
 ## Roadmap state/identity completion batch — November 6, 2026
 
 This resumed batch closes four near-term state gaps across both games. Team motivation is now a persisted,

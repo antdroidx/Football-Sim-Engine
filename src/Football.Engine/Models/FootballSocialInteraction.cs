@@ -1,6 +1,6 @@
 namespace DynastyManager.Core.Models;
 
-public enum FootballSocialInteractionKind { Like, Repost }
+public enum FootballSocialInteractionKind { Like, Repost, Reply }
 
 /// <summary>An action the player took on an in-game media post.</summary>
 public sealed record FootballSocialInteraction
@@ -8,6 +8,7 @@ public sealed record FootballSocialInteraction
     public required string Id { get; init; }
     public required string PostId { get; init; }
     public required FootballSocialInteractionKind Kind { get; init; }
+    public string? Body { get; init; }
     public int SeasonYear { get; init; }
     public int Week { get; init; }
 }

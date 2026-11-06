@@ -24,6 +24,15 @@ public class CollegeSocialTests
                     Kind = FootballSocialInteractionKind.Like,
                     SeasonYear = 2026,
                     Week = 4
+                },
+                new FootballSocialInteraction
+                {
+                    Id = "post-1:Reply",
+                    PostId = "post-1",
+                    Kind = FootballSocialInteractionKind.Reply,
+                    Body = "College reply",
+                    SeasonYear = 2026,
+                    Week = 4
                 }
             ],
             SocialFollows =
@@ -40,9 +49,11 @@ public class CollegeSocialTests
 
         var restored = JsonSerializer.Deserialize<DynastyState>(JsonSerializer.Serialize(state))!;
 
-        var interaction = Assert.Single(restored.SocialInteractions);
+        Assert.Equal(2, restored.SocialInteractions.Count);
+        var interaction = restored.SocialInteractions[0];
         Assert.Equal("post-1", interaction.PostId);
         Assert.Equal(FootballSocialInteractionKind.Like, interaction.Kind);
+        Assert.Equal("College reply", restored.SocialInteractions[1].Body);
         var follow = Assert.Single(restored.SocialFollows);
         Assert.Equal("@DynastyWire", follow.Handle);
     }

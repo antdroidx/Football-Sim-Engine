@@ -26,6 +26,14 @@ public sealed record FootballRules
     public bool StopClockOnFirstDown { get; init; } = true;
     public int KickoffTouchbackYardLine { get; init; } = 25;
     public int ExtraPointDistance { get; init; } = 20;
+    // Internal catalog and animation distance bounds. The NCAA and NFL rulebooks do not set a numeric
+    // shift or motion yard limit, so these values must not be presented as league rules.
     public double MaximumShiftYards { get; init; } = 1;
     public double MaximumMotionYards { get; init; } = 3;
+
+    // Sourced alignment boundaries shared by NCAA Rule 7 and NFL Rule 7.
+    public int MaximumBackfieldPlayersInMotion { get; init; } = 1;
+    public bool MotionMustBeParallelOrAwayFromGoalLine { get; init; } = true;
+    public bool MotionFromLineRequiresBackAndCompleteStop { get; init; } = true;
+    public bool RequiresOneSecondSetAfterShift { get; init; } = true;
 }

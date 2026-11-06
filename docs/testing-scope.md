@@ -1,3 +1,22 @@
+## Player reply and sourced pre-snap validation — November 6, 2026
+
+Executed on the feature working tree:
+
+- Engine `FootballSocialTests|PreSnapTests|NewsStoryTests`: 26 passed. This covers player reply persistence,
+  replacement/removal, separate generated and player replies, old pre-snap record defaults, sourced motion
+  count/direction/set/line-start constraints, internal distance bounds and the existing recorded snap effect.
+- College `CollegeSocialTests|CollegeChemistryTests`: 7 passed. This covers player reply save round trips and
+  the motivation/chemistry persistence path.
+- Pro `ProSocialTests|FootballRulesConformanceTests`: 7 passed. This covers player reply save round trips,
+  sourced shared pre-snap boundaries and simulation-neutral rivalry records.
+- College Android compile target: passed with three offline `NU1900` warnings.
+- Pro Android compile target: passed with one offline `NU1900` warning and two existing `CS8625` warnings.
+
+Official rule review used the NCAA football rules and NFL 2026 rulebook linked in `current-work.md`. The
+one-yard shift and three-yard motion values are tested only as internal simulation/catalog bounds.
+
+Focused evidence only. Device action acceptance, full suites, APK packaging and GitHub Actions are not claimed
+by this entry.
 ## Roadmap state and identity validation — November 6, 2026
 
 Executed on the dirty feature working tree:

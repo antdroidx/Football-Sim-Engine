@@ -9,25 +9,45 @@ public static class PreSnapCatalog
     public static IReadOnlyList<PreSnapChoice> Common =>
     [
         None,
-        new(PreSnapType.Shift, "Left", .5),
-        new(PreSnapType.Shift, "Right", .5),
-        new(PreSnapType.Motion, "Left", 2),
-        new(PreSnapType.Motion, "Right", 2)
+        Shift("Left", .5),
+        Shift("Right", .5),
+        Motion("Left", 2),
+        Motion("Right", 2)
     ];
 
-    public static PreSnapChoice Motion(string side, double yards) => new(PreSnapType.Motion, side, yards);
+    public static PreSnapChoice Shift(string side, double yards) => new(PreSnapType.Shift, side, yards);
+
+    public static PreSnapChoice Motion(
+        string side,
+        double yards,
+        PreSnapMotionDirection direction = PreSnapMotionDirection.Lateral) =>
+        new(PreSnapType.Motion, side, yards) { MotionDirection = direction };
 
     public static bool IsValid(PreSnapChoice choice) => IsValid(choice, FootballRules.College);
 
-    /// <summary>League rules decide how far a formation may shift or motion before the snap.</summary>
+    /// <summary>
+    /// Validates sourced NCAA/NFL alignment boundaries plus the repository's internal catalog distance bounds.
+    /// The rulebooks do not define a numeric shift or motion yard limit.
+    /// </summary>
     public static bool IsValid(PreSnapChoice choice, FootballRules rules)
     {
+        ArgumentNullException.ThrowIfNull(choice);
         ArgumentNullException.ThrowIfNull(rules);
+        if (!choice.SetForOneSecond) return false;
+
         return choice.Type switch
         {
             PreSnapType.None => choice.Yards == 0,
             PreSnapType.Shift => choice.Yards >= 0 && choice.Yards <= rules.MaximumShiftYards,
-            PreSnapType.Motion => choice.Yards >= 0 && choice.Yards <= rules.MaximumMotionYards,
+            PreSnapType.Motion => choice.Yards >= 0 && choice.Yards <= rules.MaximumMotionYards &&
+                choice.BackfieldPlayersInMotion > 0 &&
+                choice.BackfieldPlayersInMotion <= rules.MaximumBackfieldPlayersInMotion &&
+                choice.AllOtherPlayersStationary &&
+                (!rules.MotionMustBeParallelOrAwayFromGoalLine ||
+                 choice.MotionDirection is PreSnapMotionDirection.Lateral or PreSnapMotionDirection.AwayFromGoalLine) &&
+                (!rules.RequiresOneSecondSetAfterShift || !choice.FollowedShift || choice.SetForOneSecond) &&
+                (!rules.MotionFromLineRequiresBackAndCompleteStop ||
+                 !choice.StartedOnLineOfScrimmage || choice.BecameBackAndStopped),
             _ => false
         };
     }

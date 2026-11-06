@@ -81,12 +81,26 @@ public sealed class FootballRulesConformanceTests
     }
 
     [Fact]
-    public void UnsourcedRivalryAndPreSnapLimitsKeepTheSharedPolicyBoundary()
+    public void SourcedPreSnapBoundariesAndRivalryHistoryRemainSeparate()
     {
+        foreach (var rules in new[] { FootballRules.College, FootballRules.Professional })
+        {
+            Assert.Equal(1, rules.MaximumBackfieldPlayersInMotion);
+            Assert.True(rules.MotionMustBeParallelOrAwayFromGoalLine);
+            Assert.True(rules.MotionFromLineRequiresBackAndCompleteStop);
+            Assert.True(rules.RequiresOneSecondSetAfterShift);
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2, PreSnapMotionDirection.TowardGoalLine), rules));
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2) with { BackfieldPlayersInMotion = 2 }, rules));
+        }
+
+        // These are internal catalog/animation bounds, not numeric limits stated by either rulebook.
         Assert.Equal(1, FootballRules.College.MaximumShiftYards);
         Assert.Equal(3, FootballRules.College.MaximumMotionYards);
         Assert.Equal(FootballRules.College.MaximumShiftYards, FootballRules.Professional.MaximumShiftYards);
         Assert.Equal(FootballRules.College.MaximumMotionYards, FootballRules.Professional.MaximumMotionYards);
+
         Assert.All(typeof(RivalryRecord).GetProperties(), property =>
             Assert.DoesNotContain("Effect", property.Name, StringComparison.OrdinalIgnoreCase));
         Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.Motion("Left", 3), FootballRules.Professional));

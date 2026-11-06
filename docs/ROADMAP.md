@@ -18,45 +18,38 @@ All seven near-term workstreams were carried through five implementation batches
 
 | Workstream | Delivered | Still open |
 |---|---|---|
-| Rivalries | Shared records and service; College traditional rivalry catalog; persisted rivalry set in both saves; labels and series in the College team profile, Pro team page, College game center, Pro matchup card and both schedules | A sourced league rule for a rivalry effect on a play. The first increment deliberately excludes one. |
-| Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; a MOTION preset in every offensive formation family; a bounded outcome effect recorded on the snap; league rules own the shift and motion limits; a motion returns to the formation before the snap | Device acceptance of the pre-snap effect, and any sourced league-specific limit. Both leagues keep shift at one yard and motion at three because no sourced rule differs. |
+| Rivalries | Shared records and service; College traditional rivalry catalog; persisted rivalry set in both saves; labels and series in the College team profile, Pro team page, College game center, Pro matchup card and both schedules | Simulation-neutral by sourced rule boundary: neither official rulebook supplies a rivalry play modifier. |
+| Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; a MOTION preset in every offensive formation family; bounded recorded outcome effect; sourced one-player/direction/set constraints; a motion returns to the formation before the snap | Device acceptance of the pre-snap effect. The one-yard shift and three-yard motion values are internal catalog bounds, not league limits. |
 | Captains / chemistry | Deterministic captains; cohesion and scheme familiarity; a bounded GameCast effect; both hosts' team UI; per-season memory fed by turnover, coaching change, plan continuity, captain changes, discipline and morale; every adjustment explained to the player | Deeper continuity effects and the remaining discipline inputs. |
-| Morale / locker room | Existing league morale, discipline, transfer and trade systems retained; persistent factual narrative memory; shared locker-room events recorded each season from real state, with College discipline incidents and Pro contract and trade friction kept separate | Motivation state, and further locker-room narrative hooks. |
-| News / social | Compact both-host feed; visible Social shortcut; authored posts with engagement labels and independent read state; phase-aware order; persistent player/coach/team season threads; player likes, reposts, followed desks, generated replies and rivalry threads; Pro player story identity | Player-authored reply action and explicit device acceptance. |
+| Morale / locker room | Existing league morale, discipline, transfer and trade systems retained; persistent factual narrative memory; shared locker-room events recorded each season from real state; persisted motivation advanced from those signals, with College discipline incidents and Pro contract and trade friction kept separate | Further locker-room narrative hooks after release. |
+| News / social | Compact both-host feed; visible Social shortcut; authored posts with engagement labels and independent read state; phase-aware order; persistent player/coach/team season threads; player likes, reposts, followed desks, generated replies, player-authored saved replies and rivalry threads; Pro player story identity | Explicit action-level device acceptance. |
 | GameCast / replay | Shared venue styling and indoor turf; replay angle selection; recorded pre-snap choices; replay highlight selection from the recorded snaps; repaired field branding | Device acceptance of the highlight picker and the pre-snap choreography. |
 | Hall of Fame | College player HOF; Pro player HOF derivation; shared coach scoring in both hosts; persistent coach induction records with per-team citations; CPU club coach season history with stable staff identity | Final broad validation and device acceptance. |
 
 ### What is left in the near term
 
-The durable state and identity work is implemented on the active branch: CPU club coach seasons use distinct
-staff identities and conference accounting, Pro player-specific stories carry player identity into persistent
-person threads, motivation is a persisted season state, and the Pro scouting department repairs itself to the
-required three scouts per club. The remaining near-term work is now release-facing:
+The implementation work is complete. The remaining near-term work is release-facing:
 
-1. **Explicit action-level device acceptance of the new surfaces.** Assert a player-authored social reply,
+1. **Explicit action-level device acceptance of the new surfaces.** Assert the player-authored social reply and
    like/repost state, rivalry series panel, chemistry/motivation note and replay highlight picker on fresh
    College and Pro APKs.
-2. **Sourced rule boundary.** Encode the sourced NCAA/NFL motion count, direction and set requirements, and
-   document that the repository's one-yard shift and three-yard motion values are internal simulation/catalog
-   bounds rather than league rules. Keep rivalry records simulation-neutral because neither rulebook supplies a
-   rivalry play modifier.
-3. **Final broad validation and packaging.** Run the required Engine, College and Pro checks for the completed
-   state work, then build and verify both exact Debug APKs before the authorized merge and prerelease.
+2. **Final broad validation and packaging.** Run the required Engine, College and Pro checks, then build and
+   verify both exact Debug APKs before the authorized merge and prerelease.
 
 ## Audit-based feature inventory
 
 | Area | College | Pro | Planning conclusion |
 |---|---|---|---|
-| Rivalries and rivalry history | Shipped | Shipped | Shared records, persisted set, series exposure. A sourced rule for a play-level effect is still open. |
-| Dynamic news and narratives | Partial | Partial | Factual story services reused; persistent memory, a compact feed, authored posts, player activity and replies are in. Player and coach level threads are open. |
-| Expanded playbooks | Strong named-play foundation | Same shared foundation | Pre-snap motion, shifts and a bounded outcome effect are in. Trick metadata and defensive counters are open. |
-| Player morale and discipline | Partial | Partial | League-specific services kept separate; shared locker-room events are in. Motivation state is open. |
+| Rivalries and rivalry history | Shipped | Shipped | Shared records, persisted set and series exposure. Simulation-neutral because the sourced rules provide no rivalry play modifier. |
+| Dynamic news and narratives | Shipped | Shipped | Factual story services reused; persistent player/coach/team threads, a compact feed, derived posts/replies, player activity and player-authored replies are in. |
+| Expanded playbooks | Strong named-play foundation | Same shared foundation | Pre-snap motion, shifts, sourced alignment boundaries and a bounded outcome effect are in. Numeric yard caps are internal catalog bounds. Trick metadata and defensive counters are long-term work. |
+| Player morale and discipline | Shipped | Shipped | League-specific services remain separate; shared locker-room events and persisted motivation are in. |
 | Transfers and trade requests | Implemented | Implemented | College uses the transfer portal market; Pro uses contract-driven trade requests. Keep the rules separate. |
 | GameCast / presentation | Strong shared foundation | Same shared foundation | Share all future UI; hosts provide branding, rules and save adapters only. |
 | Broadcast replay | Partial | Partial | Deterministic shared replays with angle selection and highlight selection are in. Cinematic replay treatment is open. |
 | Team cohesion and scheme familiarity | Shipped | Shipped | Shared records with league-specific turnover and scheme inputs, carried per season. |
 | Captaincy and leadership | Partial leadership | Partial leadership | Actual captain records exist; a full leadership hierarchy is open. |
-| Hall of Fame | College player HOF implemented | Pro player HOF and coach HOF implemented | Shared scoring and citation core in both hosts. CPU coach lifecycle parity is open. |
+| Hall of Fame | College player HOF implemented | Pro player HOF and coach HOF implemented | Shared scoring and citation core in both hosts, including persistent CPU club coach history. |
 | Weather / field conditions | Partial | Better | Weather affects simulation and presentation; Pro indoor venues skip precipitation and wind. A broader venue and turf model is open. |
 | Weekly prep / opponent scouting | Partial | Partial | Game plans and staff attributes affect simulation; opponent scouting is informational only. |
 | Historical records / memorable games | Partial | Partial | College has weekly highlights; both hosts now expose replay highlights and rivalry series. Stronger career-record UI is open. |

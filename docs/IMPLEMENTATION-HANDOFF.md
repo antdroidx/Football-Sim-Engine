@@ -6,24 +6,22 @@ Current planning source: [ROADMAP.md](ROADMAP.md). The execution outline is
 
 ## Where the work stands
 
-The resumed roadmap branch now includes the durable-state and identity completion pass: persisted team
-motivation, deterministic Pro scouting replenishment, CPU club coach season history, collision-resistant Pro
-coach identity, conference record accounting and Pro player identity on injury, result, award and all-star
-stories. Shared narrative memory already carries stable person threads across seasons.
+All near-term implementation work is complete on `codex/feature-roadmap-plan`: durable motivation and scout
+replenishment, CPU coach season history with stable identities, Pro person-level story threads, save-backed
+player-authored social replies, and sourced NCAA/NFL pre-snap alignment boundaries. The existing one-yard shift
+and three-yard motion values are internal catalog/animation bounds, not league limits. Rivalry records remain
+simulation-neutral.
 
-Focused validation for this pass is green: 63 Pro regressions, 18 Engine regressions, 24 College regressions and
-both Android compile targets. `ScheduledGame.WinnerTeamName` also now returns null for a tie after the coach-record test exposed the
-previous away-team fallback.
+Focused validation through Batch G is green: 26 Engine, 7 College and 7 Pro social/pre-snap tests, plus both
+Android compile targets. Earlier state/identity checks passed 63 Pro, 18 Engine and 24 College tests.
 
 ## What to pick up next
 
-1. Add the player-authored social reply action and explicit action-level smoke assertions for social state,
-   rivalry series, chemistry/motivation and replay highlights.
-2. Rework the pre-snap rule boundary around sourced NCAA/NFL requirements. Keep the repository's numeric
-   shift/motion limits labeled as internal simulation bounds and keep rivalry records simulation-neutral.
-3. Run the final broad Engine, College and Pro checks, package and verify both exact Debug APKs, and use the
+1. Add explicit action-level smoke assertions for the player-authored social reply and like/repost state,
+   rivalry series, chemistry/motivation and replay highlights on fresh College and Pro APKs.
+2. Run the final broad Engine, College and Pro checks, package and verify both exact Debug APKs, and use the
    existing College and Pro workflows for CI/device evidence.
-4. Merge to `main`, publish the authorized prerelease with both APKs and checksums, clean generated files and
+3. Merge to `main`, publish the authorized prerelease with both APKs and checksums, clean generated files and
    delete only the completed feature branches locally and remotely.
 
 The long-term agenda remains in `ROADMAP.md`: College NIL, College media rights and finance, Pro finance

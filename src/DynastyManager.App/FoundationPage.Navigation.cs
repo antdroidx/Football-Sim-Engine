@@ -437,7 +437,7 @@ public sealed partial class FoundationPage
         _currentDynasty = _currentDynasty with { NarrativeMemory = FootballNarrativeMemoryService.Refresh(_currentDynasty.NarrativeMemory, sources, _currentDynasty.SeasonYear,
             FootballRivalryMemoryService.Records(_currentDynasty.Schedule, _currentDynasty.SeasonYear)) };
         var socialPosts = FootballNewsSocialService.Build(sources, _currentDynasty.NarrativeMemory);
-        var socialReplies = FootballSocialService.ComposeReplies(socialPosts, sources, _currentDynasty.SeasonYear, _currentDynasty.Week);
+        var socialReplies = FootballSocialService.BuildReplies(socialPosts, sources, _currentDynasty.SocialInteractions, _currentDynasty.SeasonYear, _currentDynasty.Week);
         var displayedPosts = FootballSocialService.Apply(socialPosts, _currentDynasty.SocialInteractions, _currentDynasty.SocialFollows);
         var socialButton = new Button
         {
@@ -498,6 +498,27 @@ public sealed partial class FoundationPage
                 await SaveCurrentAsync(SaveKind.AutosaveCurrent);
                 RenderNews();
             };
+            var playerReply = replies.FirstOrDefault(reply => reply.AuthoredByPlayer);
+            var reply = new Button
+            {
+                Text = playerReply is null ? "Reply" : "Edit reply",
+                AutomationId = "college-social-reply"
+            };
+            reply.Clicked += async (_, _) =>
+            {
+                if (_currentDynasty is null) return;
+                var body = await GameDialogs.PromptAsync(this, "Reply to post",
+                    "Your reply is saved with this dynasty and shown beside the in-game media reply.",
+                    "Post reply", "Cancel", playerReply?.Body ?? string.Empty);
+                if (body is null) return;
+                _currentDynasty = _currentDynasty with
+                {
+                    SocialInteractions = FootballSocialService.Reply(_currentDynasty.SocialInteractions,
+                        post.Id, body, _currentDynasty.SeasonYear, _currentDynasty.Week).ToList()
+                };
+                await SaveCurrentAsync(SaveKind.AutosaveCurrent);
+                RenderNews();
+            };
             var follow = new Button { Text = post.FollowedAuthor ? "Following" : "Follow", AutomationId = "college-social-follow" };
             follow.Clicked += async (_, _) =>
             {
@@ -509,14 +530,19 @@ public sealed partial class FoundationPage
             };
             row.Children.Add(like);
             row.Children.Add(repost);
+            row.Children.Add(reply);
             row.Children.Add(follow);
             var stack = new VerticalStackLayout { Spacing = 6 };
             stack.Children.Add(row);
-            foreach (var reply in FootballSocialService.RepliesFor(replies, post.Id))
-                stack.Children.Add(new Label { Text = $"{reply.AuthorName} {reply.AuthorHandle} · {reply.Body}", FontSize = 11, TextColor = DynastyTheme.Muted });
+            foreach (var item in FootballSocialService.RepliesFor(replies, post.Id))
+            {
+                var author = item.AuthoredByPlayer ? "Your reply" : $"{item.AuthorName} {item.AuthorHandle}";
+                stack.Children.Add(new Label { Text = $"{author} · {item.Body}", FontSize = 11, TextColor = DynastyTheme.Muted });
+            }
             return stack;
         }
     }
+
     private View BuildInjurySection()
     {
         _injuryScope.SelectedIndexChanged += (_, _) => RenderInjuryReport();

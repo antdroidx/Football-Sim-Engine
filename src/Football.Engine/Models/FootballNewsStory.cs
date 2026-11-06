@@ -24,6 +24,8 @@ public sealed record FootballNewsStory
     public string? PersonName { get; init; }
 
     /// <summary>The player's own activity on this post. The derived counts stay decorative.</summary>
+    public bool RepliedByPlayer { get; init; }
+    public bool AuthoredByPlayer { get; init; }
     public bool LikedByPlayer { get; init; }
     public bool RepostedByPlayer { get; init; }
     public bool FollowedAuthor { get; init; }

@@ -6,12 +6,23 @@ authorized release sequence.
 | Batch | Scope | Status |
 |---|---|---|
 | F | Persisted motivation and scout replenishment from the resumed work; CPU coach season history with stable staff identity; Pro person-level story identity | Implemented and focused-tested; 63 Pro, 18 Engine, 24 College and both app compiles passed |
-| G | Player-authored social reply plus sourced NCAA/NFL pre-snap rule boundaries | Next |
+| G | Player-authored social reply plus sourced NCAA/NFL pre-snap rule boundaries | Implemented and focused-tested; 26 Engine, 7 College, 7 Pro and both app compiles passed |
 | H | Explicit College/Pro action-level device assertions for social, rivalry, chemistry/motivation and replay highlights | After G |
 
 After H: run the final broad checks, package both Debug APKs, dispatch the established workflows, merge to
 `main`, publish the prerelease with verified APKs/checksums/manifest, clean generated files and delete only the
 completed `codex/feature-roadmap-plan` branch locally and remotely.
+
+## Batch G implementation notes
+
+- Both social feeds expose a save-backed player reply action with stable automation IDs and a themed text prompt.
+- Generated media replies and the player's "Your reply" content are separate, and the player reply can be
+  replaced or removed without mutating decorative engagement counts.
+- `PreSnapChoice` and `FootballRules` encode the sourced one-backfield-player, legal-direction, stationary-player,
+  line-of-scrimmage-start and one-second-set boundaries from NCAA Rule 7 and NFL Rule 7.
+- The shared live view holds for a full second after the alignment animation before the snap.
+- The existing one-yard shift and three-yard motion values are internal catalog/animation bounds only.
+- Rivalry records remain simulation-neutral.
 
 ## Batch F implementation notes
 
