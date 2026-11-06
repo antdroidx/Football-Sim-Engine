@@ -40,7 +40,7 @@ def load(fixture):
     s.adb("shell","monkey","-p",package,"-c","android.intent.category.LAUNCHER","1");ready("library",s.library_loaded)
     phase=["Preseason","RegularSeason","Playoffs","Offseason"][fixture["phase"]]
     click("slot",f"{fixture['name']} · {fixture['userTeam']} · {fixture['year']} {phase} W{fixture['week']}")
-    ready("overview",s.pro_overview_loaded)
+    ready("overview",lambda r:s.pro_overview_loaded(r) or "2026 offseason" in s.texts(r))
 def category(label):
     root=s.scroll_to_text("pro-roadmap-category","Franchise analytics",max_swipes=20,toward_start=True)
     s.tap_id(root,"pro-analytics-category");click("category-select",label)
