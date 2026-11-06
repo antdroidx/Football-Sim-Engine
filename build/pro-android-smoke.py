@@ -248,7 +248,7 @@ try:
     s.tap_id(selected,"live-call")
     time.sleep(.35)
     Path("android-pro-pre-snap-hold.png").write_bytes(s.adb("exec-out","screencap","-p"))
-    s.wait_for("pro-pre-snap-effect",lambda r:any(("Motion created separation and added 2 yards." in (t or "")) or ("Motion shifted the defense and added 1 yard." in (t or "")) for t in s.texts(r)) and any(re.search(r"[+-][12] yd pre-snap",t or "") for t in s.texts(r)),timeout=30)
+    s.wait_for("pro-pre-snap-effect",lambda r:"Pre-snap: None" in s.texts(r) and any(("Motion created separation and added 2 yards." in (t or "")) or ("Motion shifted the defense and added 1 yard." in (t or "")) for t in s.texts(r)),timeout=30)
     s.capture("pro-coach-after-snap")
     # Leaving the game goes through the shared options menu.
     options=s.tap_expect("pro-leave-menu","Options","Game options")
