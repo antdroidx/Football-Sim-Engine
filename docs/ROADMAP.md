@@ -1,16 +1,16 @@
-# Current roadmap — November 5, 2026
+# Current roadmap — November 6, 2026
 
 This is the active planning source. Completed release evidence remains in `current-work.md`, `testing-scope.md`, `pro-completion-checklist.md`, and the individual release and audit records. The near-term execution outline is [roadmap-completion-plan.md](roadmap-completion-plan.md); the long-term agenda is the last section of this file.
 
 ## Planning baseline
 
-- Latest published release: Pro165 / College454 (`preview-2026-11-04-roster-identity`). The next prerelease is pending final APK and CI verification.
-- Active branch: `codex/feature-roadmap-plan`. The near-term work below is implemented there and pushed, but it is not merged and not published.
+- Latest published release: Pro190 / College476 (`preview-2026-11-06-roadmap-apks`).
+- Active branch: `main` after the authorized roadmap merge. The completed feature branch is retired after publication.
 - Shared engine and presentation are the default home for league-neutral behavior.
 - College and Pro keep league-specific roster, financial, career, persistence, branding, and rule adapters.
 - Existing factual news systems are retained; do not fabricate statistics, outcomes, interviews, or social activity.
 - Existing saves must load without destructive migration. New records default safely and remain backward compatible. The College save repository rejects a mismatched schema version, so a schema version is only bumped when the format truly changes.
-- The current execution has explicit authorization to merge to `main`, publish one prerelease, clean generated files and delete completed feature branches after final verification.
+- The near-term roadmap and its authorized release sequence are complete. Long-term work below requires a new scoped execution.
 
 ## Near-term status — November 6, 2026
 
@@ -19,22 +19,18 @@ All seven near-term workstreams were carried through five implementation batches
 | Workstream | Delivered | Still open |
 |---|---|---|
 | Rivalries | Shared records and service; College traditional rivalry catalog; persisted rivalry set in both saves; labels and series in the College team profile, Pro team page, College game center, Pro matchup card and both schedules | Simulation-neutral by sourced rule boundary: neither official rulebook supplies a rivalry play modifier. |
-| Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; a MOTION preset in every offensive formation family; bounded recorded outcome effect; sourced one-player/direction/set constraints; a motion returns to the formation before the snap | Device acceptance of the pre-snap effect. The one-yard shift and three-yard motion values are internal catalog bounds, not league limits. |
+| Playbooks / pre-snap | Shared catalog; manual formation hold; animated None/Shift/Motion preview; a MOTION preset in every offensive formation family; bounded recorded outcome effect; sourced one-player/direction/set constraints; a motion returns to the formation before the snap | Complete for the near term. The one-yard shift and three-yard motion values are internal catalog bounds, not league limits. |
 | Captains / chemistry | Deterministic captains; cohesion and scheme familiarity; a bounded GameCast effect; both hosts' team UI; per-season memory fed by turnover, coaching change, plan continuity, captain changes, discipline and morale; every adjustment explained to the player | Deeper continuity effects and the remaining discipline inputs. |
 | Morale / locker room | Existing league morale, discipline, transfer and trade systems retained; persistent factual narrative memory; shared locker-room events recorded each season from real state; persisted motivation advanced from those signals, with College discipline incidents and Pro contract and trade friction kept separate | Further locker-room narrative hooks after release. |
-| News / social | Compact both-host feed; visible Social shortcut; authored posts with engagement labels and independent read state; phase-aware order; persistent player/coach/team season threads; player likes, reposts, followed desks, generated replies, player-authored saved replies and rivalry threads; Pro player story identity | Explicit action-level device acceptance. |
-| GameCast / replay | Shared venue styling and indoor turf; replay angle selection; recorded pre-snap choices; replay highlight selection from the recorded snaps; repaired field branding | Device acceptance of the highlight picker and the pre-snap choreography. |
-| Hall of Fame | College player HOF; Pro player HOF derivation; shared coach scoring in both hosts; persistent coach induction records with per-team citations; CPU club coach season history with stable staff identity | Final broad validation and device acceptance. |
+| News / social | Compact both-host feed; visible Social shortcut; authored posts with engagement labels and independent read state; phase-aware order; persistent player/coach/team season threads; player likes, reposts, followed desks, generated replies, player-authored saved replies and rivalry threads; Pro player story identity | Complete for the near term. |
+| GameCast / replay | Shared venue styling and indoor turf; replay angle selection; recorded pre-snap choices; replay highlight selection from the recorded snaps; repaired field branding | Complete for the near term. Cinematic replay treatment remains long-term work. |
+| Hall of Fame | College player HOF; Pro player HOF derivation; shared coach scoring in both hosts; persistent coach induction records with per-team citations; CPU club coach season history with stable staff identity | Complete for the near term. |
 
-### What is left in the near term
+### Near-term completion
 
-The implementation work is complete. The remaining near-term work is release-facing:
-
-1. **Explicit action-level device acceptance of the new surfaces.** Assert the player-authored social reply and
-   like/repost state, rivalry series panel, chemistry/motivation note and replay highlight picker on fresh
-   College and Pro APKs.
-2. **Final broad validation and packaging.** Run the required Engine, College and Pro checks, then build and
-   verify both exact Debug APKs before the authorized merge and prerelease.
+The near-term roadmap is complete. College476 and Pro190 passed their broad workflows, exact-APK social/team
+action scopes, replay-highlight checks and the shared pre-snap hold/effect check. The verified release record is
+`releases/preview-2026-11-06-roadmap-apks.manifest.json`.
 
 ## Audit-based feature inventory
 

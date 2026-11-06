@@ -10,8 +10,8 @@
 - [x] Keep rivalry records free of a play modifier because neither official rulebook supplies one.
 - [x] Pass 26 Engine, 7 College and 7 Pro focused tests and both Android compile targets.
 
-Remaining before acceptance: explicit action-level device checks on fresh College/Pro APKs, final required
-suites, exact APK packaging and established workflow runs, then the authorized merge and prerelease.
+Completed for acceptance: exact-APK action checks on fresh College/Pro APKs, final required suites, verified APK
+packaging, established workflow runs, the authorized merge and prerelease.
 ## Roadmap completion checkpoint — November 6, 2026
 
 - [x] Persist team motivation in both save models and advance it deterministically by season.
@@ -23,9 +23,8 @@ suites, exact APK packaging and established workflow runs, then the authorized m
 - [x] Keep tied game results from naming an away-team winner.
 - [x] Pass 63 focused Pro regressions, 18 focused Engine regressions, 24 focused College regressions and both Android compile targets.
 
-Still required before acceptance: player-authored social reply and action-level device checks, sourced pre-snap
-rule boundaries, full required suites, exact College/Pro APKs, established workflow runs and the authorized
-prerelease.
+Near-term acceptance is complete: player-authored social replies, action-level device checks, sourced pre-snap
+rule boundaries, required suites, exact College/Pro APKs, workflow runs and the authorized prerelease all passed.
 > **Historical acceptance log:** See [current roadmap](ROADMAP.md) and [parity audit](audits/pro-college-parity-2026-11-01.md) for completed milestones and remaining work.
 
 ## Accepted Pro115 / College412 — guided offseason, compact overview and backfield corrections

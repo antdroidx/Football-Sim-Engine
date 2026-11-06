@@ -1,2 +1,2 @@
-7e7b5df7074c8be3c14b491342c6610f8a66a99441b9b1a6e0f95cb05b667b7f antdroid.profootball.franchise-Signed.apk (Pro165, run 41798956069)
-b0424b5f723be2f0800cf903c678710afeff41e19c502e05ffbdd04dffe33b5d antdroid.cfbcoach.dev-Signed.apk (College454, run 41798956072)
+259464436fe5357ef846119725c064e3b13cc6f8b85f17890ce7a2ae4a236124 antdroid.profootball.franchise-Signed.apk (Pro190, run 42287498698)
+a64210cf82e1fbe5518e17aba13fa54eed097f8d7c9f323c4ec2de52b3d2bbf1 antdroid.cfbcoach.dev-Signed.apk (College476, run 42287497915)

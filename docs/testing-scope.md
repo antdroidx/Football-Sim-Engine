@@ -1,3 +1,22 @@
+## Roadmap release validation — November 6, 2026
+
+- College476 run `42287497915` passed 380 Engine Fast, 12 Engine Balance, 629 Core/College tests, packaging,
+  `android-launch` replay-highlight coverage and `android-career-options`.
+- College exact-APK run `42290592355` passed `college-phase-check.json`: real creation, start-to-regular phase,
+  stop/autosave/reload, `socialActions`, `rivalrySeries` and `chemistryMotivation`.
+- Pro190 run `42287498698` passed 486 standard Pro tests, NFLPA normalization, packaging and the full live
+  GameCast/reload/coordinator device scope.
+- Pro exact-APK run `42298345683` passed the sourced pre-snap selection, direct hold screenshot and recorded
+  motion effect. Pro exact-APK run `42311170531` passed `pro-roadmap-check.json` and
+  `pro-presentation-check.json`, including social actions, rivalry/chemistry/motivation and draft/retention
+  portrait/landscape actions.
+- Local focused tests passed 44 Engine, 10 College, 22 Pro and 24 UI helpers. Both app compile targets,
+  packaged-resource validation, NFLPA normalization and actionlint 1.7.12 passed.
+
+Exact tested APK hashes are in `releases/preview-2026-11-06-roadmap-apks.manifest.json`. The standard long-case
+exclusions remain: College `DynastyHealthTests` / `OvrCalibrationDynastyTests` and Pro `TwentySeasons` /
+`SourcedFiveSeasons`. Earlier failed/cancelled device retries are superseded and are not acceptance evidence.
+
 ## Player reply and sourced pre-snap validation — November 6, 2026
 
 Executed on the feature working tree:

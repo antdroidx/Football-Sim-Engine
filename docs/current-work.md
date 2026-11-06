@@ -1,3 +1,39 @@
+## Roadmap APK release — November 6, 2026
+
+The near-term roadmap is complete for College and Pro. Durable motivation, scout replenishment, CPU coach
+histories, person-level news memory, player-authored social replies, sourced pre-snap boundaries, rivalry
+series, chemistry/locker-room state, replay highlights and coach Hall of Fame records are implemented with
+backward-compatible save defaults. The one-yard shift and three-yard motion values remain internal catalog
+bounds; rivalry records remain simulation-neutral.
+
+Release validation actually passed:
+
+- College476, run `42287497915`: 380 Engine Fast, 12 Engine Balance, 629 Core/College tests, Android packaging,
+  live replay-highlight checks and career-options device checks.
+- College action run `42290592355` on the exact College476 APK: real dynasty creation, phase/save/reload,
+  player reply plus like/repost state, rivalry series, chemistry and motivation.
+- Pro190, run `42287498698`: 486 standard Pro tests, NFLPA cap normalization, Android packaging and the full
+  live GameCast/reload/coordinator device flow.
+- Pro pre-snap run `42298345683` on the exact Pro190 APK: `Pre-snap formation` hold screenshot, selected motion,
+  recorded `Motion created separation and added 2 yards.` effect and reset state.
+- Pro roadmap run `42311170531` on the exact Pro190 APK: social actions and saved reply, rivalry series,
+  chemistry/motivation, analytics/news/career/standings and visible portrait/landscape draft and retention
+  actions. Scoped fixture regeneration passed 80 Pro cases.
+- Local focused checks: 44 Engine, 10 College, 22 Pro and 24 UI synchronization tests. Both Android compile
+  targets, packaged-resource validation, NFLPA normalization and `actionlint` 1.7.12 passed.
+
+Exact APKs:
+
+- College476: `antdroid.cfbcoach.dev-Signed.apk`, 91,527,218 bytes, SHA-256
+  `A64210CF82E1FBE5518E17ABA13FA54EED097F8D7C9F323C4EC2DE52B3D2BBF1`.
+- Pro190: `antdroid.profootball.franchise-Signed.apk`, 90,247,689 bytes, SHA-256
+  `259464436FE5357EF846119725C064E3B13CC6F8B85F17890CE7A2AE4A236124`.
+
+Limits: the established release scope excludes the documented long College career/calibration cases and Pro
+`TwentySeasons` / `SourcedFiveSeasons` cases. Earlier exact-APK retries failed or were cancelled on harness-only
+predicate, timing and stale-label assumptions; Pro195 and Pro202 are the successful superseding checks. No
+simulation claim is made beyond the bounded recorded pre-snap effect already covered by focused tests.
+
 ## Player replies and sourced pre-snap boundaries — November 6, 2026
 
 Both remaining implementation gaps are now closed. The in-game social feed has a real player-authored reply

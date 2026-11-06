@@ -1,0 +1,25 @@
+{
+  "tag": "preview-2026-11-06-roadmap-apks",
+  "apkSourceCommit": "b51ba6659215bcaf9fcea536d5c4a0ca8e73092c",
+  "pro": {
+    "build": "Pro190",
+    "run": 42287498698,
+    "artifactId": 13538912317,
+    "liveDeviceRun": 42298345683,
+    "roadmapDeviceRun": 42311170531,
+    "apk": "antdroid.profootball.franchise-Signed.apk",
+    "size": 90247689,
+    "sha256": "259464436FE5357EF846119725C064E3B13CC6F8B85F17890CE7A2AE4A236124",
+    "scope": "486 standard Pro tests plus live/pre-snap and roadmap action-level device checks"
+  },
+  "college": {
+    "build": "College476",
+    "run": 42287497915,
+    "artifactId": 13538990919,
+    "actionDeviceRun": 42290592355,
+    "apk": "antdroid.cfbcoach.dev-Signed.apk",
+    "size": 91527218,
+    "sha256": "A64210CF82E1FBE5518E17ABA13FA54EED097F8D7C9F323C4EC2DE52B3D2BBF1",
+    "scope": "Engine Fast/Balance and Core/College tests plus live/replay and action-level device checks"
+  }
+}

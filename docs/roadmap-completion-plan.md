@@ -7,11 +7,11 @@ authorized release sequence.
 |---|---|---|
 | F | Persisted motivation and scout replenishment from the resumed work; CPU coach season history with stable staff identity; Pro person-level story identity | Implemented and focused-tested; 63 Pro, 18 Engine, 24 College and both app compiles passed |
 | G | Player-authored social reply plus sourced NCAA/NFL pre-snap rule boundaries | Implemented and focused-tested; 26 Engine, 7 College, 7 Pro and both app compiles passed |
-| H | Explicit College/Pro action-level device assertions for social, rivalry, chemistry/motivation and replay highlights | After G |
+| H | Explicit College/Pro action-level device assertions for social, rivalry, chemistry/motivation, replay highlights and sourced pre-snap hold/effect | Implemented and device-tested on College476 and Pro190 |
 
-After H: run the final broad checks, package both Debug APKs, dispatch the established workflows, merge to
-`main`, publish the prerelease with verified APKs/checksums/manifest, clean generated files and delete only the
-completed `codex/feature-roadmap-plan` branch locally and remotely.
+After H: the final broad checks and both Debug APK packages passed, the established workflows completed, and the
+authorized release sequence published `preview-2026-11-06-roadmap-apks` with verified APKs, checksums and a
+manifest. Earlier failed/cancelled exact-APK retries were harness-only and are superseded by Pro195 and Pro202.
 
 ## Batch G implementation notes
 
