@@ -35,7 +35,7 @@ These are the open items above, in a sensible order. Each is small next to the d
 3. **Player and coach level narrative memory.** Season threads are keyed by team, topic and season. A thread per player or per coach needs a stable identity for that person across seasons.
 4. **Motivation state.** Locker-room events record what happened. Motivation would be the durable state those events read from and write to.
 5. **Sourced league rules for the two open limits.** A rivalry effect on a play, and any league-specific pre-snap limit, both wait on a rule this repository does not currently hold. Neither should be invented.
-6. **The intermittent Pro staff-balance test.** `StaffBalanceTests.EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity` fails roughly once in twenty runs because the generated franchise id seeds the staff lifecycle and one scout can age out. It predates this work and is recorded as intermittent in `current-work.md`. It needs either a deterministic staff fixture or a replenished scout department.
+6. **The Pro scout-count intermittency.** The staff-balance fixture now uses a fixed franchise id, because the staff lifecycle is seeded from that id and the count could land on 95 instead of 96 about once in twenty runs. The underlying intermittency predates this work and is recorded in `current-work.md`. What is still open is proving that a freshly created franchise can never end up with a short scouting department, rather than only proving that one fixture does not.
 
 ## Audit-based feature inventory
 

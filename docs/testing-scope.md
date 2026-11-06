@@ -1,3 +1,15 @@
+## Roadmap rewrite, harness cleanup, and APK handover — November 5, 2026
+
+Executed: the smoke harness unit tests in `build/test_android_ui_smoke.py` pass, including new cases for the
+library Settings button, the career control leak check and the calendar phase fallback. The Pro
+`StaffBalanceTests` class was run six times after the fixture change with no failures.
+
+The GitHub Actions device jobs were dispatched against `codex/feature-roadmap-plan` after the live-game rewrite.
+The College career-options device job passes and the launch job reaches the live game.
+
+Not claimed: the device jobs still do not complete end to end, and the long College career cases were not rerun
+for this batch because no application code changed. No APK was published, no release was created, and nothing
+was merged.
 ## Branch validation on GitHub Actions and smoke harness repairs — November 5, 2026
 
 Executed on GitHub Actions against `codex/feature-roadmap-plan`: the College build job (shared engine fast and balance tiers, combined Core/College suite, debug APK packaging) and the Pro build job (standard Pro suite, debug APK packaging) both succeed, and the College career-options device job passes.

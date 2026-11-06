@@ -1,3 +1,37 @@
+## Roadmap rewrite, harness cleanup, and APK handover — November 5, 2026
+
+**Roadmap rewrite.** `docs/ROADMAP.md` was rewritten to match the state of the branch. It now opens with the
+near-term status of all seven workstreams, each with what was delivered and what is still open, followed by an
+ordered list of the six near-term items that remain: device acceptance of the new surfaces, coach lifecycle
+parity for CPU club coaches, player and coach level narrative memory, motivation state, the two league rules
+that need a sourced rule rather than an invented one, and the intermittent Pro staff-balance test. The long-term
+section replaces a bare list with a first slice, a dependency note and a scope boundary for each of the six
+long-term areas: the College NIL system, College media rights and finance, Pro finance expansion, expansion and
+relocation, stadium construction and training facilities, and additional offseason activities, with an order that
+puts NIL and Pro finance first because neither disturbs an existing ledger. `docs/IMPLEMENTATION-HANDOFF.md` now
+points at that agenda, and `docs/roadmap-completion-plan.md` records the delivered batch commits.
+
+**Harness cleanup.** The two device smoke scripts had drifted from the app over several UI rewrites and could not
+reach the live game any more. The live-game sections of both were rewritten against the shared GameCast view:
+the watch flow now opens the Options sheet, then Viewing options, then the camera choices; the team sheet is
+checked during a live game; a play is picked from the call sheet and snapped; the box score is opened from the
+live view; the landscape layout is checked against the `live-field` and `live-quick-call` automation ids; and the
+game is finished, confirmed saved and exited. The College script's second-unit check now waits for the menu to
+re-render instead of capturing it immediately, and the live view is located by its `live-game-page` automation id
+rather than by a toolbar label.
+
+Two things were deliberately not "fixed". The College save repository rejects a mismatched schema version, so no
+schema version was bumped for any of the new collections. And the harness still refuses to dismiss the app's own
+ANR dialog: an app hang is a finding, so the check fails and the cause gets fixed instead.
+
+**Staff fixture.** `StaffBalanceTests` created a franchise with a random id, and the staff lifecycle is seeded
+from that id, so the scout count could land on 95 instead of 96 and fail the run about once in twenty. The
+fixture now uses a fixed franchise id, which removes the random dimension and keeps every assertion intact. The
+underlying intermittency predates this work and is recorded in the November 1 entry.
+
+**Repository hygiene.** The two dead scratch patch scripts from an earlier session were deleted after confirming
+their anchors no longer exist in the source, the Codex attachment drop folders are now ignored instead of showing
+as untracked noise, and the empty Codex worktree folder for a removed branch was cleared.
 ## Branch validation on GitHub Actions and smoke harness repairs — November 5, 2026
 
 After the five batches landed, both existing workflows were dispatched against `codex/feature-roadmap-plan` to validate the branch end to end. The College build job runs the shared engine fast and balance tiers and the combined Core/College suite and packages a debug APK with zero warnings; the Pro build job runs the standard Pro suite and packages a debug APK with the two existing nullable warnings. Both build jobs pass on the branch, and the College career-options device job passes.
