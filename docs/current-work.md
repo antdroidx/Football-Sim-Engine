@@ -21,6 +21,9 @@ Release validation actually passed:
   actions. Scoped fixture regeneration passed 80 Pro cases.
 - Local focused checks: 44 Engine, 10 College, 22 Pro and 24 UI synchronization tests. Both Android compile
   targets, packaged-resource validation, NFLPA normalization and `actionlint` 1.7.12 passed.
+- Post-merge `main` workflows also passed: College build 478, run `42313407089`, repeated 380 Engine Fast,
+  12 Engine Balance and 629 Core/College tests with successful packaging; Pro build 203, run `42313407092`,
+  repeated 486 standard Pro tests with successful packaging and the two existing `CS8625` warnings.
 
 Exact APKs:
 

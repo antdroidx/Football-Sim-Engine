@@ -18,6 +18,8 @@ Validation:
 - Exact-APK action runs `42290592355`, `42298345683` and `42311170531` passed the new roadmap device assertions.
 - Local focused checks passed 44 Engine, 10 College, 22 Pro and 24 UI helper cases; both compile targets,
   packaged-resource validation, NFLPA normalization and actionlint 1.7.12 passed.
+- Post-merge main workflows passed: College build 478 (`42313407089`) and Pro build 203 (`42313407092`), including
+  their repeated broad test scopes and APK packaging.
 
 APK source artifacts:
 

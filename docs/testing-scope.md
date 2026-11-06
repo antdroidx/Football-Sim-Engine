@@ -12,6 +12,8 @@
   portrait/landscape actions.
 - Local focused tests passed 44 Engine, 10 College, 22 Pro and 24 UI helpers. Both app compile targets,
   packaged-resource validation, NFLPA normalization and actionlint 1.7.12 passed.
+- Post-merge College build 478 (`42313407089`) passed 380 Engine Fast, 12 Engine Balance, 629 Core/College and
+  packaging. Post-merge Pro build 203 (`42313407092`) passed 486 standard Pro tests and packaging.
 
 Exact tested APK hashes are in `releases/preview-2026-11-06-roadmap-apks.manifest.json`. The standard long-case
 exclusions remain: College `DynastyHealthTests` / `OvrCalibrationDynastyTests` and Pro `TwentySeasons` /
