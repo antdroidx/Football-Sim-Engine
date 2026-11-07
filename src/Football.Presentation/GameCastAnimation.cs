@@ -33,7 +33,7 @@ public sealed class GameCastAnimationContext
 /// <summary>The college GameCast choreography, shared without changing simulation or save models.</summary>
 public static class GameCastAnimation
 {
-    public static async Task PlayAsync(GameCastAnimationContext context, GameSnapEvent snap, bool instantReplay = false)
+    public static async Task PlayAsync(GameCastAnimationContext context, GameSnapEvent snap, bool instantReplay = false, bool preSnapPreview = false)
     {
         var session = context.Session; var game = session.Game;
         var home = session.HomeProfile; var away = session.AwayProfile;
@@ -98,9 +98,7 @@ public static class GameCastAnimation
             session.PlayersById.TryGetValue(id, out var player);
             return player;
         }).ToArray();
-        var motionPlayerId = snap.PreSnap?.Type == PreSnapType.Motion
-            ? offense.FirstOrDefault(player => player?.Position is Position.WR or Position.TE or Position.RB or Position.FB)?.PlayerId
-            : null;
+
         var defense = snap.DefensePersonnel.Select(id =>
         {
             session.PlayersById.TryGetValue(id, out var player);
@@ -219,8 +217,7 @@ public static class GameCastAnimation
                 var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65, snap.UsesDynamicKickoff, snap.IsOnsideKick);
                 x = formation.From.X; y = formation.From.Y;
             }
-            if (snap.PreSnap is { HasAlignmentAction: true } preSnapAlignment &&
-                (preSnapAlignment.Type == PreSnapType.Shift || player?.PlayerId == motionPlayerId))
+            if (snap.PreSnap is { HasAlignmentAction: true, Type: PreSnapType.Shift } preSnapAlignment)
             {
                 var lateral = preSnapAlignment.Yards / Math.Max(1, session.Rules.FieldWidthYards);
                 y = Math.Clamp(y + (preSnapAlignment.Side == "Right" ? lateral : -lateral), .06, .94);
@@ -496,6 +493,7 @@ public static class GameCastAnimation
         AbsoluteLayout.SetLayoutBounds(ball, ballStart);
         fieldPlayers.Add(ball);
         AbsoluteLayout.SetLayoutFlags(carrierLabel, AbsoluteLayoutFlags.PositionProportional); fieldPlayers.Add(carrierLabel);
+        if (preSnapPreview) return;
         var durationSeconds = GameDayAnimationPlanner.PlaybackDurationSeconds(movements.Select(m =>
         {
             var from = new GameFieldPoint(m.From.X, m.From.Y);
@@ -749,6 +747,3 @@ public static class GameCastAnimation
     static Rect Interpolate(Rect start, Rect end, double progress) => new(
         start.X + (end.X - start.X) * progress, start.Y + (end.Y - start.Y) * progress, start.Width, start.Height);
 }
-
-
-

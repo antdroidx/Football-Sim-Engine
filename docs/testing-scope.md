@@ -1,3 +1,33 @@
+## GameCast pre-snap and end-zone validation - November 6, 2026
+
+Executed on the feature working tree:
+
+- Engine `GameDayPreSnapPresentationTests|PreSnapTests` - 12 passed. The two new cases verify that formation display precedes alignment motion and that both aligned and plain calls settle before snap.
+- Engine Fast - 382 passed; Engine Balance - 12 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests` - 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons` - 486 passed.
+- Packaged-resource validation - passed.
+- `python -m unittest discover -s build -p 'test_android_ui_smoke.py'` - 24 passed.
+- Football.Presentation compile target - passed with zero warnings/errors.
+- College Android compile and Debug APK packaging - passed with zero warnings/errors.
+- Pro Android compile and Debug APK packaging - passed with zero errors and the two existing `CS8625` warnings.
+
+Exact APK identity:
+
+- `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, 91,527,218 bytes, SHA-256 `21B7EA517215F6D106CA71F3DE967751AC0FA7168FB568B0CF16D8A25CD50F4B`, Debug `net10.0-android`, version code 400 / version name 0.20.0.
+- `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, 90,247,689 bytes, SHA-256 `A180D279913AA43D713382CB575C997BC1034C1596D2A569ED79BC2962E070B5`, Debug `net10.0-android`, version code 1 / version name 0.1.0.
+
+The exact Pro APK passed focused Android visual checks on a read-only API 36 emulator:
+
+- Fresh Seattle franchise reached an opening live game at the Los Angeles Chargers.
+- Both home end zones matched Chargers primary `#007BC7` at 76.98%; green-like pixels were 0.20% left and 0.19% right.
+- Timed direct screenshots show the players in their on-field formations with `Pre-snap formation` and `PRE-SNAP FORMATION` visible before snap.
+- Motion/return/settle frames differ only in one localized marker region on the field, confirming the selected player moves in the formation rather than in the huddle.
+- Logcat contains zero `FATAL EXCEPTION`, application ANR, Pro process-error or `outstanding GREFs` matches.
+
+Evidence and the disposable QA driver are under `.artifacts/presnap-qa/`. The first 50 ms screenshot preceded completion of the adb tap dispatch and still shows the huddle; the 320 ms and later frames are the pre-snap evidence. A `uiautomator` dump completed several seconds late after the snap and is excluded from timing proof.
+
+Not claimed: a CI run, PR, main merge, GitHub release, extended career suites, or a physical-device test.
 ## Roadmap release validation — November 6, 2026
 
 - College476 run `42287497915` passed 380 Engine Fast, 12 Engine Balance, 629 Core/College tests, packaging,

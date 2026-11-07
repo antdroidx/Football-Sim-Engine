@@ -48,6 +48,7 @@ public sealed class GameFieldDrawable : IDrawable
             var leftGoal = (float)GameDayAnimationPlanner.ProjectYardLine(0, 1);
 
             var rightGoal = (float)GameDayAnimationPlanner.ProjectYardLine(100, 1);
+            canvas.FillColor = HomeColor;
             canvas.FillRectangle(0, 0, rect.Width * leftGoal, rect.Height);
             canvas.FillRectangle(rect.Width * rightGoal, 0, rect.Width * leftGoal, rect.Height);
             canvas.SaveState(); canvas.FontColor = HomeSecondaryColor; canvas.Font = Microsoft.Maui.Graphics.Font.DefaultBold;

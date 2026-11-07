@@ -1,3 +1,28 @@
+## GameCast pre-snap phase and team-colored end zones - November 6, 2026
+
+Manual GameCast snaps now render the called offensive and defensive formation before any alignment action or snap animation. The previous implementation held the midfield huddle, so the delay and motion appeared in the wrong phase. Pre-snap motion now moves one eligible player within the on-field formation, returns that player to the settled alignment, and keeps the offense set for one full second before the recorded play animation starts. Shifts retain their shifted alignment at the snap. Simulation outcomes and saved `PreSnapChoice` records are unchanged.
+
+Both field end zones now use the home team's primary color before drawing the home field/city wordmark. The prior drawing code reused the turf overlay fill, which made the end zones appear green.
+
+Validation actually run:
+
+- Focused `GameDayPreSnapPresentationTests|PreSnapTests` - 12 passed.
+- Engine Fast - 382 passed; Engine Balance - 12 passed.
+- Standard College suite with `DynastyHealthTests|OvrCalibrationDynastyTests` excluded - 629 passed.
+- Standard Pro suite with `TwentySeasons|SourcedFiveSeasons` excluded - 486 passed.
+- Packaged-resource validation and 24 Android UI synchronization helper tests passed.
+- Football.Presentation and both Android app compile targets passed. College has no warnings; Pro retains its two documented `CS8625` warnings.
+- College and Pro Debug Android APK packaging passed.
+
+Exact local Debug APKs:
+
+- College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, 91,527,218 bytes, SHA-256 `21B7EA517215F6D106CA71F3DE967751AC0FA7168FB568B0CF16D8A25CD50F4B`, version code 400 / version name 0.20.0.
+- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, 90,247,689 bytes, SHA-256 `A180D279913AA43D713382CB575C997BC1034C1596D2A569ED79BC2962E070B5`, version code 1 / version name 0.1.0.
+
+Android QA used the exact Pro APK on a read-only API 36 emulator and a fresh Seattle franchise. In Seattle's game at the Los Angeles Chargers, both end zones were exact Chargers primary `#007BC7`: 76.98% of each end-zone crop matched that color and only 0.20%/0.19% was green-like. Direct frames at the pre-snap hold show both 11-player units set in their formations with `Pre-snap formation` active. A field-only frame diff localizes the motion change to one marker region while the rest of the formation remains fixed. The logcat evidence has zero fatal exceptions, application ANRs, application process errors or outstanding GREF warnings.
+
+Timing evidence is in `.artifacts/presnap-qa/`. The 50 ms frame was captured before adb finished dispatching the Call play tap and therefore still shows the huddle; subsequent 320 ms and later frames show the on-field formation and motion. A late `uiautomator` dump landed after the snap and is not used as hold-state evidence.
+
 ## Roadmap APK release — November 6, 2026
 
 The near-term roadmap is complete for College and Pro. Durable motivation, scout replenishment, CPU coach

@@ -9,8 +9,6 @@ namespace DynastyManager.App;
 /// <summary>One live screen for every league. Hosts supply branding, a session and persistence only.</summary>
 public class GameCastLivePage : ContentPage
 {
-    const int ManualFormationHoldMilliseconds = 1000;
-    const int PreSnapActionLeadMilliseconds = 180;
     readonly GameDaySession session;
     readonly GameCastLiveHost host;
     readonly GameDayLiveControl control;
@@ -186,32 +184,28 @@ public class GameCastLivePage : ContentPage
         {
             preSnapHolding = manual;
             Update();
+            last = control.Step(calledOffense, calledDefense, calledPreSnap);
+            offense = defense = null; ResetPreSnap();
             if (manual)
             {
-                // Hold the called formation before simulating the snap. Motion/shift starts
-                // as a presentation preview, then the snap starts from the adjusted alignment.
-                RenderHuddles();
                 var calledPlay = GamePlanService.AvailableOffensivePlays(Plan).FirstOrDefault(play => play.Id == calledOffense);
-                commentary.Text = "PRE-SNAP · " + (calledPlay?.Name ?? "Formation") +
-                    (calledPreSnap.HasAlignmentAction ? " · " + PreSnapCatalog.Label(calledPreSnap) : "");
-                if (calledPreSnap.HasAlignmentAction)
-                {
-                    await Task.Delay(PreSnapActionLeadMilliseconds, lifetime.Token);
-                    await AnimatePreSnapChoice(calledPreSnap);
-                    // NCAA and NFL require the offense to be set for one full second after the last shift.
-                    await Task.Delay(ManualFormationHoldMilliseconds, lifetime.Token);
-                }
-                else
-                {
-                    await Task.Delay(ManualFormationHoldMilliseconds, lifetime.Token);
-                }
+                await GameDayPreSnapPresentation.HoldAsync(
+                    calledPreSnap.HasAlignmentAction,
+                    async () =>
+                    {
+                        await Animate(last, false, true);
+                        commentary.Text = "PRE-SNAP · " + (calledPlay?.Name ?? "Formation") +
+                            (calledPreSnap.HasAlignmentAction ? " · " + PreSnapCatalog.Label(calledPreSnap) : "");
+                    },
+                    () => AnimatePreSnapChoice(calledPreSnap),
+                    (delay, token) => Task.Delay(delay, token),
+                    lifetime.Token);
             }
-            preSnapHolding = false; Update(); last = control.Step(calledOffense, calledDefense, calledPreSnap);
-            offense = defense = null; ResetPreSnap();
+            preSnapHolding = false; Update();
             var atBreak = await GameCastSnapPresentation.PresentAsync(new()
             {
                 Session = session, Snap = last, Highlight = highlight, HighlightText = highlightText,
-                TeamColor = Primary, Animate = Animate, Replay = Replay, AutoReplay = autoReplay && !menuOpen
+                TeamColor = Primary, Animate = (snap, replay) => Animate(snap, replay), Replay = Replay, AutoReplay = autoReplay && !menuOpen
             });
             commentary.Text = GameDayCommentaryService.Describe(last, session.PlayersById) +
                 (last.PreSnapEffectNote is null ? "" : " · " + last.PreSnapEffectNote);
@@ -657,13 +651,13 @@ public class GameCastLivePage : ContentPage
         var marker = new Border { WidthRequest = 28, HeightRequest = 28, Padding = 0, StrokeThickness = 0, BackgroundColor = Colors.Transparent, InputTransparent = true, Content = sprite };
         spritePlayers[sprite] = player; markerHosts[marker] = (player, primary, secondary, away); return marker;
     }
-    Task Animate(GameSnapEvent snap, bool replay) => GameCastAnimation.PlayAsync(new()
+    Task Animate(GameSnapEvent snap, bool replay, bool preSnapPreview = false) => GameCastAnimation.PlayAsync(new()
     {
         Session = session, ControlledPlan = Plan, Players = players, Turf = turf, Artwork = art, Commentary = commentary, Highlight = highlight,
         SpritePlayers = spritePlayers, MarkerHosts = markerHosts, ActiveBallOwners = ballOwners, CreateMarker = Marker,
         ClearMarkers = () => { spritePlayers.Clear(); markerHosts.Clear(); ballOwners.Clear(); }, TeamPrimary = Primary, TeamSecondary = Secondary,
         GameSpeed = speed, ReplaySpeed = replaySpeed, UseSprites = () => true, ShowCarrierNames = () => showNames, CameraMode = () => camera, ReplayAngle = () => replayAngle, FrameCamera = FrameCamera
-    }, snap, replay);
+    }, snap, replay, preSnapPreview);
     void RenderHuddles()
     {
         players.Clear(); spritePlayers.Clear(); markerHosts.Clear(); ballOwners.Clear();
@@ -690,4 +684,3 @@ public class GameCastLivePage : ContentPage
         }
     }
 }
-
