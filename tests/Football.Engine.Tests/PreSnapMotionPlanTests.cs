@@ -82,7 +82,54 @@ public class PreSnapMotionPlanTests
     }
 
     [Fact]
-    public void DefensiveAlignmentAdjustsAutomaticallyForTheVisibleOffensiveFormation()
+    public void GenericMotionsSelectOutsideAndSlotReceiversAtUniqueOpenSpots()
+    {
+        foreach (var id in new[] { "off-spread-verts", "off-empty-motion-cross" })
+        {
+            var play = PlaybookCatalog.OffensivePlays.Single(item => item.Id == id);
+            var leftRole = PreSnapMotionPlan.MotionPlayerRole(play, "Left");
+            var rightRole = PreSnapMotionPlan.MotionPlayerRole(play, "Right");
+            var slotRole = PreSnapMotionPlan.MotionPlayerRole(play, "Slot");
+            var motions = new[]
+            {
+                PreSnapCatalog.FormationMotion(play, "Left"),
+                PreSnapCatalog.FormationMotion(play, "Right"),
+                PreSnapCatalog.FormationMotion(play, "Slot")
+            };
+
+            Assert.NotEqual(leftRole, rightRole);
+            Assert.NotEqual(leftRole, slotRole);
+            Assert.NotEqual(rightRole, slotRole);
+            foreach (var (choice, mover) in new[] { (motions[0], leftRole), (motions[1], rightRole), (motions[2], slotRole) })
+            {
+                var target = new GameFieldPoint(choice.SnapDepth, choice.SnapLane!.Value);
+                Assert.True(PreSnapMotionPlan.IsOpenAlignment(play, target, mover.Position, mover.Role));
+                Assert.NotEqual(GameDayAnimationPlanner.OffensiveAlignment(play, mover.Position, mover.Role), target);
+            }
+
+            Assert.True(motions[0].SnapLane!.Value < .5);
+            Assert.True(motions[1].SnapLane!.Value > .5);
+            var slotStart = GameDayAnimationPlanner.OffensiveAlignment(play, slotRole.Position, slotRole.Role).Y;
+            Assert.True((motions[2].SnapLane!.Value - .5) * (slotStart - .5) < 0);
+        }
+    }
+
+    [Fact]
+    public void GenericMotionsStayOpenAcrossEveryCatalogFormation()
+    {
+        foreach (var play in PlaybookCatalog.OffensivePlays)
+        {
+            foreach (var destination in new[] { "Left", "Right", "Slot" })
+            {
+                var mover = PreSnapMotionPlan.MotionPlayerRole(play, destination);
+                var target = PreSnapMotionPlan.OpenAlignment(play, destination, mover.Position, mover.Role);
+                Assert.True(PreSnapMotionPlan.IsOpenAlignment(play, target, mover.Position, mover.Role), $"{play.Name}: {destination}");
+            }
+        }
+    }
+
+    [Fact]
+    public void DefensiveAlignmentOnlyMovesForMeaningfulFormationChanges()
     {
         var session = GameDayFixture.Session(GameDayMode.Play);
         var defenders = session.AwayRoster
@@ -90,21 +137,20 @@ public class PreSnapMotionPlanTests
             .Take(11)
             .ToArray();
         var defensivePlay = PlaybookCatalog.DefensivePlays.Single(item => item.Id == "def-43-run");
-        var offensivePlay = PlaybookCatalog.OffensivePlays.Single(item => item.Id == "off-spread-jet-zone");
+        var balanced = PlaybookCatalog.OffensivePlays.Single(item => item.Id == "off-spread-jet-zone");
+        var extreme = PlaybookCatalog.OffensivePlays.Single(item => item.Id == "off-empty-motion-cross");
 
         var baseAlignments = DefensivePursuitService.Alignments(defenders, defensivePlay);
-        var shifted = PreSnapDefensivePlan.Alignments(defenders, defensivePlay, offensivePlay);
+        Assert.Equal(baseAlignments, PreSnapDefensivePlan.Alignments(defenders, defensivePlay, balanced));
 
+        var shifted = PreSnapDefensivePlan.Alignments(defenders, defensivePlay, extreme);
         Assert.Equal(baseAlignments.Count, shifted.Count);
+        Assert.Contains(defenders, defender => shifted[defender.PlayerId] != baseAlignments[defender.PlayerId]);
         Assert.All(shifted.Values, point =>
         {
             Assert.InRange(point.X, -.5, 18);
             Assert.InRange(point.Y, .08, .92);
         });
-        Assert.Contains(defenders, defender =>
-            shifted[defender.PlayerId] != baseAlignments[defender.PlayerId]);
-        Assert.Equal(
-            shifted,
-            PreSnapDefensivePlan.Alignments(defenders, defensivePlay, offensivePlay));
+        Assert.Equal(shifted, PreSnapDefensivePlan.Alignments(defenders, defensivePlay, extreme));
     }
 }

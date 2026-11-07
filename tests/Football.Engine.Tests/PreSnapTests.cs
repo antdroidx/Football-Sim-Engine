@@ -19,7 +19,7 @@ public class PreSnapTests
         Assert.True(choice.Valid);
         Assert.False(PreSnapCatalog.IsValid(choice with { Type = (PreSnapType)3 }));
         Assert.False(PreSnapCatalog.IsValid(choice with { Yards = 4.5 }));
-        Assert.Equal(6, PreSnapCatalog.Common.Count);
+        Assert.Equal(5, PreSnapCatalog.Common.Count);
     }
 
     [Fact]
@@ -201,42 +201,54 @@ public class PreSnapTests
     }
 
     [Fact]
-    public void UserOptionsRestrictShiftsToReceiversAndKeepMotionPlayAware()
+    public void UserOptionsExposeReceiverMotionsAndThePlaySpecificPreset()
     {
         var jetPlay = PlaybookCatalog.OffensivePlays.Single(play => play.Id == "off-spread-jet-zone");
         var options = PreSnapCatalog.Options(jetPlay);
 
-        Assert.Equal(4, options.Count);
+        Assert.Equal(6, options.Count);
         Assert.Equal(PreSnapCatalog.None, options[0]);
-        Assert.All(options.Where(choice => choice.Type == PreSnapType.Shift),
-            choice => Assert.Equal(Position.WR, choice.ShiftPosition));
         Assert.Contains(jetPlay.PreSnapAction, options);
-        Assert.DoesNotContain(options, choice =>
-            choice.Type == PreSnapType.Shift && choice.ShiftPosition != Position.WR);
+        Assert.DoesNotContain(options, choice => choice.Type == PreSnapType.Shift);
         Assert.DoesNotContain(options, choice =>
             choice.Type == PreSnapType.Motion && choice.MotionPosition is not (Position.WR or Position.TE or Position.RB or Position.FB));
 
         Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.ReceiverShift("Right", Position.WR, 0)));
         Assert.False(PreSnapCatalog.IsValid(PreSnapCatalog.ReceiverShift("Right", Position.OL, 0)));
     }
-    [Fact]
-    public void GenericReceiverOptionsRelocateOrSwapInsteadOfReturningToTheSameSpot()
-    {
-        var session = GameDayFixture.Session(GameDayMode.Play);
-        var play = PlaybookCatalog.OffensivePlays.Single(item => item.Id == "off-spread-verts");
-        var options = PreSnapCatalog.Options(play);
-        var receivers = session.HomeRoster.Where(player => player.Position == Position.WR).Take(2).ToArray();
-        var motion = options.Single(choice => PreSnapCatalog.Label(choice) == "WR motion right");
-        var swap = options.Single(choice => PreSnapCatalog.Label(choice) == "WR swap");
-        var baseAlignment = GameDayAnimationPlanner.OffensiveAlignment(play, Position.WR, 0);
-        var movedAlignment = PreSnapMotionPlan.SnapAlignment(motion, receivers, play, receivers[0]);
 
-        Assert.Equal(6, options.Count);
-        Assert.Equal(PreSnapMotionKind.SetAcross, motion.MotionKind);
+    [Fact]
+    public void GenericReceiverOptionsUseDistinctCollisionFreeMotions()
+    {
+        var play = PlaybookCatalog.OffensivePlays.Single(item => item.Id == "off-empty-motion-cross");
+        var options = PreSnapCatalog.Options(play);
+        var left = options.Single(choice => PreSnapCatalog.Label(choice) == "Motion left");
+        var right = options.Single(choice => PreSnapCatalog.Label(choice) == "Motion right");
+        var slot = options.Single(choice => PreSnapCatalog.Label(choice) == "Motion slot");
+        var swap = options.Single(choice => PreSnapCatalog.Label(choice) == "WR swap");
+
+        Assert.Equal(5, options.Count);
+        Assert.All(new[] { left, right, slot }, choice => Assert.Equal(PreSnapMotionKind.ReceiverRelocate, choice.MotionKind));
         Assert.Equal(PreSnapMotionKind.SwapAlignments, swap.MotionKind);
-        Assert.Equal(1, swap.SwapRoleIndex);
-        Assert.NotEqual(baseAlignment, movedAlignment);
-        Assert.DoesNotContain(options, choice => choice.Type == PreSnapType.Motion && choice.MotionKind == PreSnapMotionKind.ReturnToFormation);
+        Assert.DoesNotContain(options, choice => choice.Type == PreSnapType.Shift);
+
+        var leftRole = PreSnapMotionPlan.MotionPlayerRole(play, "Left");
+        var rightRole = PreSnapMotionPlan.MotionPlayerRole(play, "Right");
+        var slotRole = PreSnapMotionPlan.MotionPlayerRole(play, "Slot");
+        Assert.NotEqual(leftRole, rightRole);
+        Assert.NotEqual(leftRole, slotRole);
+        Assert.NotEqual(rightRole, slotRole);
+
+        foreach (var (choice, mover) in new[] { (left, leftRole), (right, rightRole), (slot, slotRole) })
+        {
+            var target = new GameFieldPoint(choice.SnapDepth, choice.SnapLane!.Value);
+            Assert.True(PreSnapMotionPlan.IsOpenAlignment(play, target, mover.Position, mover.Role));
+        }
+
+        Assert.True(left.SnapLane!.Value < .5);
+        Assert.True(right.SnapLane!.Value > .5);
+        var slotStart = GameDayAnimationPlanner.OffensiveAlignment(play, slotRole.Position, slotRole.Role).Y;
+        Assert.True((slot.SnapLane!.Value - .5) * (slotStart - .5) < 0);
     }
 
 }

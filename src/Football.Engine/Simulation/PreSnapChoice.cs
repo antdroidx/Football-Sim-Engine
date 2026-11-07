@@ -10,7 +10,8 @@ public enum PreSnapMotionKind
     SetAcross,
     OrbitAcross,
     JetHandoff,
-    SwapAlignments
+    SwapAlignments,
+    ReceiverRelocate
 }
 
 /// <summary>Compact pre-snap intent used by presentation, call planning and recorded snap replay.</summary>

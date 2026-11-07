@@ -2,7 +2,7 @@ using DynastyManager.Core.Models;
 
 namespace DynastyManager.Core.Simulation;
 
-/// <summary>Presentation-only defensive alignment adjustment after the offense is set.</summary>
+/// <summary>Presentation-only defensive alignment adjustment for meaningful offensive formation changes.</summary>
 public static class PreSnapDefensivePlan
 {
     public static IReadOnlyDictionary<Guid, GameFieldPoint> Alignments(
@@ -16,16 +16,14 @@ public static class PreSnapDefensivePlan
 
         var starts = DefensivePursuitService.Alignments(defenders, defensivePlay);
         var strength = FormationStrength(offensivePlay);
-        var towardStrength = strength switch
-        {
-            > .08 => .028,
-            < -.08 => -.028,
-            _ => 0
-        };
+        var meaningfulStrength = Math.Abs(strength) >= .35;
+        var towardStrength = meaningfulStrength
+            ? Math.Sign(strength) * .028
+            : 0;
 
-        var spread = offensivePlay.Formation is OffensiveFormation.Empty or OffensiveFormation.ShotgunSpread;
+        var extremeSpread = offensivePlay.Formation == OffensiveFormation.Empty;
         var heavy = offensivePlay.Formation is OffensiveFormation.IForm or OffensiveFormation.Flexbone ||
-            offensivePlay.Personnel is OffensivePersonnel.Twelve or OffensivePersonnel.TwentyOne;
+            offensivePlay.Personnel is OffensivePersonnel.TwentyOne;
         var result = new Dictionary<Guid, GameFieldPoint>();
 
         foreach (var defender in defenders)
@@ -41,10 +39,10 @@ public static class PreSnapDefensivePlan
             };
             var depth = defender.Position switch
             {
-                Position.DE or Position.DT => spread ? .20 : heavy ? -.15 : 0,
-                Position.MLB or Position.OLB => spread ? .55 : heavy ? -.30 : 0,
-                Position.CB => spread ? .75 : 0,
-                Position.FS or Position.SS => spread ? -.65 : heavy ? -.45 : 0,
+                Position.DE or Position.DT => extremeSpread ? .20 : heavy ? -.15 : 0,
+                Position.MLB or Position.OLB => extremeSpread ? .55 : heavy ? -.30 : 0,
+                Position.CB => extremeSpread ? .75 : 0,
+                Position.FS or Position.SS => extremeSpread ? -.65 : heavy ? -.45 : 0,
                 _ => 0
             };
 

@@ -6,25 +6,23 @@ public static class PreSnapCatalog
 {
     public static readonly PreSnapChoice None = new(PreSnapType.None, "None", 0);
 
-    public static IReadOnlyList<PreSnapChoice> Common => Options(null);
+    public static IReadOnlyList<PreSnapChoice> Common =>
+        Options(PlaybookCatalog.OffensivePlays.Single(play => play.Id == "off-spread-verts"));
 
     public static IReadOnlyList<PreSnapChoice> Options(OffensivePlayDefinition? play)
     {
+        var formation = play ?? PlaybookCatalog.OffensivePlays.Single(item => item.Id == "off-spread-verts");
         var options = new List<PreSnapChoice>
         {
             None,
-            ReceiverShift("Left", Position.WR, 0),
-            ReceiverShift("Right", Position.WR, 0)
+            FormationMotion(formation, "Left"),
+            FormationMotion(formation, "Right"),
+            FormationMotion(formation, "Slot"),
+            FormationSwap(formation)
         };
 
-        if (play?.PreSnapAction is { HasAlignmentAction: true } preset)
+        if (play?.PreSnapAction is { HasAlignmentAction: true } preset && !options.Contains(preset))
             options.Add(preset);
-        else
-        {
-            options.Add(ReceiverMotion("Left", Position.WR, 0, PreSnapMotionKind.SetAcross));
-            options.Add(ReceiverMotion("Right", Position.WR, 0, PreSnapMotionKind.SetAcross));
-            options.Add(Swap("Right", Position.WR, 0, Position.WR, 1));
-        }
 
         return options;
     }
@@ -54,15 +52,37 @@ public static class PreSnapCatalog
         string side,
         Position position = Position.WR,
         int roleIndex = 0,
-        PreSnapMotionKind kind = PreSnapMotionKind.SetAcross) =>
+        PreSnapMotionKind kind = PreSnapMotionKind.ReceiverRelocate,
+        double? snapLane = null,
+        double? snapDepth = null) =>
         Motion(side, 2, PreSnapMotionDirection.Lateral, kind) with
         {
             MotionPosition = position,
             MotionRoleIndex = roleIndex,
+            SnapLane = snapLane,
+            SnapDepth = snapDepth ?? -2,
             BackfieldPlayersInMotion = 1,
             AllOtherPlayersStationary = true,
             SetForOneSecond = true
         };
+
+    public static PreSnapChoice FormationMotion(OffensivePlayDefinition play, string destination)
+    {
+        ArgumentNullException.ThrowIfNull(play);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destination);
+        var mover = PreSnapMotionPlan.MotionPlayerRole(play, destination);
+        var target = PreSnapMotionPlan.OpenAlignment(play, destination, mover.Position, mover.Role);
+        return ReceiverMotion(destination, mover.Position, mover.Role,
+            PreSnapMotionKind.ReceiverRelocate, target.Y, target.X);
+    }
+
+    public static PreSnapChoice FormationSwap(OffensivePlayDefinition play)
+    {
+        ArgumentNullException.ThrowIfNull(play);
+        var left = PreSnapMotionPlan.MotionPlayerRole(play, "Right");
+        var right = PreSnapMotionPlan.MotionPlayerRole(play, "Left");
+        return Swap("Right", left.Position, left.Role, right.Position, right.Role);
+    }
 
     public static PreSnapChoice Jet(string side, Position position = Position.WR, int roleIndex = 1) =>
         Motion(side, 3, PreSnapMotionDirection.Lateral, PreSnapMotionKind.JetHandoff) with
@@ -159,12 +179,13 @@ public static class PreSnapCatalog
             "Jet motion " + choice.Side.ToLowerInvariant(),
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.OrbitAcross =>
             "Orbit motion " + choice.Side.ToLowerInvariant(),
-        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SetAcross && choice.SnapLane is null && choice.MotionPosition == Position.WR =>
-            $"WR motion {choice.Side.ToLowerInvariant()}",
+        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.ReceiverRelocate =>
+            $"Motion {choice.Side.ToLowerInvariant()}",
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SetAcross =>
             "Set motion " + choice.Side.ToLowerInvariant(),
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SwapAlignments => "WR swap",
-        PreSnapType.Motion when choice.MotionPosition == Position.WR =>
+        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.ReturnToFormation &&
+            choice.MotionPosition == Position.WR =>
             $"WR return motion {choice.Side.ToLowerInvariant()}",
         PreSnapType.Motion => $"Motion {choice.Side.ToLowerInvariant()} {choice.Yards:0.#} yd",
         _ => choice.Type.ToString()
@@ -175,6 +196,7 @@ public static class PreSnapCatalog
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.JetHandoff => "JET",
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.OrbitAcross => "ORBIT",
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SetAcross => "SET",
+        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.ReceiverRelocate => "MOTION",
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SwapAlignments => "SWAP",
         PreSnapType.Motion => "MOTION",
         PreSnapType.Shift => "SHIFT",

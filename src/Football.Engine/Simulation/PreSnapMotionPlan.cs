@@ -2,10 +2,11 @@ using DynastyManager.Core.Models;
 
 namespace DynastyManager.Core.Simulation;
 
-/// <summary>Shared play-aware motion selection, snap alignment and presentation paths.</summary>
+/// <summary>Shared play-aware motion selection, collision-free snap alignment and presentation paths.</summary>
 public static class PreSnapMotionPlan
 {
     public const int MotionSegmentMilliseconds = 260;
+
     public static int RoleIndex(IReadOnlyList<DynastyPlayer> players, Position position, Guid playerId) =>
         players.TakeWhile(player => player.PlayerId != playerId).Count(player => player.Position == position);
 
@@ -81,6 +82,73 @@ public static class PreSnapMotionPlan
     public static bool IsSwapPartner(PreSnapChoice choice, IReadOnlyList<DynastyPlayer> players, DynastyPlayer? player) =>
         player is not null && SelectSwapPartner(choice, players)?.PlayerId == player.PlayerId;
 
+    /// <summary>Selects the outside or slot player implied by a generic receiver motion.</summary>
+    public static (Position Position, int Role) MotionPlayerRole(OffensivePlayDefinition play, string destination)
+    {
+        ArgumentNullException.ThrowIfNull(play);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destination);
+        var receivers = FormationAlignments(play)
+            .Where(item => item.Position == Position.WR)
+            .OrderBy(item => item.Point.Y)
+            .ToArray();
+        if (receivers.Length > 0 && destination.Equals("Left", StringComparison.OrdinalIgnoreCase))
+            return (Position.WR, receivers[^1].Role);
+        if (receivers.Length > 0 && destination.Equals("Right", StringComparison.OrdinalIgnoreCase))
+            return (Position.WR, receivers[0].Role);
+
+        if (receivers.Length >= 3)
+        {
+            var slot = receivers
+                .Skip(1)
+                .Take(receivers.Length - 2)
+                .OrderBy(item => Math.Abs(item.Point.Y - .5))
+                .First();
+            return (Position.WR, slot.Role);
+        }
+
+        var insideReceiver = FormationAlignments(play)
+            .Where(item => item.Position is Position.WR or Position.TE)
+            .OrderBy(item => Math.Abs(item.Point.Y - .5))
+            .FirstOrDefault();
+        return insideReceiver.Position == default
+            ? (Position.WR, 0)
+            : (insideReceiver.Position, insideReceiver.Role);
+    }
+
+    /// <summary>Returns a formation-aware target that does not overlap another offensive player.</summary>
+    public static GameFieldPoint OpenAlignment(
+        OffensivePlayDefinition play,
+        string destination,
+        Position movingPosition,
+        int movingRole)
+    {
+        ArgumentNullException.ThrowIfNull(play);
+        ArgumentException.ThrowIfNullOrWhiteSpace(destination);
+        var occupied = FormationAlignments(play)
+            .Where(item => item.Position != movingPosition || item.Role != movingRole)
+            .Select(item => item.Point)
+            .ToArray();
+        var moving = FormationAlignments(play)
+            .FirstOrDefault(item => item.Position == movingPosition && item.Role == movingRole).Point;
+        var line = FormationAlignments(play)
+            .Where(item => item.Position == Position.OL)
+            .Select(item => item.Point.Y)
+            .ToArray();
+        var lineMin = line.Length == 0 ? .34 : line.Min();
+        var lineMax = line.Length == 0 ? .66 : line.Max();
+        var candidates = DestinationCandidates(destination, moving, lineMin, lineMax);
+        foreach (var candidate in candidates)
+            if (IsOpen(candidate, movingPosition, movingRole, play)) return candidate;
+        return candidates.OrderByDescending(point => Clearance(point, occupied)).First();
+    }
+
+    public static bool IsOpenAlignment(
+        OffensivePlayDefinition play,
+        GameFieldPoint target,
+        Position movingPosition,
+        int movingRole) =>
+        IsOpen(target, movingPosition, movingRole, play);
+
     /// <summary>Position at the snap after the play-specific motion finishes.</summary>
     public static GameFieldPoint SnapAlignment(
         PreSnapChoice choice,
@@ -101,7 +169,7 @@ public static class PreSnapMotionPlan
                 quarterbackAlignment.X - Math.Max(.25, Math.Abs(choice.SnapDepth)),
                 Math.Clamp(choice.SnapLane ?? quarterbackAlignment.Y +
                     (choice.Side.Equals("Right", StringComparison.OrdinalIgnoreCase) ? .08 : -.08), .08, .92)),
-            PreSnapMotionKind.SetAcross or PreSnapMotionKind.OrbitAcross => new(
+            PreSnapMotionKind.SetAcross or PreSnapMotionKind.OrbitAcross or PreSnapMotionKind.ReceiverRelocate => new(
                 choice.SnapDepth,
                 Math.Clamp(choice.SnapLane ?? 1 - baseAlignment.Y, .08, .92)),
             _ => baseAlignment
@@ -129,6 +197,8 @@ public static class PreSnapMotionPlan
 
         var primary = SelectPrimary(choice, players)?.PlayerId == player.PlayerId;
         var swapPartner = SelectSwapPartner(choice, players)?.PlayerId == player.PlayerId;
+        if (primary && choice.MotionKind == PreSnapMotionKind.ReceiverRelocate && choice.SnapLane is null)
+            return OpenAlignment(play, choice.Side, player.Position, role);
         var otherAlignment = baseAlignment;
         if (primary && choice.SwapPosition is Position swapPosition)
             otherAlignment = GameDayAnimationPlanner.OffensiveAlignment(play, swapPosition, choice.SwapRoleIndex);
@@ -171,7 +241,7 @@ public static class PreSnapMotionPlan
                 new(snapAlignment.X - .20, snapAlignment.Y),
                 snapAlignment
             ],
-            PreSnapMotionKind.SetAcross =>
+            PreSnapMotionKind.SetAcross or PreSnapMotionKind.ReceiverRelocate =>
             [
                 baseAlignment,
                 new(snapAlignment.X, baseAlignment.Y),
@@ -198,4 +268,57 @@ public static class PreSnapMotionPlan
             ]
         };
     }
+
+    static IEnumerable<(Position Position, int Role, GameFieldPoint Point)> FormationAlignments(OffensivePlayDefinition play)
+    {
+        yield return (Position.QB, 0, GameDayAnimationPlanner.OffensiveAlignment(play, Position.QB, 0));
+        for (var role = 0; role < 5; role++)
+            yield return (Position.OL, role, GameDayAnimationPlanner.OffensiveAlignment(play, Position.OL, role));
+
+        var counts = new Dictionary<Position, int>();
+        foreach (var position in GameDayAnimationPlanner.EligiblePositions(play.Personnel))
+        {
+            var role = counts.GetValueOrDefault(position);
+            counts[position] = role + 1;
+            yield return (position, role, GameDayAnimationPlanner.OffensiveAlignment(play, position, role));
+        }
+    }
+
+    static IReadOnlyList<GameFieldPoint> DestinationCandidates(
+        string destination,
+        GameFieldPoint moving,
+        double lineMin,
+        double lineMax)
+    {
+        if (destination.Equals("Slot", StringComparison.OrdinalIgnoreCase))
+        {
+            var right = moving.Y < .5;
+            return right
+                ? [new(-1.5, lineMax + .14), new(-2.5, lineMax + .10), new(-1.5, lineMax + .22),
+                    new(-3, lineMax + .12), new(-2, lineMax + .18), new(-2.5, lineMax + .24)]
+                : [new(-1.5, lineMin - .14), new(-2.5, lineMin - .10), new(-1.5, lineMin - .22),
+                    new(-3, lineMin - .12), new(-2, lineMin - .18), new(-2.5, lineMin - .24)];
+        }
+
+        var left = destination.Equals("Left", StringComparison.OrdinalIgnoreCase);
+        return left
+            ? [new(-2.5, lineMin - .06), new(-1.5, lineMin - .14), new(-3, lineMin - .08),
+                new(-2, lineMin - .20), new(-1.5, lineMin + .06), new(-2.5, lineMin + .04),
+                new(-3.5, lineMin - .16)]
+            : [new(-2.5, lineMax + .06), new(-1.5, lineMax + .14), new(-3, lineMax + .08),
+                new(-2, lineMax + .20), new(-1.5, lineMax - .06), new(-2.5, lineMax - .04),
+                new(-3.5, lineMax + .16)];
+    }
+
+    static bool IsOpen(GameFieldPoint target, Position movingPosition, int movingRole, OffensivePlayDefinition play) =>
+        FormationAlignments(play)
+            .Where(item => item.Position != movingPosition || item.Role != movingRole)
+            .All(item => !Overlaps(target, item.Point));
+
+    static bool Overlaps(GameFieldPoint first, GameFieldPoint second) =>
+        Math.Abs(first.X - second.X) < .80 && Math.Abs(first.Y - second.Y) < .075;
+
+    static double Clearance(GameFieldPoint target, IReadOnlyList<GameFieldPoint> occupied) =>
+        occupied.Count == 0 ? 10 : occupied.Min(point =>
+            Math.Abs(target.X - point.X) / .80 + Math.Abs(target.Y - point.Y) / .075);
 }
