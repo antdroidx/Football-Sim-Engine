@@ -1,3 +1,14 @@
+## Play-aware motion Actions artifact verification - November 6, 2026
+
+Actions runs `42328614160` and `42328614715` completed successfully from `0613ebab6d8d51feeafb735f01f08bd7ef18281a`.
+
+- College artifact `dynasty-manager-build-480` / ID `13556765851`: `antdroid.cfbcoach.dev-Signed.apk`, 91,543,602 bytes, version code 880 / version name 0.20.480, SHA-256 `38D0B21697CF0D9B01129FD2E3D2E280B71EB447794F2B4A3074C2D19EAD8BC2`.
+- Pro artifact `pro-football-apk-205` / ID `13556697357`: `antdroid.profootball.franchise-Signed.apk`, 90,268,169 bytes, version code 205 / version name 0.1.205, SHA-256 `AC385F2E0E28828020D949827BAB652F4AB1FBD46F9874EAFFD377ADFD4DFF5C`.
+
+`apksigner verify` passes both exact downloads with v2 and v3 signatures. The Actions logs report College 386/12/629 and Pro 486/486 passing tests. Artifact links are recorded in `current-work.md`.
+
+Not claimed: a PR, main merge, GitHub release, physical-device install, or the excluded long career suites.
+
 ## Play-aware motion validation - November 6, 2026
 
 Executed on the feature working tree:

@@ -1,3 +1,17 @@
+## Play-aware motion Actions APKs - November 6, 2026
+
+GitHub Actions completed successfully for implementation commit `0613ebab6d8d51feeafb735f01f08bd7ef18281a` on `codex/presnap-gamecast-corrections`:
+
+- College Android run `42328614160` passed 386 Engine Fast, 12 Engine Balance, 629 combined Core/College tests, packaged-resource and UI-helper checks, and APK upload.
+- Pro Football Android run `42328614715` passed 486 standard Pro tests, UI-helper and NFLPA normalization checks, and APK upload.
+
+Exact Actions APK artifacts:
+
+- College `dynasty-manager-build-480`, artifact `13556765851`: https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42328614160/artifacts/13556765851. APK `antdroid.cfbcoach.dev-Signed.apk`, 91,543,602 bytes, version code 880 / version name 0.20.480, SHA-256 `38D0B21697CF0D9B01129FD2E3D2E280B71EB447794F2B4A3074C2D19EAD8BC2`.
+- Pro `pro-football-apk-205`, artifact `13556697357`: https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42328614715/artifacts/13556697357. APK `antdroid.profootball.franchise-Signed.apk`, 90,268,169 bytes, version code 205 / version name 0.1.205, SHA-256 `AC385F2E0E28828020D949827BAB652F4AB1FBD46F9874EAFFD377ADFD4DFF5C`.
+
+Both exact downloaded APKs pass `apksigner verify` with APK Signature Scheme v2 and v3. These are CI artifacts, not GitHub releases. No PR was created.
+
 ## Play-aware pre-snap motion - November 6, 2026
 
 Pre-snap motion is now play-specific instead of a generic two-yard excursion that always returns to the same spot. The shared motion plan records the selected player role, motion family, final lane/depth, swap partner and handoff responsibility. GameCast and play art use the same plan:
