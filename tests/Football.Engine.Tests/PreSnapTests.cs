@@ -19,42 +19,25 @@ public class PreSnapTests
         Assert.True(choice.Valid);
         Assert.False(PreSnapCatalog.IsValid(choice with { Type = (PreSnapType)3 }));
         Assert.False(PreSnapCatalog.IsValid(choice with { Yards = 4.5 }));
-        Assert.Equal(5, PreSnapCatalog.Common.Count);
+        Assert.Equal(6, PreSnapCatalog.Common.Count);
     }
 
     [Fact]
-    public void PresnapChoiceIsRecordedAndAppliesItsBoundedEffect()
+    public void PresnapChoiceIsRecordedAndUsesACoverageSensitiveEffect()
     {
+        var play = PlaybookCatalog.OffensivePlays.Single(item => item.Id == "off-empty-motion-cross");
         var plain = GameDayFixture.Session(GameDayMode.Play);
         var presnap = GameDayFixture.Session(GameDayMode.Play);
-        var choice = PreSnapCatalog.Motion("Right", 2);
-        var plainSnap = GameDayEngine.Step(plain, "off-spread-zone");
-        var alignedSnap = GameDayEngine.Step(presnap, "off-spread-zone", userDefensivePlayId: null, preSnap: choice);
+        var plainSnap = GameDayEngine.Step(plain, play.Id);
+        var alignedSnap = GameDayEngine.Step(presnap, play.Id, userDefensivePlayId: null, preSnap: play.PreSnapAction);
 
         Assert.Null(plainSnap.PreSnap);
-        Assert.Equal(choice, alignedSnap.PreSnap);
-
-        // The call, the outcome and the defensive read are untouched; only the recorded gain moves.
-        Assert.Equal(plainSnap.Outcome, alignedSnap.Outcome);
-        Assert.Equal(plainSnap.OffensivePlayId, alignedSnap.OffensivePlayId);
-        Assert.Equal(plainSnap.DefensivePlayId, alignedSnap.DefensivePlayId);
-        Assert.Equal(plainSnap.CallSource, alignedSnap.CallSource);
-        Assert.Equal(plainSnap.DefensiveCallSource, alignedSnap.DefensiveCallSource);
-        Assert.True(Math.Abs(plainSnap.ClockSeconds - alignedSnap.ClockSeconds) <= 1);
-
-        var effect = PreSnapCatalog.Effect(choice, alignedSnap.Outcome == SnapOutcome.Completion);
-        Assert.NotNull(effect);
-        if (plainSnap.Yards > 0)
+        Assert.Equal(play.PreSnapAction, alignedSnap.PreSnap);
+        Assert.Null(plainSnap.PreSnapEffectNote);
+        if (alignedSnap.Outcome != SnapOutcome.Penalty)
         {
-            Assert.Equal(effect!.Yards, alignedSnap.PreSnapEffectYards);
-            Assert.Equal(effect.Note, alignedSnap.PreSnapEffectNote);
-            Assert.Equal(plainSnap.Yards + effect.Yards, alignedSnap.Yards);
-        }
-        else
-        {
-            Assert.Equal(0, alignedSnap.PreSnapEffectYards);
-            Assert.Null(alignedSnap.PreSnapEffectNote);
-            Assert.Equal(plainSnap.Yards, alignedSnap.Yards);
+            Assert.NotNull(alignedSnap.PreSnapEffectNote);
+            Assert.InRange(alignedSnap.PreSnapEffectYards, -2, 2);
         }
     }
 
@@ -236,4 +219,24 @@ public class PreSnapTests
         Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.ReceiverShift("Right", Position.WR, 0)));
         Assert.False(PreSnapCatalog.IsValid(PreSnapCatalog.ReceiverShift("Right", Position.OL, 0)));
     }
+    [Fact]
+    public void GenericReceiverOptionsRelocateOrSwapInsteadOfReturningToTheSameSpot()
+    {
+        var session = GameDayFixture.Session(GameDayMode.Play);
+        var play = PlaybookCatalog.OffensivePlays.Single(item => item.Id == "off-spread-verts");
+        var options = PreSnapCatalog.Options(play);
+        var receivers = session.HomeRoster.Where(player => player.Position == Position.WR).Take(2).ToArray();
+        var motion = options.Single(choice => PreSnapCatalog.Label(choice) == "WR motion right");
+        var swap = options.Single(choice => PreSnapCatalog.Label(choice) == "WR swap");
+        var baseAlignment = GameDayAnimationPlanner.OffensiveAlignment(play, Position.WR, 0);
+        var movedAlignment = PreSnapMotionPlan.SnapAlignment(motion, receivers, play, receivers[0]);
+
+        Assert.Equal(6, options.Count);
+        Assert.Equal(PreSnapMotionKind.SetAcross, motion.MotionKind);
+        Assert.Equal(PreSnapMotionKind.SwapAlignments, swap.MotionKind);
+        Assert.Equal(1, swap.SwapRoleIndex);
+        Assert.NotEqual(baseAlignment, movedAlignment);
+        Assert.DoesNotContain(options, choice => choice.Type == PreSnapType.Motion && choice.MotionKind == PreSnapMotionKind.ReturnToFormation);
+    }
+
 }

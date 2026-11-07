@@ -65,8 +65,8 @@ public class GameDayPreSnapPresentationTests
             motionLiveAtSnap: true);
 
         Assert.Equal([
-            "formation", "delay:3500", "delay:180", "defense",
-            "delay:1600", "motion-to-mesh"
+            "formation", "delay:3500", "delay:2720", "delay:180", "defense",
+            "motion-to-mesh"
         ], calls);
 
         Task Record(string value)
@@ -117,4 +117,31 @@ public class GameDayPreSnapPresentationTests
         await sequence;
         Assert.True(sequence.IsCompletedSuccessfully);
     }
+    [Fact]
+    public async Task JetSnapWaitsForBothTheFormationLeadAndMotionAnimation()
+    {
+        var formationLead = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var motionFinished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var motionStarted = false;
+        var sequence = GameDayPreSnapPresentation.HoldSequenceAsync(
+            true,
+            () => Task.CompletedTask,
+            () => Task.CompletedTask,
+            () => { motionStarted = true; return motionFinished.Task; },
+            (delay, _) => delay == GameDayPreSnapPresentation.FormationLead
+                ? formationLead.Task
+                : Task.CompletedTask,
+            settleAfterAlignment: false,
+            motionLiveAtSnap: true);
+
+        await Task.Yield();
+        Assert.True(motionStarted);
+        Assert.False(sequence.IsCompleted);
+        motionFinished.SetResult();
+        await Task.Yield();
+        Assert.False(sequence.IsCompleted);
+        formationLead.SetResult();
+        await sequence;
+    }
+
 }

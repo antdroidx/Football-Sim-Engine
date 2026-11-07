@@ -21,8 +21,9 @@ public static class PreSnapCatalog
             options.Add(preset);
         else
         {
-            options.Add(ReceiverMotion("Left", Position.WR, 0));
-            options.Add(ReceiverMotion("Right", Position.WR, 0));
+            options.Add(ReceiverMotion("Left", Position.WR, 0, PreSnapMotionKind.SetAcross));
+            options.Add(ReceiverMotion("Right", Position.WR, 0, PreSnapMotionKind.SetAcross));
+            options.Add(Swap("Right", Position.WR, 0, Position.WR, 1));
         }
 
         return options;
@@ -53,7 +54,7 @@ public static class PreSnapCatalog
         string side,
         Position position = Position.WR,
         int roleIndex = 0,
-        PreSnapMotionKind kind = PreSnapMotionKind.ReturnToFormation) =>
+        PreSnapMotionKind kind = PreSnapMotionKind.SetAcross) =>
         Motion(side, 2, PreSnapMotionDirection.Lateral, kind) with
         {
             MotionPosition = position,
@@ -148,20 +149,6 @@ public static class PreSnapCatalog
         };
     }
 
-    /// <summary>The bounded outcome effect of a pre-snap alignment action.</summary>
-    public static PreSnapEffect? Effect(PreSnapChoice choice, bool isPass) => choice.Type switch
-    {
-        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.JetHandoff =>
-            new(1, "Jet motion held the edge and added 1 yard."),
-        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SwapAlignments =>
-            new(1, "The slot swap created a cleaner exchange and added 1 yard."),
-        PreSnapType.Motion => isPass
-            ? new(2, "Motion created separation and added 2 yards.")
-            : new(1, "Motion shifted the defense and added 1 yard."),
-        PreSnapType.Shift => new(1, "The receiver shift opened a lane and added 1 yard."),
-        _ => null
-    };
-
     public static string Label(PreSnapChoice choice) => choice.Type switch
     {
         PreSnapType.None => "None",
@@ -172,9 +159,11 @@ public static class PreSnapCatalog
             "Jet motion " + choice.Side.ToLowerInvariant(),
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.OrbitAcross =>
             "Orbit motion " + choice.Side.ToLowerInvariant(),
+        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SetAcross && choice.SnapLane is null && choice.MotionPosition == Position.WR =>
+            $"WR motion {choice.Side.ToLowerInvariant()}",
         PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SetAcross =>
             "Set motion " + choice.Side.ToLowerInvariant(),
-        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SwapAlignments => "Slot swap",
+        PreSnapType.Motion when choice.MotionKind == PreSnapMotionKind.SwapAlignments => "WR swap",
         PreSnapType.Motion when choice.MotionPosition == Position.WR =>
             $"WR return motion {choice.Side.ToLowerInvariant()}",
         PreSnapType.Motion => $"Motion {choice.Side.ToLowerInvariant()} {choice.Yards:0.#} yd",

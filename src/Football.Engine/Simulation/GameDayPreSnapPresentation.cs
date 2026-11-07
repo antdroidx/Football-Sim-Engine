@@ -10,7 +10,9 @@ public static class GameDayPreSnapPresentation
     public static readonly TimeSpan ActionLead = TimeSpan.FromMilliseconds(180);
     public static readonly TimeSpan SetHold = TimeSpan.FromSeconds(1);
     public static readonly TimeSpan FormationLead = TimeSpan.FromSeconds(3.5);
-    public static readonly TimeSpan LiveMotionLead = TimeSpan.FromSeconds(1.6);
+    public static readonly TimeSpan LiveMotionDuration =
+        TimeSpan.FromMilliseconds(PreSnapMotionPlan.MotionSegmentMilliseconds * 3);
+    public static readonly TimeSpan LiveMotionStart = FormationLead - LiveMotionDuration;
 
     public static Task HoldAsync(
         bool hasAlignmentAction,
@@ -47,9 +49,13 @@ public static class GameDayPreSnapPresentation
         {
             await showFormation();
 
-            // The formation lead is wall-clock time from lineup visibility. Alignment
-            // animation may consume part of it, but never shortens the minimum lead.
+            // Both timers start when the formation becomes visible. The live motion
+            // timer reserves its animation duration so the final segment ends at snap.
             var formationLead = delay(FormationLead, cancellationToken);
+            var liveMotionStart = motionLiveAtSnap
+                ? delay(LiveMotionStart, cancellationToken)
+                : null;
+
             if (hasAlignmentAction || animateDefensiveAlignment is not null)
                 await delay(ActionLead, cancellationToken);
             if (animateDefensiveAlignment is not null)
@@ -59,14 +65,14 @@ public static class GameDayPreSnapPresentation
             {
                 if (motionLiveAtSnap)
                 {
-                    await delay(LiveMotionLead, cancellationToken);
-                    await animateOffensiveAlignment();
+                    await liveMotionStart!;
+                    var motion = animateOffensiveAlignment();
+                    await Task.WhenAll(formationLead, motion);
+                    return;
                 }
-                else
-                {
-                    await animateOffensiveAlignment();
-                    if (settleAfterAlignment) await delay(SetHold, cancellationToken);
-                }
+
+                await animateOffensiveAlignment();
+                if (settleAfterAlignment) await delay(SetHold, cancellationToken);
             }
 
             await formationLead;

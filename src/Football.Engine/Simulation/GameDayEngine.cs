@@ -220,7 +220,7 @@ public static partial class GameDayEngine
             advantage += homeOnOffense ? HomeFieldRatingBonus : -HomeFieldRatingBonus;
         var dropback = calledPass && !designedKeep;
         var read = dropback ? PassingReadService.Read(call.Offense, call.Defense, offensePlayers, defensePlayers, qb,
-            offense.OffensiveCoordinatorGameManagement, session.Random) : new PassingRead(null, null, 0, 0, 2, 0, 0);
+            offense.OffensiveCoordinatorGameManagement, session.Random, alignmentAction) : new PassingRead(null, null, 0, 0, 2, 0, 0);
         var turnover = session.Random.NextDouble() < (isPass ? read.InterceptionChance : Math.Clamp(.025 - advantage * .0008 + GameWeatherService.FumblePenalty(session.Weather), .008, .075));
         var sack = isPass && read.Blocking.PressureRushers.Count > 0 && !turnover && session.Random.NextDouble() < .24;
         var hailMary = call.Offense.Name == "Hail Mary";
@@ -236,6 +236,14 @@ public static partial class GameDayEngine
         var runBlocking = !dropback ? BlockMatchupService.Resolve(offensePlayers.Where(p=>p.PlayerId!=runner?.PlayerId && p.Position is Position.OL or Position.TE or Position.FB).ToArray(),
             defensePlayers.Where(p=>p.Position is Position.DE or Position.DT or Position.MLB or Position.OLB).ToArray(),0,false,session.Random) : new BlockingResolution([],[],null,null);
         if(!dropback && runBlocking.Blocks.Count>0) advantage += (runBlocking.Blocks.Count(b=>b.Won)/(double)runBlocking.Blocks.Count-.64)*5;
+        var runMotionPlayer = alignmentAction is null ? null : PreSnapMotionPlan.SelectPrimary(alignmentAction, offensePlayers);
+        var preSnapMatchup = isPass ? read.PreSnapMatchup : alignmentAction is null ? null : PreSnapMatchupService.Resolve(
+            alignmentAction, call.Defense,
+            runMotionPlayer?.Position ?? runner?.Position ?? Position.RB,
+            runMotionPlayer is null ? 0 : PreSnapMotionPlan.RoleIndexAfterMotion(alignmentAction, offensePlayers, runMotionPlayer),
+            null, true, false,
+            runMotionPlayer is null ? 70 : (runMotionPlayer.SpeedRating + runMotionPlayer.AgilityRating + runMotionPlayer.AwarenessRating) / 3, 65);
+        if (!isPass) advantage += preSnapMatchup?.PlayAdjustment ?? 0;
         var yards = turnover ? 0 : sack ? -session.Random.Next(3, 11) : scramble
             ? Math.Max(-3, RoundYards(session.Random.Next(-1, 10) + (mobility - 65) * .10))
             : isPass ? 0 : Math.Max(-4, RoundYards(session.Random.Next(-2, 11) + advantage * .09 + session.Rules.RunGainOffset));
@@ -258,9 +266,10 @@ public static partial class GameDayEngine
         // A loss can reach the offense's goal line for a safety. Statistical
         // yardage stops there rather than counting distance inside the end zone.
         yards = Math.Clamp(yards, -session.YardLine, 100 - session.YardLine);
-        var preSnapEffect = alignmentAction is null ? null : PreSnapCatalog.Effect(alignmentAction, isPass);
+        var preSnapEffect = preSnapMatchup?.Effect;
         var appliedPreSnapYards = 0;
-        if (preSnapEffect is not null && yards > 0)
+        var canApplyPreSnapEffect = !turnover && !sack && (!isPass || complete);
+        if (preSnapEffect is not null && canApplyPreSnapEffect)
         {
             appliedPreSnapYards = preSnapEffect.Yards;
             yards = Math.Clamp(yards + appliedPreSnapYards, -session.YardLine, 100 - session.YardLine);
@@ -302,7 +311,7 @@ public static partial class GameDayEngine
             AirYards = complete ? gain.AirYards : 0, YardsAfterCatch = complete ? gain.YardsAfterCatch : 0,
             PreSnapSeconds = session.LastPreSnapSeconds, LiveBallSeconds = liveSeconds,
             PreSnapEffectYards = appliedPreSnapYards,
-            PreSnapEffectNote = appliedPreSnapYards > 0 ? preSnapEffect?.Note : null,
+            PreSnapEffectNote = preSnapEffect?.Note,
             PassReleaseProgress = Math.Clamp(read.ReleaseSeconds / 5, .3, .75), TargetSeparation = read.Separation,
             IsDrop = isPass && !complete && !turnover && !sack && read.Separation >= 2 && session.Random.NextDouble() < .18,
             BrokeTackle = brokeTackle || complete && gain.BrokeTackle, IsQuarterbackScramble = scramble, IsQuarterbackKeep = designedKeep,

@@ -5,8 +5,25 @@ namespace DynastyManager.Core.Simulation;
 /// <summary>Shared play-aware motion selection, snap alignment and presentation paths.</summary>
 public static class PreSnapMotionPlan
 {
+    public const int MotionSegmentMilliseconds = 260;
     public static int RoleIndex(IReadOnlyList<DynastyPlayer> players, Position position, Guid playerId) =>
         players.TakeWhile(player => player.PlayerId != playerId).Count(player => player.Position == position);
+
+    public static int RoleIndexAfterMotion(
+        PreSnapChoice choice,
+        IReadOnlyList<DynastyPlayer> players,
+        DynastyPlayer player)
+    {
+        ArgumentNullException.ThrowIfNull(choice);
+        ArgumentNullException.ThrowIfNull(players);
+        ArgumentNullException.ThrowIfNull(player);
+        var baseRole = RoleIndex(players, player.Position, player.PlayerId);
+        if (choice.Type != PreSnapType.Motion || choice.MotionKind != PreSnapMotionKind.SwapAlignments)
+            return baseRole;
+        if (SelectPrimary(choice, players)?.PlayerId == player.PlayerId) return choice.SwapRoleIndex;
+        if (SelectSwapPartner(choice, players)?.PlayerId == player.PlayerId) return choice.MotionRoleIndex;
+        return baseRole;
+    }
 
     public static bool IsRole(PreSnapChoice choice, Position position, int roleIndex, bool swapRole = false)
     {
@@ -89,6 +106,41 @@ public static class PreSnapMotionPlan
                 Math.Clamp(choice.SnapLane ?? 1 - baseAlignment.Y, .08, .92)),
             _ => baseAlignment
         };
+    }
+
+    /// <summary>Position for one player after the selected shift or motion.</summary>
+    public static GameFieldPoint SnapAlignment(
+        PreSnapChoice choice,
+        IReadOnlyList<DynastyPlayer> players,
+        OffensivePlayDefinition play,
+        DynastyPlayer player)
+    {
+        ArgumentNullException.ThrowIfNull(choice);
+        ArgumentNullException.ThrowIfNull(players);
+        ArgumentNullException.ThrowIfNull(play);
+        ArgumentNullException.ThrowIfNull(player);
+        var role = RoleIndex(players, player.Position, player.PlayerId);
+        var baseAlignment = GameDayAnimationPlanner.OffensiveAlignment(play, player.Position, role);
+        if (choice.Type == PreSnapType.Shift)
+            return SelectShiftPrimary(choice, players)?.PlayerId == player.PlayerId
+                ? ShiftAlignment(choice, baseAlignment)
+                : baseAlignment;
+        if (choice.Type != PreSnapType.Motion) return baseAlignment;
+
+        var primary = SelectPrimary(choice, players)?.PlayerId == player.PlayerId;
+        var swapPartner = SelectSwapPartner(choice, players)?.PlayerId == player.PlayerId;
+        var otherAlignment = baseAlignment;
+        if (primary && choice.SwapPosition is Position swapPosition)
+            otherAlignment = GameDayAnimationPlanner.OffensiveAlignment(play, swapPosition, choice.SwapRoleIndex);
+        else if (swapPartner && choice.MotionPosition is Position motionPosition)
+            otherAlignment = GameDayAnimationPlanner.OffensiveAlignment(play, motionPosition, choice.MotionRoleIndex);
+        return SnapAlignment(
+            choice,
+            primary,
+            swapPartner,
+            baseAlignment,
+            otherAlignment,
+            GameDayAnimationPlanner.OffensiveAlignment(play, Position.QB, 0));
     }
 
     /// <summary>Final alignment for a receiver shift. A shift changes stance/alignment without live motion.</summary>

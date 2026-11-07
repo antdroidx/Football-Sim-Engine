@@ -7,6 +7,7 @@ public sealed record PassingRead(DynastyPlayer? Target, DynastyPlayer? Defender,
 {
     public BlockingResolution Blocking {get;init;} = new([],[],null,null);
     public int RusherCount { get; init; }
+    public PreSnapMatchup? PreSnapMatchup { get; init; }
 }
 
 /// <summary>Uses the actual package and assigned routes to choose a read before resolving the throw.</summary>
@@ -14,8 +15,14 @@ public static class PassingReadService
 {
     public static PassingRead Read(OffensivePlayDefinition play, DefensivePlayDefinition defense,
         IReadOnlyList<DynastyPlayer> offense, IReadOnlyList<DynastyPlayer> defenders, DynastyPlayer? quarterback,
-        int coaching, Random random)
+        int coaching, Random random, PreSnapChoice? preSnap = null)
     {
+        ArgumentNullException.ThrowIfNull(play);
+        ArgumentNullException.ThrowIfNull(defense);
+        ArgumentNullException.ThrowIfNull(offense);
+        ArgumentNullException.ThrowIfNull(defenders);
+        ArgumentNullException.ThrowIfNull(random);
+
         var offenseRoles = new Dictionary<Guid, PlayAssignment?>(); var slotCounts = new Dictionary<Position, int>();
         foreach (var p in offense)
         { var role = slotCounts.GetValueOrDefault(p.Position); slotCounts[p.Position] = role + 1;
@@ -39,30 +46,49 @@ public static class PassingReadService
             var screens = eligible.Where(p => receiverScreen ? p.Position == Position.WR : play.Name.StartsWith("FB ") ? p.Position == Position.FB : p.Position == Position.RB).ToArray();
             if (screens.Length > 0) eligible = screens;
         }
+
+        var alignments = DefensivePursuitService.Alignments(coverage, defense);
         var counts = new Dictionary<Position, int>();
         var reads = eligible.Select((receiver, index) =>
         {
             var role = counts.GetValueOrDefault(receiver.Position); counts[receiver.Position] = role + 1;
-            var route = GameDayAnimationPlanner.AssignedRoute(play, receiver.Position, role);
-            var custom = offenseRoles[receiver.PlayerId];
-            var lane = GameDayAnimationPlanner.OffensiveAlignment(play, receiver.Position, role).Y;
-            // Match outside receivers to corners; safeties and linebackers handle inside routes.
-            var alignments = DefensivePursuitService.Alignments(coverage, defense);
-            var defender = coverage.OrderBy(p => receiver.Position == Position.WR
-                    ? p.Position == Position.CB ? 0 : p.Position is Position.FS or Position.SS ? 1 : 2
-                    : p.Position is Position.MLB or Position.OLB ? 0 : 1)
-                .ThenBy(p => Math.Abs(alignments[p.PlayerId].Y - lane)).FirstOrDefault();
+            var assignedRole = preSnap is null ? role :
+                PreSnapMotionPlan.RoleIndexAfterMotion(preSnap, offense, receiver);
+            var route = GameDayAnimationPlanner.AssignedRoute(play, receiver.Position, assignedRole);
+            var baseAlignment = GameDayAnimationPlanner.OffensiveAlignment(play, receiver.Position, role);
+            var snapAlignment = preSnap is null ? baseAlignment :
+                PreSnapMotionPlan.SnapAlignment(preSnap, offense, play, receiver);
+            var participant = preSnap is not null && PreSnapMatchupService.IsParticipant(preSnap, offense, receiver);
+            var initialDefender = ChooseDefender(receiver, baseAlignment.Y);
+            var initialAssignment = initialDefender is null ? null : defenseRoles[initialDefender.PlayerId];
+            var initialMatchup = PreSnapMatchupService.Resolve(
+                preSnap, defense, receiver.Position, assignedRole, initialAssignment, participant, true,
+                Ability(receiver, true), initialDefender is null ? 60 : Ability(initialDefender, false));
+            var lane = participant && initialMatchup is { DefenderFollowsMotion: false }
+                ? snapAlignment.Y : baseAlignment.Y;
+            var defender = participant && initialMatchup is { DefenderFollowsMotion: false }
+                ? ChooseDefender(receiver, lane) ?? initialDefender
+                : initialDefender;
             var defenderAssignment = defender is null ? null : defenseRoles[defender.PlayerId];
-            var defenderAbility = defender is null ? 60 : (defender.SpeedRating + defender.AgilityRating + defender.AwarenessRating) / 3d;
-            var routeAbility = (receiver.SpeedRating + receiver.AgilityRating + receiver.AwarenessRating) / 3d;
+            var matchup = PreSnapMatchupService.Resolve(
+                preSnap, defense, receiver.Position, assignedRole, defenderAssignment, participant, true,
+                Ability(receiver, true), defender is null ? 60 : Ability(defender, false));
             var zones = LiveFootballChoreography.Zone(defense, defenderAssignment);
             var leverage = zones && route is GameDayRouteFamily.Curls or GameDayRouteFamily.Outs ? .35
                 : !zones && route is GameDayRouteFamily.Mesh or GameDayRouteFamily.Slants ? .4 : 0;
             var spacing = Math.Abs(lane - .5) * .3;
-            var separation = Math.Clamp(.9 + (routeAbility - defenderAbility) * .045 + leverage + spacing + random.NextDouble() * 1.4, .1, 4.5);
-            return (Receiver: receiver, Defender: defender, Separation: separation, Role: role);
+            var routeAbility = Ability(receiver, true);
+            var defenderAbility = defender is null ? 60 : Ability(defender, false);
+            var separation = Math.Clamp(.9 + (routeAbility - defenderAbility) * .045 + leverage + spacing +
+                (matchup?.SeparationAdjustment ?? 0) + random.NextDouble() * 1.4, .1, 4.5);
+            return (Receiver: receiver, Defender: defender, Separation: separation, Role: assignedRole, Matchup: matchup);
         }).OrderByDescending(r => r.Separation).ToArray();
-        if (reads.Length == 0) return new(null, coverage.FirstOrDefault(), 0, protection, 2.5, .3, .04) { RusherCount = rushers.Length, Blocking = BlockMatchupService.Resolve(blockers,rushers,2.5,true,random) };
+
+        if (reads.Length == 0) return new(null, coverage.FirstOrDefault(), 0, protection, 2.5, .3, .04)
+        {
+            RusherCount = rushers.Length,
+            Blocking = BlockMatchupService.Resolve(blockers,rushers,2.5,true,random)
+        };
         var awareness = quarterback?.AwarenessRating ?? 60;
         var readIndex = random.NextDouble() < Math.Clamp((awareness + coaching) / 220d, .35, .9) ? 0 : random.Next(reads.Length);
         var chosen = reads[readIndex];
@@ -73,6 +99,22 @@ public static class PassingReadService
         var catchChance = Math.Clamp(.36 + chosen.Separation * .10 + (accuracy - 60) * .004 + (hands - 60) * .002 + protection * .0015
             - (play.Concept == OffensiveConcept.DeepPass ? .17 : 0), .08, .88);
         return new(chosen.Receiver, chosen.Defender, chosen.Separation, protection, release, catchChance,
-            Math.Clamp(.045 - chosen.Separation * .009 + (65 - awareness) * .0004 - protection * .0002, .006, .09)) { RusherCount = rushers.Length, Blocking = BlockMatchupService.Resolve(blockers,rushers,release,true,random) };
+            Math.Clamp(.045 - chosen.Separation * .009 + (65 - awareness) * .0004 - protection * .0002, .006, .09))
+        {
+            RusherCount = rushers.Length,
+            Blocking = BlockMatchupService.Resolve(blockers,rushers,release,true,random),
+            PreSnapMatchup = chosen.Matchup
+        };
+
+        DynastyPlayer? ChooseDefender(DynastyPlayer receiver, double lane) => coverage
+            .OrderBy(p => receiver.Position == Position.WR
+                    ? p.Position == Position.CB ? 0 : p.Position is Position.FS or Position.SS ? 1 : 2
+                    : p.Position is Position.MLB or Position.OLB ? 0 : 1)
+            .ThenBy(p => Math.Abs(alignments[p.PlayerId].Y - lane))
+            .FirstOrDefault();
+
+        static int Ability(DynastyPlayer player, bool receiver) => receiver
+            ? (int)Math.Round((player.SpeedRating + player.AgilityRating + player.AwarenessRating) / 3d)
+            : (int)Math.Round((player.SpeedRating + player.AgilityRating + player.AwarenessRating) / 3d);
     }
 }

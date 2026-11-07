@@ -471,10 +471,17 @@ public static class GameCastAnimation
             if (passRushSnap && !passRusher && player is not null && snap.Outcome is not (SnapOutcome.Kickoff or SnapOutcome.Punt) && routeViews.Count > 0 && player.PlayerId != snap.ReturnerId)
             {
                 var match = movements.Where(m => routeViews.Contains(m.View))
-                    .OrderBy(m => player.PlayerId == snap.PrimaryDefenderId && snap.TargetId.HasValue && m.View is Border marker && markerHosts[marker].Player?.PlayerId == snap.TargetId ? 0 : 1)
+                    .OrderBy(m => player.PlayerId == snap.CoverageDefenderId && snap.TargetId.HasValue && m.View is Border marker && markerHosts.GetValueOrDefault(marker).Player?.PlayerId == snap.TargetId ? 0 : 1)
                     .ThenBy(m => Math.Abs(m.From.Y - y)).First();
                 var assignment = calledDefensivePlay?.Assignments.FirstOrDefault(a => a.Position == player.Position && a.RoleIndex == defensiveRole);
-                var zone = calledDefensivePlay is not null && LiveFootballChoreography.Zone(calledDefensivePlay, assignment);
+                var matchedPlayer = match.View is Border matchedMarker ? markerHosts.GetValueOrDefault(matchedMarker).Player : null;
+                var matchedRole = matchedPlayer is null || preSnapChoice is null ? 0 :
+                    PreSnapMotionPlan.RoleIndexAfterMotion(preSnapChoice, preSnapPlayers, matchedPlayer);
+                var motionParticipant = preSnapChoice is not null && matchedPlayer is not null &&
+                    PreSnapMatchupService.IsParticipant(preSnapChoice, preSnapPlayers, matchedPlayer);
+                var followsMotion = calledDefensivePlay is not null && matchedPlayer is not null &&
+                    PreSnapMatchupService.DefenderFollowsMotion(calledDefensivePlay, assignment, matchedPlayer.Position, matchedRole, motionParticipant);
+                var zone = calledDefensivePlay is not null && LiveFootballChoreography.Zone(calledDefensivePlay, assignment) && !followsMotion;
                 coverageTracks[view] = (match.From, match.To, assignedRoutes[match.View], new(x, y), zone, hasPursuitTarget);
                 if (!hasPursuitTarget && interceptionPoint is null)
                 { var point = LiveFootballChoreography.Coverage(new(x,y), new(match.To.X, match.To.Y), 1, zone, direction); to = to with { X = point.X, Y = point.Y }; }

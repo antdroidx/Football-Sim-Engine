@@ -1,3 +1,19 @@
+## Coverage-aware pre-snap motion outcomes - November 7, 2026
+
+The shared engine now resolves man, zone and focused bracket reactions to pre-snap movement. Man/focused coverage keeps the same defender through motion; zone coverage passes the receiver off and can change the WR/CB matchup. Receiver/defender quality changes separation and run advantage, and the recorded pre-snap yard effect is bounded from -2 to +2 rather than guaranteed positive.
+
+The generic menu uses receiver shifts, `WR motion left/right`, and `WR swap`; routes start from the relocated/swapped alignment. Older saved `ReturnToFormation` choices still deserialize and retain their legacy path. Jet motion's final 780 ms segment ends at the 3.5-second snap boundary, and snap waits for both the formation lead and the motion task.
+
+Actual checks:
+
+- Focused pre-snap/matchup/timing suite: 26 passed.
+- Football.Engine: 409 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed on repeat. One initial intermittent staff-vector collision passed in isolation and disappeared on the complete rerun.
+- Android UI helpers: 24 passed. Packaged-resource validation and Python smoke compilation passed.
+- Football.Presentation: zero warnings/errors. College Debug APK: zero warnings/errors. Pro Debug APK: zero errors, two documented `CS8625` warnings.
+
+Exact local APKs: College `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk` (91,564,082 bytes, SHA-256 `A9A8518A9821C8F69CD8461529CDA332C98A4C10DF767F2EF509BCCBBC1EFEAD`); Pro `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk` (90,284,553 bytes, SHA-256 `72F4280CA1FE2691CE93B1C248720D1BF1C9382E8C924D52F9960B8922D0A6E1`). The existing `presnap-apk-validation.yml` workflow is the remote APK source; its run and artifact IDs are pending until the feature branch push completes. Long career suites, PR, merge and release remain out of scope.
 ## APK update compatibility - November 7, 2026
 
 Signing comparison across the new, prior CI and published release APKs found the same `CFDM Dev` certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. The in-place update failure was a version-code regression from the wrapper workflow's independent counter, not a key mismatch.
@@ -11,7 +27,7 @@ The College `antdroid.cfbcoach.dev` artifact cannot update an installation using
 
 The shared GameCast pre-snap sequence now enforces a 3.5-second minimum from formation visibility to snap. It orders the sequence as formation display, defensive alignment adjustment, offensive shift/motion, required one-second set where applicable, then snap or dead-ball foul reveal. Live Jet motion is scheduled late enough to reach the quarterback mesh at the snap instead of standing behind the quarterback before the exchange.
 
-User pre-snap choices expose `None`, receiver-only left/right shifts, and the selected play's motion preset or receiver return motion. Offensive linemen cannot be selected for a user shift. Defensive adjustment is automatic and presentation-only: the front and secondary respond to offensive formation strength and spread/box shape after seeing the offense at the line.
+User pre-snap choices expose `None`, receiver-only left/right shifts, the selected play's motion preset, receiver relocation, or WR swap. Offensive linemen cannot be selected for a user shift. Defensive adjustment is automatic and presentation-only: the front and secondary respond to offensive formation strength and spread/box shape after seeing the offense at the line.
 
 Dead-ball pre-snap penalties now carry offensive/defensive play IDs, formation personnel and `IsPreSnapPenalty=true`. Focused tests verify the culprit belongs to the aligned unit and that the additive fields survive JSON save round trips. The foul banner is not presented until after the formation and motion sequence; live-ball penalties keep their existing played-snap animation.
 

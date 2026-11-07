@@ -242,9 +242,9 @@ try:
     s.tap(choices,"Close playbook")
     live=s.wait_for_id("pro-play-ready","live-call")
     alignment=s.tap_expect("pro-pre-snap-open","Pre-snap: None",lambda r:"Pre-snap alignment" in s.texts(r))
-    motion_label="WR return motion right"
+    motion_label="WR motion right"
     assert motion_label in s.texts(alignment)
-    assert "WR shift left" in s.texts(alignment) and "WR shift right" in s.texts(alignment)
+    assert "WR shift left" in s.texts(alignment) and "WR shift right" in s.texts(alignment) and "WR swap" in s.texts(alignment)
     s.tap(alignment,motion_label)
     selected=s.wait_for("pro-pre-snap-selected",lambda r:s.has_id_label(r,"live-pre-snap","Pre-snap: "+motion_label),timeout=30)
     call=s.node_with_id(selected,"live-call")

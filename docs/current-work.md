@@ -1,3 +1,26 @@
+## Coverage-aware pre-snap motion outcomes - November 7, 2026
+
+Pre-snap movement now changes the play through an explicit coverage response instead of a fixed positive yard bonus. Man coverage carries the assigned defender with the motioning receiver and preserves the original matchup. Zone coverage passes the receiver off to the defender responsible for the new alignment, so the matchup can change. Focused bracket coverage carries the primary outside receiver through motion and denies the intended mismatch. The same reaction drives passing separation/catch risk, run advantage, the bounded recorded yard effect (-2 to +2), and GameCast's defender tracking; the animation uses `CoverageDefenderId` rather than the eventual tackler.
+
+Generic pre-snap options now expose receiver shifts, `WR motion left/right` to a new on-field alignment, and `WR swap`. Relocated and swapped receivers run their assigned routes from the new role/alignment. `ReturnToFormation` remains only for older saved `PreSnapChoice` records. Jet motion now reserves its final 780 ms path segment so the receiver reaches the quarterback mesh as the 3.5-second formation lead expires, and the snap waits for both the formation timer and the motion animation.
+
+Focused and required validation on this implementation:
+
+- Focused `PreSnapMatchupTests|PreSnapTests|PreSnapMotionPlanTests|GameDayPreSnapPresentationTests`: 26 passed.
+- Football.Engine full suite: 409 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed on the repeated run. The first run had one known intermittent `StaffBalanceTests.EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity` collision (95 unique scout vectors for 96 scouts); the exact isolated retry passed 1/1 and the complete repeated suite passed without a source change.
+- Android UI synchronization helpers: 24 passed. Packaged-resource validation: passed. Both smoke Python files compile.
+- Football.Presentation Debug compile: zero warnings/errors.
+- College Android Debug APK packaging: zero warnings/errors.
+- Pro Android Debug APK packaging: zero errors and the two documented `CS8625` warnings.
+
+Local Debug APKs:
+
+- College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, 91,564,082 bytes, SHA-256 `A9A8518A9821C8F69CD8461529CDA332C98A4C10DF767F2EF509BCCBBC1EFEAD`.
+- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, 90,284,553 bytes, SHA-256 `72F4280CA1FE2691CE93B1C248720D1BF1C9382E8C924D52F9960B8922D0A6E1`.
+
+Both local APKs pass `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. The established `presnap-apk-validation.yml` workflow will be run from the pushed feature branch for remotely testable CI APK artifacts. No PR, main merge, release, or long career-suite run is claimed here.
 ## APK signing and update compatibility - November 7, 2026
 
 The APK signing key did not change. Current, prior CI and published release APKs all report signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7` (`CN=CFDM Dev`). The earlier wrapper builds failed to update existing installs because the wrapper workflow had an independent run counter and produced lower version codes: College `401` versus installed `880`, and Pro `1` versus installed `205`. `adb install -r` reproduced `INSTALL_FAILED_VERSION_DOWNGRADE` for both.
@@ -398,7 +421,7 @@ Branch `codex/feature-roadmap-plan`: the GameCast live view can now replay the r
 
 Replay highlights: the shared engine gains `ReplayHighlightService`, which reads a game's recorded snaps and returns the moments worth replaying — scores, turnovers, fourth-down conversions and big plays. Every candidate carries the recorded snap it came from, so a replay never reruns the simulation. The live game's Options menu gains a "Replay highlights" entry that lists the candidates with their quarter and clock and replays the chosen one.
 
-Pre-snap outcome effect: a shift or motion now has a small bounded effect on the recorded play — a motion adds two yards to a pass and one to a run, a shift adds one yard. The effect is recorded on the snap as `PreSnapEffectYards` and `PreSnapEffectNote`, shown in the live commentary and in the recent-play list. The play call, the outcome and the defensive read are untouched, and the random stream is not disturbed. A pre-snap choice only exists on a user-controlled play, so CPU seasons are unaffected.
+Historical pre-snap outcome note (superseded by the coverage-aware model above): the first implementation used a small fixed yard effect and left the defensive read untouched. Current behavior resolves man/zone/focused coverage, changes the read matchup and may add or remove up to two recorded yards.
 
 League pre-snap legality: `FootballRules` now carries `MaximumShiftYards` and `MaximumMotionYards`, and `PreSnapCatalog.IsValid` validates against the session's rules instead of a fixed range. Both leagues keep the current limits because the repository holds no sourced rule for a different one; the hook is what a future league rule will use.
 

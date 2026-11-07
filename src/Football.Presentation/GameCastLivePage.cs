@@ -325,7 +325,7 @@ public class GameCastLivePage : ContentPage
         {
             var line = Text(12);
             var preSnapLabel = snap.PreSnap is { HasAlignmentAction: true } ? " · " + PreSnapCatalog.Label(snap.PreSnap) : "";
-            var effectLabel = snap.PreSnapEffectYards > 0 ? $" · {snap.PreSnapEffectYards:+0;-0;0} yd pre-snap" : "";
+            var effectLabel = snap.PreSnapEffectNote is null ? "" : " · " + snap.PreSnapEffectNote;
             line.Text = $"Q{snap.Quarter} {snap.ClockSeconds / 60}:{snap.ClockSeconds % 60:00} · {GameDayCommentaryService.Describe(snap, session.PlayersById)}{preSnapLabel}{effectLabel}";
             recent.Add(line);
         }
@@ -686,7 +686,7 @@ public class GameCastLivePage : ContentPage
             {
                 var translation = MarkerTranslation(marker, basePoint, point, direction);
                 await marker.TranslateToAsync(
-                    translation.X, translation.Y, 260, Easing.CubicInOut);
+                    translation.X, translation.Y, PreSnapMotionPlan.MotionSegmentMilliseconds, Easing.CubicInOut);
             }
         }
 
