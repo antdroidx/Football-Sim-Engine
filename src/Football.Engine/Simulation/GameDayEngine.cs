@@ -100,13 +100,16 @@ public static partial class GameDayEngine
             offensePlan = offensePlan with { OpeningPlayIds = [userPlayId] };
         var penalty = TryPreSnapPenalty(session, alignmentAction);
         if (penalty is not null) return penalty;
-        var offensivePossessionIndex = session.Events.Count(item => item.Outcome != SnapOutcome.Kickoff);
+        var offensivePossessionIndex = session.Events.Count(item => item.OffenseTeamName == session.PossessionTeamName && IsScrimmage(item));
         var call = GamePlanService.ResolvePlayCall(offensePlan, defensePlan,
             string.IsNullOrWhiteSpace(userPlayId) ? offensivePossessionIndex : 0, session.Random,
             (offense.HeadCoachGameManagement + offense.OffensiveCoordinatorGameManagement) / 2,
             (defense.HeadCoachGameManagement + defense.DefensiveCoordinatorGameManagement) / 2);
+
         var advice = GameDayRecommendationService.Recommend(session, offensePlan);
-        if (string.IsNullOrWhiteSpace(userPlayId) && advice.Play is not null &&
+        var scriptedConceptActive = offensivePossessionIndex < offensePlan.OpeningScript.Count &&
+            offensePlan.OpeningScript[offensivePossessionIndex] != OffensiveConcept.Automatic;
+        if (string.IsNullOrWhiteSpace(userPlayId) && !scriptedConceptActive && advice.Play is not null &&
             (offensivePossessionIndex >= offensePlan.OpeningPlayIds.Count && offensivePossessionIndex >= offensePlan.OpeningScript.Count ||
              session.Down >= 3 && session.Distance >= 3 || GameDayRecommendationService.PassingUrgency(session) >= 2 || advice.Play.Name == "Hail Mary"))
             call = call with { Offense = advice.Play, Source = PlayCallSource.Cpu };

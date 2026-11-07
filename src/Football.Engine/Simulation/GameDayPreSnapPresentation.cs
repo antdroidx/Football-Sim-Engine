@@ -15,7 +15,8 @@ public static class GameDayPreSnapPresentation
         Func<Task> showFormation,
         Func<Task> animateAlignment,
         Func<TimeSpan, CancellationToken, Task> delay,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool settleAfterAlignment = true)
     {
         ArgumentNullException.ThrowIfNull(showFormation);
         ArgumentNullException.ThrowIfNull(animateAlignment);
@@ -33,7 +34,7 @@ public static class GameDayPreSnapPresentation
 
             await delay(ActionLead, cancellationToken);
             await animateAlignment();
-            await delay(FormationHold, cancellationToken);
+            if (settleAfterAlignment) await delay(FormationHold, cancellationToken);
         }
     }
 }

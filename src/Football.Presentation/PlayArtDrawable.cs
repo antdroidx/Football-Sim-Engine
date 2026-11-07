@@ -65,6 +65,35 @@ public sealed class PlayArtDrawable(string id, string playName, bool offense, st
         canvas.FillCircle(width * (float)quarterback.Y, height * (.61f - (float)quarterback.X * .03f), 3.5f);
         var positions = GameDayAnimationPlanner.EligiblePositions(play.Personnel);
         var roleCounts = new Dictionary<Position, int>();
+        var motion = play.PreSnapAction;
+        if (motion is { Type: PreSnapType.Motion })
+        {
+            var motionPosition = motion.MotionPosition ?? Position.WR;
+            var partnerPosition = motion.SwapPosition ?? motionPosition;
+            var motionStart = GameDayAnimationPlanner.OffensiveAlignment(play, motionPosition, motion.MotionRoleIndex);
+            var partnerStart = GameDayAnimationPlanner.OffensiveAlignment(play, partnerPosition, motion.SwapRoleIndex);
+            var motionQuarterback = GameDayAnimationPlanner.OffensiveAlignment(play, Position.QB, 0);
+            var motionEnd = PreSnapMotionPlan.SnapAlignment(motion, true, false, motionStart, partnerStart, motionQuarterback);
+            var previous = motionStart;
+            canvas.StrokeColor = DynastyTheme.Palette("#7CC6FF");
+            canvas.StrokeSize = 1.5f;
+            canvas.StrokeDashPattern = [4, 3];
+            foreach (var point in PreSnapMotionPlan.Path(motion, motionStart, motionEnd, motionQuarterback).Skip(1))
+            {
+                canvas.DrawLine(width * (float)previous.Y, height * (.61f - (float)previous.X * .03f),
+                    width * (float)point.Y, height * (.61f - (float)point.X * .03f));
+                previous = point;
+            }
+            canvas.StrokeDashPattern = [];
+        }
+
+        var runnerPosition = play.Name.StartsWith("FB ") ? Position.FB : Position.RB;
+        var runnerRole = 0;
+        if (motion?.MotionManIsBallCarrier == true)
+        {
+            runnerPosition = motion.MotionPosition ?? Position.WR;
+            runnerRole = motion.MotionRoleIndex;
+        }
         for (var i = 0; i < positions.Count; i++)
         {
             var position = positions[i];
@@ -82,10 +111,15 @@ public sealed class PlayArtDrawable(string id, string playName, bool offense, st
             if (custom?.Task == AssignmentTask.Block) continue;
             if (family == GameDayRouteFamily.Run)
             {
-                if (roleIndex == 0 && position == (play.Name.StartsWith("FB ") ? Position.FB : Position.RB))
+                if (roleIndex == runnerRole && position == runnerPosition)
                 {
                     canvas.StrokeColor = DynastyTheme.Palette("#F4CC66"); canvas.StrokeSize = 2;
-                    DrawRoute(canvas, width * (float)start.Y, height * startY,
+                    var runStart = motion?.MotionManIsBallCarrier == true
+                        ? PreSnapMotionPlan.SnapAlignment(motion, true, false, alignment,
+                            GameDayAnimationPlanner.OffensiveAlignment(play, motion.SwapPosition ?? position, motion.SwapRoleIndex),
+                            GameDayAnimationPlanner.OffensiveAlignment(play, Position.QB, 0))
+                        : alignment;
+                    DrawRoute(canvas, width * (float)runStart.Y, height * (.61f - (float)runStart.X * .03f),
                         width * (play.Concept == OffensiveConcept.OutsideRun ? .80f : .50f), height * .38f);
                 }
                 continue;

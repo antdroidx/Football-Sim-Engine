@@ -15,6 +15,9 @@ public static class BackfieldRoles
     }
     public static DynastyPlayer? Runner(OffensivePlayDefinition play, IReadOnlyList<DynastyPlayer> players, Random random)
     {
+        if (play.PreSnapAction?.MotionManIsBallCarrier == true &&
+            PreSnapMotionPlan.SelectPrimary(play.PreSnapAction, players) is DynastyPlayer motionRunner)
+            return motionRunner;
         if(play.Name.StartsWith("FB ",StringComparison.Ordinal))return players.FirstOrDefault(p=>p.Position==Position.FB);
         var backs=players.Where(p=>p.Position==Position.RB).ToArray();
         return backs.Length>0?backs[random.Next(backs.Length)]:players.FirstOrDefault(p=>p.Position==Position.FB);

@@ -103,6 +103,11 @@ public class PreSnapTests
                 PreSnapCatalog.Motion("Left", 2) with { AllOtherPlayersStationary = false }, rules));
             Assert.False(PreSnapCatalog.IsValid(
                 PreSnapCatalog.Motion("Left", 2) with { FollowedShift = true, SetForOneSecond = false }, rules));
+            Assert.True(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Motion("Left", 2) with { SetForOneSecond = false }, rules));
+            Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.Jet("Left", Position.WR, 1), rules));
+            Assert.False(PreSnapCatalog.IsValid(
+                PreSnapCatalog.Jet("Left", Position.WR, 1) with { FollowedShift = true }, rules));
             Assert.False(PreSnapCatalog.IsValid(
                 PreSnapCatalog.Shift("Left", .5) with { SetForOneSecond = false }, rules));
             Assert.False(PreSnapCatalog.IsValid(
@@ -128,6 +133,9 @@ public class PreSnapTests
 
         Assert.True(restored.Valid);
         Assert.Equal(PreSnapMotionDirection.Lateral, restored.MotionDirection);
+        Assert.Equal(PreSnapMotionKind.ReturnToFormation, restored.MotionKind);
+        Assert.Null(restored.MotionPosition);
+        Assert.False(restored.MotionLiveAtSnap);
         Assert.Equal(1, restored.BackfieldPlayersInMotion);
         Assert.True(restored.AllOtherPlayersStationary);
         Assert.True(restored.SetForOneSecond);
@@ -159,8 +167,20 @@ public class PreSnapTests
             TeamName = "Home", Offense = OffensivePlaybook.Spread,
             OffensiveFormation = OffensiveFormation.ShotgunSpread
         };
-        Assert.Contains(GamePlanService.AvailableOffensivePlays(spread),
-            play => play.PreSnapAction?.Type == PreSnapType.Motion);
+        var spreadBook = GamePlanService.AvailableOffensivePlays(spread);
+        Assert.Contains(spreadBook, play => play.Name == "Jet Sweep");
+        Assert.Contains(spreadBook, play => play.Name == "Glide Motion Power");
+        Assert.Contains(spreadBook, play => play.Name == "Motion Crossers");
+
+        var playAction = new TeamGamePlan
+        {
+            TeamName = "Home", Offense = OffensivePlaybook.PlayAction,
+            OffensiveFormation = OffensiveFormation.Singleback
+        };
+        var playActionBook = GamePlanService.AvailableOffensivePlays(playAction);
+        Assert.Contains(playActionBook, play => play.Name == "Orbit Motion Levels");
+        Assert.Contains(playActionBook, play => play.Name == "Orbit Motion PA Boot");
+        Assert.Contains(playActionBook, play => play.Name == "Glide Motion Power");
     }
 
     [Fact]

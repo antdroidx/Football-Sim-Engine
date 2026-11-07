@@ -1,3 +1,21 @@
+## Play-aware motion validation - November 6, 2026
+
+Executed on the feature working tree:
+
+- Engine `GameDayPreSnapPresentationTests|PreSnapMotionPlanTests|PreSnapTests` - 16 passed. Coverage includes distinct Jet/Set/Orbit/Swap snap alignments and paths, Jet Sweep handing off to the selected motion receiver, live Jet timing without a false return hold, legacy choice defaults and sourced motion legality.
+- College `GamePlanTests` - 14 passed. The motion-preset case covers Spread `Jet Sweep|Glide Motion Power|Motion Crossers` and Play Action `Orbit Motion Levels|Orbit Motion PA Boot|Glide Motion Power`; postseason cases confirm team-specific opening scripts remain authoritative.
+- Engine Fast - 386 passed; Engine Balance - 12 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests` - 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons` - 486 passed.
+- Packaged-resource validation - passed.
+- `python -m unittest discover -s build -p 'test_android_ui_smoke.py'` - 24 passed.
+- Football.Presentation and both Android compile targets - passed with zero warnings/errors.
+
+The exact local Pro Debug APK tested in the emulator has SHA-256 `67B2C3B4B8C1BE4057F733C046492458BF7F37EB92FE0C758590E80BF258F62D`. The read-only API 36 flow created a fresh Seattle franchise and scrolled the full playbook to verify motion presets below the first visible row. `Orbit Motion PA Boot` displayed `SELECTED · ORBIT · PASS`, auto-selected `Pre-snap: Orbit motion right`, moved the player to the opposite on-field alignment, held `Pre-snap formation`, and snapped from that alignment. Direct screenshots and a field-only diff are under `.artifacts/motion-qa/`. The same run has zero fatal exceptions, application ANRs, Pro process errors or GREF warnings.
+
+Jet Sweep's handoff is verified by the engine snap test against the motion receiver. A separate device walkthrough of Jet Sweep was not claimed because Seattle's sourced Play Action plan exposes Orbit/Set families; `Jet Sweep` is available in Spread plan books and covered by the focused availability test.
+
+Not claimed: GitHub Actions completion for this revision, a physical-device install, a release, a PR, or a main merge.
 ## GitHub Actions APK validation - November 6, 2026
 
 Executed against `5d6947c8b42c6703bf81ffe2cd831f4051d8594d` on `codex/presnap-gamecast-corrections`:

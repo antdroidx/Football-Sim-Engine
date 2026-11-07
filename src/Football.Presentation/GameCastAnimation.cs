@@ -113,6 +113,11 @@ public static class GameCastAnimation
         var backIndex = 0;
         var routeEligibleIndex = 0;
         var calledPlay = PlayEditorService.OffensiveLibrary((snap.OffenseTeamName == game.HomeTeamName ? home : away).GamePlan ?? controlledPlan).FirstOrDefault(play => play.Id == snap.OffensivePlayId);
+        var preSnapChoice = snap.PreSnap;
+        var preSnapPlayers = offense.OfType<DynastyPlayer>().ToArray();
+        var preSnapPrimary = preSnapChoice is { Type: PreSnapType.Motion } ? PreSnapMotionPlan.SelectPrimary(preSnapChoice, preSnapPlayers) : null;
+        var preSnapSwapPartner = preSnapChoice is { Type: PreSnapType.Motion } ? PreSnapMotionPlan.SelectSwapPartner(preSnapChoice, preSnapPlayers) : null;
+        var quarterbackAlignment = calledPlay is null ? new GameFieldPoint(-5, .50) : GameDayAnimationPlanner.OffensiveAlignment(calledPlay, Position.QB, 0);
         var routeFamily = calledPlay is null ? GameDayRouteFamily.Run : GameDayAnimationPlanner.RouteFamily(calledPlay);
         var receiverFamily = routeFamily;
         var passRelease = snap.TurnoverYardLine.HasValue ? .30 : snap.PassReleaseProgress > 0 ? snap.PassReleaseProgress : calledPlay is null ? .54 : GameDayAnimationPlanner.PassReleaseProgress(calledPlay);
@@ -194,23 +199,40 @@ public static class GameCastAnimation
                     break;
             }
             PlayAssignment? playerAssignment = null;
+            var playerRoleIndex = 0;
+            var baseAlignment = new GameFieldPoint(0, y);
             if (player is not null && calledPlay is not null &&
                 snap.Outcome is not (SnapOutcome.Punt or SnapOutcome.Kickoff or SnapOutcome.FieldGoal or SnapOutcome.MissedFieldGoal or SnapOutcome.ExtraPoint or SnapOutcome.MissedExtraPoint))
             {
-                roleCounts.TryGetValue(player.Position, out var roleIndex);
-                roleCounts[player.Position] = roleIndex + 1;
-                playerAssignment = calledPlay.Assignments.FirstOrDefault(a => a.Position == player.Position && a.RoleIndex == roleIndex);
+                roleCounts.TryGetValue(player.Position, out playerRoleIndex);
+                roleCounts[player.Position] = playerRoleIndex + 1;
+                playerAssignment = calledPlay.Assignments.FirstOrDefault(a => a.Position == player.Position && a.RoleIndex == playerRoleIndex);
                 if (player.Position is Position.QB or Position.RB or Position.FB or Position.WR or Position.TE)
                 {
-                    var custom = calledPlay.Assignments.FirstOrDefault(a => a.Position == player.Position && a.RoleIndex == roleIndex);
-                    var alignment = GameDayAnimationPlanner.OffensiveAlignment(calledPlay, player.Position, roleIndex);
+                    var alignment = GameDayAnimationPlanner.OffensiveAlignment(calledPlay, player.Position, playerRoleIndex);
+                    baseAlignment = alignment;
                     x = Project(snap.StartYardLine + alignment.X); y = alignment.Y;
                 }
                 else if (player.Position == Position.OL)
                 {
-                    var alignment = GameDayAnimationPlanner.OffensiveAlignment(calledPlay, Position.OL, roleIndex);
+                    var alignment = GameDayAnimationPlanner.OffensiveAlignment(calledPlay, Position.OL, playerRoleIndex);
+                    baseAlignment = alignment;
                     x = Project(snap.StartYardLine + alignment.X); y = alignment.Y;
                 }
+            }
+            if (!preSnapPreview && calledPlay is not null && preSnapChoice is { Type: PreSnapType.Motion } motionChoice && player is not null)
+            {
+                var isPrimary = player.PlayerId == preSnapPrimary?.PlayerId;
+                var isSwapPartner = player.PlayerId == preSnapSwapPartner?.PlayerId;
+                GameFieldPoint otherAlignment = baseAlignment;
+                if (isPrimary && preSnapChoice.SwapPosition is Position swapPosition)
+                    otherAlignment = GameDayAnimationPlanner.OffensiveAlignment(calledPlay, swapPosition, preSnapChoice.SwapRoleIndex);
+                else if (isSwapPartner && preSnapChoice.MotionPosition is Position motionPosition)
+                    otherAlignment = GameDayAnimationPlanner.OffensiveAlignment(calledPlay, motionPosition, preSnapChoice.MotionRoleIndex);
+                var snapAlignment = PreSnapMotionPlan.SnapAlignment(
+                    motionChoice, isPrimary, isSwapPartner, baseAlignment, otherAlignment, quarterbackAlignment);
+                x = Project(snap.StartYardLine + snapAlignment.X);
+                y = snapAlignment.Y;
             }
             if (snap.Outcome == SnapOutcome.Kickoff)
             {
@@ -224,8 +246,12 @@ public static class GameCastAnimation
             }
             x = Math.Clamp(x, .025, .96);
             var isEligible = playerAssignment?.Task != AssignmentTask.Block && player?.Position is Position.WR or Position.TE or Position.RB or Position.FB;
+            var assignedRoleIndex = player is null ? 0 :
+                player.PlayerId == preSnapPrimary?.PlayerId && preSnapChoice?.MotionKind == PreSnapMotionKind.SwapAlignments ? preSnapChoice.SwapRoleIndex :
+                player.PlayerId == preSnapSwapPartner?.PlayerId && preSnapChoice is not null ? preSnapChoice.MotionRoleIndex :
+                Math.Max(0, roleCounts.GetValueOrDefault(player.Position) - 1);
             var assigned = player is null || calledPlay is null ? routeFamily :
-                GameDayAnimationPlanner.AssignedRoute(calledPlay, player.Position, Math.Max(0, roleCounts.GetValueOrDefault(player.Position) - 1));
+                GameDayAnimationPlanner.AssignedRoute(calledPlay, player.Position, assignedRoleIndex);
             var eligibleIndex = isEligible ? routeEligibleIndex++ : index;
             var endY = player is null ? y : GameDayAnimationPlanner.RouteEndLane(assigned,
                 player.Position, eligibleIndex, y, player.PlayerId == snap.TargetId);

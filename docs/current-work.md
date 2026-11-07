@@ -1,3 +1,30 @@
+## Play-aware pre-snap motion - November 6, 2026
+
+Pre-snap motion is now play-specific instead of a generic two-yard excursion that always returns to the same spot. The shared motion plan records the selected player role, motion family, final lane/depth, swap partner and handoff responsibility. GameCast and play art use the same plan:
+
+- `JetHandoff` moves a named receiver behind the line to the quarterback mesh, keeps him there through the snap and gives him the ball on the Jet Sweep call.
+- `SetAcross` moves a player to a new formation alignment and keeps him there.
+- `OrbitAcross` carries a player behind the formation to the opposite-side alignment and keeps him there.
+- `SwapAlignments` exchanges two named players and their route roles.
+- Older generic choices retain `ReturnToFormation` behavior for save compatibility.
+
+The existing `off-spread-jet-zone` ID remains stable for playbooks and saves, but its call is now `Jet Sweep`; its concept and runner behavior make the motion receiver the ball carrier. Set/orbit/swap calls settle before snap, while Jet motion hands off directly at the snap without an artificial return hold. Each formation family in an active standard playbook now retains its motion call instead of allowing the Hail Mary reservation to displace it.
+
+A related play-script bug was fixed: opening-script position now advances per team and per scrimmage play, so opponent possessions and clock-only events cannot consume the user's scripted call sequence.
+
+Validation actually run:
+
+- Focused motion/rule/timing suite - 16 passed, including Jet Sweep selecting the motion receiver as `BallCarrierId`.
+- Focused game-plan suite - 14 passed, including Spread Jet/Set/Swap availability and Play Action Orbit/Set availability.
+- Engine Fast - 386 passed; Engine Balance - 12 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests` - 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons` - 486 passed.
+- Packaged-resource validation and 24 UI synchronization helper tests passed.
+- Both Android compile targets passed with zero warnings/errors.
+
+Android QA used local Pro Debug APK SHA-256 `67B2C3B4B8C1BE4057F733C046492458BF7F37EB92FE0C758590E80BF258F62D` on a read-only API 36 emulator. The full scrollable playbook exposed the motion calls below the initial fold. `Orbit Motion PA Boot` auto-selected `Pre-snap: Orbit motion right`; timed frames show the on-field formation, motion to the opposite alignment, the settled `PRE-SNAP FORMATION`, and the following snap/run. A field-only frame diff isolates the moving-player region. Jet handoff is covered by the engine snap test because Seattle's Play Action plan correctly offers Orbit/Set calls rather than the Spread-only Jet Sweep call. Logcat has zero fatal exceptions, application ANRs, application process errors or GREF warnings.
+
+Not claimed: CI completion for this revision, physical-device installation, or a device walkthrough of the Spread-only Jet Sweep call.
 ## GitHub Actions APK handoff - November 6, 2026
 
 The shared GameCast corrections are pushed on `codex/presnap-gamecast-corrections` at `5d6947c8b42c6703bf81ffe2cd831f4051d8594d`. The existing College and Pro workflows were dispatched for that exact commit; no PR, merge, release, or prerelease was created.
