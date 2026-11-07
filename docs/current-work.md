@@ -1,3 +1,17 @@
+## APK signing and update compatibility - November 7, 2026
+
+The APK signing key did not change. Current, prior CI and published release APKs all report signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7` (`CN=CFDM Dev`). The earlier wrapper builds failed to update existing installs because the wrapper workflow had an independent run counter and produced lower version codes: College `401` versus installed `880`, and Pro `1` versus installed `205`. `adb install -r` reproduced `INSTALL_FAILED_VERSION_DOWNGRADE` for both.
+
+Commit `5794061` adds a reusable `version_code_offset`; `presnap-apk-validation.yml` passes `1000` while direct workflow runs retain their normal numbering. Corrected workflow [42384796728](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42384796728) completed successfully across both builds and all College/Pro device jobs.
+
+New update-compatible artifacts:
+
+- College `dynasty-manager-build-2`, artifact [13579291526](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42384796728/artifacts/13579291526): `antdroid.cfbcoach.dev-Signed.apk`, 91,555,890 bytes, version code `1402` / `0.20.1002`, SHA-256 `38226C6B3F7DFB7B55A628A4FA3E892AEAF8F43709B6774E08C27EF731D83BDB`.
+- Pro `pro-football-apk-2`, artifact [13579237991](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42384796728/artifacts/13579237991): `antdroid.profootball.franchise-Signed.apk`, 90,276,361 bytes, version code `1002` / `0.1.1002`, SHA-256 `FEA2405CF6FEB1A7D6D668C38981B0B2C0A241C6ADE1488C5AB4051579D9C9F1`.
+
+A disposable API 36 emulator first installed College `880` and Pro `205`, reproduced both downgrade failures with the old wrapper APKs, then successfully installed `1402` and `1002` over the same package data using `adb install -r`. Final `dumpsys package` values matched the new manifests.
+
+Package identity remains important: the College Debug/release asset package is `antdroid.cfbcoach.dev`; the retained non-dev identity is `antdroid.cfbcoach`. Those are separate Android apps and cannot update each other. Pro remains `antdroid.profootball.franchise`.
 ## Pre-snap formation, motion and APK validation workflow - November 7, 2026
 
 Shared GameCast now keeps a called formation on screen for a minimum of 3.5 seconds before the snap. Defensive players automatically adjust after the offensive formation is visible, offensive shifts are limited to a selected receiver, and play-specific motion uses the resolved play instead of a stale call-sheet lookup. Jet Sweep animates the selected receiver from his WR alignment toward the quarterback mesh and keeps that receiver as the ball carrier.

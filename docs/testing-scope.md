@@ -1,3 +1,12 @@
+## APK update compatibility - November 7, 2026
+
+Signing comparison across the new, prior CI and published release APKs found the same `CFDM Dev` certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. The in-place update failure was a version-code regression from the wrapper workflow's independent counter, not a key mismatch.
+
+`adb install -r` reproduced `INSTALL_FAILED_VERSION_DOWNGRADE` for College `401 -> 880` and Pro `1 -> 205`. Commit `5794061` adds `version_code_offset` and the wrapper passes `1000`. Workflow [42384796728](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42384796728) then completed all College/Pro build and device jobs successfully.
+
+Verified update artifacts: College [13579291526](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42384796728/artifacts/13579291526), code `1402`, SHA-256 `38226C6B3F7DFB7B55A628A4FA3E892AEAF8F43709B6774E08C27EF731D83BDB`; Pro [13579237991](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42384796728/artifacts/13579237991), code `1002`, SHA-256 `FEA2405CF6FEB1A7D6D668C38981B0B2C0A241C6ADE1488C5AB4051579D9C9F1`. Both installed successfully over the prior `880`/`205` packages with `adb install -r`.
+
+The College `antdroid.cfbcoach.dev` artifact cannot update an installation using the separate retained `antdroid.cfbcoach` package ID. Pro remains `antdroid.profootball.franchise`.
 ## Pre-snap timing, motion and penalty presentation - November 7, 2026
 
 The shared GameCast pre-snap sequence now enforces a 3.5-second minimum from formation visibility to snap. It orders the sequence as formation display, defensive alignment adjustment, offensive shift/motion, required one-second set where applicable, then snap or dead-ball foul reveal. Live Jet motion is scheduled late enough to reach the quarterback mesh at the snap instead of standing behind the quarterback before the exchange.
