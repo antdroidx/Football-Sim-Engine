@@ -1,3 +1,19 @@
+## GitHub Actions APK validation - November 6, 2026
+
+Executed against `5d6947c8b42c6703bf81ffe2cd831f4051d8594d` on `codex/presnap-gamecast-corrections`:
+
+- College Android run `42321359769` completed successfully with 382/382 Engine Fast, 12/12 Engine Balance and 629/629 combined Core/College tests. Packaged-resource validation, 24 UI-helper tests, Android packaging and APK upload all passed.
+- Pro Football Android run `42321359983` completed successfully on retry with 486/486 standard Pro tests. UI-helper tests, NFLPA normalization, Android packaging and APK upload all passed. The initial attempt's lone failure was the documented intermittent `CapInitializationTests.ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets` case; no assertion was weakened and no source change was made before the successful retry.
+
+Verified Actions artifacts:
+
+- College artifact `dynasty-manager-build-479` / ID `13553371259`: `antdroid.cfbcoach.dev-Signed.apk`, 91,531,314 bytes, version code 879 / version name 0.20.479, SHA-256 `6BDF06060273BBBC7A8154B769DC102CA92AD8A98B0DC49EF55EC8E101F8A458`.
+- Pro artifact `pro-football-apk-204` / ID `13553413817`: `antdroid.profootball.franchise-Signed.apk`, 90,251,785 bytes, version code 204 / version name 0.1.204, SHA-256 `AEA05419DD1B2789A0C20D1012044A58BAD896ABB1AF94CC0C75C28BA9CBC93A`.
+
+`apksigner verify` passes both APKs with v2 and v3 signatures. The artifacts are downloadable from the corresponding workflow runs and are not GitHub releases.
+
+Not claimed: a PR, main merge, GitHub release, prerelease publication, physical-device installation, or the excluded long career suites.
+
 ## GameCast pre-snap and end-zone validation - November 6, 2026
 
 Executed on the feature working tree:

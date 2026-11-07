@@ -1,3 +1,17 @@
+## GitHub Actions APK handoff - November 6, 2026
+
+The shared GameCast corrections are pushed on `codex/presnap-gamecast-corrections` at `5d6947c8b42c6703bf81ffe2cd831f4051d8594d`. The existing College and Pro workflows were dispatched for that exact commit; no PR, merge, release, or prerelease was created.
+
+- College Android run `42321359769` passed: 382 Engine Fast, 12 Engine Balance, 629 combined Core/College tests, packaged-resource and UI-helper checks, Android Debug APK packaging and artifact upload.
+- Pro Football Android run `42321359983` passed on its failed-job retry: 486 standard Pro tests, UI-helper and NFLPA normalization checks, Android Debug APK packaging and artifact upload. The first attempt failed 485/486 only on the already documented intermittent `CapInitializationTests.ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets` lifecycle case; the retry passed without a source change.
+
+Exact GitHub Actions APK artifacts:
+
+- College `dynasty-manager-build-479`, artifact `13553371259`: https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42321359769/artifacts/13553371259. APK `antdroid.cfbcoach.dev-Signed.apk`, 91,531,314 bytes, version code 879 / version name 0.20.479, SHA-256 `6BDF06060273BBBC7A8154B769DC102CA92AD8A98B0DC49EF55EC8E101F8A458`.
+- Pro `pro-football-apk-204`, artifact `13553413817`: https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42321359983/artifacts/13553413817. APK `antdroid.profootball.franchise-Signed.apk`, 90,251,785 bytes, version code 204 / version name 0.1.204, SHA-256 `AEA05419DD1B2789A0C20D1012044A58BAD896ABB1AF94CC0C75C28BA9CBC93A`.
+
+Both downloaded APKs pass `apksigner verify` using APK Signature Scheme v2 and v3 with signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. These are CI artifacts, not GitHub releases.
+
 ## GameCast pre-snap phase and team-colored end zones - November 6, 2026
 
 Manual GameCast snaps now render the called offensive and defensive formation before any alignment action or snap animation. The previous implementation held the midfield huddle, so the delay and motion appeared in the wrong phase. Pre-snap motion now moves one eligible player within the on-field formation, returns that player to the settled alignment, and keeps the offense set for one full second before the recorded play animation starts. Shifts retain their shifted alignment at the snap. Simulation outcomes and saved `PreSnapChoice` records are unchanged.
