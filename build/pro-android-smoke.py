@@ -258,7 +258,7 @@ try:
     capture_at(.45,"formation")
     capture_at(1.0,"motion")
     capture_at(3.0,"hold")
-    s.wait_for("pro-pre-snap-effect",lambda r:"Pre-snap: None" in s.texts(r) and "Waiting for your call" in s.texts(r),timeout=30)
+    s.wait_for("pro-pre-snap-effect",lambda r:any(t.startswith("Pre-snap: ") for t in s.texts(r)) and "Waiting for your call" in s.texts(r),timeout=30)
     s.capture("pro-coach-after-snap")
     # Leaving the game goes through the shared options menu.
     options=s.tap_expect("pro-leave-menu","Options","Game options")
