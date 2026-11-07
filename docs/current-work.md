@@ -6,7 +6,7 @@ Generic pre-snap options now expose `Motion left`, `Motion right`, `Motion slot`
 
 Focused and required validation on this implementation:
 
-- Focused `PreSnapMatchupTests|PreSnapTests|PreSnapMotionPlanTests|GameDayPreSnapPresentationTests`: 28 passed.
+- Focused `PreSnapMatchupTests|PreSnapTests|PreSnapMotionPlanTests|GameDayPreSnapPresentationTests`: 27 passed.
 - Football.Engine full suite: 411 passed.
 - College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
 - Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed on the repeated run. The first run had one known intermittent `StaffBalanceTests.EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity` collision (95 unique scout vectors for 96 scouts); the exact isolated retry passed 1/1 and the complete repeated suite passed without a source change.
@@ -22,7 +22,18 @@ Local Debug APKs:
 
 Both local APKs pass `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`.
 
-The prior GitHub Actions record below is historical; a new remote run for this revision is pending after push. Run [42417369639](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639) completed successfully on `ba9c0479e4408d48d59700bb29c8384e78b847e3` after an isolated retry of a College launcher ANR. All build, test and device jobs are green, including the corrected Pro live flow.
+Current GitHub Actions verification - November 7, 2026
+
+Run [42425206521](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42425206521) completed successfully on `5bb3fa342c25b4542d17aed5433afb4d3fb1e673`; all five jobs are green.
+
+Remote APKs:
+
+- College `dynasty-manager-build-5`, artifact [13595600936](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42425206521/artifacts/13595600936): `antdroid.cfbcoach.dev-Signed.apk`, 91,572,274 bytes, version code `1405` / `0.20.1005`, SHA-256 `98196B65DF9F721ACD4AFD384215DB3B827EECE90C061AD21E0AE2D6D8EA3BD7`.
+- Pro `pro-football-apk-5`, artifact [13595144432](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42425206521/artifacts/13595144432): `antdroid.profootball.franchise-Signed.apk`, 90,292,745 bytes, version code `1005` / `0.1.1005`, SHA-256 `192185CBB8131B0E8A0B6E93E2A339D72503D430B68B79B5365411E4F7EE23D0`.
+
+Both APKs pass `aapt dump badging` package checks and `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. Device evidence is [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42425206521/artifacts/13595573121), [College career](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42425206521/artifacts/13595456922), and [College management](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42425206521/artifacts/13595504115).
+
+The prior GitHub Actions record below is historical. Run [42417369639](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639) completed successfully on `ba9c0479e4408d48d59700bb29c8384e78b847e3` after an isolated retry of a College launcher ANR. All build, test and device jobs are green, including the corrected Pro live flow.
 
 - College `dynasty-manager-build-4`, artifact [13591734358](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639/artifacts/13591734358): `antdroid.cfbcoach.dev-Signed.apk`, 91,564,082 bytes, version code `1404` / `0.20.1004`, SHA-256 `8CCB1E018210ED54B61A6B23AC52A7A647241F42B482223BD094CD5DDF25DC25`.
 - Pro `pro-football-apk-4`, artifact [13592755842](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639/artifacts/13592755842): `antdroid.profootball.franchise-Signed.apk`, 90,284,553 bytes, version code `1004` / `0.1.1004`, SHA-256 `99E37F6BDC6892231BA5CCE87E740F4F354CFCEAD28B5C6FAB3ED6131049F3E8`.
