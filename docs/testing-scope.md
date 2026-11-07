@@ -20,7 +20,14 @@ Focused and required local validation:
 - College Android Debug APK packaging: passed with zero warnings/errors.
 - Pro Android Debug APK packaging: passed with zero errors and the two documented `CS8625` warnings.
 
-The College and Pro long career/calibration exclusions remain unchanged. No local emulator claim is made in this entry. `.github/workflows/presnap-apk-validation.yml` calls the established College and Pro workflows with emulator/live validation enabled and will provide the exact CI APK and device evidence after the branch push.
+The College and Pro long career/calibration exclusions remain unchanged. `.github/workflows/presnap-apk-validation.yml` calls the established College and Pro workflows with emulator/live validation enabled.
+
+CI run [42354394728](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42354394728) passed College Engine Fast/Balance, 629 Core/College tests, both College emulator jobs, Pro 486 scoped tests and both APK builds. Its first Pro device attempt exposed only the stale `Motion right 2 yd` harness expectation. The corrected exact-APK Pro live/device retry [42356094914](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42356094914) passed the full Pro flow and uploaded evidence artifact [13568385823](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42356094914/artifacts/13568385823).
+
+The exact CI APK identities are College artifact [13567340936](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42354394728/artifacts/13567340936), version code 401 / 0.20.1, SHA-256 `76B2341FBA5B70D849C7C584F76F780929ED0367638D16980EA9C4FB22311642`; Pro artifact [13567213115](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42354394728/artifacts/13567213115), version code 1 / 0.1.1, SHA-256 `D82305076AB8504E39FDB73D4926D0F096C565EE6A3CF69480DE7E15F718F78C`. Both downloaded APKs pass v2/v3 `apksigner` verification.
+
+A subsequent evidence-only run [42357416270](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42357416270) reached the 25-minute device timeout and is explicitly not acceptance evidence. Focused local `pixel_9_-_api_36` emulator QA used UI-tree-derived taps and a 150 ms screenshot burst. The 0.45-1.05 second frames changed only in the player-alignment field region, settled by 1.20 seconds, and the 3.0-second frame was still `Pre-snap formation`. No app-process crash was observed; the crash buffer contained only a concurrent `uiautomator` service-registration error caused by inspecting the UI during the focused run.
+
 ## Play-aware motion Actions artifact verification - November 6, 2026
 
 Actions runs `42328614160` and `42328614715` completed successfully from `0613ebab6d8d51feeafb735f01f08bd7ef18281a`.

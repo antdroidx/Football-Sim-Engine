@@ -19,7 +19,21 @@ Validation actually run on the implementation working tree:
 - College Android Debug APK build: passed with zero warnings/errors.
 - Pro Android Debug APK build: passed with zero errors and the two existing `CS8625` warnings.
 
-Local APKs were generated at `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk` (91,217,048 bytes, SHA-256 `DCE724671091D8C6D727A64EF0B75A12DA9BBC6FCB2B74B37536F6042CBB451B`) and `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk` (89,937,519 bytes, SHA-256 `069FB775EFEB9D151DE26C48D617F12EB4A9D84891AB90C8153CCCF5E71D02C1`). Both are Debug `net10.0-android` builds. GitHub Actions completion, artifact verification, emulator evidence and exact CI APK identities are pending until the branch workflow finishes.
+Local APKs were generated at `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk` (91,217,048 bytes, SHA-256 `DCE724671091D8C6D727A64EF0B75A12DA9BBC6FCB2B74B37536F6042CBB451B`) and `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk` (89,937,519 bytes, SHA-256 `069FB775EFEB9D151DE26C48D617F12EB4A9D84891AB90C8153CCCF5E71D02C1`). Both are Debug `net10.0-android` builds.
+
+The `Pre-snap APK validation` wrapper ran as [Actions run 42354394728](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42354394728). College build/tests and both College emulator jobs passed. Pro tests and APK packaging passed. The first Pro device pass stopped on a stale smoke-harness label (`Motion right 2 yd`) after the UI correctly changed to `WR return motion right`; `build/pro-android-smoke.py` was corrected without changing application source.
+
+Exact CI APK artifacts from that run:
+
+- College `dynasty-manager-build-1`, artifact [13567340936](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42354394728/artifacts/13567340936): `antdroid.cfbcoach.dev-Signed.apk`, 91,555,890 bytes, version code 401 / version name 0.20.1, SHA-256 `76B2341FBA5B70D849C7C584F76F780929ED0367638D16980EA9C4FB22311642`.
+- Pro `pro-football-apk-1`, artifact [13567213115](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42354394728/artifacts/13567213115): `antdroid.profootball.franchise-Signed.apk`, 90,276,361 bytes, version code 1 / version name 0.1.1, SHA-256 `D82305076AB8504E39FDB73D4926D0F096C565EE6A3CF69480DE7E15F718F78C`.
+
+Both exact downloads pass `apksigner verify` with APK Signature Scheme v2 and v3 and retain the expected application IDs.
+
+The corrected full Pro live/device flow then passed against that exact Pro APK in [Actions run 42356094914](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42356094914), including franchise creation, watch/replay, landscape, save/reload, week advance and coach mode. Its UI evidence is artifact [13568385823](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42356094914/artifacts/13568385823).
+
+A later evidence-only exact-APK run, [42357416270](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42357416270), was cancelled at the 25-minute device timeout after uploading `pro-ui-evidence-207`; it is not acceptance evidence. Focused local Android emulator QA on `pixel_9_-_api_36` then selected `WR return motion right` and captured a 150 ms screenshot burst. Frames from 0.45-1.05 seconds differed only in the player-alignment field region and settled by 1.20 seconds, while the 3.0-second frame remained `Pre-snap formation`.
+
 ## Play-aware motion Actions APKs - November 6, 2026
 
 GitHub Actions completed successfully for implementation commit `0613ebab6d8d51feeafb735f01f08bd7ef18281a` on `codex/presnap-gamecast-corrections`:
