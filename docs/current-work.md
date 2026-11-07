@@ -20,7 +20,14 @@ Local Debug APKs:
 - College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, 91,564,082 bytes, SHA-256 `A9A8518A9821C8F69CD8461529CDA332C98A4C10DF767F2EF509BCCBBC1EFEAD`.
 - Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, 90,284,553 bytes, SHA-256 `72F4280CA1FE2691CE93B1C248720D1BF1C9382E8C924D52F9960B8922D0A6E1`.
 
-Both local APKs pass `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. The established `presnap-apk-validation.yml` workflow will be run from the pushed feature branch for remotely testable CI APK artifacts. No PR, main merge, release, or long career-suite run is claimed here.
+Both local APKs pass `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`.
+
+GitHub Actions run [42417369639](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639) completed successfully on `ba9c0479e4408d48d59700bb29c8384e78b847e3` after an isolated retry of a College launcher ANR. All build, test and device jobs are green, including the corrected Pro live flow.
+
+- College `dynasty-manager-build-4`, artifact [13591734358](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639/artifacts/13591734358): `antdroid.cfbcoach.dev-Signed.apk`, 91,564,082 bytes, version code `1404` / `0.20.1004`, SHA-256 `8CCB1E018210ED54B61A6B23AC52A7A647241F42B482223BD094CD5DDF25DC25`.
+- Pro `pro-football-apk-4`, artifact [13592755842](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639/artifacts/13592755842): `antdroid.profootball.franchise-Signed.apk`, 90,284,553 bytes, version code `1004` / `0.1.1004`, SHA-256 `99E37F6BDC6892231BA5CCE87E740F4F354CFCEAD28B5C6FAB3ED6131049F3E8`.
+
+Both CI APKs pass `apksigner verify` with the same stable certificate. Device evidence is in [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639/artifacts/13592892689), [College career](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639/artifacts/13592888999), and [College management](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42417369639/artifacts/13592468175). These are Actions artifacts, not GitHub releases. No PR, main merge, release, or long career-suite run is claimed here.
 ## APK signing and update compatibility - November 7, 2026
 
 The APK signing key did not change. Current, prior CI and published release APKs all report signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7` (`CN=CFDM Dev`). The earlier wrapper builds failed to update existing installs because the wrapper workflow had an independent run counter and produced lower version codes: College `401` versus installed `880`, and Pro `1` versus installed `205`. `adb install -r` reproduced `INSTALL_FAILED_VERSION_DOWNGRADE` for both.
