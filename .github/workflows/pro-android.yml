@@ -35,6 +35,10 @@ on:
         description: College APK artifact for two-app exchange verification
         type: string
         default: ''
+      version_code_offset:
+        description: Offset wrapper build numbering above separately numbered workflow installs
+        type: number
+        default: 0
       run_emulator:
         description: Run Pro Android device validation after uploading the APK
         type: boolean
@@ -61,6 +65,10 @@ on:
         description: College APK artifact for two-app exchange verification
         type: string
         default: ''
+      version_code_offset:
+        description: Offset wrapper build numbering above separately numbered workflow installs
+        type: number
+        default: 0
       run_emulator:
         description: Run Pro Android device validation after uploading the APK
         type: boolean
@@ -125,11 +133,20 @@ jobs:
         env:
           PRO_COORDINATOR_UI_FIXTURES: ${{ github.workspace }}
         run: dotnet test tests/ProFootball.Tests/ProFootball.Tests.csproj -c Release --filter 'FullyQualifiedName~InSeasonRetentionTests'
+      - name: Set CI Android version metadata
+        shell: bash
+        env:
+          VERSION_CODE_OFFSET: ${{ inputs.version_code_offset || 0 }}
+        run: |
+          version_code=$((GITHUB_RUN_NUMBER + VERSION_CODE_OFFSET))
+          echo "APP_VERSION_CODE=$version_code" >> "$GITHUB_ENV"
+          echo "APP_DISPLAY_VERSION=0.1.$version_code" >> "$GITHUB_ENV"
+
       - name: Build independent pro APK
         run: >
           dotnet build src/ProFootball.App/ProFootball.App.csproj -c Debug -f net10.0-android
-          -p:AndroidPackageFormats=apk -p:ApplicationVersion=${{ github.run_number }}
-          -p:ApplicationDisplayVersion=0.1.${{ github.run_number }}
+          -p:AndroidPackageFormats=apk -p:ApplicationVersion="$APP_VERSION_CODE"
+          -p:ApplicationDisplayVersion="$APP_DISPLAY_VERSION"
       - name: Stage isolated management UI fixtures
         if: inputs.validation_scope != 'parity'
         run: |

@@ -21,6 +21,7 @@ jobs:
       reuse_apk_artifact: ''
       run_emulator: true
       run_career_health: false
+      version_code_offset: 1000
       run_rating_calibration: false
 
   pro:
@@ -32,4 +33,5 @@ jobs:
       reuse_apk_artifact: ''
       college_run: ''
       college_artifact: ''
+      version_code_offset: 1000
       run_emulator: true

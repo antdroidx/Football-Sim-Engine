@@ -47,6 +47,10 @@ on:
         description: Run 20-year FBS calibration plus complete 12-team career tests
         type: boolean
         default: false
+      version_code_offset:
+        description: Offset wrapper build numbering above separately numbered workflow installs
+        type: number
+        default: 0
 
   workflow_call:
     inputs:
@@ -74,6 +78,10 @@ on:
         description: Run 20-year FBS calibration plus complete 12-team career tests
         type: boolean
         default: false
+      version_code_offset:
+        description: Offset wrapper build numbering above separately numbered workflow installs
+        type: number
+        default: 0
 permissions:
   contents: read
 
@@ -172,9 +180,11 @@ jobs:
 
       - name: Set CI Android version metadata
         shell: bash
+        env:
+          VERSION_CODE_OFFSET: ${{ inputs.version_code_offset || 0 }}
         run: |
-          echo "APP_VERSION_CODE=$((400 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
-          echo "APP_DISPLAY_VERSION=0.20.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+          echo "APP_VERSION_CODE=$((400 + GITHUB_RUN_NUMBER + VERSION_CODE_OFFSET))" >> "$GITHUB_ENV"
+          echo "APP_DISPLAY_VERSION=0.20.$((GITHUB_RUN_NUMBER + VERSION_CODE_OFFSET))" >> "$GITHUB_ENV"
 
       - name: Build Android debug APK
         run: >
