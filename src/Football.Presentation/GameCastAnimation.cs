@@ -45,7 +45,7 @@ public static class GameCastAnimation
         var gameSpeed = context.GameSpeed; var replaySpeed = context.ReplaySpeed;
 
         if (snap.IsOnsideKick) { await Task.Delay(350); return; }
-        if (!GameDayEngine.IsScrimmage(snap) && !GameDayAnimationPlanner.IsPlaceKick(snap) && snap.Outcome is not (SnapOutcome.Kickoff or SnapOutcome.Punt)) { await Task.Delay(350); return; }
+        if (!GameDayEngine.IsScrimmage(snap) && !GameDayAnimationPlanner.IsPlaceKick(snap) && !snap.IsPreSnapPenalty && snap.Outcome is not (SnapOutcome.Kickoff or SnapOutcome.Punt)) { await Task.Delay(350); return; }
         highlight.IsVisible = false;
         var preSnapLabel = snap.PreSnap is { HasAlignmentAction: true }
             ? " · " + PreSnapCatalog.Label(snap.PreSnap) : "";
@@ -117,6 +117,7 @@ public static class GameCastAnimation
         var preSnapPlayers = offense.OfType<DynastyPlayer>().ToArray();
         var preSnapPrimary = preSnapChoice is { Type: PreSnapType.Motion } ? PreSnapMotionPlan.SelectPrimary(preSnapChoice, preSnapPlayers) : null;
         var preSnapSwapPartner = preSnapChoice is { Type: PreSnapType.Motion } ? PreSnapMotionPlan.SelectSwapPartner(preSnapChoice, preSnapPlayers) : null;
+        var preSnapShiftPrimary = preSnapChoice is { Type: PreSnapType.Shift } ? PreSnapMotionPlan.SelectShiftPrimary(preSnapChoice, preSnapPlayers) : null;
         var quarterbackAlignment = calledPlay is null ? new GameFieldPoint(-5, .50) : GameDayAnimationPlanner.OffensiveAlignment(calledPlay, Position.QB, 0);
         var routeFamily = calledPlay is null ? GameDayRouteFamily.Run : GameDayAnimationPlanner.RouteFamily(calledPlay);
         var receiverFamily = routeFamily;
@@ -239,10 +240,12 @@ public static class GameCastAnimation
                 var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65, snap.UsesDynamicKickoff, snap.IsOnsideKick);
                 x = formation.From.X; y = formation.From.Y;
             }
-            if (snap.PreSnap is { HasAlignmentAction: true, Type: PreSnapType.Shift } preSnapAlignment)
+            if (!preSnapPreview && snap.PreSnap is { HasAlignmentAction: true, Type: PreSnapType.Shift } preSnapAlignment &&
+                player?.PlayerId == preSnapShiftPrimary?.PlayerId)
             {
-                var lateral = preSnapAlignment.Yards / Math.Max(1, session.Rules.FieldWidthYards);
-                y = Math.Clamp(y + (preSnapAlignment.Side == "Right" ? lateral : -lateral), .06, .94);
+                var shifted = PreSnapMotionPlan.ShiftAlignment(preSnapAlignment, baseAlignment);
+                x = Project(snap.StartYardLine + shifted.X);
+                y = shifted.Y;
             }
             x = Math.Clamp(x, .025, .96);
             var isEligible = playerAssignment?.Task != AssignmentTask.Block && player?.Position is Position.WR or Position.TE or Position.RB or Position.FB;

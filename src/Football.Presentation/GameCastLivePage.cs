@@ -188,8 +188,9 @@ public class GameCastLivePage : ContentPage
             offense = defense = null; ResetPreSnap();
             if (manual)
             {
-                var calledPlay = GamePlanService.AvailableOffensivePlays(Plan).FirstOrDefault(play => play.Id == calledOffense);
-                await GameDayPreSnapPresentation.HoldAsync(
+                var calledPlay = OffensivePlay(last);
+                var calledDefensivePlay = DefensivePlay(last);
+                await GameDayPreSnapPresentation.HoldSequenceAsync(
                     calledPreSnap.HasAlignmentAction,
                     async () =>
                     {
@@ -197,10 +198,12 @@ public class GameCastLivePage : ContentPage
                         commentary.Text = "PRE-SNAP · " + (calledPlay?.Name ?? "Formation") +
                             (calledPreSnap.HasAlignmentAction ? " · " + PreSnapCatalog.Label(calledPreSnap) : "");
                     },
-                    () => AnimatePreSnapChoice(calledPreSnap),
+                    () => AnimateDefensiveAlignment(last, calledDefensivePlay),
+                    () => AnimatePreSnapChoice(calledPreSnap, calledPlay, last),
                     (delay, token) => Task.Delay(delay, token),
                     cancellationToken: lifetime.Token,
-                    settleAfterAlignment: calledPreSnap.MotionKind != PreSnapMotionKind.JetHandoff || !calledPreSnap.MotionLiveAtSnap);
+                    settleAfterAlignment: calledPreSnap.RequiresSetBeforeSnap,
+                    motionLiveAtSnap: calledPreSnap.MotionLiveAtSnap);
             }
             preSnapHolding = false; Update();
             var atBreak = await GameCastSnapPresentation.PresentAsync(new()
@@ -523,15 +526,42 @@ public class GameCastLivePage : ContentPage
         var index = Array.IndexOf(names, value);
         if (index >= 0) commentary.Text = GameDayCoachingService.Substitute(session, session.ControlledTeamName!, pool[index].PlayerId) ? pool[index].FullName + " in for the next snap." : "Player unavailable.";
     }
+    OffensivePlayDefinition? OffensivePlay(GameSnapEvent snap)
+    {
+        var profile = snap.OffenseTeamName == session.Game.HomeTeamName ? session.HomeProfile : session.AwayProfile;
+        return PlayEditorService.OffensiveLibrary(profile.GamePlan ?? Plan)
+            .FirstOrDefault(play => play.Id == snap.OffensivePlayId);
+    }
+
+    DefensivePlayDefinition? DefensivePlay(GameSnapEvent snap)
+    {
+        var profile = snap.DefenseTeamName == session.Game.HomeTeamName ? session.HomeProfile : session.AwayProfile;
+        return PlayEditorService.DefensiveLibrary(profile.GamePlan ?? Plan)
+            .FirstOrDefault(play => play.Id == snap.DefensivePlayId);
+    }
+
+    OffensivePlayDefinition? SelectedOffensivePlay()
+    {
+        if (string.IsNullOrWhiteSpace(offense)) return null;
+        var profile = session.PossessionTeamName == session.Game.HomeTeamName ? session.HomeProfile : session.AwayProfile;
+        return PlayEditorService.OffensiveLibrary(profile.GamePlan ?? Plan)
+            .FirstOrDefault(play => play.Id == offense);
+    }
+
     async Task SetPreSnap()
     {
         if (!control.CanChoosePreSnap) return;
-        var labels = PreSnapCatalog.Common.Select(PreSnapCatalog.Label).ToArray();
+        var options = PreSnapCatalog.Options(SelectedOffensivePlay());
+        var labels = options.Select(PreSnapCatalog.Label).ToArray();
         var selected = Array.IndexOf(labels, PreSnapCatalog.Label(preSnapChoice));
         var index = await GameDialogs.ChooseIndexAsync(this, "Pre-snap alignment", labels, Math.Max(0, selected));
-        if (index >= 0) { preSnapChoice = PreSnapCatalog.Common[index]; preSnapFromPlay = false; preSnap.Text = "Pre-snap: " + PreSnapCatalog.Label(preSnapChoice); }
+        if (index >= 0)
+        {
+            preSnapChoice = options[index];
+            preSnapFromPlay = false;
+            preSnap.Text = "Pre-snap: " + PreSnapCatalog.Label(preSnapChoice);
+        }
     }
-
     void ResetPreSnap()
     {
         preSnapChoice = PreSnapCatalog.None;
@@ -556,62 +586,116 @@ public class GameCastLivePage : ContentPage
         else if (preSnapFromPlay) ResetPreSnap();
     }
 
-    async Task AnimatePreSnapChoice(PreSnapChoice choice)
+    (double X, double Y) MarkerTranslation(
+        Border marker,
+        GameFieldPoint from,
+        GameFieldPoint to,
+        double direction)
     {
-        if (!choice.HasAlignmentAction || field.Height <= 0) return;
-        var offenseMarkers = markerHosts.Where(item => item.Value.Player?.TeamName == session.PossessionTeamName).ToArray();
+        var x = (to.X - from.X) * direction / 120d * Math.Max(1, field.Width - marker.Width);
+        var y = (to.Y - from.Y) * Math.Max(1, field.Height - marker.Height);
+        return (x, y);
+    }
+
+    async Task AnimateDefensiveAlignment(GameSnapEvent snap, DefensivePlayDefinition? calledDefense)
+    {
+        var offensivePlay = OffensivePlay(snap);
+        if (calledDefense is null || offensivePlay is null || field.Width <= 0 || field.Height <= 0) return;
+        var defenseMarkers = markerHosts
+            .Where(item => item.Value.Player?.TeamName == snap.DefenseTeamName)
+            .ToArray();
+        var defenders = defenseMarkers.Select(item => item.Value.Player).OfType<DynastyPlayer>().ToArray();
+        if (defenders.Length == 0) return;
+
+        var baseAlignments = DefensivePursuitService.Alignments(defenders, calledDefense);
+        var shiftedAlignments = PreSnapDefensivePlan.Alignments(defenders, calledDefense, offensivePlay);
+        var direction = (snap.OffenseTeamName == session.Game.HomeTeamName ? 1 : -1) *
+            (snap.Quarter % 2 == 0 ? -1 : 1);
+        var moves = new List<Task>();
+
+        foreach (var item in defenseMarkers)
+        {
+            if (item.Value.Player is not DynastyPlayer defender) continue;
+            var basePoint = baseAlignments[defender.PlayerId];
+            var shifted = shiftedAlignments[defender.PlayerId];
+            var translation = MarkerTranslation(item.Key, basePoint, shifted, direction);
+            if (Math.Abs(translation.X) < .25 && Math.Abs(translation.Y) < .25) continue;
+            moves.Add(item.Key.TranslateToAsync(
+                translation.X, translation.Y, 520, Easing.CubicOut));
+        }
+
+        await Task.WhenAll(moves);
+    }
+
+    async Task AnimatePreSnapChoice(PreSnapChoice choice, OffensivePlayDefinition? calledPlay, GameSnapEvent snap)
+    {
+        if (!choice.HasAlignmentAction || calledPlay is null || field.Width <= 0 || field.Height <= 0) return;
+        var offenseMarkers = markerHosts
+            .Where(item => item.Value.Player?.TeamName == snap.OffenseTeamName)
+            .ToArray();
         if (offenseMarkers.Length == 0) return;
         var players = offenseMarkers.Select(item => item.Value.Player).OfType<DynastyPlayer>().ToArray();
         var fieldWidth = Math.Max(1, session.Rules.FieldWidthYards);
-
-        if (choice.Type == PreSnapType.Shift)
-        {
-            var pixels = field.Height * choice.Yards / fieldWidth;
-            var delta = choice.Side == "Right" ? pixels : -pixels;
-            await Task.WhenAll(offenseMarkers.Select(item => item.Key.TranslateToAsync(0, delta, 260, Easing.CubicOut)));
-            return;
-        }
-
-        var calledPlay = PlayEditorService.OffensiveLibrary(Plan).FirstOrDefault(play => play.Id == offense);
-        if (calledPlay is null) return;
-        var primary = PreSnapMotionPlan.SelectPrimary(choice, players);
-        var swapPartner = PreSnapMotionPlan.SelectSwapPartner(choice, players);
-        var primaryMarker = offenseMarkers.FirstOrDefault(item => item.Value.Player?.PlayerId == primary?.PlayerId);
-        var partnerMarker = offenseMarkers.FirstOrDefault(item => item.Value.Player?.PlayerId == swapPartner?.PlayerId);
-        if (primaryMarker.Key is null || primary is null) return;
+        var direction = (snap.OffenseTeamName == session.Game.HomeTeamName ? 1 : -1) *
+            (snap.Quarter % 2 == 0 ? -1 : 1);
 
         GameFieldPoint AlignmentFor(DynastyPlayer player)
         {
-            var role = players.TakeWhile(item => item.PlayerId != player.PlayerId).Count(item => item.Position == player.Position);
+            var role = PreSnapMotionPlan.RoleIndex(players, player.Position, player.PlayerId);
             return GameDayAnimationPlanner.OffensiveAlignment(calledPlay, player.Position, role);
         }
+
+        if (choice.Type == PreSnapType.Shift)
+        {
+            var primary = PreSnapMotionPlan.SelectShiftPrimary(choice, players);
+            var shiftMarker = offenseMarkers
+                .FirstOrDefault(item => item.Value.Player?.PlayerId == primary?.PlayerId);
+            if (primary is null || shiftMarker.Key is not { } marker) return;
+
+            var basePoint = AlignmentFor(primary);
+            var shifted = PreSnapMotionPlan.ShiftAlignment(choice, basePoint);
+            var translation = MarkerTranslation(marker, basePoint, shifted, direction);
+            await marker.TranslateToAsync(
+                translation.X, translation.Y, 420, Easing.CubicOut);
+            return;
+        }
+
+        var primaryPlayer = PreSnapMotionPlan.SelectPrimary(choice, players);
+        var swapPartner = PreSnapMotionPlan.SelectSwapPartner(choice, players);
+        var primaryMarker = offenseMarkers
+            .FirstOrDefault(item => item.Value.Player?.PlayerId == primaryPlayer?.PlayerId);
+        var partnerMarker = offenseMarkers
+            .FirstOrDefault(item => item.Value.Player?.PlayerId == swapPartner?.PlayerId);
+        if (primaryPlayer is null || primaryMarker.Key is not { } motionMarker) return;
 
         var quarterbackPoint = players.FirstOrDefault(player => player.Position == Position.QB) is DynastyPlayer quarterback
             ? AlignmentFor(quarterback)
             : GameDayAnimationPlanner.OffensiveAlignment(calledPlay, Position.QB, 0);
-        var primaryPoint = AlignmentFor(primary);
+        var primaryPoint = AlignmentFor(primaryPlayer);
         var partnerPoint = swapPartner is null ? primaryPoint : AlignmentFor(swapPartner);
-        var primarySnap = PreSnapMotionPlan.SnapAlignment(choice, true, false, primaryPoint, partnerPoint, quarterbackPoint);
-        var partnerSnap = PreSnapMotionPlan.SnapAlignment(choice, false, true, partnerPoint, primaryPoint, quarterbackPoint);
-        var direction = (session.PossessionTeamName == session.Game.HomeTeamName ? 1 : -1) * (session.Quarter % 2 == 0 ? -1 : 1);
+        var primarySnap = PreSnapMotionPlan.SnapAlignment(
+            choice, true, false, primaryPoint, partnerPoint, quarterbackPoint);
+        var partnerSnap = PreSnapMotionPlan.SnapAlignment(
+            choice, false, true, partnerPoint, primaryPoint, quarterbackPoint);
 
         async Task MoveAlong(Border marker, GameFieldPoint basePoint, GameFieldPoint snapPoint)
         {
-            var path = PreSnapMotionPlan.Path(choice, basePoint, snapPoint, quarterbackPoint, fieldWidth);
+            var path = PreSnapMotionPlan.Path(
+                choice, basePoint, snapPoint, quarterbackPoint, fieldWidth);
             foreach (var point in path.Skip(1))
             {
-                var x = (point.X - basePoint.X) * direction / 120d * Math.Max(1, field.Width - marker.Width);
-                var y = (point.Y - basePoint.Y) * Math.Max(1, field.Height - marker.Height);
-                await marker.TranslateToAsync(x, y, 260, Easing.CubicInOut);
+                var translation = MarkerTranslation(marker, basePoint, point, direction);
+                await marker.TranslateToAsync(
+                    translation.X, translation.Y, 260, Easing.CubicInOut);
             }
         }
 
-        var moves = new List<Task> { MoveAlong(primaryMarker.Key, primaryPoint, primarySnap) };
-        if (partnerMarker.Key is not null && swapPartner is not null)
-            moves.Add(MoveAlong(partnerMarker.Key, partnerPoint, partnerSnap));
+        var moves = new List<Task> { MoveAlong(motionMarker, primaryPoint, primarySnap) };
+        if (swapPartner is not null && partnerMarker.Key is not { } partnerView) return;
+        if (swapPartner is not null && partnerMarker.Key is { } partnerMarkerView)
+            moves.Add(MoveAlong(partnerMarkerView, partnerPoint, partnerSnap));
         await Task.WhenAll(moves);
     }
-
     async Task CoachTalk()
     {
         var audience = session.UserCoachRole == StaffRole.OffensiveCoordinator ? CoachTalkAudience.Offense : session.UserCoachRole == StaffRole.DefensiveCoordinator ? CoachTalkAudience.Defense : CoachTalkAudience.Team;

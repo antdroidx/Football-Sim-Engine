@@ -35,6 +35,36 @@ on:
         description: College APK artifact for two-app exchange verification
         type: string
         default: ''
+      run_emulator:
+        description: Run Pro Android device validation after uploading the APK
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      validation_scope:
+        description: Validation scope passed through to the established Pro workflow
+        type: string
+        default: fast
+      reuse_apk_run_id:
+        description: Optional prior run ID for test-only retries; app-source differences reject reuse
+        type: string
+        default: ''
+      reuse_apk_artifact:
+        description: Original APK artifact name when reusing a prior build
+        type: string
+        default: ''
+      college_run:
+        description: College APK run for two-app exchange verification
+        type: string
+        default: ''
+      college_artifact:
+        description: College APK artifact for two-app exchange verification
+        type: string
+        default: ''
+      run_emulator:
+        description: Run Pro Android device validation after uploading the APK
+        type: boolean
+        default: false
 permissions:
   contents: read
   actions: read
@@ -124,7 +154,7 @@ jobs:
           retention-days: 7
   pro-device:
     needs: pro-build
-    if: github.event_name == 'workflow_dispatch' && inputs.validation_scope != 'fast' && inputs.validation_scope != 'parity' && (inputs.validation_scope != 'exchange' || inputs.college_run != '') && always() && !cancelled() && (needs.pro-build.result == 'success' || inputs.reuse_apk_run_id != '')
+    if: inputs.run_emulator && inputs.validation_scope != 'fast' && inputs.validation_scope != 'parity' && (inputs.validation_scope != 'exchange' || inputs.college_run != '') && always() && !cancelled() && (needs.pro-build.result == 'success' || inputs.reuse_apk_run_id != '')
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:

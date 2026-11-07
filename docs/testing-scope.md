@@ -1,3 +1,26 @@
+## Pre-snap timing, motion and penalty presentation - November 7, 2026
+
+The shared GameCast pre-snap sequence now enforces a 3.5-second minimum from formation visibility to snap. It orders the sequence as formation display, defensive alignment adjustment, offensive shift/motion, required one-second set where applicable, then snap or dead-ball foul reveal. Live Jet motion is scheduled late enough to reach the quarterback mesh at the snap instead of standing behind the quarterback before the exchange.
+
+User pre-snap choices expose `None`, receiver-only left/right shifts, and the selected play's motion preset or receiver return motion. Offensive linemen cannot be selected for a user shift. Defensive adjustment is automatic and presentation-only: the front and secondary respond to offensive formation strength and spread/box shape after seeing the offense at the line.
+
+Dead-ball pre-snap penalties now carry offensive/defensive play IDs, formation personnel and `IsPreSnapPenalty=true`. Focused tests verify the culprit belongs to the aligned unit and that the additive fields survive JSON save round trips. The foul banner is not presented until after the formation and motion sequence; live-ball penalties keep their existing played-snap animation.
+
+Focused and required local validation:
+
+- `GameDayPreSnapPresentationTests|PreSnapMotionPlanTests|PreSnapTests|PenaltyPresentationTests`: 34 passed.
+- Engine Fast: 392 passed; Engine Balance: 12 passed.
+- College `GamePlanTests`: 14 passed.
+- Pro `FootballRulesConformanceTests`: 5 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 485 passed, 1 known intermittent failure (`CapInitializationTests.ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets`). The exact isolated retry passed 1/1 without a source change.
+- Packaged-resource validation: passed.
+- `python -m unittest discover -s build -p 'test_android_ui_smoke.py'`: 24 passed.
+- Football.Presentation Debug compile: passed with zero warnings/errors.
+- College Android Debug APK packaging: passed with zero warnings/errors.
+- Pro Android Debug APK packaging: passed with zero errors and the two documented `CS8625` warnings.
+
+The College and Pro long career/calibration exclusions remain unchanged. No local emulator claim is made in this entry. `.github/workflows/presnap-apk-validation.yml` calls the established College and Pro workflows with emulator/live validation enabled and will provide the exact CI APK and device evidence after the branch push.
 ## Play-aware motion Actions artifact verification - November 6, 2026
 
 Actions runs `42328614160` and `42328614715` completed successfully from `0613ebab6d8d51feeafb735f01f08bd7ef18281a`.

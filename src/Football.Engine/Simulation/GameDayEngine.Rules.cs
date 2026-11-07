@@ -178,7 +178,14 @@ public static partial class GameDayEngine
         return snap;
     }
 
-    private static GameSnapEvent? TryPreSnapPenalty(GameDaySession session, PreSnapChoice? preSnap)
+    private static GameSnapEvent? TryPreSnapPenalty(
+        GameDaySession session,
+        PreSnapChoice? preSnap,
+        TeamGamePlan offensePlan,
+        TeamGamePlan defensePlan,
+        string? userPlayId,
+        string? userDefensivePlayId,
+        string? requestedSpecial)
     {
         if (session.Events.Count == 0) return null;
         var random = new Random(unchecked(session.Game.SimulationSeed * 397 ^ session.Events.Count * 7919));
@@ -187,12 +194,46 @@ public static partial class GameDayEngine
         // Field spots use whole yards. Do not turn a half-distance foul into a goal-line crossing.
         var enforced = Math.Min(5, Math.Max(0, (offense ? session.YardLine : 100 - session.YardLine) / 2));
         var yards = offense ? -enforced : enforced;
-        var defenseTeam = session.PossessionTeamName == session.Game.HomeTeamName ? session.Game.AwayTeamName : session.Game.HomeTeamName;
+        var homeOnOffense = session.PossessionTeamName.Equals(session.Game.HomeTeamName, StringComparison.OrdinalIgnoreCase);
+        var defenseTeam = homeOnOffense ? session.Game.AwayTeamName : session.Game.HomeTeamName;
         var penalizedTeam = offense ? session.PossessionTeamName : defenseTeam;
         var foul = offense ? "False start" : "Offside";
-        var candidates=(offense ? session.PossessionTeamName==session.Game.HomeTeamName?session.HomeRoster:session.AwayRoster : defenseTeam==session.Game.HomeTeamName?session.HomeRoster:session.AwayRoster)
-            .Where(p=>p.CurrentInjury is null&&!p.IsRedshirted&&(offense?p.Position==Position.OL:p.Position is Position.DE or Position.DT)).OrderBy(p=>p.DepthChartOrder).Take(5).ToArray();
-        var culprit=candidates.Length>0?candidates.OrderBy(p=>(p.Skills?.Discipline??60)+random.Next(0,30)).First().PlayerId:(Guid?)null;
+
+        var offensePlay = requestedSpecial is null
+            ? !string.IsNullOrWhiteSpace(userPlayId)
+                ? PlayEditorService.OffensiveLibrary(offensePlan).FirstOrDefault(play => play.Id == userPlayId)
+                : GamePlanService.RecommendOffensivePlay(
+                    offensePlan, session.Down, session.Distance, session.YardLine,
+                    session.Events.Count, null, session.Game.SimulationSeed)
+            : null;
+        var defensePlay = !string.IsNullOrWhiteSpace(userDefensivePlayId)
+            ? PlayEditorService.DefensiveLibrary(defensePlan).FirstOrDefault(play => play.Id == userDefensivePlayId)
+            : GamePlanService.RecommendDefensivePlay(defensePlan, session.Down, session.Distance);
+
+        var previewRandom = new Random(unchecked(session.Game.SimulationSeed * 104729 ^ session.Events.Count * 15485863));
+        var offenseUnit = GameDayCoachingService.ApplySubstitutions(session, PersonnelRotationService.SelectOffense(
+            homeOnOffense ? session.HomeDepthChart : session.AwayDepthChart,
+            session.PossessionTeamName,
+            offensePlay?.Personnel ?? OffensivePersonnel.Eleven,
+            homeOnOffense ? session.HomeFatigue : session.AwayFatigue,
+            previewRandom));
+        var defenseUnit = GameDayCoachingService.ApplySubstitutions(session, PersonnelRotationService.SelectDefense(
+            homeOnOffense ? session.AwayDepthChart : session.HomeDepthChart,
+            defenseTeam,
+            defensePlay?.Personnel ?? DefensivePersonnel.BaseFourThree,
+            homeOnOffense ? session.AwayFatigue : session.HomeFatigue,
+            previewRandom));
+
+        var unitIds = offense ? offenseUnit.PlayerIds : defenseUnit.PlayerIds;
+        var candidates = unitIds
+            .Select(id => session.PlayersById[id])
+            .Where(p => p.CurrentInjury is null && !p.IsRedshirted &&
+                (offense ? p.Position == Position.OL : p.Position is Position.DE or Position.DT))
+            .OrderBy(p => p.DepthChartOrder).Take(5).ToArray();
+        var culprit = candidates.Length > 0
+            ? candidates.OrderBy(p => (p.Skills?.Discipline ?? 60) + random.Next(0, 30)).First().PlayerId
+            : (Guid?)null;
+
         var snap = new GameSnapEvent
         {
             StatsVersion = 1, PenalizedPlayerId = culprit,
@@ -202,24 +243,32 @@ public static partial class GameDayEngine
             OffenseTeamName = session.PossessionTeamName,
             DefenseTeamName = defenseTeam,
             PreSnap = preSnap,
-            OffensivePlayId = "", DefensivePlayId = "", Down = session.Down, Distance = session.Distance,
+            OffensivePlayId = offensePlay?.Id ?? string.Empty,
+            DefensivePlayId = defensePlay?.Id ?? string.Empty,
+            CallSource = string.IsNullOrWhiteSpace(userPlayId) ? PlayCallSource.Cpu : PlayCallSource.User,
+            DefensiveCallSource = string.IsNullOrWhiteSpace(userDefensivePlayId) ? PlayCallSource.Cpu : PlayCallSource.User,
+            Down = session.Down, Distance = session.Distance,
             StartYardLine = session.YardLine, BallEndYardLine = session.YardLine + yards,
             PenalizedTeamName = penalizedTeam, PenaltyName = foul, PenaltyYards = enforced,
-            Outcome = SnapOutcome.Penalty, Description = $"{foul} on {penalizedTeam}: {enforced} yards."
+            Outcome = SnapOutcome.Penalty, IsPreSnapPenalty = true,
+            Description = $"{foul} on {penalizedTeam}: {enforced} yards.",
+            OffensePersonnel = offenseUnit.PlayerIds,
+            DefensePersonnel = defenseUnit.PlayerIds
         };
-        var running=!session.ClockStopped||session.ClockRestartsOnReady;
+        var running = !session.ClockStopped || session.ClockRestartsOnReady;
         session.YardLine += yards; session.Distance -= yards;
         if (session.Distance <= 0) { session.Down = 1; session.Distance = Math.Min(10, 100 - session.YardLine); }
         session.ClockRestartsOnReady = !session.ClockStopped || session.ClockRestartsOnReady;
         session.ClockStopped = true; session.PlayClockSeconds = 25; session.Events.Add(snap);
-        ApplyFoulRunoff(session,penalizedTeam,true,running);
-        var offenseMargin=session.PossessionTeamName==session.Game.HomeTeamName?session.HomeScore-session.AwayScore:session.AwayScore-session.HomeScore;
-        if(!offense && session.Quarter is 2 or 4 && session.ClockSeconds<=120 && offenseMargin<=0)
-            session.ClockRestartsOnReady=false;
+        ApplyFoulRunoff(session, penalizedTeam, true, running);
+        var offenseMargin = session.PossessionTeamName == session.Game.HomeTeamName
+            ? session.HomeScore - session.AwayScore
+            : session.AwayScore - session.HomeScore;
+        if (!offense && session.Quarter is 2 or 4 && session.ClockSeconds <= 120 && offenseMargin <= 0)
+            session.ClockRestartsOnReady = false;
         AdvanceQuarter(session);
         return session.Events[^1];
     }
-
     private static void StartProfessionalOvertime(GameDaySession session)
     {
         session.OvertimeRound = 1; session.Quarter = 5;

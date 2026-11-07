@@ -31,6 +31,13 @@ public sealed class PenaltyPresentationTests
         Assert.Equal(expectedTeam,snap.PenalizedTeamName);Assert.Equal(5,snap.PenaltyYards);
         Assert.Equal(offense?45:55,s.YardLine);Assert.Equal(offense?12:2,s.Distance);Assert.Equal(3,s.Down);
         Assert.False(GameDayEngine.IsScrimmage(snap));Assert.Equal(0,snap.Yards);
+        Assert.True(snap.IsPreSnapPenalty);
+        Assert.False(snap.IsLiveBallPenalty);
+        Assert.Equal("off-spread-zone", snap.OffensivePlayId);
+        Assert.NotEmpty(snap.DefensivePlayId);
+        Assert.NotEmpty(snap.OffensePersonnel);
+        Assert.NotEmpty(snap.DefensePersonnel);
+        Assert.Contains(snap.PenalizedPlayerId!.Value, offense ? snap.OffensePersonnel : snap.DefensePersonnel);
         var display=GameDayCommentaryService.Penalty(snap)!;
         Assert.Equal(expectedTeam,display.TeamName);Assert.Equal(offense?"False start":"Offside",display.Foul);
         Assert.Equal($"PENALTY\n5 yards {display.Foul}\n{expectedTeam}",display.Banner);
@@ -64,5 +71,18 @@ public sealed class PenaltyPresentationTests
         Assert.Equal("Offside on Washington: 5 yards.",GameDayCommentaryService.Describe(restored,new Dictionary<Guid,DynastyPlayer>()));
         Assert.Equal("Washington",GameDayCommentaryService.Penalty(snap with {PenalizedTeamName=null,PenaltyName=null,PenaltyYards=null,Description="Defensive offside: 5 yards."})!.TeamName);
         Assert.Null(GameDayCommentaryService.Penalty(snap with {Outcome=SnapOutcome.Run}));
+    }
+
+    [Fact]
+    public void PreSnapFoulFormationContextSurvivesSaveCompatibility()
+    {
+        var (_, snap) = Foul(true, "Home", 50);
+        var restored = JsonSerializer.Deserialize<GameSnapEvent>(JsonSerializer.Serialize(snap))!;
+
+        Assert.True(restored.IsPreSnapPenalty);
+        Assert.Equal(snap.OffensivePlayId, restored.OffensivePlayId);
+        Assert.Equal(snap.DefensivePlayId, restored.DefensivePlayId);
+        Assert.Equal(snap.OffensePersonnel, restored.OffensePersonnel);
+        Assert.Equal(snap.DefensePersonnel, restored.DefensePersonnel);
     }
 }

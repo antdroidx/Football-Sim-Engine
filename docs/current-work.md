@@ -1,3 +1,25 @@
+## Pre-snap formation, motion and APK validation workflow - November 7, 2026
+
+Shared GameCast now keeps a called formation on screen for a minimum of 3.5 seconds before the snap. Defensive players automatically adjust after the offensive formation is visible, offensive shifts are limited to a selected receiver, and play-specific motion uses the resolved play instead of a stale call-sheet lookup. Jet Sweep animates the selected receiver from his WR alignment toward the quarterback mesh and keeps that receiver as the ball carrier.
+
+Dead-ball false starts and offside now record formation play IDs, selected personnel and an explicit `IsPreSnapPenalty` marker. GameCast renders the aligned formation and completes pre-snap movement before revealing the foul banner; live-ball penalty playback remains unchanged. Older `PreSnapChoice` and `GameSnapEvent` records continue to deserialize with their previous defaults.
+
+`.github/workflows/presnap-apk-validation.yml` reuses the established College and Pro workflows through `workflow_call`. A push to `codex/presnap-formation-motion-fixes` runs the standard tests, builds both signed Debug APK artifacts, and enables the existing College and Pro emulator/live scopes. No duplicate APK jobs or release workflow were added.
+
+Validation actually run on the implementation working tree:
+
+- Engine focused pre-snap/presentation/penalty suite: 34 passed.
+- Engine Fast: 392 passed. Engine Balance: 12 passed.
+- College `GamePlanTests`: 14 passed.
+- Pro `FootballRulesConformanceTests`: 5 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 485 passed and the documented intermittent `CapInitializationTests.ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets` failed once after 3m32s. The exact isolated retry passed 1/1 in 1m29s with no source or assertion change.
+- Packaged-resource validation: passed.
+- Android UI synchronization helpers: 24 passed.
+- College Android Debug APK build: passed with zero warnings/errors.
+- Pro Android Debug APK build: passed with zero errors and the two existing `CS8625` warnings.
+
+Local APKs were generated at `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk` (91,217,048 bytes, SHA-256 `DCE724671091D8C6D727A64EF0B75A12DA9BBC6FCB2B74B37536F6042CBB451B`) and `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk` (89,937,519 bytes, SHA-256 `069FB775EFEB9D151DE26C48D617F12EB4A9D84891AB90C8153CCCF5E71D02C1`). Both are Debug `net10.0-android` builds. GitHub Actions completion, artifact verification, emulator evidence and exact CI APK identities are pending until the branch workflow finishes.
 ## Play-aware motion Actions APKs - November 6, 2026
 
 GitHub Actions completed successfully for implementation commit `0613ebab6d8d51feeafb735f01f08bd7ef18281a` on `codex/presnap-gamecast-corrections`:

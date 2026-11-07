@@ -20,6 +20,8 @@ public sealed record PreSnapChoice(PreSnapType Type, string Side, double Yards)
     public PreSnapMotionKind MotionKind { get; init; } = PreSnapMotionKind.ReturnToFormation;
     public Position? MotionPosition { get; init; }
     public int MotionRoleIndex { get; init; }
+    public Position? ShiftPosition { get; init; }
+    public int ShiftRoleIndex { get; init; }
     public Position? SwapPosition { get; init; }
     public int SwapRoleIndex { get; init; } = 1;
     public double? SnapLane { get; init; }
@@ -35,4 +37,6 @@ public sealed record PreSnapChoice(PreSnapType Type, string Side, double Yards)
 
     public bool Valid => PreSnapCatalog.IsValid(this);
     public bool HasAlignmentAction => Type is not PreSnapType.None;
+    public bool RequiresSetBeforeSnap => Type == PreSnapType.Shift ||
+        Type == PreSnapType.Motion && MotionKind != PreSnapMotionKind.JetHandoff;
 }

@@ -48,6 +48,32 @@ on:
         type: boolean
         default: false
 
+  workflow_call:
+    inputs:
+      management_scope:
+        description: Focus device and engine checks on the changed management flow
+        type: string
+        default: full
+      reuse_apk_run_id:
+        description: Prior APK run for harness-only retries; application input differences reject reuse
+        type: string
+        default: ''
+      reuse_apk_artifact:
+        description: Exact prior dynasty-manager-build artifact name
+        type: string
+        default: ''
+      run_emulator:
+        description: Run Android launch validation after uploading the APK
+        type: boolean
+        default: false
+      run_career_health:
+        description: Include the extended five/ten-year career simulations
+        type: boolean
+        default: false
+      run_rating_calibration:
+        description: Run 20-year FBS calibration plus complete 12-team career tests
+        type: boolean
+        default: false
 permissions:
   contents: read
 
@@ -194,7 +220,7 @@ jobs:
 
   android-launch:
     needs: build-test-android
-    if: github.event_name == 'workflow_dispatch' && inputs.run_emulator && always() && !cancelled() && (needs.build-test-android.result == 'success' || inputs.reuse_apk_run_id != '')
+    if: inputs.run_emulator && always() && !cancelled() && (needs.build-test-android.result == 'success' || inputs.reuse_apk_run_id != '')
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -295,7 +321,7 @@ jobs:
 
   android-career-options:
     needs: build-test-android
-    if: inputs.management_scope != 'overview-roster' && inputs.management_scope != 'statistics' && inputs.management_scope != 'generated-roster' && inputs.management_scope != 'fast-forward' && github.event_name == 'workflow_dispatch' && inputs.run_emulator
+    if: inputs.management_scope != 'overview-roster' && inputs.management_scope != 'statistics' && inputs.management_scope != 'generated-roster' && inputs.management_scope != 'fast-forward' && inputs.run_emulator
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

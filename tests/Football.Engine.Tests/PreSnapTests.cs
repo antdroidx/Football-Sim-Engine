@@ -216,4 +216,24 @@ public class PreSnapTests
         snap = control.Step("off-spread-zone", null, PreSnapCatalog.Motion("Right", 1.5));
         Assert.Null(snap.PreSnap);
     }
+
+    [Fact]
+    public void UserOptionsRestrictShiftsToReceiversAndKeepMotionPlayAware()
+    {
+        var jetPlay = PlaybookCatalog.OffensivePlays.Single(play => play.Id == "off-spread-jet-zone");
+        var options = PreSnapCatalog.Options(jetPlay);
+
+        Assert.Equal(4, options.Count);
+        Assert.Equal(PreSnapCatalog.None, options[0]);
+        Assert.All(options.Where(choice => choice.Type == PreSnapType.Shift),
+            choice => Assert.Equal(Position.WR, choice.ShiftPosition));
+        Assert.Contains(jetPlay.PreSnapAction, options);
+        Assert.DoesNotContain(options, choice =>
+            choice.Type == PreSnapType.Shift && choice.ShiftPosition != Position.WR);
+        Assert.DoesNotContain(options, choice =>
+            choice.Type == PreSnapType.Motion && choice.MotionPosition is not (Position.WR or Position.TE or Position.RB or Position.FB));
+
+        Assert.True(PreSnapCatalog.IsValid(PreSnapCatalog.ReceiverShift("Right", Position.WR, 0)));
+        Assert.False(PreSnapCatalog.IsValid(PreSnapCatalog.ReceiverShift("Right", Position.OL, 0)));
+    }
 }

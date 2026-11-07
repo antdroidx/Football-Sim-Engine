@@ -98,7 +98,7 @@ public static partial class GameDayEngine
             throw new ArgumentException("Offensive play is not in this custom playbook.", nameof(userPlayId));
         if (!string.IsNullOrWhiteSpace(userPlayId) && requestedSpecial is null)
             offensePlan = offensePlan with { OpeningPlayIds = [userPlayId] };
-        var penalty = TryPreSnapPenalty(session, alignmentAction);
+        var penalty = TryPreSnapPenalty(session, alignmentAction, offensePlan, defensePlan, userPlayId, userDefensivePlayId, requestedSpecial);
         if (penalty is not null) return penalty;
         var offensivePossessionIndex = session.Events.Count(item => item.OffenseTeamName == session.PossessionTeamName && IsScrimmage(item));
         var call = GamePlanService.ResolvePlayCall(offensePlan, defensePlan,

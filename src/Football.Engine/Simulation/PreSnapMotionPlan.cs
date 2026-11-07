@@ -37,6 +37,19 @@ public static class PreSnapMotionPlan
             .FirstOrDefault();
     }
 
+    public static DynastyPlayer? SelectShiftPrimary(PreSnapChoice choice, IReadOnlyList<DynastyPlayer> players)
+    {
+        ArgumentNullException.ThrowIfNull(choice);
+        ArgumentNullException.ThrowIfNull(players);
+        if (choice.Type != PreSnapType.Shift) return null;
+        if (choice.ShiftPosition is Position position)
+            return players.FirstOrDefault(player => player.Position == position &&
+                RoleIndex(players, position, player.PlayerId) == choice.ShiftRoleIndex);
+
+        return players.FirstOrDefault(player => player.Position == Position.WR) ??
+            players.FirstOrDefault(player => player.Position is Position.TE or Position.RB or Position.FB);
+    }
+
     public static DynastyPlayer? SelectSwapPartner(PreSnapChoice choice, IReadOnlyList<DynastyPlayer> players)
     {
         if (choice.Type != PreSnapType.Motion || choice.MotionKind != PreSnapMotionKind.SwapAlignments ||
@@ -76,6 +89,15 @@ public static class PreSnapMotionPlan
                 Math.Clamp(choice.SnapLane ?? 1 - baseAlignment.Y, .08, .92)),
             _ => baseAlignment
         };
+    }
+
+    /// <summary>Final alignment for a receiver shift. A shift changes stance/alignment without live motion.</summary>
+    public static GameFieldPoint ShiftAlignment(PreSnapChoice choice, GameFieldPoint baseAlignment)
+    {
+        if (choice.Type != PreSnapType.Shift) return baseAlignment;
+        var yards = Math.Max(0, choice.Yards);
+        var lane = choice.Side.Equals("Right", StringComparison.OrdinalIgnoreCase) ? yards : -yards;
+        return baseAlignment with { Y = Math.Clamp(baseAlignment.Y + lane / 53.333, .06, .94) };
     }
 
     /// <summary>Path used by the live pre-snap animation. The final point is the snap alignment.</summary>

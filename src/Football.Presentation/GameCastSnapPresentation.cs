@@ -23,7 +23,7 @@ public static class GameCastSnapPresentation
     public static async Task<bool> PresentAsync(GameCastSnapPresentationContext context)
     {
         var session = context.Session; var snap = context.Snap;
-        await context.Animate(snap, false);
+        if (!snap.IsPreSnapPenalty) await context.Animate(snap, false);
         await GameCastHighlight.ShowAsync(context.Highlight, context.HighlightText, session, snap, context.TeamColor);
         if (context.AutoReplay && GameDayLivePresentation.InstantReplay(snap)) await context.Replay(snap);
         var period = GameDayAnimationPlanner.PeriodHeadline(snap.Quarter, session.Quarter, session.IsComplete);
