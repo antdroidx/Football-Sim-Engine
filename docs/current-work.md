@@ -1,5 +1,15 @@
 ## GitHub Actions APK verification - November 8, 2026
 
+Run [42468674918](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42468674918) completed successfully on `fe3a885db59b0f0bd1dcbeaa778ffd441d9fb4dc`; all five jobs are green. It supersedes run [42462711585](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585), which was built before the pre-snap motion travelled the full path.
+
+Remote APKs:
+
+- College `dynasty-manager-build-11`, artifact [13613095351](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42468674918/artifacts/13613095351): `antdroid.cfbcoach.dev-Signed.apk`, 91,584,562 bytes, version code `1411` / `0.20.1011`, SHA-256 `A988DA722F784A499F394ACB7FC680E85CB5D531B6D34EB57B3C4F4295465D40`.
+- Pro `pro-football-apk-11`, artifact [13612803020](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42468674918/artifacts/13612803020): `antdroid.profootball.franchise-Signed.apk`, 90,305,033 bytes, version code `1011` / `0.1.1011`, SHA-256 `4E75155A20FD16380691AB64390C863F41752955DE11533C73F33EFB55FCE80F`.
+
+Both APKs pass `aapt dump badging` package checks and `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`, the same signing key as the published versions. Device evidence is [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42468674918/artifacts/13613615817), [College launch](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42468674918/artifacts/13613161065), and [College career options](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42468674918/artifacts/13612957061). These are Actions artifacts, not GitHub releases.
+## GitHub Actions APK verification - November 8, 2026
+
 Run [42462711585](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585) completed successfully on `74dba82ca44d21cc8ff912e8643abbdc49f3ff39`; all five jobs are green.
 
 Remote APKs:
