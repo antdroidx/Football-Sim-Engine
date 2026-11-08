@@ -33,9 +33,12 @@ public class StaffBalanceTests
         }
     }
 
-    // The staff lifecycle is seeded from the franchise id, so the fixture keeps a fixed one.
-    static ProFranchise New()=>ProLeagueService.Create("Seattle Seahawks",generatedPlayers:true,applyOpeningTrades:false)
-        with{Id=Guid.Parse("7c9e6679-7425-40de-944b-e07fc1f90ae7")};
+    // The staff lifecycle is seeded from the franchise id, so creation receives the fixed id directly.
+    static ProFranchise New() => ProLeagueService.Create(
+        "Seattle Seahawks",
+        generatedPlayers: true,
+        applyOpeningTrades: false,
+        franchiseId: Guid.Parse("7c9e6679-7425-40de-944b-e07fc1f90ae7"));
 
     [Fact]
     public void FreshFranchiseSeedsAlwaysCreateNinetySixUniqueScouts()

@@ -9,7 +9,7 @@ Focused motion/timing/kick tests: 29 passed. Football.Engine: 423 passed. Colleg
 Local Debug APKs:
 
 - College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, version code `400` / `0.20.0`, 91,580,466 bytes, SHA-256 `5ED1726A14CED65C0DBA19481280A058FA126CC4B30F80339B4A861DD880BF58`.
-- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, version code `1` / `0.1.0`, 89,962,095 bytes, SHA-256 `1604609670ECBF7B796327D165CE68B27329F2351A8741C03114A9450697DADE`.
+- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, version code `1` / `0.1.0`, 90,300,937 bytes, SHA-256 `9E8BEC7D8981A767B6CBFD8A1CC70B9B8A74F625E4FB0337B9B7C56C57BC9756`.
 
 College Android Debug packaging: zero warnings/errors. Pro Android Debug packaging: zero errors and the two documented `CS8625` warnings.
 ## GitHub Actions APK verification - November 8, 2026
@@ -371,7 +371,7 @@ rerun for this batch.
 near-term status of all seven workstreams, each with what was delivered and what is still open, followed by an
 ordered list of the six near-term items that remain: device acceptance of the new surfaces, coach lifecycle
 parity for CPU club coaches, player and coach level narrative memory, motivation state, the two league rules
-that need a sourced rule rather than an invented one, and the intermittent Pro staff-balance test. The long-term
+that need a sourced rule rather than an invented one. The long-term
 section replaces a bare list with a first slice, a dependency note and a scope boundary for each of the six
 long-term areas: the College NIL system, College media rights and finance, Pro finance expansion, expansion and
 relocation, stadium construction and training facilities, and additional offseason activities, with an order that
@@ -417,7 +417,7 @@ Fifteen harness commits repair what the scripts still asserted after the app mov
 
 The harness repairs carry focused unit tests in `build/test_android_ui_smoke.py`, which pass.
 
-Two things remain outside the batches. The live-game sections of both scripts still expect labels the app no longer renders — "Choose offense", "Next snap", "Game controls", "Pause CPU unit", "Pause watch", "Leave game?" and "Return to franchise" — because the live view was rewritten in the FM touch-style refactor and again in the November 5 live-view batch. Rewriting those sections against the current GameCast actions (Playbook, Call play, Pre-snap, Take over, Options, Skip replay) is a separate piece of work; the College flow now reaches the live view and the Pro flow reaches the contract negotiation, so the remaining gap is the live-game step and what follows it. Separately, `ProFootball.Tests.StaffBalanceTests.EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity` is intermittent: `ProFranchise.Id` defaults to a fresh `Guid` and the staff lifecycle random is seeded from it, so one generated scout occasionally ages out and the total reads 95 instead of 96. The same test was recorded as intermittent in the November 1 coach-attribution entry. It was reproduced locally once in twenty-two runs with the identical numbers, so it is pre-existing and not caused by the batches.
+One thing remains outside the batches. The live-game sections of both scripts still expect labels the app no longer renders — "Choose offense", "Next snap", "Game controls", "Pause CPU unit", "Pause watch", "Leave game?" and "Return to franchise" — because the live view was rewritten in the FM touch-style refactor and again in the November 5 live-view batch. Rewriting those sections against the current GameCast actions (Playbook, Call play, Pre-snap, Take over, Options, Skip replay) is a separate piece of work; the College flow now reaches the live view and the Pro flow reaches the contract negotiation, so the remaining gap is the live-game step and what follows it. Separately, `ProFootball.Tests.StaffBalanceTests.EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity` now receives the fixed franchise ID before staff generation. `ProLeagueService.Create` accepts that ID directly, so staff identities and lifecycle rolls use the intended seed instead of a fresh random ID; `StaffBalanceTests` passes 26/26 and the complete Pro suite passes 486/486.
 
 Not claimed: no release, no merge, and no artifact publication. The CI runs are build and device evidence, not a release.
 ## Persisted rivalries and rivalry series in both games — November 5, 2026

@@ -25,7 +25,7 @@ public static class ProLeagueService
             league.Teams.GroupBy(t => (t.Conference, t.Division)).Any(g => g.Count() != 4 || !g.Select(t => t.SeedRank).Order().SequenceEqual(new[] { 0, 1, 2, 3 })) || league.ActiveRosterLimit != 53 || league.PracticeSquadLimit is not (0 or 16))
             throw new InvalidDataException("A league needs two conferences of four divisions, four unique teams per division, 53 active players.");
     }
-    public static ProFranchise Create(string userTeam, string name = "My franchise", bool sourcedContracts = false, StaffRole role = StaffRole.HeadCoach, bool firingEnabled = false, string? coachName = null, bool applyOpeningTrades = true, bool generatedPlayers = false, bool preserveLegacyPracticeForAudit = false)
+    public static ProFranchise Create(string userTeam, string name = "My franchise", bool sourcedContracts = false, StaffRole role = StaffRole.HeadCoach, bool firingEnabled = false, string? coachName = null, bool applyOpeningTrades = true, bool generatedPlayers = false, bool preserveLegacyPracticeForAudit = false, Guid? franchiseId = null)
     {
         var league = Load();
         if(preserveLegacyPracticeForAudit) league=league with {PracticeSquadLimit=16};
@@ -34,6 +34,7 @@ public static class ProLeagueService
         if(generatedPlayers){sourcedContracts=false;applyOpeningTrades=false;}
         var franchise = ProEconomy.Initialize(ProPlayerRatingService.Migrate(new()
         {
+            Id = franchiseId ?? Guid.NewGuid(),
             League = league,
             UserTeam = userTeam,
             Name = string.IsNullOrWhiteSpace(name) ? "My franchise" : name.Trim(),

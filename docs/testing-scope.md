@@ -4,12 +4,14 @@ GameCast now clears huddles before every snap sequence, including a pre-snap pen
 
 Punt choreography now has a dedicated return-unit shape: deep returner, split edge gunners, upbacks and a compact front near the line. The coverage unit separately aligns the punter, snapper, interior line and split gunners. Punt defense no longer reuses kickoff or generic defensive coordinates.
 
+The Pro staff fixture now passes its fixed franchise ID into creation before staff generation. `StaffBalanceTests` passes 26/26 and the complete Pro suite passes 486/486.
+
 Focused motion/timing/kick tests: 29 passed. Football.Engine: 423 passed. College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed. Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed. Android UI helpers: 24 passed. Packaged-resource validation and Python smoke compilation passed. Football.Presentation compiled with zero warnings/errors.
 
 Local Debug APKs:
 
 - College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, version code `400` / `0.20.0`, 91,580,466 bytes, SHA-256 `5ED1726A14CED65C0DBA19481280A058FA126CC4B30F80339B4A861DD880BF58`.
-- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, version code `1` / `0.1.0`, 89,962,095 bytes, SHA-256 `1604609670ECBF7B796327D165CE68B27329F2351A8741C03114A9450697DADE`.
+- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, version code `1` / `0.1.0`, 90,300,937 bytes, SHA-256 `9E8BEC7D8981A767B6CBFD8A1CC70B9B8A74F625E4FB0337B9B7C56C57BC9756`.
 
 College Android Debug packaging: zero warnings/errors. Pro Android Debug packaging: zero errors and the two documented `CS8625` warnings.
 ## GitHub Actions APK verification - November 8, 2026
