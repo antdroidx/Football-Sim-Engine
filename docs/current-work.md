@@ -1,15 +1,20 @@
+## Game-day timing and special teams - November 7, 2026
+
+The shared pre-snap hold is now 2 seconds from formation visibility to snap. Jet motion still reserves its final 780 ms path segment inside that window and waits for both the formation timer and motion task. Two-point conversions now expose an extra-point choice, a generic two-point call, and playbook run/pass cards. A selected conversion records that play and uses normal personnel, routes, ball ownership and replay animation.
+
+When the CPU is about to punt or attempt a field goal, the defensive call sheet offers `Punt return · strong protection` / `Punt block` or `Field goal safe` / `Field goal block`. Strong protection reduces return risk; block calls increase the chance of a recorded blocked kick and animate the rusher to the kick point.
 ## Coverage-aware pre-snap motion outcomes - November 7, 2026
 
 Pre-snap movement now changes the play through an explicit coverage response instead of a fixed positive yard bonus. Man coverage carries the assigned defender with the motioning receiver and preserves the original matchup. Zone coverage passes the receiver off to the defender responsible for the new alignment, so the matchup can change. Focused bracket coverage carries the primary outside receiver through motion and denies the intended mismatch. The same reaction drives passing separation/catch risk, run advantage, the bounded recorded yard effect (-2 to +2), and GameCast's defender tracking; the animation uses `CoverageDefenderId` rather than the eventual tackler. Ordinary balanced formations leave the defense set; only meaningful strength or extreme spread/heavy formations trigger a small automatic defensive adjustment.
 
-Generic pre-snap options now expose `Motion left`, `Motion right`, `Motion slot`, and `WR swap`. `Motion left` moves the right-side WR to an open inside/tackle-box spot, `Motion right` mirrors that with the left-side WR, and `Motion slot` sends the slot receiver to the opposite side of the offensive line. Relocated and swapped receivers run their assigned routes from the new role/alignment. `WR shift` is removed from the menu; legacy `Shift` and `ReturnToFormation` records remain only for older saves. Jet motion now reserves its final 780 ms path segment so the receiver reaches the quarterback mesh as the 3.5-second formation lead expires, and the snap waits for both the formation timer and the motion animation.
+Generic pre-snap options now expose `Motion left`, `Motion right`, `Motion slot`, and `WR swap`. `Motion left` moves the right-side WR to an open inside/tackle-box spot, `Motion right` mirrors that with the left-side WR, and `Motion slot` sends the slot receiver to the opposite side of the offensive line. Relocated and swapped receivers run their assigned routes from the new role/alignment. `WR shift` is removed from the menu; legacy `Shift` and `ReturnToFormation` records remain only for older saves. Jet motion now reserves its final 780 ms path segment so the receiver reaches the quarterback mesh as the 2-second formation lead expires, and the snap waits for both the formation timer and the motion animation.
 
 Focused and required validation on this implementation:
 
-- Focused `PreSnapMatchupTests|PreSnapTests|PreSnapMotionPlanTests|GameDayPreSnapPresentationTests`: 27 passed.
-- Football.Engine full suite: 411 passed.
+- Focused `PreSnapMatchupTests|PreSnapTests|PreSnapMotionPlanTests|GameDayPreSnapPresentationTests|SpecialTeamsCallTests`: 35 passed.
+- Football.Engine full suite: 418 passed.
 - College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
-- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed on the repeated run. The first run had one known intermittent `StaffBalanceTests.EveryFranchiseHasCompleteVariedStaffAndARealSchemeIdentity` collision (95 unique scout vectors for 96 scouts); the exact isolated retry passed 1/1 and the complete repeated suite passed without a source change.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed.
 - Android UI synchronization helpers: 24 passed. Packaged-resource validation: passed. Both smoke Python files compile.
 - Football.Presentation Debug compile: zero warnings/errors.
 - College Android Debug APK packaging: zero warnings/errors.
@@ -17,8 +22,8 @@ Focused and required validation on this implementation:
 
 Local Debug APKs:
 
-- College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, 91,233,432 bytes, SHA-256 `F008BD4D286965F0636B3447C8FDCE15EBA7C9DD6A1712068E9AA0623C3CB253`.
-- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, 89,953,903 bytes, SHA-256 `BD03F12E14093AC629CA31EE2493D3C2E65438046621472619125346E8F6391C`.
+- College Debug: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, version code `400` / `0.20.0`, 91,241,624 bytes, SHA-256 `7105AAC7175A15BCBA31A27C5FC210AEE10FFA2A2563749F3AF8C61FD72A5D3A`.
+- Pro Debug: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, version code `1` / `0.1.0`, 90,296,841 bytes, SHA-256 `ADC7C7BFC8866171F557FC6A8CAE8B30A6D8C6854637226FC4290ABB150A589D`.
 
 Both local APKs pass `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`.
 
@@ -55,7 +60,7 @@ A disposable API 36 emulator first installed College `880` and Pro `205`, reprod
 Package identity remains important: the College Debug/release asset package is `antdroid.cfbcoach.dev`; the retained non-dev identity is `antdroid.cfbcoach`. Those are separate Android apps and cannot update each other. Pro remains `antdroid.profootball.franchise`.
 ## Pre-snap formation, motion and APK validation workflow - November 7, 2026
 
-Shared GameCast now keeps a called formation on screen for a minimum of 3.5 seconds before the snap. Defensive players automatically adjust after the offensive formation is visible, offensive shifts are limited to a selected receiver, and play-specific motion uses the resolved play instead of a stale call-sheet lookup. Jet Sweep animates the selected receiver from his WR alignment toward the quarterback mesh and keeps that receiver as the ball carrier.
+Shared GameCast now keeps a called formation on screen for a minimum of 2 seconds before the snap. Defensive players automatically adjust after the offensive formation is visible, offensive motion/swap is limited to selected receiver alignment actions, and play-specific motion uses the resolved play instead of a stale call-sheet lookup. Jet Sweep animates the selected receiver from his WR alignment toward the quarterback mesh and keeps that receiver as the ball carrier.
 
 Dead-ball false starts and offside now record formation play IDs, selected personnel and an explicit `IsPreSnapPenalty` marker. GameCast renders the aligned formation and completes pre-snap movement before revealing the foul banner; live-ball penalty playback remains unchanged. Older `PreSnapChoice` and `GameSnapEvent` records continue to deserialize with their previous defaults.
 

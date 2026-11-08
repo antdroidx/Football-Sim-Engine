@@ -64,6 +64,20 @@ public sealed class GameDayLiveControl(GameDaySession session)
         return GameDayEngine.Step(Session, CanCall(false) ? offense : null, CanCall(true) ? defense : null, offensiveChoice);
     }
 
+    public IReadOnlyList<string> SpecialDefensiveCalls()
+    {
+        if (!CanCall(true)) return [];
+        var home = Session.PossessionTeamName.Equals(Session.Game.HomeTeamName, StringComparison.OrdinalIgnoreCase);
+        var profile = home ? Session.HomeProfile : Session.AwayProfile;
+        var plan = GamePlanService.Normalize(profile.GamePlan ?? new TeamGamePlan { TeamName = profile.TeamName });
+        var expected = GameDayRecommendationService.Recommend(Session, plan).Type;
+        return expected switch
+        {
+            RecommendedCallType.Punt => [SpecialTeamsCallService.PuntSafeId, SpecialTeamsCallService.PuntBlockId],
+            RecommendedCallType.FieldGoal => [SpecialTeamsCallService.FieldGoalSafeId, SpecialTeamsCallService.FieldGoalBlockId],
+            _ => []
+        };
+    }
     public IReadOnlyList<string> SpecialCalls()
     {
         if (!CanCall(false)) return [];

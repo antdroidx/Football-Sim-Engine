@@ -20,7 +20,7 @@ public class GameDayPreSnapPresentationTests
             () => Record("alignment"),
             (delay, _) => Record($"delay:{delay.TotalMilliseconds:0}"));
 
-        Assert.Equal(["formation", "delay:3500", "delay:180", "alignment", "delay:1000"], calls);
+        Assert.Equal(["formation", "delay:2000", "delay:180", "alignment", "delay:1000"], calls);
 
         Task Record(string value)
         {
@@ -41,7 +41,7 @@ public class GameDayPreSnapPresentationTests
             () => Record("offense"),
             (delay, _) => Record($"delay:{delay.TotalMilliseconds:0}"));
 
-        Assert.Equal(["formation", "delay:3500", "delay:180", "defense", "offense", "delay:1000"], calls);
+        Assert.Equal(["formation", "delay:2000", "delay:180", "defense", "offense", "delay:1000"], calls);
 
         Task Record(string value)
         {
@@ -65,7 +65,7 @@ public class GameDayPreSnapPresentationTests
             motionLiveAtSnap: true);
 
         Assert.Equal([
-            "formation", "delay:3500", "delay:2720", "delay:180", "defense",
+            "formation", "delay:2000", "delay:1220", "delay:180", "defense",
             "motion-to-mesh"
         ], calls);
 
@@ -77,7 +77,7 @@ public class GameDayPreSnapPresentationTests
     }
 
     [Fact]
-    public async Task PlainFormationStillWaitsForTheThreeAndOneHalfSecondLead()
+    public async Task PlainFormationStillWaitsForTheTwoSecondLead()
     {
         var calls = new List<string>();
 
@@ -87,8 +87,8 @@ public class GameDayPreSnapPresentationTests
             () => Record("alignment"),
             (delay, _) => Record($"delay:{delay.TotalMilliseconds:0}"));
 
-        Assert.Equal(["formation", "delay:3500"], calls);
-        Assert.Equal(TimeSpan.FromSeconds(3.5), GameDayPreSnapPresentation.FormationLead);
+        Assert.Equal(["formation", "delay:2000"], calls);
+        Assert.Equal(TimeSpan.FromSeconds(2), GameDayPreSnapPresentation.FormationLead);
 
         Task Record(string value)
         {

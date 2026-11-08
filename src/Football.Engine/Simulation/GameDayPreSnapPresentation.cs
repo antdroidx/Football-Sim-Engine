@@ -9,7 +9,7 @@ public static class GameDayPreSnapPresentation
 {
     public static readonly TimeSpan ActionLead = TimeSpan.FromMilliseconds(180);
     public static readonly TimeSpan SetHold = TimeSpan.FromSeconds(1);
-    public static readonly TimeSpan FormationLead = TimeSpan.FromSeconds(3.5);
+    public static readonly TimeSpan FormationLead = TimeSpan.FromSeconds(2);
     public static readonly TimeSpan LiveMotionDuration =
         TimeSpan.FromMilliseconds(PreSnapMotionPlan.MotionSegmentMilliseconds * 3);
     public static readonly TimeSpan LiveMotionStart = FormationLead - LiveMotionDuration;

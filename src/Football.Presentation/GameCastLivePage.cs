@@ -335,25 +335,81 @@ public class GameCastLivePage : ContentPage
 
     List<GameDayCallChoice> Choices()
     {
-        if (control.CanCall(true)) return GamePlanService.AvailableDefensivePlays(Plan).Select(p => new GameDayCallChoice(p.Id, p.Name,
-            GamePlanService.Label(p.Formation), GamePlanService.Label(p.Approach), new PlayArtDrawable(p.Id, p.Name, false, p.Approach.ToString(), defensiveDefinition: p))).ToList();
-        var choices = session.TryPending ? new List<GameDayCallChoice>() : GamePlanService.AvailableOffensivePlays(Plan).Select(p =>
+        if (control.CanCall(true))
+        {
+            var responses = control.SpecialDefensiveCalls();
+            if (responses.Count > 0)
+                return responses.Select(id =>
+                {
+                    var name = id switch
+                    {
+                        SpecialTeamsCallService.PuntSafeId => "Punt return · strong protection",
+                        SpecialTeamsCallService.PuntBlockId => "Punt block",
+                        SpecialTeamsCallService.FieldGoalSafeId => "Field goal safe",
+                        _ => "Field goal block"
+                    };
+                    return new GameDayCallChoice(id, name, "Special teams", "KICK RESPONSE",
+                        new PlayArtDrawable(id, name, false, "Kick"));
+                }).ToList();
+
+            return GamePlanService.AvailableDefensivePlays(Plan).Select(p => new GameDayCallChoice(p.Id, p.Name,
+                GamePlanService.Label(p.Formation), GamePlanService.Label(p.Approach),
+                new PlayArtDrawable(p.Id, p.Name, false, p.Approach.ToString(), defensiveDefinition: p))).ToList();
+        }
+
+        var choices = new List<GameDayCallChoice>();
+        if (session.TryPending)
+        {
+            foreach (var id in control.SpecialCalls())
+            {
+                var name = id == "special-extra-point" ? "Extra point" : "Two-point conversion";
+                choices.Add(new(id, name, "Special plays", "SITUATIONAL", new PlayArtDrawable(id, name, true, "Kick")));
+            }
+
+            foreach (var p in GamePlanService.AvailableOffensivePlays(Plan))
+            {
+                var run = p.Concept is OffensiveConcept.InsideRun or OffensiveConcept.OutsideRun;
+                choices.Add(new(p.Id, "Two-point · " + p.Name, GamePlanService.Label(p.Formation),
+                    run ? "2PT RUN" : "2PT PASS", new PlayArtDrawable(p.Id, p.Name, true, p.Concept.ToString(), p)));
+            }
+
+            return choices;
+        }
+
+        choices.AddRange(GamePlanService.AvailableOffensivePlays(Plan).Select(p =>
         {
             var run = p.Concept is OffensiveConcept.InsideRun or OffensiveConcept.OutsideRun;
-            var type = p.PreSnapAction?.Type == PreSnapType.Motion ? PreSnapCatalog.CardLabel(p.PreSnapAction) + " · " + (run ? "RUN" : "PASS") : run ? "RUN" : "PASS";
+            var type = p.PreSnapAction?.Type == PreSnapType.Motion
+                ? PreSnapCatalog.CardLabel(p.PreSnapAction) + " · " + (run ? "RUN" : "PASS")
+                : run ? "RUN" : "PASS";
             return new GameDayCallChoice(p.Id, p.Name, GamePlanService.Label(p.Formation), type,
                 new PlayArtDrawable(p.Id, p.Name, true, p.Concept.ToString(), p));
-        }).ToList();
+        }));
         foreach (var id in control.SpecialCalls())
         {
-            var name = id switch { "special-punt" => "Punt", "special-field-goal" => "Field goal", "special-kneel" => "Kneel", "special-spike" => "Spike", "special-extra-point" => "Extra point", _ => "Two-point conversion" };
+            var name = id switch
+            {
+                "special-punt" => "Punt",
+                "special-field-goal" => "Field goal",
+                "special-kneel" => "Kneel",
+                "special-spike" => "Spike",
+                "special-extra-point" => "Extra point",
+                _ => "Two-point conversion"
+            };
             choices.Add(new(id, name, "Special plays", "SITUATIONAL", new PlayArtDrawable(id, name, true, "Kick")));
         }
         return choices;
     }
-    string Recommended() => control.CanCall(true) ? GamePlanService.RecommendDefensivePlay(Plan, session.Down, session.Distance).Id
-        : session.TryPending ? GameDayEngine.ShouldAttemptTwo(session) ? "special-two-point" : "special-extra-point"
-        : GameDayRecommendationService.Recommend(session, Plan).PlayId;
+    string Recommended()
+    {
+        if (control.CanCall(true))
+        {
+            var responses = control.SpecialDefensiveCalls();
+            return responses.Count > 0 ? responses[0] : GamePlanService.RecommendDefensivePlay(Plan, session.Down, session.Distance).Id;
+        }
+        return session.TryPending ? GameDayEngine.ShouldAttemptTwo(session) ? "special-two-point" : "special-extra-point"
+            : GameDayRecommendationService.Recommend(session, Plan).PlayId;
+    }
     void UpdateCalls()
     {
         var choices = Choices(); if (choices.Count == 0) return;

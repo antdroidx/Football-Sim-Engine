@@ -18,7 +18,7 @@ public static class GameCastHighlight
             : snap.Points >= 6 ? "TOUCHDOWN"
             : snap.Outcome == SnapOutcome.ClockStoppage
                 ? snap.TimeoutTeamName is not null ? "TIMEOUT" : snap.Description?.Contains("Two-minute", StringComparison.OrdinalIgnoreCase) == true ? "TWO-MINUTE TIMEOUT" : null
-                : GameDayAnimationPlanner.OutcomeHeadline(snap.Outcome));
+                : GameDayAnimationPlanner.OutcomeHeadline(snap));
         if (headline is null) return;
         var penalty = GameDayCommentaryService.Penalty(snap);
         var team = snap.IsSafety?snap.ScoringTeamName:snap.TimeoutTeamName ?? penalty?.TeamName ?? LiveFootballChoreography.NotificationTeam(snap);

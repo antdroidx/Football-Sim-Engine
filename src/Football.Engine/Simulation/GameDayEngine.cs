@@ -58,7 +58,7 @@ public static partial class GameDayEngine
         var alignmentAction = preSnap is { HasAlignmentAction: true } ? preSnap : null;
         if (alignmentAction is not null && (session.KickoffPending || session.TryPending))
             throw new ArgumentException("Pre-snap choices apply only to normal scrimmage plays.", nameof(preSnap));
-        if (session.TryPending) return ResolveTry(session, userPlayId);
+        if (session.TryPending) return ResolveTry(session, userPlayId, userDefensivePlayId);
         if (session.KickoffPending) return ResolveKickoff(session);
         if (session.Quarter is 2 or 4 && session.ClockSeconds <= 90 && (!session.ClockStopped || session.ClockRestartsOnReady))
         {
@@ -113,14 +113,14 @@ public static partial class GameDayEngine
             (offensivePossessionIndex >= offensePlan.OpeningPlayIds.Count && offensivePossessionIndex >= offensePlan.OpeningScript.Count ||
              session.Down >= 3 && session.Distance >= 3 || GameDayRecommendationService.PassingUrgency(session) >= 2 || advice.Play.Name == "Hail Mary"))
             call = call with { Offense = advice.Play, Source = PlayCallSource.Cpu };
-        if (!string.IsNullOrWhiteSpace(userDefensivePlayId))
+        var specialDefensiveCall = SpecialTeamsCallService.IsSpecialDefensiveCall(userDefensivePlayId) ? userDefensivePlayId : null;
+        if (!string.IsNullOrWhiteSpace(userDefensivePlayId) && specialDefensiveCall is null)
         {
             var calledDefense = GamePlanService.AvailableDefensivePlays(defensePlan)
                 .SingleOrDefault(play => play.Id == userDefensivePlayId)
                 ?? throw new ArgumentException("Defensive play is not in this team's playbook.", nameof(userDefensivePlayId));
             call = call with { Defense = calledDefense };
         }
-
         // A user can choose a kick on any down; CPU fourth-down decisions remain situational.
         var special = requestedSpecial ?? (string.IsNullOrWhiteSpace(userPlayId) && advice.Type != RecommendedCallType.Scrimmage
             ? advice.PlayId : null);
@@ -128,49 +128,62 @@ public static partial class GameDayEngine
         {
             var kickStart = session.YardLine;
             var kicker = GameDayCoachingService.Specialist(session, offense.TeamName, Kicker(offenseRoster, special == "special-punt"));
-            var made = special == "special-field-goal" &&
+            var response = SpecialTeamsCallService.Resolve(specialDefensiveCall, special == "special-field-goal");
+            var specialTeamsDifference = defense.SpecialTeamsRating - offense.SpecialTeamsRating;
+            var blocked = session.Random.NextDouble() <
+                SpecialTeamsCallService.BlockChance(response, special == "special-field-goal", specialTeamsDifference);
+            var made = special == "special-field-goal" && !blocked &&
                 session.Random.NextDouble() < FieldGoalProbability(session);
             var puntLanding = special == "special-punt"
-                ? Math.Clamp(kickStart + session.Random.Next(34, 51) + (int)Math.Round(GameWeatherService.Tailwind(session, offense.TeamName) * .3), kickStart + 1, 110) : 100;
-            var touchback = special == "special-punt" && puntLanding >= 100;
+                ? Math.Clamp(kickStart + session.Random.Next(34, 51) + (int)Math.Round(GameWeatherService.Tailwind(session, offense.TeamName) * .3), kickStart + 1, 110)
+                : blocked ? kickStart : 100;
+            var touchback = special == "special-punt" && !blocked && puntLanding >= 100;
             var returner = Returner(defenseRoster);
             var kickingUnit = special == "special-field-goal" ? PlaceKickTeam(offenseRoster, kicker) : SpecialTeam(offenseRoster, kicker);
             var returnUnit = special == "special-field-goal" ? PlaceKickDefense(defenseRoster) : SpecialTeam(defenseRoster, returner);
             var hangTime = special == "special-punt" ? 3.6 + session.Random.NextDouble() * 1.8 : 0;
-            var coverage = PuntCoverageService.Evaluate(puntLanding - kickStart, hangTime, kickingUnit, kicker?.PlayerId, returner?.AwarenessRating ?? 60);
-            var fairCatch = special == "special-punt" && !touchback && coverage.FairCatch;
-            var returnYards = special == "special-punt" && !touchback && !fairCatch ? session.Random.Next(0, 13) : 0;
-            var trajectory=special=="special-punt" && !touchback && !fairCatch
-                ? GoalLineService.Return(session.Rules,100-puntLanding,returnYards,session.Random):null;
-            if(trajectory is not null)returnYards=trajectory.Yards;
-            var returnSafety=trajectory?.Ruling.Disposition==GoalLineDisposition.Safety;
-            var newSpot = made ? 25 : special == "special-punt"
-                ? touchback ? 20 : trajectory?.Ruling.OwnYardLine ?? Math.Clamp(100-puntLanding,1,99)
+            var coverage = special == "special-punt" && !blocked
+                ? PuntCoverageService.Evaluate(puntLanding - kickStart, hangTime, kickingUnit, kicker?.PlayerId, returner?.AwarenessRating ?? 60)
+                : new PuntCoverage(null, 0, false);
+            var fairCatch = SpecialTeamsCallService.FairCatch(response,
+                special == "special-punt" && !blocked && !touchback && coverage.FairCatch, session.Random);
+            var plannedReturn = special == "special-punt" && !blocked && !touchback && !fairCatch ? session.Random.Next(0, 13) : 0;
+            var returnYards = SpecialTeamsCallService.PuntReturnYards(response, plannedReturn, session.Random);
+            var trajectory = special == "special-punt" && !blocked && !touchback && !fairCatch
+                ? GoalLineService.Return(session.Rules, 100 - puntLanding, returnYards, session.Random) : null;
+            if (trajectory is not null) returnYards = trajectory.Yards;
+            var returnSafety = trajectory?.Ruling.Disposition == GoalLineDisposition.Safety;
+            var blocker = blocked ? SpecialTeamsCallService.Blocker(returnUnit, returner?.PlayerId, session.Random) : null;
+            var newSpot = blocked ? 100 - kickStart : made ? 25 : special == "special-punt"
+                ? touchback ? 20 : trajectory?.Ruling.OwnYardLine ?? Math.Clamp(100 - puntLanding, 1, 99)
                 : Math.Clamp(100 - Math.Max(20, kickStart - 7), 10, 80);
-            var coverageTackler = special == "special-punt" && (returnYards != 0 || returnSafety)
-                ? CoverageTackler(kickingUnit, kicker, session.Random)
-                : null;
+            var coverageTackler = special == "special-punt" && !blocked && (returnYards != 0 || returnSafety)
+                ? CoverageTackler(kickingUnit, kicker, session.Random) : null;
             var kick = new GameSnapEvent
             {
-                StatsVersion = 1, IsUntimedDown=session.UntimedDownPending,
+                StatsVersion = 1, IsUntimedDown = session.UntimedDownPending,
                 Sequence = session.Events.Count + 1, PossessionNumber = session.PossessionNumber,
                 Quarter = session.Quarter, ClockSeconds = session.ClockSeconds,
                 OffenseTeamName = offense.TeamName, DefenseTeamName = defense.TeamName,
-                OffensivePlayId = call.Offense.Id, DefensivePlayId = call.Defense.Id,
+                OffensivePlayId = call.Offense.Id,
+                DefensivePlayId = specialDefensiveCall ?? call.Defense.Id,
                 CallSource = requestedSpecial is null ? call.Source : PlayCallSource.User,
-                DefensiveCallSource = string.IsNullOrWhiteSpace(userDefensivePlayId) ? PlayCallSource.Cpu : PlayCallSource.User,
+                DefensiveCallSource = SpecialTeamsCallService.IsSpecialDefensiveCall(userDefensivePlayId)
+                    ? PlayCallSource.User : string.IsNullOrWhiteSpace(userDefensivePlayId) ? PlayCallSource.Cpu : PlayCallSource.User,
                 Down = session.Down, Distance = session.Distance, StartYardLine = kickStart,
-                BallEndYardLine = special == "special-punt" ? 100 - newSpot : 100,
-                KickLandingYardLine = special == "special-punt" ? puntLanding : 100,
+                BallEndYardLine = blocked ? kickStart : special == "special-punt" ? 100 - newSpot : 100,
+                KickLandingYardLine = special == "special-punt" ? puntLanding : blocked ? kickStart : 100,
                 Yards = 0, ReturnYards = returnYards,
-                IsTouchback = touchback, IsFairCatch = fairCatch,
-                IsSafety=returnSafety,SafetyConcedingTeamName=returnSafety?defense.TeamName:null,
-                ReturnerProvidedImpetus=trajectory?.OwnImpetus??false,
-                IsMomentumException=trajectory?.Ruling.Disposition==GoalLineDisposition.MomentumException,
-                Points=returnSafety?2:0,
-                KickerId = kicker?.PlayerId, ReturnerId = special == "special-punt" && !touchback ? returner?.PlayerId : null,
-                PrimaryDefenderId = fairCatch ? coverage.DefenderId : coverageTackler?.PlayerId,
+                IsTouchback = touchback, IsFairCatch = fairCatch, IsBlockedKick = blocked,
+                IsSafety = returnSafety, SafetyConcedingTeamName = returnSafety ? defense.TeamName : null,
+                ReturnerProvidedImpetus = trajectory?.OwnImpetus ?? false,
+                IsMomentumException = trajectory?.Ruling.Disposition == GoalLineDisposition.MomentumException,
+                Points = returnSafety ? 2 : 0,
+                KickerId = kicker?.PlayerId,
+                ReturnerId = special == "special-punt" && !blocked && !touchback ? returner?.PlayerId : null,
+                PrimaryDefenderId = blocked ? blocker?.PlayerId : fairCatch ? coverage.DefenderId : coverageTackler?.PlayerId,
                 KickHangTimeSeconds = hangTime, NearestCoverageYardsAtCatch = coverage.DistanceAtCatch,
+                Description = blocked ? $"{blocker?.FullName ?? "The defense"} blocks the kick." : null,
                 OffensePersonnel = kickingUnit.Select(player => player.PlayerId).ToArray(),
                 DefensePersonnel = returnUnit.Select(player => player.PlayerId).ToArray(),
                 Outcome = special == "special-punt" ? SnapOutcome.Punt :

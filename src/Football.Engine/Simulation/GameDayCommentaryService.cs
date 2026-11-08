@@ -38,6 +38,10 @@ public static class GameDayCommentaryService
         var returner = Name(snap.ReturnerId, "the returner");
         var gain = YardPhrase(snap.Yards);
 
+        if (snap.IsBlockedKick)
+            return snap.Outcome == SnapOutcome.Punt
+                ? $"{defender} blocks {kicker}'s punt at the line."
+                : $"{defender} blocks {kicker}'s field goal at the line.";
         if (snap.IsSafety)
             return $"{(snap.IsTry?"ONE-POINT SAFETY":"SAFETY")}! {snap.SafetyConcedingTeamName??snap.OffenseTeamName} concedes a safety{(snap.PenaltyName is not null?$" for {snap.PenaltyName.ToLowerInvariant()}":"")}. {snap.ScoringTeamName} scores {(snap.IsTry?"one point":"two points")}.";
         if(snap.IsTry && snap.TryScoredByDefense && snap.Points==2)

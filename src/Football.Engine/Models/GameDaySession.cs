@@ -92,6 +92,8 @@ public sealed record GameSnapEvent
     public double NearestCoverageYardsAtCatch { get; init; }
     public bool IsTouchback { get; init; }
     public bool IsFairCatch { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool IsBlockedKick { get; init; }
     public bool IsQuarterbackKeep { get; init; }
     public bool IsBootleg { get; init; }
     public bool IsQuarterbackScramble { get; init; }

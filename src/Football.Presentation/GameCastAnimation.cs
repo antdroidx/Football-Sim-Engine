@@ -45,7 +45,7 @@ public static class GameCastAnimation
         var gameSpeed = context.GameSpeed; var replaySpeed = context.ReplaySpeed;
 
         if (snap.IsOnsideKick) { await Task.Delay(350); return; }
-        if (!GameDayEngine.IsScrimmage(snap) && !GameDayAnimationPlanner.IsPlaceKick(snap) && !snap.IsPreSnapPenalty && snap.Outcome is not (SnapOutcome.Kickoff or SnapOutcome.Punt)) { await Task.Delay(350); return; }
+        if (!GameDayEngine.IsScrimmage(snap) && !GameDayAnimationPlanner.IsConversionPlay(snap) && !GameDayAnimationPlanner.IsPlaceKick(snap) && !snap.IsPreSnapPenalty && snap.Outcome is not (SnapOutcome.Kickoff or SnapOutcome.Punt)) { await Task.Delay(350); return; }
         highlight.IsVisible = false;
         var preSnapLabel = snap.PreSnap is { HasAlignmentAction: true }
             ? " · " + PreSnapCatalog.Label(snap.PreSnap) : "";
@@ -123,14 +123,14 @@ public static class GameCastAnimation
         var receiverFamily = routeFamily;
         var passRelease = snap.TurnoverYardLine.HasValue ? .30 : snap.PassReleaseProgress > 0 ? snap.PassReleaseProgress : calledPlay is null ? .54 : GameDayAnimationPlanner.PassReleaseProgress(calledPlay);
         var catchProgress = GameDayAnimationPlanner.CatchProgress(passRelease);
-        var caught = snap.TargetId.HasValue && snap.Outcome is SnapOutcome.Completion or SnapOutcome.Touchdown;
+        var caught = snap.TargetId.HasValue && (snap.IsTry && snap.Outcome == SnapOutcome.TwoPointConversion || snap.Outcome is SnapOutcome.Completion or SnapOutcome.Touchdown);
         var terminalCarrierId = snap.BallCarrierId ?? snap.ReturnerId ??
-            (snap.Outcome is SnapOutcome.Completion or SnapOutcome.Touchdown ? snap.TargetId : null) ??
+            (snap.IsTry && snap.Outcome == SnapOutcome.TwoPointConversion || snap.Outcome is SnapOutcome.Completion or SnapOutcome.Touchdown ? snap.TargetId : null) ??
             (snap.Outcome == SnapOutcome.Sack ? snap.QuarterbackId : null);
         var isReturnTackle = (snap.Outcome is SnapOutcome.Kickoff or SnapOutcome.Punt) &&
             snap.ReturnYards > 0 && snap.Points < 6 && !snap.IsFairCatch && !snap.IsTouchback;
         var isTackle = terminalCarrierId.HasValue && (isReturnTackle ||
-            snap.Outcome is SnapOutcome.Run or SnapOutcome.Scramble or SnapOutcome.Completion or SnapOutcome.Sack or SnapOutcome.Fumble);
+            snap.IsTry && snap.Outcome == SnapOutcome.FailedTwoPointConversion && snap.BallCarrierId.HasValue || snap.Outcome is SnapOutcome.Run or SnapOutcome.Scramble or SnapOutcome.Completion or SnapOutcome.Sack or SnapOutcome.Fumble);
         var isFieldGoalSnap = GameDayAnimationPlanner.IsPlaceKick(snap);
         var specialContact = GameDayAnimationPlanner.ContactPoint(snap, direction, .50);
         Rect? qbFrom = null, qbTo = null, runnerFrom = null, runnerTo = null, receiverFrom = null, receiverTo = null,
@@ -418,7 +418,7 @@ public static class GameCastAnimation
             var endX = defensiveDestination.X;
             var endY = defensiveDestination.Y;
             (View View, Rect From, Rect To)? blocker = null;
-            var engages = player is not null && GameDayEngine.IsScrimmage(snap) && !isFieldGoalSnap &&
+            var engages = player is not null && (GameDayEngine.IsScrimmage(snap) || GameDayAnimationPlanner.IsConversionPlay(snap)) && !isFieldGoalSnap &&
                 (passRusher || !passRushSnap && player.Position is Position.DE or Position.DT) &&
                 !(snap.Outcome == SnapOutcome.Interception && player.PlayerId == snap.PrimaryDefenderId);
             if (engages && blockers.Length > 0)
@@ -431,12 +431,18 @@ public static class GameCastAnimation
             }
             if (isFieldGoalSnap)
             {
-                endX = Math.Clamp(x - direction * .018, .025, .96);
-                endY = y;
+                endX = snap.IsBlockedKick && player?.PlayerId == snap.PrimaryDefenderId
+                    ? line : Math.Clamp(x - direction * .018, .025, .96);
+                endY = snap.IsBlockedKick && player?.PlayerId == snap.PrimaryDefenderId ? .50 : y;
             }
             if (snap.Outcome == SnapOutcome.Punt && player?.PlayerId == snap.ReturnerId)
             {
                 endX = destination;
+                endY = .50;
+            }
+            if (snap.IsBlockedKick && player?.PlayerId == snap.PrimaryDefenderId)
+            {
+                endX = line;
                 endY = .50;
             }
             if (interceptionPoint is GameFieldPoint interception && player?.PlayerId == snap.PrimaryDefenderId)

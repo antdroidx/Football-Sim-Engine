@@ -65,46 +65,137 @@ public static partial class GameDayEngine
             .Concat(eligible).DistinctBy(p => p.PlayerId).Take(11).ToArray();
     }
 
-    private static GameSnapEvent ResolveTry(GameDaySession session, string? choice)
+    private static GameSnapEvent ResolveTry(GameDaySession session, string? choice, string? defensiveChoice = null)
     {
-        var two = choice == "special-two-point" || choice != "special-extra-point" && ShouldAttemptTwo(session);
-        if (!session.Rules.TimedOvertime && session.OvertimeRound >= 2) two = true;
+        var forcedTwo = !session.Rules.TimedOvertime && session.OvertimeRound >= 2;
+        var two = forcedTwo || (choice is null ? ShouldAttemptTwo(session) : choice != "special-extra-point");
         var home = session.PossessionTeamName == session.Game.HomeTeamName;
         var profile = home ? session.HomeProfile : session.AwayProfile;
         var defense = home ? session.AwayProfile : session.HomeProfile;
-        var kicker = GameDayCoachingService.Specialist(session, session.PossessionTeamName, Kicker(home ? session.HomeRoster : session.AwayRoster));
-        var probability = two ? Math.Clamp(.44 + (profile.OffenseRating - defense.DefenseRating) * .006, .15, .75)
-            : GameDayMatchupService.FieldGoalProbability(session.Rules.ExtraPointDistance, kicker?.Skills?.KickAccuracy ?? profile.SpecialTeamsRating,
+        var offenseRoster = home ? session.HomeRoster : session.AwayRoster;
+        var defenseRoster = home ? session.AwayRoster : session.HomeRoster;
+        var offensePlan = GamePlanService.Normalize(profile.GamePlan ?? new TeamGamePlan { TeamName = profile.TeamName });
+        var defensePlan = GamePlanService.Normalize(defense.GamePlan ?? new TeamGamePlan { TeamName = defense.TeamName });
+        var kicker = GameDayCoachingService.Specialist(session, session.PossessionTeamName, Kicker(offenseRoster));
+
+        OffensivePlayDefinition? conversionPlay = null;
+        DefensivePlayDefinition? conversionDefense = null;
+        if (two)
+        {
+            conversionPlay = forcedTwo || choice is null || choice == "special-two-point"
+                ? GamePlanService.RecommendOffensivePlay(offensePlan, 1, 2, 97, session.Random.Next())
+                : PlayEditorService.OffensiveLibrary(offensePlan).FirstOrDefault(play => play.Id == choice)
+                    ?? PlaybookCatalog.OffensivePlays.FirstOrDefault(play => play.Id == choice)
+                    ?? throw new ArgumentException("Offensive play is not available for this try.", nameof(choice));
+            conversionDefense = GamePlanService.RecommendDefensivePlay(defensePlan, 1, 2);
+        }
+
+        SnapPersonnel offensePersonnel;
+        SnapPersonnel defensePersonnel;
+        DynastyPlayer[] offensePlayers;
+        DynastyPlayer[] defensePlayers;
+        if (two)
+        {
+            offensePersonnel = GameDayCoachingService.ApplySubstitutions(session, PersonnelRotationService.SelectOffense(
+                home ? session.HomeDepthChart : session.AwayDepthChart, session.PossessionTeamName,
+                conversionPlay!.Personnel, home ? session.HomeFatigue : session.AwayFatigue, session.Random));
+            defensePersonnel = GameDayCoachingService.ApplySubstitutions(session, PersonnelRotationService.SelectDefense(
+                home ? session.AwayDepthChart : session.HomeDepthChart,
+                home ? session.Game.AwayTeamName : session.Game.HomeTeamName,
+                conversionDefense!.Personnel, home ? session.AwayFatigue : session.HomeFatigue, session.Random));
+            offensePlayers = BackfieldRoles.Assign(conversionPlay, Players(session, offensePersonnel)).ToArray();
+            defensePlayers = Players(session, defensePersonnel);
+        }
+        else
+        {
+            var offenseUnit = PlaceKickTeam(offenseRoster, kicker);
+            var defenseUnit = PlaceKickDefense(defenseRoster);
+            offensePlayers = offenseUnit.ToArray();
+            defensePlayers = defenseUnit.ToArray();
+            offensePersonnel = new SnapPersonnel { TeamName = session.PossessionTeamName, PlayerIds = offenseUnit.Select(player => player.PlayerId).ToArray() };
+            defensePersonnel = new SnapPersonnel { TeamName = home ? session.Game.AwayTeamName : session.Game.HomeTeamName, PlayerIds = defenseUnit.Select(player => player.PlayerId).ToArray() };
+        }
+
+        var isPass = conversionPlay?.Concept is OffensiveConcept.QuickPass or OffensiveConcept.PlayAction or OffensiveConcept.DeepPass;
+        PassingRead? read = null;
+        DynastyPlayer? runner = null;
+        PursuitDecision? pursuit = null;
+        BlockingResolution? runBlocking = null;
+        if (two && conversionPlay is not null)
+        {
+            var quarterback = offensePlayers.FirstOrDefault(player => player.Position == Position.QB);
+            if (isPass)
+            {
+                read = PassingReadService.Read(conversionPlay, conversionDefense!, offensePlayers, defensePlayers, quarterback,
+                    profile.OffensiveCoordinatorGameManagement, session.Random);
+            }
+            else
+            {
+                runner = BackfieldRoles.Runner(conversionPlay, offensePlayers, session.Random) ?? quarterback;
+                runBlocking = BlockMatchupService.Resolve(
+                    offensePlayers.Where(player => player.PlayerId != runner?.PlayerId && player.Position is Position.OL or Position.TE or Position.FB).ToArray(),
+                    defensePlayers.Where(player => player.Position is Position.DE or Position.DT or Position.MLB or Position.OLB).ToArray(),
+                    0, false, session.Random);
+                pursuit = DefensivePursuitService.Select(defensePlayers, conversionDefense!, 0, .50,
+                    false, false, 0, 0, null, 0, session.Random);
+            }
+        }
+
+        var advantage = profile.OffenseRating - defense.DefenseRating;
+        if (conversionPlay is not null && conversionDefense is not null)
+        {
+            advantage += GameDayMatchupService.FormationAdvantage(conversionPlay, conversionDefense, isPass) * 4;
+            advantage += GameDayMatchupService.PersonnelAdvantage(offensePlayers, defensePlayers, isPass) * 4;
+        }
+        var probability = two
+            ? Math.Clamp(.43 + advantage * .004, .15, .78)
+            : GameDayMatchupService.FieldGoalProbability(session.Rules.ExtraPointDistance,
+                kicker?.Skills?.KickAccuracy ?? profile.SpecialTeamsRating,
                 kicker?.Skills?.KickPower ?? profile.SpecialTeamsRating);
         var made = session.Random.NextDouble() < probability;
-        var offenseUnit = PlaceKickTeam(home ? session.HomeRoster : session.AwayRoster, kicker);
-        var defenseUnit = PlaceKickDefense(home ? session.AwayRoster : session.HomeRoster);
+        var target = read?.Target;
+        var defender = read?.Defender ?? pursuit?.Tackler;
         var snap = new GameSnapEvent
         {
             StatsVersion = 1,
             Sequence = session.Events.Count + 1, PossessionNumber = session.PossessionNumber,
             Quarter = session.Quarter, ClockSeconds = session.ClockSeconds,
             OffenseTeamName = session.PossessionTeamName, DefenseTeamName = home ? session.Game.AwayTeamName : session.Game.HomeTeamName,
-            OffensivePlayId = string.Empty, DefensivePlayId = string.Empty, IsTry=true, StartYardLine = two?97:117-session.Rules.ExtraPointDistance,
+            OffensivePlayId = conversionPlay?.Id ?? string.Empty,
+            DefensivePlayId = conversionDefense?.Id ?? defensiveChoice ?? string.Empty,
+            IsTry = true, StartYardLine = two ? 97 : 117 - session.Rules.ExtraPointDistance,
             BallEndYardLine = made ? 100 : 97, Down = 0, Distance = 3, KickerId = two ? null : kicker?.PlayerId,
             CallSource = choice is null ? PlayCallSource.Cpu : PlayCallSource.User,
+            DefensiveCallSource = string.IsNullOrWhiteSpace(defensiveChoice) ? PlayCallSource.Cpu : PlayCallSource.User,
             Outcome = two ? made ? SnapOutcome.TwoPointConversion : SnapOutcome.FailedTwoPointConversion
                 : made ? SnapOutcome.ExtraPoint : SnapOutcome.MissedExtraPoint,
-            OffensePersonnel = offenseUnit.Select(p => p.PlayerId).ToArray(),
-            DefensePersonnel = defenseUnit.Select(p => p.PlayerId).ToArray(),
-            Points = made ? two ? 2 : 1 : 0
+            OffensePersonnel = offensePersonnel.PlayerIds,
+            DefensePersonnel = defensePersonnel.PlayerIds,
+            QuarterbackId = two ? offensePlayers.FirstOrDefault(player => player.Position == Position.QB)?.PlayerId : null,
+            BallCarrierId = two && !isPass ? runner?.PlayerId : null,
+            TargetId = two && isPass ? target?.PlayerId : null,
+            PrimaryDefenderId = two ? defender?.PlayerId : null,
+            CarrierLane = two && !isPass ? .50 : null,
+            TackleAttemptIds = pursuit?.AttemptIds ?? [],
+            AirYards = made && isPass ? 2 : 0,
+            YardsAfterCatch = 0,
+            PassReleaseProgress = read is null ? 0 : Math.Clamp(read.ReleaseSeconds / 5, .3, .75),
+            TargetSeparation = read?.Separation ?? 0,
+            IsDropback = two && isPass,
+            Blocks = read?.Blocking.Blocks ?? runBlocking?.Blocks ?? [],
+            PressureRushers = read?.Blocking.PressureRushers ?? [],
+            SackBlockerId = read?.Blocking.SackBlockerId
         };
-        if(!made)
+        if (!made)
         {
-            var returner=defenseUnit.OrderByDescending(p=>p.SpeedRating).FirstOrDefault();
-            snap=TryReturnService.ResolveFailure(snap with {ReturnerId=returner?.PlayerId,
-                QuarterbackId=offenseUnit.FirstOrDefault(p=>p.Position==Position.QB)?.PlayerId},session.Rules,
-                new Random(unchecked(session.Game.SimulationSeed*397 ^ snap.Sequence*7919 ^ 0x7A1)));
-            if(!snap.TurnoverYardLine.HasValue)snap=snap with {ReturnerId=null};
+            var returner = defensePlayers.OrderByDescending(player => player.SpeedRating).FirstOrDefault();
+            snap = TryReturnService.ResolveFailure(snap with {ReturnerId = returner?.PlayerId,
+                QuarterbackId = offensePlayers.FirstOrDefault(player => player.Position == Position.QB)?.PlayerId}, session.Rules,
+                new Random(unchecked(session.Game.SimulationSeed * 397 ^ snap.Sequence * 7919 ^ 0x7A1)));
+            if (!snap.TurnoverYardLine.HasValue) snap = snap with {ReturnerId = null};
         }
-        return ApplyTryResult(session,snap);
+        return ApplyTryResult(session, snap);
     }
-
     public static GameSnapEvent ApplyTryResult(GameDaySession session,GameSnapEvent snap)
     {
         if(session.IsComplete || !session.TryPending)throw new InvalidOperationException("No try is pending.");

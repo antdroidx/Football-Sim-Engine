@@ -7,6 +7,8 @@ public enum GameDayRouteFamily { Run, Verticals, Mesh, Screen, Flood, Smash, Sla
 
 public static class GameDayAnimationPlanner
 {
+    public static bool IsConversionPlay(GameSnapEvent snap) => snap.IsTry && snap.Outcome is SnapOutcome.TwoPointConversion or SnapOutcome.FailedTwoPointConversion;
+
     public static bool IsPlaceKick(GameSnapEvent snap) => snap.Outcome is SnapOutcome.FieldGoal or SnapOutcome.MissedFieldGoal
         or SnapOutcome.ExtraPoint or SnapOutcome.MissedExtraPoint;
 
@@ -17,6 +19,8 @@ public static class GameDayAnimationPlanner
         return new(Math.Clamp(receiver.X + direction * (sequence % 2 == 0 ? 3 : -2) / 120d, 1 / 120d, 119 / 120d),
             Math.Clamp(receiver.Y + (sequence % 3 - 1) * .035, .04, .96));
     }
+
+    public static string? OutcomeHeadline(GameSnapEvent snap) => snap.IsBlockedKick ? "KICK BLOCKED" : OutcomeHeadline(snap.Outcome);
 
     public static string? OutcomeHeadline(SnapOutcome outcome) => outcome switch
     {
@@ -194,6 +198,7 @@ public static class GameDayAnimationPlanner
     {
         if(snap.ReturnFumbleRecoveredByOffense && progress>=.90)return snap.QuarterbackId;
         if (snap.TurnoverYardLine.HasValue && progress >= CatchProgress(release)) return snap.ReturnerId;
+        if (snap.IsBlockedKick) return progress < .20 ? snap.KickerId : snap.PrimaryDefenderId;
         if (snap.Outcome is SnapOutcome.Kickoff or SnapOutcome.Punt)
             return progress < .10 ? snap.KickerId : progress < .65 ? null : snap.ReturnerId;
         if (IsPlaceKick(snap)) return progress < .20 ? snap.KickerId : null;
@@ -201,7 +206,7 @@ public static class GameDayAnimationPlanner
         if (snap.TargetId.HasValue)
             return progress < release ? snap.QuarterbackId : progress < CatchProgress(release) ? null :
                 snap.Outcome == SnapOutcome.Interception ? snap.PrimaryDefenderId :
-                snap.Outcome is SnapOutcome.Completion or SnapOutcome.Touchdown ? snap.TargetId : null;
+                snap.IsTry && snap.Outcome == SnapOutcome.TwoPointConversion || snap.Outcome is SnapOutcome.Completion or SnapOutcome.Touchdown ? snap.TargetId : null;
         return progress < .25 ? snap.QuarterbackId : snap.BallCarrierId;
     }
 
