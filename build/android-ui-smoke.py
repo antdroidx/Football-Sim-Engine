@@ -805,7 +805,7 @@ def check_career_options():
         options = wait_for("career-firing-default", lambda r: "Off" in texts(r))
         tap(options, "Off")
         tap(capture("career-create-ready"), "New dynasty")
-        tap(capture("career-create-school"), "Choose your team")
+        tap(scroll_to_text("career-create-school", "Choose your team"), "Choose your team")
         tap(wait_for("career-schools", lambda r: "Air Force" in texts(r)), "Air Force")
         form = scroll_to_text("career-form-"+scope, "Start dynasty")
         assert role in texts(form)

@@ -132,6 +132,9 @@ public sealed partial class FranchisePage : ContentPage
                         role.SelectedIndex == 1 ? StaffRole.OffensiveCoordinator : role.SelectedIndex == 2 ? StaffRole.DefensiveCoordinator : StaffRole.HeadCoach,
                         firing.IsToggled, coachName.Text, generatedPlayers: roster.SelectedIndex == 1));
                     await Save(); section = "Overview"; Render();
+                    // The setup screen is taller than the overview header, so start the new
+                    // franchise at the top of its overview instead of the previous scroll offset.
+                    await scroll.ScrollToAsync(0, 0, false);
                 }, "pro-start"),
                 SetupScreen.Secondary("Cancel", () => _ = Library()))));
 
