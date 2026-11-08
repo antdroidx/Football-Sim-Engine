@@ -155,6 +155,39 @@ public static class PreSnapMotionPlan
     /// <summary>Lateral offset of the handoff from the quarterback's lane.</summary>
     public const double HandoffLaneOffset = .07;
 
+    /// <summary>
+    /// Screen offset of a motion waypoint from the player's alignment. The live animation replaces
+    /// the marker translation on every segment, so a waypoint's offset is the whole displacement
+    /// from the alignment rather than the last step alone.
+    /// </summary>
+    public static (double X, double Y) AlignmentOffset(
+        GameFieldPoint alignment,
+        GameFieldPoint waypoint,
+        int direction,
+        double fieldWidth,
+        double fieldHeight,
+        double markerSize)
+    {
+        var x = (waypoint.X - alignment.X) * direction / 120d * Math.Max(1, fieldWidth - markerSize);
+        var y = (waypoint.Y - alignment.Y) * Math.Max(1, fieldHeight - markerSize);
+        return (x, y);
+    }
+
+    /// <summary>Screen offsets for every waypoint of a motion path, measured from the alignment.</summary>
+    public static IReadOnlyList<(double X, double Y)> PathOffsets(
+        IReadOnlyList<GameFieldPoint> path,
+        int direction,
+        double fieldWidth,
+        double fieldHeight,
+        double markerSize)
+    {
+        if (path.Count == 0) return [];
+        var alignment = path[0];
+        return path
+            .Select(waypoint => AlignmentOffset(alignment, waypoint, direction, fieldWidth, fieldHeight, markerSize))
+            .ToArray();
+    }
+
     /// <summary>Point on the Jet path a given share of the way from the receiver to the quarterback.</summary>
     public static GameFieldPoint JetPoint(GameFieldPoint baseAlignment, GameFieldPoint handoffAlignment, double traveled) =>
         new(baseAlignment.X + (handoffAlignment.X - baseAlignment.X) * traveled,

@@ -8,16 +8,16 @@ Run [42462711585](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/
 Both exact downloads pass `apksigner verify` with APK Signature Scheme v2 and v3 and signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`, the same key as the published versions. Device evidence is [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585/artifacts/13610783883), [College launch](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585/artifacts/13610603131), and [College career options](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585/artifacts/13610995507). These are Actions artifacts, not GitHub releases.
 ## Jet Sweep handoff choreography - November 8, 2026
 
-The Jet Sweep's live choreography is now covered headlessly. `JetSweepChoreographyTests` asserts that the motion man starts in his wide receiver alignment, that the handoff point sits at the quarterback's lane rather than behind him, that the pre-snap path only moves toward the quarterback, that the snap continues exactly where the pre-snap motion stopped, that the carrier reaches the mesh before the run starts, and that the ball changes hands from the quarterback to the motion man at that handoff.
+The Jet Sweep's live choreography is now covered headlessly. `JetSweepChoreographyTests` asserts that the motion man starts in his wide receiver alignment, that the handoff point sits at the quarterback's lane rather than behind him, that the pre-snap path only moves toward the quarterback, that every waypoint's screen offset is measured from the player's alignment rather than from the previous waypoint, that the snap continues exactly where the pre-snap motion stopped, that the carrier reaches the mesh before the run starts, and that the ball changes hands from the quarterback to the motion man at that handoff.
 
 Device evidence: a fresh Arizona Cardinals franchise in the Pro app on a read-only API 36 emulator. The live call sheet shows `Jet Sweep` with `Pre-snap: Jet motion left`. Filmed at half game speed, the ball snaps from the center to the quarterback, the carrier highlight moves from the quarterback to the motion man at the mesh, and the motion man continues into the run. The frames are under `.artifacts/jet-qa/`.
 
 Actual checks on the implementation working tree:
 
-- Focused `PreSnapMotionPlanTests|JetSweepChoreographyTests|PreSnapTests|GameDayPreSnapPresentationTests|PreSnapMatchupTests|SpecialTeamsCallTests`: 43 passed.
-- Football.Engine full suite: 430 passed.
+- Focused `PreSnapMotionPlanTests|JetSweepChoreographyTests|PreSnapTests|GameDayPreSnapPresentationTests|PreSnapMatchupTests|SpecialTeamsCallTests`: 44 passed.
+- Football.Engine full suite: 431 passed.
 - College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
-- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 485 passed and the documented intermittent `CapInitializationTests.ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets` failed once after 3m40s. The exact isolated retry passed 1/1 in 1m24s with no source or assertion change.
 - Football.Presentation Debug compile: zero warnings/errors.
 - College Android Debug APK packaging: zero errors. Pro Android Debug APK packaging: zero errors.
 ## GitHub Actions APK verification - November 8, 2026
@@ -65,7 +65,7 @@ Actual checks:
 - Focused pre-snap/matchup/timing/special-teams suite: 35 passed.
 - Football.Engine: 418 passed.
 - College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
-- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 485 passed and the documented intermittent `CapInitializationTests.ThreeSeasonsPreserveImportedCapRolloverDraftAndCpuBudgets` failed once after 3m40s. The exact isolated retry passed 1/1 in 1m24s with no source or assertion change.
 - Android UI helpers: 24 passed. Packaged-resource validation and Python smoke compilation passed.
 - Football.Presentation: zero warnings/errors. College Debug APK: zero warnings/errors. Pro Debug APK: zero errors, two documented `CS8625` warnings.
 

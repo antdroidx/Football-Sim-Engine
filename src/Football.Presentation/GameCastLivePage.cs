@@ -649,9 +649,9 @@ public class GameCastLivePage : ContentPage
         GameFieldPoint to,
         double direction)
     {
-        var x = (to.X - from.X) * direction / 120d * Math.Max(1, field.Width - marker.Width);
-        var y = (to.Y - from.Y) * Math.Max(1, field.Height - marker.Height);
-        return (x, y);
+        var offset = PreSnapMotionPlan.AlignmentOffset(
+            from, to, (int)direction, field.Width, field.Height, marker.Width);
+        return (offset.X, offset.Y);
     }
 
     async Task AnimateDefensiveAlignment(GameSnapEvent snap, DefensivePlayDefinition? calledDefense)
@@ -740,14 +740,14 @@ public class GameCastLivePage : ContentPage
             var path = PreSnapMotionPlan.Path(
                 choice, basePoint, snapPoint, quarterbackPoint, fieldWidth,
                 stopBeforeHandoff: choice.MotionLiveAtSnap);
-            var previous = basePoint;
-            foreach (var point in path.Skip(1))
-            {
-                var translation = MarkerTranslation(marker, previous, point, direction);
+            // TranslateToAsync replaces the marker translation, so every waypoint is measured from
+            // the alignment the player started at. Measuring from the previous waypoint would leave
+            // the player one segment away from his alignment when the motion ends.
+            var offsets = PreSnapMotionPlan.PathOffsets(
+                path, (int)direction, field.Width, field.Height, marker.Width);
+            foreach (var offset in offsets.Skip(1))
                 await marker.TranslateToAsync(
-                    translation.X, translation.Y, PreSnapMotionPlan.MotionSegmentMilliseconds, Easing.CubicInOut);
-                previous = point;
-            }
+                    offset.X, offset.Y, PreSnapMotionPlan.MotionSegmentMilliseconds, Easing.CubicInOut);
         }
 
         var moves = new List<Task> { MoveAlong(motionMarker, primaryPoint, primarySnap) };
