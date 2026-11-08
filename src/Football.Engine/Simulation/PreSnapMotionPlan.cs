@@ -149,17 +149,54 @@ public static class PreSnapMotionPlan
         int movingRole) =>
         IsOpen(target, movingPosition, movingRole, play);
 
-    /// <summary>Point immediately before the post-snap handoff for live Jet motion.</summary>
+    /// <summary>Share of the Jet path the motion man has covered when the ball is snapped.</summary>
+    public const double JetTraveledAtSnap = .90;
+
+    /// <summary>Lateral offset of the handoff from the quarterback's lane.</summary>
+    public const double HandoffLaneOffset = .07;
+
+    /// <summary>Point on the Jet path a given share of the way from the receiver to the quarterback.</summary>
+    public static GameFieldPoint JetPoint(GameFieldPoint baseAlignment, GameFieldPoint handoffAlignment, double traveled) =>
+        new(baseAlignment.X + (handoffAlignment.X - baseAlignment.X) * traveled,
+            baseAlignment.Y + (handoffAlignment.Y - baseAlignment.Y) * traveled);
+
+    /// <summary>
+    /// Point where the quarterback hands the ball to the motion man. The receiver arrives at the
+    /// quarterback's hip rather than behind him, so the exchange reads as a handoff.
+    /// </summary>
+    public static GameFieldPoint HandoffAlignment(PreSnapChoice choice, GameFieldPoint quarterbackAlignment)
+    {
+        if (choice.MotionKind != PreSnapMotionKind.JetHandoff) return quarterbackAlignment;
+        var lane = quarterbackAlignment.Y + (choice.Side.Equals("Right", StringComparison.OrdinalIgnoreCase)
+            ? -HandoffLaneOffset : HandoffLaneOffset);
+        return new(quarterbackAlignment.X, Math.Clamp(lane, .08, .92));
+    }
+
+    /// <summary>
+    /// Waypoints of the live Jet path. The path only moves toward the quarterback, and the last
+    /// point is where the receiver stands when the ball is snapped.
+    /// </summary>
+    public static IReadOnlyList<GameFieldPoint> JetPath(
+        GameFieldPoint baseAlignment,
+        GameFieldPoint handoffAlignment,
+        bool stopBeforeHandoff = true) =>
+    [
+        baseAlignment,
+        JetPoint(baseAlignment, handoffAlignment, .40),
+        JetPoint(baseAlignment, handoffAlignment, .70),
+        stopBeforeHandoff
+            ? JetPoint(baseAlignment, handoffAlignment, JetTraveledAtSnap)
+            : handoffAlignment
+    ];
+
+    /// <summary>Point the motion man occupies when the ball is snapped.</summary>
     public static GameFieldPoint HandoffStartAlignment(
         PreSnapChoice choice,
         GameFieldPoint baseAlignment,
         GameFieldPoint snapAlignment)
     {
         if (choice.MotionKind != PreSnapMotionKind.JetHandoff) return snapAlignment;
-        const double traveledBeforeSnap = .82;
-        return new(
-            snapAlignment.X + (baseAlignment.X - snapAlignment.X) * (1 - traveledBeforeSnap),
-            snapAlignment.Y);
+        return JetPoint(baseAlignment, snapAlignment, JetTraveledAtSnap);
     }
 
     /// <summary>Position at the snap after the play-specific motion finishes.</summary>
@@ -178,10 +215,7 @@ public static class PreSnapMotionPlan
 
         return choice.MotionKind switch
         {
-            PreSnapMotionKind.JetHandoff => new(
-                quarterbackAlignment.X - Math.Max(.25, Math.Abs(choice.SnapDepth)),
-                Math.Clamp(choice.SnapLane ?? quarterbackAlignment.Y +
-                    (choice.Side.Equals("Right", StringComparison.OrdinalIgnoreCase) ? .08 : -.08), .08, .92)),
+            PreSnapMotionKind.JetHandoff => HandoffAlignment(choice, quarterbackAlignment),
             PreSnapMotionKind.SetAcross or PreSnapMotionKind.OrbitAcross or PreSnapMotionKind.ReceiverRelocate => new(
                 choice.SnapDepth,
                 Math.Clamp(choice.SnapLane ?? 1 - baseAlignment.Y, .08, .92)),
@@ -248,13 +282,7 @@ public static class PreSnapMotionPlan
         var side = choice.Side.Equals("Right", StringComparison.OrdinalIgnoreCase) ? 1 : -1;
         return choice.MotionKind switch
         {
-            PreSnapMotionKind.JetHandoff =>
-            [
-                baseAlignment,
-                new((baseAlignment.X + snapAlignment.X) * .55, baseAlignment.Y + (snapAlignment.Y - baseAlignment.Y) * .12),
-                new((stopBeforeHandoff ? HandoffStartAlignment(choice, baseAlignment, snapAlignment) : snapAlignment).X - .20, snapAlignment.Y),
-                stopBeforeHandoff ? HandoffStartAlignment(choice, baseAlignment, snapAlignment) : snapAlignment
-            ],
+            PreSnapMotionKind.JetHandoff => JetPath(baseAlignment, snapAlignment, stopBeforeHandoff),
             PreSnapMotionKind.SetAcross or PreSnapMotionKind.ReceiverRelocate =>
             [
                 baseAlignment,

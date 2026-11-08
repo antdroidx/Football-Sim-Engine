@@ -1,3 +1,28 @@
+## Jet Sweep handoff at the quarterback - November 8, 2026
+
+The Jet Sweep now runs the way the play is drawn. The receiver starts in his wide alignment, motions toward the quarterback, the ball is snapped to the quarterback, the exchange happens at the quarterback's hip, and the receiver runs from there.
+
+The live motion path has one source of truth. `PreSnapMotionPlan.JetPath` produces the pre-snap waypoints and `HandoffStartAlignment` returns that path's last point, so the receiver can no longer be re-placed at the snap and appear to run back to where he started. The path only moves toward the quarterback: the previous shape overshot the mesh by 0.2 yards and stepped back, and the handoff point sat 0.75 yards deeper than the quarterback, which put the receiver behind the quarterback instead of beside him. The handoff now lands at the quarterback's lane.
+
+The ball and the receiver also share one track. `GameDayAnimationPlanner.CarrierTrack` carries the receiver to the mesh and then into the run, and the ball follows that exact path, so the ball changes hands where the handoff happens instead of jumping to a receiver who is already running. The ball transfer moved from 22% to 18% of the play.
+
+Device evidence: a fresh Arizona Cardinals franchise in the Pro app on a read-only API 36 emulator, `Pre-snap: Jet motion left`, filmed at half game speed. The ball sits on the line, snaps to the quarterback, the carrier highlight moves from the quarterback to the motion man at the mesh, and the motion man continues into the run. Frames are under `.artifacts/jet-qa/`.
+
+Validation actually run on the implementation working tree:
+
+- Focused `PreSnapMotionPlanTests|JetSweepChoreographyTests|PreSnapTests|GameDayPreSnapPresentationTests|PreSnapMatchupTests|SpecialTeamsCallTests`: 43 passed.
+- Football.Engine full suite: 430 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed.
+- Football.Presentation Debug compile: zero warnings/errors.
+- College Android Debug APK packaging: zero errors.
+
+Local Debug APKs:
+
+- College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, 91,241,624 bytes, SHA-256 `FC6F94EA3FEFE1AC355CB4510058ECC2696391C118B42CFBD6DBD6CBF5AD891E`.
+- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, 90,300,937 bytes, SHA-256 `B44030EBD76710EC8220753817B664925744217889E47A9F60B2B77CECCE5164`.
+
+Both local APKs pass `apksigner verify` with signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`, the same key as the published versions.
 ## GitHub Actions APK verification - November 8, 2026
 
 Run [42444981350](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42444981350) completed successfully on `c9f0dd458a2e374ec0e9a3a14f84b853e7e4f071`; all five jobs are green. The earlier run [42443560962](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42443560962) failed on the pre-fix Pro staff seed collision and is superseded by this run.

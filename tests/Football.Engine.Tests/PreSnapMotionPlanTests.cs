@@ -16,7 +16,7 @@ public class PreSnapMotionPlanTests
         var basePoint = GameDayAnimationPlanner.OffensiveAlignment(play, Position.WR, jet.MotionRoleIndex);
         var quarterback = GameDayAnimationPlanner.OffensiveAlignment(play, Position.QB, 0);
         var jetSnap = PreSnapMotionPlan.SnapAlignment(jet, true, false, basePoint, basePoint, quarterback);
-        Assert.True(jetSnap.X < quarterback.X);
+        Assert.Equal(quarterback.X, jetSnap.X);
         Assert.NotEqual(basePoint, jetSnap);
         Assert.Equal(jetSnap, PreSnapMotionPlan.Path(jet, basePoint, jetSnap, quarterback)[^1]);
         var handoffStart = PreSnapMotionPlan.HandoffStartAlignment(jet, basePoint, jetSnap);
@@ -82,7 +82,7 @@ public class PreSnapMotionPlanTests
         Assert.Equal(basePoint, path[0]);
         Assert.True(path[1].X < basePoint.X);
         Assert.True(path[1].X > snapPoint.X);
-        Assert.True(snapPoint.X < quarterback.X);
+        Assert.Equal(quarterback.X, snapPoint.X);
         Assert.Equal(snapPoint, path[^1]);
         var handoffStart = PreSnapMotionPlan.HandoffStartAlignment(jet, basePoint, snapPoint);
         var beforeHandoff = PreSnapMotionPlan.Path(
@@ -110,7 +110,7 @@ public class PreSnapMotionPlanTests
             BallCarrierId = receiverId
         };
         var transfer = GameDayAnimationPlanner.BallTransferProgress(snap);
-        Assert.Equal(.22, transfer);
+        Assert.Equal(.18, transfer);
         Assert.Equal(quarterbackId, GameDayAnimationPlanner.BallOwner(snap, transfer - .01, .4));
         Assert.Equal(receiverId, GameDayAnimationPlanner.BallOwner(snap, transfer + .01, .4));
     }

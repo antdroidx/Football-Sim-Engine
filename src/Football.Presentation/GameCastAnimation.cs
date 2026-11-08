@@ -343,28 +343,16 @@ public static class GameCastAnimation
             }
             AddMovement(view, from, to, movements, fieldPlayers);
         }
-        Rect CarrierTrack(Rect from, Rect to, double progress)
+        Rect CarrierTrack(Rect from, Rect to, double progress, bool ballCarrier = false)
         {
             var carrier = session.PlayersById.GetValueOrDefault(snap.BallCarrierId ?? snap.ReturnerId ?? Guid.Empty);
-            var start = new GameFieldPoint(from.X, from.Y);
-            var end = new GameFieldPoint(to.X, to.Y);
-            if (snap.PreSnap?.MotionKind == PreSnapMotionKind.JetHandoff &&
-                from == runnerFrom && jetHandoffTo is Rect handoff)
-            {
-                var transfer = GameDayAnimationPlanner.BallTransferProgress(snap);
-                if (progress <= transfer)
-                {
-                    var approach = GameDayAnimationPlanner.CarrierPoint(
-                        start, new(handoff.X, handoff.Y), progress / transfer,
-                        carrier?.AgilityRating ?? 65, snap.BrokeTackle);
-                    return new Rect(approach.X, approach.Y, from.Width, from.Height);
-                }
-
-                start = new(handoff.X, handoff.Y);
-                progress = (progress - transfer) / (1 - transfer);
-            }
-            var point = GameDayAnimationPlanner.CarrierPoint(
-                start, end, progress, carrier?.AgilityRating ?? 65, snap.BrokeTackle);
+            // A Jet motion hands off at the quarterback's hip; the ball and the receiver share this path.
+            var mesh = ballCarrier && snap.PreSnap?.MotionKind == PreSnapMotionKind.JetHandoff &&
+                jetHandoffTo is Rect handoff
+                ? new GameFieldPoint(handoff.X, handoff.Y) : (GameFieldPoint?)null;
+            var point = GameDayAnimationPlanner.CarrierTrack(
+                new GameFieldPoint(from.X, from.Y), new GameFieldPoint(to.X, to.Y), progress,
+                carrier?.AgilityRating ?? 65, snap.BrokeTackle, mesh, GameDayAnimationPlanner.BallTransferProgress(snap));
             return new Rect(point.X, point.Y, from.Width, from.Height);
         }
         Rect ReceiverTrack(double progress)
@@ -629,7 +617,8 @@ public static class GameCastAnimation
                     : caught && ReferenceEquals(movement.View, terminalCarrierView) ? ReceiverTrack(progress) : routeViews.Contains(movement.View)
                     ? RouteTrack(movement.From, movement.To, movementProgress, assignedRoutes.GetValueOrDefault(movement.View, routeFamily))
                     : (ReferenceEquals(movement.View, terminalCarrierView) && !isPass || ReferenceEquals(movement.View, specialReturnerView))
-                    ? CarrierTrack(movement.From, movement.To, movementProgress) : Interpolate(movement.From, movement.To, movementProgress);
+                    ? CarrierTrack(movement.From, movement.To, movementProgress, ReferenceEquals(movement.View, terminalCarrierView) && !isPass)
+                    : Interpolate(movement.From, movement.To, movementProgress);
                 if (coverageTracks.TryGetValue(movement.View, out var cover))
                 {
                     Rect CoverAt(double at)
@@ -723,7 +712,12 @@ public static class GameCastAnimation
                 else carrierLabel.IsVisible = false;
             }
             Rect Track(Rect? from, Rect? to, double fraction) =>
-                from is Rect a && to is Rect b ? (from == runnerFrom && !isPass || from == returnerFrom ? CarrierTrack(a, b, fraction) : Interpolate(a, b, fraction)) : centerPoint;
+                from is Rect a && to is Rect b ? (from == returnerFrom ? CarrierTrack(a, b, fraction) : Interpolate(a, b, fraction)) : centerPoint;
+            // The ball carrier's own track. The ball follows this exact path, so a Jet handoff
+            // always lands in the receiver's hands instead of jumping to where he already ran.
+            Rect RunnerTrack(double fraction) => runnerFrom is Rect a && runnerTo is Rect b
+                ? CarrierTrack(a, b, fraction, true)
+                : centerPoint;
             Rect currentBall;
             if (isKick && snap.Outcome is SnapOutcome.Kickoff or SnapOutcome.Punt)
             {
@@ -796,9 +790,9 @@ public static class GameCastAnimation
             {
                 var transfer = GameDayAnimationPlanner.BallTransferProgress(snap);
                 currentBall = progress < transfer
-                    ? Interpolate(BallAt(Track(qbFrom, qbTo, 0)), BallAt(Track(runnerFrom, runnerTo, transfer)),
+                    ? Interpolate(BallAt(Track(qbFrom, qbTo, 0)), BallAt(RunnerTrack(transfer)),
                         (progress - .13) / Math.Max(.01, transfer - .13))
-                    : BallAt(Track(runnerFrom, runnerTo, progress));
+                    : BallAt(RunnerTrack(progress));
             }
             else currentBall = BallAt(Track(qbFrom, qbTo, progress));
             if (snap.TurnoverYardLine.HasValue && progress >= catchProgress) currentBall = BallAt(TurnoverTrack(progress));

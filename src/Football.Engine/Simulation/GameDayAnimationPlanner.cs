@@ -163,6 +163,28 @@ public static class GameDayAnimationPlanner
         return point;
     }
 
+    /// <summary>
+    /// Ball carrier path. A live Jet motion carries the receiver to the quarterback's hip before the
+    /// run begins, so the ball changes hands where the handoff actually happens.
+    /// </summary>
+    public static GameFieldPoint CarrierTrack(
+        GameFieldPoint start,
+        GameFieldPoint end,
+        double progress,
+        int agility = 65,
+        bool brokenTackle = false,
+        GameFieldPoint? handoff = null,
+        double transfer = .18)
+    {
+        if (handoff is GameFieldPoint mesh)
+        {
+            if (progress <= transfer)
+                return CarrierPoint(start, mesh, progress / Math.Max(.01, transfer), agility, brokenTackle);
+            return CarrierPoint(mesh, end, (progress - transfer) / Math.Max(.01, 1 - transfer), agility, brokenTackle);
+        }
+        return CarrierPoint(start, end, progress, agility, brokenTackle);
+    }
+
     public static GameFieldPoint CarrierPoint(GameFieldPoint from, GameFieldPoint to, double progress, int agility, bool brokenTackle)
     {
         var p = Math.Clamp(progress, 0, 1);
@@ -194,7 +216,7 @@ public static class GameDayAnimationPlanner
     public static double DistanceYards(GameFieldPoint from, GameFieldPoint to) =>
         Math.Sqrt(Math.Pow((to.X - from.X) * 120, 2) + Math.Pow((to.Y - from.Y) * 53.333, 2));
 
-    public static double BallTransferProgress(GameSnapEvent snap) => snap.PreSnap?.MotionKind == PreSnapMotionKind.JetHandoff ? .22 : .25;
+    public static double BallTransferProgress(GameSnapEvent snap) => snap.PreSnap?.MotionKind == PreSnapMotionKind.JetHandoff ? .18 : .25;
 
     public static Guid? BallOwner(GameSnapEvent snap, double progress, double release)
     {

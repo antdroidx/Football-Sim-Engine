@@ -1,3 +1,17 @@
+## Jet Sweep handoff choreography - November 8, 2026
+
+The Jet Sweep's live choreography is now covered headlessly. `JetSweepChoreographyTests` asserts that the motion man starts in his wide receiver alignment, that the handoff point sits at the quarterback's lane rather than behind him, that the pre-snap path only moves toward the quarterback, that the snap continues exactly where the pre-snap motion stopped, that the carrier reaches the mesh before the run starts, and that the ball changes hands from the quarterback to the motion man at that handoff.
+
+Device evidence: a fresh Arizona Cardinals franchise in the Pro app on a read-only API 36 emulator. The live call sheet shows `Jet Sweep` with `Pre-snap: Jet motion left`. Filmed at half game speed, the ball snaps from the center to the quarterback, the carrier highlight moves from the quarterback to the motion man at the mesh, and the motion man continues into the run. The frames are under `.artifacts/jet-qa/`.
+
+Actual checks on the implementation working tree:
+
+- Focused `PreSnapMotionPlanTests|JetSweepChoreographyTests|PreSnapTests|GameDayPreSnapPresentationTests|PreSnapMatchupTests|SpecialTeamsCallTests`: 43 passed.
+- Football.Engine full suite: 430 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed.
+- Football.Presentation Debug compile: zero warnings/errors.
+- College Android Debug APK packaging: zero errors. Pro Android Debug APK packaging: zero errors.
 ## GitHub Actions APK verification - November 8, 2026
 
 Run [42444981350](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42444981350) completed successfully on `c9f0dd458a2e374ec0e9a3a14f84b853e7e4f071`; all five jobs are green. The earlier run [42443560962](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42443560962) failed on the pre-fix Pro staff seed collision and is superseded by this run.
