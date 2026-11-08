@@ -308,7 +308,7 @@ public static class GameCastAnimation
                 endX = formation.To.X; endY = formation.To.Y;
             }
             if (player?.PlayerId == terminalCarrierId && snap.CarrierLane.HasValue) endY = snap.CarrierLane.Value;
-            if (player?.PlayerId == snap.TargetId && caught) endX = Project(snap.StartYardLine + snap.AirYards);
+            if (player?.PlayerId == snap.TargetId && caught) endX = Project(GameDayAnimationPlanner.CatchDestinationYardLine(snap));
             else if (player?.PlayerId == terminalCarrierId) endX = destination;
             var view = Marker(player, offenseColor, context.TeamSecondary(snap.OffenseTeamName), offenseIsAway);
             RegisterMarker(player, view);

@@ -1,3 +1,18 @@
+## Continuous pre-snap motion, penalty formations and conversion goal lines - November 8, 2026
+
+The pre-snap motion is now one continuous run. The live path no longer eases in and out at every waypoint, and the time each segment gets follows its length, so the receiver accelerates once and keeps running instead of running, stopping and restarting. The receiver's legs also animate during the motion. `PreSnapMotionPlan.PathDurations` owns the split so the pace is testable.
+
+A dead-ball foul is now announced over the alignment it was called on. The pre-snap sequence runs for a pre-snap penalty even when the CPU called the snap, so the formation and the motion are on the field before the flag is shown. Previously a CPU false start was called on an empty field.
+
+A made two-point conversion is carried past the goal line. `GameDayAnimationPlanner.CarrierDestinationYardLine` and the new `CatchDestinationYardLine` put the carrier two yards past the goal line at 102, matching how a touchdown is carried to 104, instead of stopping on the line at 100. The try itself now records its points, so a made conversion is worth two and a made extra point is worth one; the scoreboard had been holding at zero for the try while the banner announced it.
+
+Validation actually run on the implementation working tree:
+
+- Focused `PreSnapMotionPlanTests|JetSweepChoreographyTests|ConversionPresentationTests|PreSnapTests|GameDayPreSnapPresentationTests|PreSnapMatchupTests|SpecialTeamsCallTests`: 50 passed.
+- Football.Engine full suite: 437 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed.
+- Football.Presentation Debug compile: zero warnings/errors.
 ## GitHub Actions APK verification - November 8, 2026
 
 Run [42468674918](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42468674918) completed successfully on `fe3a885db59b0f0bd1dcbeaa778ffd441d9fb4dc`; all five jobs are green. It supersedes run [42462711585](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585), which was built before the pre-snap motion travelled the full path.

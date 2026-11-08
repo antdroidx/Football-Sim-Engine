@@ -169,6 +169,7 @@ public static partial class GameDayEngine
             DefensiveCallSource = string.IsNullOrWhiteSpace(defensiveChoice) ? PlayCallSource.Cpu : PlayCallSource.User,
             Outcome = two ? made ? SnapOutcome.TwoPointConversion : SnapOutcome.FailedTwoPointConversion
                 : made ? SnapOutcome.ExtraPoint : SnapOutcome.MissedExtraPoint,
+            Points = made ? two ? 2 : 1 : 0,
             OffensePersonnel = offensePersonnel.PlayerIds,
             DefensePersonnel = defensePersonnel.PlayerIds,
             QuarterbackId = two ? offensePlayers.FirstOrDefault(player => player.Position == Position.QB)?.PlayerId : null,

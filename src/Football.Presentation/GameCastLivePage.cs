@@ -187,7 +187,11 @@ public class GameCastLivePage : ContentPage
             Update();
             last = control.Step(calledOffense, calledDefense, calledPreSnap);
             offense = defense = null; ResetPreSnap();
-            if (manual)
+            preSnapHolding = manual || last.IsPreSnapPenalty;
+            Update();
+            // A dead-ball foul is announced over the alignment it was called on, so the formation is
+            // always shown first. Without it a CPU penalty is called on an empty field.
+            if (manual || last.IsPreSnapPenalty)
             {
                 var calledPlay = OffensivePlay(last);
                 var calledDefensivePlay = DefensivePlay(last);
@@ -745,9 +749,23 @@ public class GameCastLivePage : ContentPage
             // the player one segment away from his alignment when the motion ends.
             var offsets = PreSnapMotionPlan.PathOffsets(
                 path, (int)direction, field.Width, field.Height, marker.Width);
-            foreach (var offset in offsets.Skip(1))
+            if (offsets.Count < 2) return;
+            // One continuous run: the time each segment gets follows its length and the easing never
+            // stops, so the player accelerates once instead of running and stopping at every point.
+            var totalMilliseconds = (uint)(PreSnapMotionPlan.MotionSegmentMilliseconds * (offsets.Count - 1));
+            var durations = PreSnapMotionPlan.PathDurations(offsets, totalMilliseconds);
+            var sprite = marker.Content as FootballSpriteView;
+            if (sprite is not null)
+            {
+                var run = new Animation(progress => sprite.Animate(
+                    progress, totalMilliseconds / 1000d,
+                    offsets[^1].X - offsets[0].X, offsets[^1].Y - offsets[0].Y, false, false));
+                run.Commit(marker, "pre-snap-run", 16, totalMilliseconds);
+            }
+            for (var index = 0; index < durations.Count; index++)
                 await marker.TranslateToAsync(
-                    offset.X, offset.Y, PreSnapMotionPlan.MotionSegmentMilliseconds, Easing.CubicInOut);
+                    offsets[index + 1].X, offsets[index + 1].Y, durations[index], Easing.Linear);
+            marker.AbortAnimation("pre-snap-run");
         }
 
         var moves = new List<Task> { MoveAlong(motionMarker, primaryPoint, primarySnap) };

@@ -188,6 +188,38 @@ public static class PreSnapMotionPlan
             .ToArray();
     }
 
+    /// <summary>
+    /// Segment durations for a motion path. The time each segment gets follows its length so the
+    /// player runs at one pace instead of stopping at every waypoint.
+    /// </summary>
+    public static IReadOnlyList<uint> PathDurations(
+        IReadOnlyList<(double X, double Y)> offsets,
+        uint totalMilliseconds)
+    {
+        if (offsets.Count < 2) return [];
+        var lengths = new double[offsets.Count - 1];
+        var total = 0d;
+        for (var index = 0; index < lengths.Length; index++)
+        {
+            lengths[index] = Math.Sqrt(
+                Math.Pow(offsets[index + 1].X - offsets[index].X, 2) +
+                Math.Pow(offsets[index + 1].Y - offsets[index].Y, 2));
+            total += lengths[index];
+        }
+        var durations = new uint[lengths.Length];
+        var spent = 0u;
+        for (var index = 0; index < lengths.Length; index++)
+        {
+            var duration = index == lengths.Length - 1
+                ? Math.Max(1u, totalMilliseconds - spent)
+                : total > 0 ? Math.Max(1u, (uint)Math.Round(totalMilliseconds * lengths[index] / total))
+                    : Math.Max(1u, totalMilliseconds / (uint)lengths.Length);
+            durations[index] = duration;
+            spent += duration;
+        }
+        return durations;
+    }
+
     /// <summary>Point on the Jet path a given share of the way from the receiver to the quarterback.</summary>
     public static GameFieldPoint JetPoint(GameFieldPoint baseAlignment, GameFieldPoint handoffAlignment, double traveled) =>
         new(baseAlignment.X + (handoffAlignment.X - baseAlignment.X) * traveled,

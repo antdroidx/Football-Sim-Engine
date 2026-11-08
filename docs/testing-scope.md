@@ -1,3 +1,16 @@
+## Continuous motion, penalty formations and conversion goal lines - November 8, 2026
+
+The pre-snap motion, the pre-snap penalty presentation and the two-point conversion are covered headlessly.
+
+`JetSweepChoreographyTests.TheMotionRunsAtOnePaceInsteadOfStoppingAtEveryWaypoint` asserts that the segment durations follow the segment lengths, that they sum to the motion window, and that the pace is the same on every segment. `ConversionPresentationTests` asserts that a made two-point conversion is worth two points, moves the score, and is carried two yards past the goal line at 102, that a made extra point is worth one, that a missed try scores nothing, and that a pre-snap penalty carries both units so the alignment can be shown before the flag.
+
+Actual checks on the implementation working tree:
+
+- Focused `PreSnapMotionPlanTests|JetSweepChoreographyTests|ConversionPresentationTests|PreSnapTests|GameDayPreSnapPresentationTests|PreSnapMatchupTests|SpecialTeamsCallTests`: 50 passed.
+- Football.Engine full suite: 437 passed.
+- College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed.
+- Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed.
+- Football.Presentation Debug compile: zero warnings/errors.
 ## GitHub Actions APK verification - November 8, 2026
 
 Run [42468674918](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42468674918) completed successfully on `fe3a885db59b0f0bd1dcbeaa778ffd441d9fb4dc` with all five jobs green. It supersedes run [42462711585](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585), which was built before the pre-snap motion travelled the full path.

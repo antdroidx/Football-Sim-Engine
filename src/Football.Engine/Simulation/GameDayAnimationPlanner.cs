@@ -88,12 +88,20 @@ public static class GameDayAnimationPlanner
         return direction == 1 ? leftToRight : 1 - leftToRight;
     }
 
+    /// <summary>Yard line a made try is carried past, so the animation shows the score crossing the goal line.</summary>
+    public const double ConversionGoalLine = 102;
+
     public static double CarrierDestinationYardLine(GameSnapEvent snap)
     {
         var spot = snap.BallEndYardLine != 0 || snap.StartYardLine + snap.Yards == 0
             ? snap.BallEndYardLine : Math.Clamp(snap.StartYardLine + snap.Yards, 0, 100);
+        if (snap.Outcome == SnapOutcome.TwoPointConversion) return ConversionGoalLine;
         return snap.Outcome == SnapOutcome.Touchdown || snap.Points >= 6 ? 104 : spot;
     }
+
+    /// <summary>Yard line where a caught ball lands. A made conversion is caught past the goal line.</summary>
+    public static double CatchDestinationYardLine(GameSnapEvent snap) =>
+        snap.Outcome == SnapOutcome.TwoPointConversion ? ConversionGoalLine : snap.StartYardLine + snap.AirYards;
 
     public static GameDayRouteFamily RouteFamily(OffensivePlayDefinition play)
     {

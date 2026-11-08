@@ -176,4 +176,31 @@ public class JetSweepChoreographyTests
             }
         }
     }
+
+    [Fact]
+    public void TheMotionRunsAtOnePaceInsteadOfStoppingAtEveryWaypoint()
+    {
+        // The time each segment gets follows its length, so the receiver accelerates once and keeps
+        // running rather than stopping and restarting at every waypoint.
+        var play = JetPlay();
+        var jet = play.PreSnapAction!;
+        var basePoint = Base(play, jet);
+        var quarterback = Quarterback(play);
+        var handoff = PreSnapMotionPlan.HandoffAlignment(jet, quarterback);
+        var path = PreSnapMotionPlan.Path(jet, basePoint, handoff, quarterback, stopBeforeHandoff: true);
+        const uint total = 780;
+
+        var offsets = PreSnapMotionPlan.PathOffsets(path, 1, 1022, 439, 28);
+        var durations = PreSnapMotionPlan.PathDurations(offsets, total);
+
+        Assert.Equal(offsets.Count - 1, durations.Count);
+        Assert.Equal(total, durations.Aggregate(0u, (sum, duration) => sum + duration));
+        var paces = durations
+            .Select((duration, index) => Length(offsets[index], offsets[index + 1]) / duration)
+            .ToArray();
+        Assert.All(paces, pace => Assert.Equal(paces[0], pace, 3));
+    }
+
+    static double Length((double X, double Y) from, (double X, double Y) to) =>
+        Math.Sqrt(Math.Pow(to.X - from.X, 2) + Math.Pow(to.Y - from.Y, 2));
 }
