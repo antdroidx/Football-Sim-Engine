@@ -1,3 +1,8 @@
+## GitHub Actions APK verification - November 8, 2026
+
+Run [42430915440](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440) completed successfully on `323924b06e8ccd08e9d0700a911ea73e6a5f9ecf`; all five jobs are green.
+
+Remote APKs: College [artifact 13597054979](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13597054979) (`1406`, `0.20.1006`, 91,580,466 bytes, SHA-256 `5A76C5399588BD4B1DD213B2D1F20D55D2E19B47B75A52A74441165D0542C33A`) and Pro [artifact 13598165735](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13598165735) (`1006`, `0.1.1006`, 90,300,937 bytes, SHA-256 `9AE121F3299751ED3C73AB8D1946ACA438C770F25471ECE944568660B78BE863`). Both pass `aapt dump badging` and `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. Device evidence: [Pro](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13598212607), [College career](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13597955695), and [College management](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13597952724). These are Actions artifacts, not GitHub releases.
 ## Game-day timing and special teams - November 7, 2026
 
 The shared pre-snap hold is 2 seconds from formation visibility to snap, with Jet motion scheduled to finish inside the same window. Two-point conversions provide `Extra point`, `Two-point conversion`, and the active playbook's run/pass cards; the selected conversion play is recorded and animated with its actual formation and routes. CPU punt and field-goal situations provide defensive `strong protection` versus `block` calls. Blocked kicks are recorded and animated at the kick point.
@@ -18,7 +23,7 @@ Actual checks:
 
 Exact local APKs: College Debug `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk` (`400` / `0.20.0`, 91,241,624 bytes, SHA-256 `7105AAC7175A15BCBA31A27C5FC210AEE10FFA2A2563749F3AF8C61FD72A5D3A`); Pro Debug `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk` (`1` / `0.1.0`, 90,296,841 bytes, SHA-256 `ADC7C7BFC8866171F557FC6A8CAE8B30A6D8C6854637226FC4290ABB150A589D`).
 
-Current GitHub Actions verification - November 7, 2026
+Previous GitHub Actions verification - November 7, 2026
 
 Run [42425206521](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42425206521) completed successfully on `5bb3fa342c25b4542d17aed5433afb4d3fb1e673`; all five jobs are green.
 

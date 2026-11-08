@@ -1,3 +1,13 @@
+## GitHub Actions APK verification - November 8, 2026
+
+Run [42430915440](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440) completed successfully on `323924b06e8ccd08e9d0700a911ea73e6a5f9ecf`; all five jobs are green.
+
+Remote APKs:
+
+- College `dynasty-manager-build-6`, artifact [13597054979](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13597054979): `antdroid.cfbcoach.dev-Signed.apk`, 91,580,466 bytes, version code `1406` / `0.20.1006`, SHA-256 `5A76C5399588BD4B1DD213B2D1F20D55D2E19B47B75A52A74441165D0542C33A`.
+- Pro `pro-football-apk-6`, artifact [13598165735](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13598165735): `antdroid.profootball.franchise-Signed.apk`, 90,300,937 bytes, version code `1006` / `0.1.1006`, SHA-256 `9AE121F3299751ED3C73AB8D1946ACA438C770F25471ECE944568660B78BE863`.
+
+Both APKs pass `aapt dump badging` package checks and `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. Device evidence is [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13598212607), [College career](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13597955695), and [College management](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440/artifacts/13597952724). These are Actions artifacts, not GitHub releases.
 ## Game-day timing and special teams - November 7, 2026
 
 The shared pre-snap hold is now 2 seconds from formation visibility to snap. Jet motion still reserves its final 780 ms path segment inside that window and waits for both the formation timer and motion task. Two-point conversions now expose an extra-point choice, a generic two-point call, and playbook run/pass cards. A selected conversion records that play and uses normal personnel, routes, ball ownership and replay animation.
@@ -27,7 +37,7 @@ Local Debug APKs:
 
 Both local APKs pass `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`.
 
-Current GitHub Actions verification - November 7, 2026
+Previous GitHub Actions verification - November 7, 2026
 
 Run [42425206521](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42425206521) completed successfully on `5bb3fa342c25b4542d17aed5433afb4d3fb1e673`; all five jobs are green.
 
