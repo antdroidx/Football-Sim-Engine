@@ -1,3 +1,10 @@
+## Modern setup screens in both games - November 8, 2026
+
+The opening screens where a player picks a club and a role are now a short, labelled form instead of a flat list of controls. A shared `SetupScreen` presentation in `Football.Presentation` gives both games the same structure: a title with one line of explanation, rounded cards that group related choices, a label and hint under every control, a switch that reads as a single row, and one full-width action at the end.
+
+The Pro screen previews the selected club with its badge, city, conference and division, and the badge follows the picker. The College screen previews the selected school with its brand colors and conference, and its coaching-career choices use the same row treatment as the rest of the form. The College screen no longer repeats the page title in the navigation bar.
+
+The college smoke scripts were updated for the new labels so the device checks still match the screen.
 ## Continuous pre-snap motion, penalty formations and conversion goal lines - November 8, 2026
 
 The pre-snap motion is now one continuous run. The live path no longer eases in and out at every waypoint, and the time each segment gets follows its length, so the receiver accelerates once and keeps running instead of running, stopping and restarting. The receiver's legs also animate during the motion. `PreSnapMotionPlan.PathDurations` owns the split so the pace is testable.

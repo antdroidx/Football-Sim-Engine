@@ -1,3 +1,6 @@
+## Setup screen coverage - November 8, 2026
+
+The opening setup screens are presentation only, so they are checked by the Android device smoke scripts rather than by engine tests. The college smoke scripts follow the new labels on the dynasty form, and `python -m unittest discover -s build -p 'test_android_ui_smoke.py'` passes 24 tests.
 ## Continuous motion, penalty formations and conversion goal lines - November 8, 2026
 
 The pre-snap motion, the pre-snap penalty presentation and the two-point conversion are covered headlessly.
