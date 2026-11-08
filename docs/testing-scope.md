@@ -1,3 +1,11 @@
+## GitHub Actions APK verification - November 8, 2026
+
+Run [42525516081](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081) completed successfully on `9695cad` with all five jobs green. It supersedes run [42522040076](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42522040076), whose two device jobs failed on the setup-screen changes described above.
+
+- College `dynasty-manager-build-14`, artifact [13634794390](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13634794390): `antdroid.cfbcoach.dev-Signed.apk`, 91,588,658 bytes, version code `1414` / `0.20.1014`, SHA-256 `D77115D0E87A23FC62DD3E805DB12BCF11F041858EA524FB61EE23D4F332AD8A`.
+- Pro `pro-football-apk-14`, artifact [13635232850](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13635232850): `antdroid.profootball.franchise-Signed.apk`, 90,309,129 bytes, version code `1014` / `0.1.1014`, SHA-256 `EF5950D32D8CB80384C0517398214934E9342EE3232BBD54DB1CF2D925A8F9E9`.
+
+Both exact downloads pass `apksigner verify` with APK Signature Scheme v2 and v3 and signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`, the same key as the published versions. Device evidence is [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13635478557), [College launch](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13635702705), and [College career options](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13635282409). These are Actions artifacts, not GitHub releases.
 ## Setup screen coverage - November 8, 2026
 
 The opening setup screens are presentation only, so they are checked by the Android device smoke scripts rather than by engine tests. The college smoke scripts follow the new labels on the dynasty form, and `python -m unittest discover -s build -p 'test_android_ui_smoke.py'` passes 24 tests.

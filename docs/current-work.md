@@ -1,3 +1,16 @@
+## GitHub Actions APK verification - November 8, 2026
+
+Run [42525516081](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081) completed successfully on `9695cad`; all five jobs are green. It supersedes run [42522040076](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42522040076), which failed because the taller setup screens moved the college team picker below the fold and left a new pro franchise's overview scrolled away from its advance button.
+
+Remote APKs:
+
+- College `dynasty-manager-build-14`, artifact [13634794390](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13634794390): `antdroid.cfbcoach.dev-Signed.apk`, 91,588,658 bytes, version code `1414` / `0.20.1014`, SHA-256 `D77115D0E87A23FC62DD3E805DB12BCF11F041858EA524FB61EE23D4F332AD8A`.
+- Pro `pro-football-apk-14`, artifact [13635232850](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13635232850): `antdroid.profootball.franchise-Signed.apk`, 90,309,129 bytes, version code `1014` / `0.1.1014`, SHA-256 `EF5950D32D8CB80384C0517398214934E9342EE3232BBD54DB1CF2D925A8F9E9`.
+
+Both APKs pass `aapt dump badging` package checks and `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`, the same signing key as the published versions. Device evidence is [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13635478557), [College launch](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13635702705), and [College career options](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081/artifacts/13635282409). These are Actions artifacts, not GitHub releases.
+## Setup screen follow-up - November 8, 2026
+
+The taller setup screens moved the college team picker below the fold and left a new pro franchise's overview scrolled away from its advance button. The college device check now scrolls the picker into view before tapping it, and a new pro franchise opens at the top of its overview.
 ## Modern setup screens in both games - November 8, 2026
 
 The opening screens where a player picks a club and a role are now a short, labelled form instead of a flat list of controls. A shared `SetupScreen` presentation in `Football.Presentation` gives both games the same structure: a title with one line of explanation, rounded cards that group related choices, a label and hint under every control, a switch that reads as a single row, and one full-width action at the end.
