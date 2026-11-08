@@ -1,3 +1,13 @@
+## GitHub Actions APK verification - November 8, 2026
+
+Run [42444981350](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42444981350) completed successfully on `c9f0dd458a2e374ec0e9a3a14f84b853e7e4f071`; all five jobs are green. The earlier run [42443560962](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42443560962) failed on the pre-fix Pro staff seed collision and is superseded by this run.
+
+Remote APKs:
+
+- College `dynasty-manager-build-8`, artifact [13603336531](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42444981350/artifacts/13603336531): `antdroid.cfbcoach.dev-Signed.apk`, 91,584,562 bytes, version code `1408` / `0.20.1008`, SHA-256 `C2A53CBDB2BB8C25D7B605B790D134AE7A1DA27EEBF2F609D335B3E97249CFBC`.
+- Pro `pro-football-apk-8`, artifact [13603920389](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42444981350/artifacts/13603920389): `antdroid.profootball.franchise-Signed.apk`, 90,305,033 bytes, version code `1008` / `0.1.1008`, SHA-256 `D71CE1C1419E669BC937C9EE39A6F317500115294AB628F971D13E194347FF5A`.
+
+Both APKs pass `aapt dump badging` package checks and `apksigner verify` with certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`. Device evidence is [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42444981350/artifacts/13603618998), [College career](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42444981350/artifacts/13602714411), and [College management](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42444981350/artifacts/13603443353). These are Actions artifacts, not GitHub releases.
 ## Motion continuity, huddles and punt formations - November 8, 2026
 
 GameCast now clears huddles before every snap sequence, including a pre-snap penalty, so alignment and motion cannot render over a huddle. Pre-snap path segments use incremental translations rather than cumulative offsets. Jet motion stops just short of the quarterback mesh at the snap, continues through the handoff after the snap, and transfers the ball while the receiver is still moving before the run begins.
@@ -14,7 +24,7 @@ Local Debug APKs:
 - Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, version code `1` / `0.1.0`, 90,300,937 bytes, SHA-256 `9E8BEC7D8981A767B6CBFD8A1CC70B9B8A74F625E4FB0337B9B7C56C57BC9756`.
 
 College Android Debug packaging: zero warnings/errors. Pro Android Debug packaging: zero errors and the two documented `CS8625` warnings.
-## GitHub Actions APK verification - November 8, 2026
+## Previous GitHub Actions APK verification - November 8, 2026
 
 Run [42430915440](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440) completed successfully on `323924b06e8ccd08e9d0700a911ea73e6a5f9ecf`; all five jobs are green.
 
