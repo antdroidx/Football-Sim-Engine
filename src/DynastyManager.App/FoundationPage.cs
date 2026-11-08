@@ -76,6 +76,7 @@ public sealed partial class FoundationPage : ContentPage
     private readonly Label _importStatus;
     private readonly Entry _dynastyNameEntry;
     private readonly Picker _teamPicker;
+    private readonly VerticalStackLayout _newDynastyPreview = new() { Spacing = 8 };
     private readonly Picker _leaguePicker = new()
     {
         Title = "League structure", ItemsSource = new[] { "Modern FBS (2026) - 138 teams", "Legacy FBS - 130 teams" },
@@ -196,6 +197,7 @@ public sealed partial class FoundationPage : ContentPage
         };
 
         _leaguePicker.SelectedIndexChanged += (_, _) => UpdateNewDynastyTeams();
+        _teamPicker.SelectedIndexChanged += (_, _) => UpdateNewDynastyPreview();
 
         _newDynastyButton = new Button
         {
@@ -1040,6 +1042,7 @@ public sealed partial class FoundationPage : ContentPage
         _teamPicker.ItemsSource = _newDynastyTeams.Select(team => team.Name)
             .OrderBy(name => name).ToList();
         if (previous is not null) _teamPicker.SelectedItem = previous;
+        UpdateNewDynastyPreview();
         UpdateStartingRosterChoices();
     }
 

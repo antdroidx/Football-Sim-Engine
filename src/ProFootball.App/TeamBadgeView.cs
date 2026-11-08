@@ -3,10 +3,26 @@ namespace ProFootball.App;
 
 public sealed class TeamBadgeView : GraphicsView
 {
+    ProTeam team;
     public TeamBadgeView(ProTeam team, int size = 44)
     {
+        this.team = team;
         WidthRequest = Math.Max(44, size); HeightRequest = size; InputTransparent = true;
         Drawable = Mark(team); SemanticProperties.SetDescription(this, team.Abbreviation + " team badge");
+    }
+
+    /// <summary>Swaps the badge to another club so a live preview can follow the picker.</summary>
+    public ProTeam Team
+    {
+        get => team;
+        set
+        {
+            if (ReferenceEquals(team, value)) return;
+            team = value;
+            Drawable = Mark(value);
+            SemanticProperties.SetDescription(this, value.Abbreviation + " team badge");
+            Invalidate();
+        }
     }
     static double Luminance(Color color)
     {

@@ -82,17 +82,60 @@ public sealed partial class FranchisePage : ContentPage
     }
     Task Create()
     {
-        body.Clear(); body.Add(Text("Start a franchise", 25, true)); var name = new Entry { Text = "My franchise", Placeholder = "Franchise name", AutomationId="pro-franchise-name" }; body.Add(name);
-        var league = ProLeagueService.Load(); var picker = new Picker { Title = "Choose your team", ItemsSource = league.Teams.Select(t => t.Name).ToList(), SelectedIndex = league.Teams.FindIndex(t => t.Id == "SEA") }; body.Add(picker);
-        var role = new Picker { Title = "Coaching role", ItemsSource = new[] { "Head coach", "Offensive coordinator", "Defensive coordinator" }, SelectedIndex = 0 }; var firing = new Switch { IsToggled = true }; var coachName = new Entry { Placeholder = "Coach name (optional)" }; body.Add(role); body.Add(coachName); body.Add(new HorizontalStackLayout { Spacing = 8, Children = { firing, Text("Coach can be fired") } });
-        body.Add(Text("Coordinators manage their unit; the GM approves shared cap and draft-pick decisions.", 12));
-        var preview = new ContentView(); void Preview() { var t = league.Teams[picker.SelectedIndex]; preview.Content = new HorizontalStackLayout { Spacing = 12, Children = { new TeamBadgeView(t, 70), Text(t.Name, 21, true) } }; }
-        picker.SelectedIndexChanged += (_, _) => Preview(); Preview(); body.Add(preview);
-        var roster = new Picker {Title="Starting players",AutomationId="pro-starting-players",ItemsSource=new[]{"Real players","New generated players · balanced league"},SelectedIndex=0};body.Add(roster);
-        var finances = new Picker { Title = "Starting contract data", ItemsSource = new[] { "Generated contracts", "Real roster contracts" }, SelectedIndex = 1 }; body.Add(finances);
-        roster.SelectedIndexChanged+=(_,_)=>{finances.SelectedIndex=roster.SelectedIndex==1?0:1;finances.IsEnabled=roster.SelectedIndex==0;};
-        body.Add(Text("Build your 2026 franchise. Regular-season rosters allow 53 active players, with separate injured reserves."));
-        body.Add(Action("Start franchise", async () => { state = await Task.Run(() => ProLeagueService.Create((string)picker.SelectedItem, name.Text, finances.SelectedIndex == 1, role.SelectedIndex == 1 ? StaffRole.OffensiveCoordinator : role.SelectedIndex == 2 ? StaffRole.DefensiveCoordinator : StaffRole.HeadCoach, firing.IsToggled, coachName.Text, generatedPlayers:roster.SelectedIndex==1)); await Save(); section = "Overview"; Render(); }, "pro-start")); body.Add(Action("Cancel", Library)); return Task.CompletedTask;
+        body.Clear();
+        var league = ProLeagueService.Load();
+        var name = new Entry { Text = "My franchise", Placeholder = "Franchise name", AutomationId = "pro-franchise-name" };
+        var picker = new Picker
+        {
+            Title = "Choose your team",
+            ItemsSource = league.Teams.Select(t => t.Name).ToList(),
+            SelectedIndex = league.Teams.FindIndex(t => t.Id == "SEA")
+        };
+        var role = new Picker { Title = "Coaching role", ItemsSource = new[] { "Head coach", "Offensive coordinator", "Defensive coordinator" }, SelectedIndex = 0 };
+        var coachName = new Entry { Placeholder = "Coach name (optional)" };
+        var firing = new Switch { IsToggled = true };
+        var roster = new Picker { Title = "Starting players", AutomationId = "pro-starting-players", ItemsSource = new[] { "Real players", "New generated players · balanced league" }, SelectedIndex = 0 };
+        var finances = new Picker { Title = "Starting contract data", ItemsSource = new[] { "Generated contracts", "Real roster contracts" }, SelectedIndex = 1 };
+        roster.SelectedIndexChanged += (_, _) => { finances.SelectedIndex = roster.SelectedIndex == 1 ? 0 : 1; finances.IsEnabled = roster.SelectedIndex == 0; };
+
+        var preview = new VerticalStackLayout { Spacing = 8 };
+        var badge = new TeamBadgeView(league.Teams[picker.SelectedIndex], 72);
+        var teamName = new Label { FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = DynastyTheme.Text };
+        var teamDetail = new Label { FontSize = 12, TextColor = DynastyTheme.Muted };
+        preview.Add(new HorizontalStackLayout { Spacing = 14, Children = { badge, new VerticalStackLayout { Spacing = 2, Children = { teamName, teamDetail } } } });
+        void Preview()
+        {
+            if (picker.SelectedIndex < 0) return;
+            var team = league.Teams[picker.SelectedIndex];
+            badge.Team = team;
+            teamName.Text = team.Name;
+            teamDetail.Text = $"{team.City} · {team.Conference} {team.Division}";
+        }
+        picker.SelectedIndexChanged += (_, _) => Preview();
+        Preview();
+
+        body.Add(SetupScreen.Column(
+            SetupScreen.Hero("Start a franchise", "Pick your team, choose your role, and decide how much of the league you want to manage."),
+            SetupScreen.Card("Your team", "The franchise you take over for the 2026 season.", SetupScreen.Field("Franchise", null, picker), preview),
+            SetupScreen.Card("Your coaching role", "Coordinators manage their unit; the general manager approves shared cap and draft decisions.",
+                SetupScreen.Field("Role", null, role),
+                SetupScreen.Field("Coach name", "Leave it blank to use the generated coach.", coachName),
+                SetupScreen.Toggle("Coach can be fired", "Turn this off for a stable job with no pressure from the front office.", firing)),
+            SetupScreen.Card("League data", "Regular-season rosters allow 53 active players, with separate injured reserves.",
+                SetupScreen.Field("Starting players", null, roster),
+                SetupScreen.Field("Contract data", "Real contracts only apply to the real roster.", finances)),
+            SetupScreen.Footer(
+                SetupScreen.Primary("Start franchise", async () =>
+                {
+                    state = await Task.Run(() => ProLeagueService.Create((string)picker.SelectedItem, name.Text,
+                        finances.SelectedIndex == 1,
+                        role.SelectedIndex == 1 ? StaffRole.OffensiveCoordinator : role.SelectedIndex == 2 ? StaffRole.DefensiveCoordinator : StaffRole.HeadCoach,
+                        firing.IsToggled, coachName.Text, generatedPlayers: roster.SelectedIndex == 1));
+                    await Save(); section = "Overview"; Render();
+                }, "pro-start"),
+                SetupScreen.Secondary("Cancel", () => _ = Library()))));
+
+        return Task.CompletedTask;
     }
     async Task Save()
     {

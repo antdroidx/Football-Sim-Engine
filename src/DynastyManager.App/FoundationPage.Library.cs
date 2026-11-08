@@ -1,7 +1,9 @@
 using DynastyManager.Core.Models;
+using DynastyManager.Data.Branding;
 using DynastyManager.Data.Persistence;
 using DynastyManager.Core.Seasons;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
 
 namespace DynastyManager.App;
@@ -40,18 +42,48 @@ public sealed partial class FoundationPage
     {
         _newDynastyButton.BackgroundColor = DynastyTheme.Accent;
         _newDynastyButton.TextColor = DynastyTheme.Background;
-        return new VerticalStackLayout { Spacing = 10, MaximumWidthRequest = 560, Children =
+        _newDynastyButton.FontAttributes = FontAttributes.Bold;
+        _newDynastyButton.FontSize = 16;
+        _newDynastyButton.CornerRadius = 12;
+        _newDynastyButton.HeightRequest = 52;
+        return SetupScreen.Column(
+            SetupScreen.Hero("Start a dynasty", "Choose your league and school, then take the reins."),
+            SetupScreen.Card("Your dynasty", "The name your program is remembered by.", SetupScreen.Field("Dynasty name", null, _dynastyNameEntry)),
+            SetupScreen.Card("League", "The league structure and the players who fill the rosters.",
+                SetupScreen.Field("League structure", null, _leaguePicker),
+                SetupScreen.Field("Starting roster", "Import a saved roster, or generate one that keeps every program's strengths.", _startingRosterPicker),
+                SetupScreen.Toggle("Generate new players", "Turn this off to start from the imported roster instead.", _generatePlayers),
+                new Label { Text = "Reusable rosters and league setups can be managed from the main screen.", FontSize = 11, TextColor = DynastyTheme.Muted }),
+            SetupScreen.Card("Your school", "The program you take over. Staff and recruiting preferences can be changed after starting.",
+                SetupScreen.Field("School", null, _teamPicker), _newDynastyPreview),
+            SetupScreen.Card("Career options", "How much of the program you are responsible for.",
+                BuildNewCareerOptions()),
+            SetupScreen.Footer(_newDynastyButton, _newDynastyStatus));
+    }
+
+    private void UpdateNewDynastyPreview()
+    {
+        if (_teamPicker.SelectedItem is not string school) return;
+        var team = _newDynastyTeams.FirstOrDefault(t => t.Name == school);
+        var brand = TeamBrandCatalog.Get(school);
+        var badge = new Border
         {
-            new Label { Text = "Choose your league and school.", FontSize = 13, TextColor = DynastyTheme.Muted },
-            new Label { Text = "Dynasty name", FontSize = 12, FontAttributes = FontAttributes.Bold }, _dynastyNameEntry,
-            new Label { Text = "League structure", FontSize = 12, FontAttributes = FontAttributes.Bold }, _leaguePicker,
-            new Label { Text = "Starting roster", FontSize = 12, FontAttributes = FontAttributes.Bold }, _startingRosterPicker,
-            new HorizontalStackLayout {Spacing=8,Children={_generatePlayers,new Label{Text="Generate new players · keep program strengths",FontSize=12,VerticalTextAlignment=TextAlignment.Center}}},
-            new Label { Text = "Import and manage reusable rosters and league setups from the main screen.", FontSize = 11, TextColor = DynastyTheme.Muted },
-            new Label { Text = "Your school", FontSize = 12, FontAttributes = FontAttributes.Bold }, _teamPicker,
-            new Label { Text = "Staff and recruiting preferences can be changed after starting.", FontSize = 11, TextColor = DynastyTheme.Muted },
-            BuildNewCareerOptions(), _newDynastyButton, _newDynastyStatus
-        } };
+            WidthRequest = 66, HeightRequest = 66, BackgroundColor = Color.FromArgb(brand.Primary),
+            StrokeShape = new RoundRectangle { CornerRadius = 16 },
+            Content = new Label { Text = school.Length > 0 ? school[..1] : "?", FontSize = 30, FontAttributes = FontAttributes.Bold,
+                TextColor = Color.FromArgb(brand.Secondary), HorizontalTextAlignment = TextAlignment.Center, VerticalTextAlignment = TextAlignment.Center }
+        };
+        _newDynastyPreview.Clear();
+        _newDynastyPreview.Add(new HorizontalStackLayout { Spacing = 14, Children =
+        {
+            badge,
+            new VerticalStackLayout { Spacing = 2, VerticalOptions = LayoutOptions.Center, Children =
+            {
+                new Label { Text = school, FontSize = 20, FontAttributes = FontAttributes.Bold, TextColor = DynastyTheme.Text },
+                new Label { Text = team is null ? "" : $"{team.ConferenceName}{(string.IsNullOrWhiteSpace(team.DivisionName) ? "" : " · " + team.DivisionName)}",
+                    FontSize = 12, TextColor = DynastyTheme.Muted }
+            } }
+        } });
     }
 
     private void UpdateShellContext()
