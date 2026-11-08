@@ -154,22 +154,26 @@ public class JetSweepChoreographyTests
         var quarterback = Quarterback(play);
         var handoff = PreSnapMotionPlan.HandoffAlignment(jet, quarterback);
         var path = PreSnapMotionPlan.Path(jet, basePoint, handoff, quarterback, stopBeforeHandoff: true);
-        const double width = 1022, height = 439, marker = 28;
+        const double marker = 28;
 
-        var offsets = PreSnapMotionPlan.PathOffsets(path, 1, width, height, marker);
-        var lastStep = PreSnapMotionPlan.AlignmentOffset(path[^2], path[^1], 1, width, height, marker);
-
-        Assert.Equal(4, offsets.Count);
-        Assert.Equal(0, offsets[0].X, 6);
-        Assert.Equal(0, offsets[0].Y, 6);
-        Assert.True(Math.Abs(offsets[^1].X) > Math.Abs(lastStep.X) * 2,
-            $"The final offset {offsets[^1].X} must be the whole path, not the last step {lastStep.X}");
-        Assert.True(Math.Abs(offsets[^1].Y) > Math.Abs(lastStep.Y),
-            $"The final lateral offset {offsets[^1].Y} must be the whole path, not the last step {lastStep.Y}");
-        for (var index = 1; index < offsets.Count; index++)
+        // Portrait and landscape fields must scale the same path.
+        foreach (var (width, height) in new[] { (1022d, 439d), (1432d, 640d) })
         {
-            Assert.True(offsets[index].X < offsets[index - 1].X, "The receiver must keep moving toward the quarterback");
-            Assert.True(offsets[index].Y < offsets[index - 1].Y, "The receiver must keep closing on the quarterback's lane");
+            var offsets = PreSnapMotionPlan.PathOffsets(path, 1, width, height, marker);
+            var lastStep = PreSnapMotionPlan.AlignmentOffset(path[^2], path[^1], 1, width, height, marker);
+
+            Assert.Equal(4, offsets.Count);
+            Assert.Equal(0, offsets[0].X, 6);
+            Assert.Equal(0, offsets[0].Y, 6);
+            Assert.True(Math.Abs(offsets[^1].X) > Math.Abs(lastStep.X) * 2,
+                $"The final offset {offsets[^1].X} must be the whole path, not the last step {lastStep.X}");
+            Assert.True(Math.Abs(offsets[^1].Y) > Math.Abs(lastStep.Y),
+                $"The final lateral offset {offsets[^1].Y} must be the whole path, not the last step {lastStep.Y}");
+            for (var index = 1; index < offsets.Count; index++)
+            {
+                Assert.True(offsets[index].X < offsets[index - 1].X, "The receiver must keep moving toward the quarterback");
+                Assert.True(offsets[index].Y < offsets[index - 1].Y, "The receiver must keep closing on the quarterback's lane");
+            }
         }
     }
 }
