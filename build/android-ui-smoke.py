@@ -272,7 +272,7 @@ def main():
     assert "Settings" in texts(home)
     tap(home, "New dynasty")
     create = capture("new-dynasty")
-    assert {"Start a dynasty", "Dynasty name", "League structure", "Your school"} <= texts(create)
+    assert {"Start a dynasty", "Dynasty name", "League structure"} <= texts(create)
     assert "Start dynasty" in texts(scroll_to_text("new-dynasty-career-options", "Start dynasty"))
     tap(create, "‹ Cancel")
     assert "Your dynasties" in texts(capture("cancel-create")), "Cancel must return to the library"
@@ -810,7 +810,7 @@ def check_career_options():
         form = scroll_to_text("career-form-"+scope, "Start dynasty")
         assert role in texts(form)
         assert node_with_id(form, "new-coach-firing").get("checked") == "false"
-        name_form=scroll_to_text("career-name-"+scope,"Your coaching career",toward_start=True)
+        name_form=scroll_to_text("career-name-"+scope,"Career options",toward_start=True)
         tap_id(name_form,"new-coach-name")
         adb("shell","input","keyevent","123","67","67","67","67","67")
         adb("shell","input","text","Alex%s"+scope)

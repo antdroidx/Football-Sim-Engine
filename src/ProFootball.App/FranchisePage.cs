@@ -92,7 +92,7 @@ public sealed partial class FranchisePage : ContentPage
             SelectedIndex = league.Teams.FindIndex(t => t.Id == "SEA")
         };
         var role = new Picker { Title = "Coaching role", ItemsSource = new[] { "Head coach", "Offensive coordinator", "Defensive coordinator" }, SelectedIndex = 0 };
-        var coachName = new Entry { Placeholder = "Coach name (optional)" };
+        var coachName = new Entry { Placeholder = "e.g. Jordan Reeves" };
         var firing = new Switch { IsToggled = true };
         var roster = new Picker { Title = "Starting players", AutomationId = "pro-starting-players", ItemsSource = new[] { "Real players", "New generated players · balanced league" }, SelectedIndex = 0 };
         var finances = new Picker { Title = "Starting contract data", ItemsSource = new[] { "Generated contracts", "Real roster contracts" }, SelectedIndex = 1 };

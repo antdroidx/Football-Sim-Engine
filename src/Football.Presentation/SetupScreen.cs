@@ -93,7 +93,8 @@ public static class SetupScreen
             FontSize = 16,
             CornerRadius = 12,
             HeightRequest = 52,
-            Padding = new Thickness(16, 0)
+            Padding = new Thickness(16, 0),
+            HorizontalOptions = LayoutOptions.Fill
         };
         button.Clicked += (_, _) => action();
         return button;
@@ -112,7 +113,8 @@ public static class SetupScreen
             BorderColor = DynastyTheme.ControlEdge,
             BorderWidth = 1,
             CornerRadius = 12,
-            HeightRequest = 48
+            HeightRequest = 48,
+            HorizontalOptions = LayoutOptions.Fill
         };
         button.Clicked += (_, _) => action();
         return button;

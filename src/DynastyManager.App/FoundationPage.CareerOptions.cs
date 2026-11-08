@@ -17,10 +17,11 @@ public sealed partial class FoundationPage
     private readonly Switch _newCoachFiring = new() { IsToggled = Preferences.Default.Get("default-coach-firing", true), AutomationId = "new-coach-firing" };
     private static string VersionCaption => "Pre-release 0.20 · Build " + (AppInfo.Current.VersionString.Split('.').ElementAtOrDefault(2) ?? AppInfo.Current.BuildString);
 
-    private View BuildNewCareerOptions() => new VerticalStackLayout { Spacing = 8, Children = {
-        new Label { Text = "Your coaching career", FontAttributes = FontAttributes.Bold }, _newCoachName, _newCoachRole,
-        new HorizontalStackLayout { Spacing = 8, Children = { _newCoachFiring, new Label { Text = "Coach can be fired", VerticalTextAlignment = TextAlignment.Center } } },
-        new Label { Text = "Coordinators control recruiting, game plans and talks for their side. The staff handles the other side. Earn new coordinator or head-coach offers through your career.", FontSize = 12, TextColor = DynastyTheme.Muted }
+    private View BuildNewCareerOptions() => new VerticalStackLayout { Spacing = 12, Children = {
+        SetupScreen.Field("Coach name", "The name on the sideline for your career.", _newCoachName),
+        SetupScreen.Field("Role", null, _newCoachRole),
+        SetupScreen.Toggle("Coach can be fired", "Turn this off for a stable job with no pressure from the front office.", _newCoachFiring),
+        new Label { Text = "Coordinators control recruiting, game plans and talks for their side. The staff handles the other side. Earn new coordinator or head-coach offers through your career.", FontSize = 11, TextColor = DynastyTheme.Muted }
     } };
 
     private View BuildCareerPreferences()

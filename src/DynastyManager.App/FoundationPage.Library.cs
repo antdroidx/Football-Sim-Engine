@@ -46,13 +46,14 @@ public sealed partial class FoundationPage
         _newDynastyButton.FontSize = 16;
         _newDynastyButton.CornerRadius = 12;
         _newDynastyButton.HeightRequest = 52;
+        _newDynastyButton.HorizontalOptions = LayoutOptions.Fill;
         return SetupScreen.Column(
             SetupScreen.Hero("Start a dynasty", "Choose your league and school, then take the reins."),
             SetupScreen.Card("Your dynasty", "The name your program is remembered by.", SetupScreen.Field("Dynasty name", null, _dynastyNameEntry)),
             SetupScreen.Card("League", "The league structure and the players who fill the rosters.",
                 SetupScreen.Field("League structure", null, _leaguePicker),
                 SetupScreen.Field("Starting roster", "Import a saved roster, or generate one that keeps every program's strengths.", _startingRosterPicker),
-                SetupScreen.Toggle("Generate new players", "Turn this off to start from the imported roster instead.", _generatePlayers),
+                SetupScreen.Toggle("Generate new players", "Keep every program's strengths instead of using the imported roster.", _generatePlayers),
                 new Label { Text = "Reusable rosters and league setups can be managed from the main screen.", FontSize = 11, TextColor = DynastyTheme.Muted }),
             SetupScreen.Card("Your school", "The program you take over. Staff and recruiting preferences can be changed after starting.",
                 SetupScreen.Field("School", null, _teamPicker), _newDynastyPreview),
@@ -89,7 +90,7 @@ public sealed partial class FoundationPage
     private void UpdateShellContext()
     {
         var library = _activeSection is AppSection.Home or AppSection.NewDynasty;
-        _screenTitle.IsVisible = _activeSection != AppSection.Home;
+        _screenTitle.IsVisible = _activeSection is not (AppSection.Home or AppSection.NewDynasty);
         _navigationBar.IsVisible = !library && _currentDynasty is not null;
         _libraryButton.IsVisible = _activeSection == AppSection.NewDynasty;
         _libraryButton.Text = _activeSection == AppSection.NewDynasty ? "‹ Cancel" : "‹ Exit Dynasty";
