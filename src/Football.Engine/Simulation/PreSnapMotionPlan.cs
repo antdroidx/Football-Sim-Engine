@@ -149,6 +149,19 @@ public static class PreSnapMotionPlan
         int movingRole) =>
         IsOpen(target, movingPosition, movingRole, play);
 
+    /// <summary>Point immediately before the post-snap handoff for live Jet motion.</summary>
+    public static GameFieldPoint HandoffStartAlignment(
+        PreSnapChoice choice,
+        GameFieldPoint baseAlignment,
+        GameFieldPoint snapAlignment)
+    {
+        if (choice.MotionKind != PreSnapMotionKind.JetHandoff) return snapAlignment;
+        const double traveledBeforeSnap = .82;
+        return new(
+            snapAlignment.X + (baseAlignment.X - snapAlignment.X) * (1 - traveledBeforeSnap),
+            snapAlignment.Y);
+    }
+
     /// <summary>Position at the snap after the play-specific motion finishes.</summary>
     public static GameFieldPoint SnapAlignment(
         PreSnapChoice choice,
@@ -228,7 +241,8 @@ public static class PreSnapMotionPlan
         GameFieldPoint baseAlignment,
         GameFieldPoint snapAlignment,
         GameFieldPoint quarterbackAlignment,
-        double fieldWidthYards = 53.333)
+        double fieldWidthYards = 53.333,
+        bool stopBeforeHandoff = false)
     {
         if (choice.Type != PreSnapType.Motion) return [baseAlignment];
         var side = choice.Side.Equals("Right", StringComparison.OrdinalIgnoreCase) ? 1 : -1;
@@ -238,8 +252,8 @@ public static class PreSnapMotionPlan
             [
                 baseAlignment,
                 new((baseAlignment.X + snapAlignment.X) * .55, baseAlignment.Y + (snapAlignment.Y - baseAlignment.Y) * .12),
-                new(snapAlignment.X - .20, snapAlignment.Y),
-                snapAlignment
+                new((stopBeforeHandoff ? HandoffStartAlignment(choice, baseAlignment, snapAlignment) : snapAlignment).X - .20, snapAlignment.Y),
+                stopBeforeHandoff ? HandoffStartAlignment(choice, baseAlignment, snapAlignment) : snapAlignment
             ],
             PreSnapMotionKind.SetAcross or PreSnapMotionKind.ReceiverRelocate =>
             [

@@ -19,6 +19,11 @@ public class PreSnapMotionPlanTests
         Assert.True(jetSnap.X < quarterback.X);
         Assert.NotEqual(basePoint, jetSnap);
         Assert.Equal(jetSnap, PreSnapMotionPlan.Path(jet, basePoint, jetSnap, quarterback)[^1]);
+        var handoffStart = PreSnapMotionPlan.HandoffStartAlignment(jet, basePoint, jetSnap);
+        Assert.Equal(handoffStart, PreSnapMotionPlan.Path(
+            jet, basePoint, jetSnap, quarterback, stopBeforeHandoff: true)[^1]);
+        Assert.True(handoffStart.X < basePoint.X);
+        Assert.True(handoffStart.X > jetSnap.X);
         Assert.True(jet.MotionManIsBallCarrier);
         Assert.True(jet.MotionLiveAtSnap);
 
@@ -79,6 +84,35 @@ public class PreSnapMotionPlanTests
         Assert.True(path[1].X > snapPoint.X);
         Assert.True(snapPoint.X < quarterback.X);
         Assert.Equal(snapPoint, path[^1]);
+        var handoffStart = PreSnapMotionPlan.HandoffStartAlignment(jet, basePoint, snapPoint);
+        var beforeHandoff = PreSnapMotionPlan.Path(
+            jet, basePoint, snapPoint, quarterback, stopBeforeHandoff: true);
+        Assert.Equal(handoffStart, beforeHandoff[^1]);
+        Assert.NotEqual(snapPoint, beforeHandoff[^1]);
+    }
+
+    [Fact]
+    public void JetBallTransfersAfterSnapWhileTheReceiverIsStillApproachingTheMesh()
+    {
+        var quarterbackId = Guid.NewGuid();
+        var receiverId = Guid.NewGuid();
+        var jet = PlaybookCatalog.OffensivePlays
+            .Single(item => item.Id == "off-spread-jet-zone").PreSnapAction!;
+        var snap = new GameSnapEvent
+        {
+            OffenseTeamName = "Home",
+            DefenseTeamName = "Away",
+            OffensivePlayId = "off-spread-jet-zone",
+            DefensivePlayId = "def-base",
+            Outcome = SnapOutcome.Run,
+            PreSnap = jet,
+            QuarterbackId = quarterbackId,
+            BallCarrierId = receiverId
+        };
+        var transfer = GameDayAnimationPlanner.BallTransferProgress(snap);
+        Assert.Equal(.22, transfer);
+        Assert.Equal(quarterbackId, GameDayAnimationPlanner.BallOwner(snap, transfer - .01, .4));
+        Assert.Equal(receiverId, GameDayAnimationPlanner.BallOwner(snap, transfer + .01, .4));
     }
 
     [Fact]

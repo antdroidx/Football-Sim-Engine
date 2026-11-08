@@ -1,3 +1,17 @@
+## Motion continuity, huddles and punt formations - November 8, 2026
+
+GameCast now clears huddles before every snap sequence, including a pre-snap penalty, so alignment and motion cannot render over a huddle. Pre-snap path segments use incremental translations rather than cumulative offsets. Jet motion stops just short of the quarterback mesh at the snap, continues through the handoff after the snap, and transfers the ball while the receiver is still moving before the run begins.
+
+Punt choreography now has a dedicated return-unit shape: deep returner, split edge gunners, upbacks and a compact front near the line. The coverage unit separately aligns the punter, snapper, interior line and split gunners. Punt defense no longer reuses kickoff or generic defensive coordinates.
+
+Focused motion/timing/kick tests: 29 passed. Football.Engine: 423 passed. College standard suite excluding `DynastyHealthTests|OvrCalibrationDynastyTests`: 629 passed. Pro standard suite excluding `TwentySeasons|SourcedFiveSeasons`: 486 passed. Android UI helpers: 24 passed. Packaged-resource validation and Python smoke compilation passed. Football.Presentation compiled with zero warnings/errors.
+
+Local Debug APKs:
+
+- College: `src/DynastyManager.App/bin/Debug/net10.0-android/antdroid.cfbcoach.dev-Signed.apk`, version code `400` / `0.20.0`, 91,580,466 bytes, SHA-256 `5ED1726A14CED65C0DBA19481280A058FA126CC4B30F80339B4A861DD880BF58`.
+- Pro: `src/ProFootball.App/bin/Debug/net10.0-android/antdroid.profootball.franchise-Signed.apk`, version code `1` / `0.1.0`, 89,962,095 bytes, SHA-256 `1604609670ECBF7B796327D165CE68B27329F2351A8741C03114A9450697DADE`.
+
+College Android Debug packaging: zero warnings/errors. Pro Android Debug packaging: zero errors and the two documented `CS8625` warnings.
 ## GitHub Actions APK verification - November 8, 2026
 
 Run [42430915440](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42430915440) completed successfully on `323924b06e8ccd08e9d0700a911ea73e6a5f9ecf`; all five jobs are green.

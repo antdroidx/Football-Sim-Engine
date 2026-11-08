@@ -40,6 +40,87 @@ public static class LiveFootballChoreography
         return new(Math.Clamp(start.X + (x - start.X) * reaction, .02, .98), Math.Clamp(start.Y + (lane - start.Y) * reaction, .06, .94));
     }
 
+    public static (GameFieldPoint From, GameFieldPoint To) Punt(
+        bool receiving,
+        bool specialist,
+        int slot,
+        int landing,
+        int end,
+        int direction,
+        int kickStartYardLine = 40)
+    {
+        double fromYard;
+        double toYard;
+        double fromLane;
+        double toLane;
+        if (receiving)
+        {
+            if (specialist)
+            {
+                fromYard = landing;
+                toYard = end;
+                fromLane = toLane = .50;
+            }
+            else if (slot is 1 or 2)
+            {
+                fromYard = kickStartYardLine + 1;
+                toYard = Math.Clamp(landing - 14 - slot % 2 * 5, kickStartYardLine + 5, 98);
+                fromLane = slot == 1 ? .04 : .96;
+                toLane = slot == 1 ? .18 : .82;
+            }
+            else if (slot is 3 or 4)
+            {
+                fromYard = kickStartYardLine + 5 + (slot - 3) * 2;
+                toYard = Math.Clamp(landing - 24 - (slot - 3) * 4, kickStartYardLine + 7, 95);
+                fromLane = slot == 3 ? .32 : .68;
+                toLane = slot == 3 ? .42 : .58;
+            }
+            else
+            {
+                fromYard = kickStartYardLine + 2 + slot % 3 * 1.5;
+                toYard = Math.Clamp(landing - 8 - slot % 3 * 5, kickStartYardLine + 4, 94);
+                fromLane = Math.Clamp(.15 + (slot - 5) * .14, .12, .88);
+                toLane = Math.Clamp(fromLane + (slot % 2 == 0 ? .06 : -.06), .10, .90);
+            }
+        }
+        else if (specialist)
+        {
+            fromYard = kickStartYardLine - 8;
+            toYard = kickStartYardLine;
+            fromLane = toLane = .50;
+        }
+        else if (slot == 1)
+        {
+            fromYard = kickStartYardLine - .5;
+            toYard = kickStartYardLine + .5;
+            fromLane = toLane = .50;
+        }
+        else if (slot is >= 2 and <= 6)
+        {
+            fromYard = kickStartYardLine - .3;
+            toYard = kickStartYardLine + 2;
+            fromLane = toLane = .34 + (slot - 2) * .08;
+        }
+        else if (slot is 7 or 8)
+        {
+            fromYard = kickStartYardLine + .5;
+            toYard = Math.Clamp(landing - 6, kickStartYardLine + 8, 98);
+            fromLane = slot == 7 ? .04 : .96;
+            toLane = slot == 7 ? .18 : .82;
+        }
+        else
+        {
+            fromYard = kickStartYardLine + 2;
+            toYard = Math.Clamp(landing - 2 - slot % 2 * 3, kickStartYardLine + 8, 98);
+            fromLane = slot == 9 ? .24 : .76;
+            toLane = slot == 9 ? .34 : .66;
+        }
+
+        return (
+            new(GameDayAnimationPlanner.ProjectFieldYardLine(fromYard, direction), fromLane),
+            new(GameDayAnimationPlanner.ProjectFieldYardLine(toYard, direction), toLane));
+    }
+
     public static (GameFieldPoint From, GameFieldPoint To) Kickoff(bool receiving, bool specialist, int slot, int landing, int end, int direction, int kickStartYardLine = 65, bool dynamicKickoff = false, bool onside = false)
     {
         var lane = specialist ? .5 : .08 + slot % 10 * .093;

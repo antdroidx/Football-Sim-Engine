@@ -134,17 +134,26 @@ public static class GameCastAnimation
         var isFieldGoalSnap = GameDayAnimationPlanner.IsPlaceKick(snap);
         var specialContact = GameDayAnimationPlanner.ContactPoint(snap, direction, .50);
         Rect? qbFrom = null, qbTo = null, runnerFrom = null, runnerTo = null, receiverFrom = null, receiverTo = null,
-            terminalCarrierTo = null, kickerFrom = null, kickerTo = null, returnerFrom = null, returnerTo = null;
+            terminalCarrierTo = null, kickerFrom = null, kickerTo = null, returnerFrom = null, returnerTo = null,
+            jetHandoffTo = null;
         View? terminalCarrierView = null, primaryTacklerView = null, specialReturnerView = null;
         for (var index = 0; index < offense.Length; index++)
         {
             var player = BackfieldRoles.MarkerRole(offense[index], snap.FullbackId);
             double x, y;
             if (player?.PlayerId == snap.KickerId && snap.Outcome is
-                SnapOutcome.Kickoff or SnapOutcome.Punt or SnapOutcome.FieldGoal or SnapOutcome.MissedFieldGoal or SnapOutcome.ExtraPoint or SnapOutcome.MissedExtraPoint)
+                SnapOutcome.Kickoff or SnapOutcome.FieldGoal or SnapOutcome.MissedFieldGoal or SnapOutcome.ExtraPoint or SnapOutcome.MissedExtraPoint)
             {
                 x = line - direction * .075;
                 y = .50;
+            }
+            else if (snap.Outcome == SnapOutcome.Punt)
+            {
+                var puntStart = LiveFootballChoreography.Punt(
+                    false, player?.PlayerId == snap.KickerId, index, snap.KickLandingYardLine,
+                    snap.BallEndYardLine, direction, snap.StartYardLine);
+                x = puntStart.From.X;
+                y = puntStart.From.Y;
             }
             else if (snap.Outcome == SnapOutcome.Kickoff)
             {
@@ -232,13 +241,14 @@ public static class GameCastAnimation
                     otherAlignment = GameDayAnimationPlanner.OffensiveAlignment(calledPlay, motionPosition, preSnapChoice.MotionRoleIndex);
                 var snapAlignment = PreSnapMotionPlan.SnapAlignment(
                     motionChoice, isPrimary, isSwapPartner, baseAlignment, otherAlignment, quarterbackAlignment);
-                x = Project(snap.StartYardLine + snapAlignment.X);
-                y = snapAlignment.Y;
-            }
-            if (snap.Outcome == SnapOutcome.Kickoff)
-            {
-                var formation = LiveFootballChoreography.Kickoff(true, player?.PlayerId == kickoffReceiver, index, snap.KickLandingYardLine, snap.IsTouchback && player?.PlayerId == kickoffReceiver ? snap.KickLandingYardLine : snap.BallEndYardLine, direction, snap.StartYardLine > 0 ? snap.StartYardLine : 65, snap.UsesDynamicKickoff, snap.IsOnsideKick);
-                x = formation.From.X; y = formation.From.Y;
+                var motionStartAlignment = isPrimary
+                    ? PreSnapMotionPlan.HandoffStartAlignment(motionChoice, baseAlignment, snapAlignment)
+                    : snapAlignment;
+                if (isPrimary && motionChoice.MotionKind == PreSnapMotionKind.JetHandoff)
+                    jetHandoffTo = new Rect(
+                        Project(snap.StartYardLine + snapAlignment.X), snapAlignment.Y, 28, 28);
+                x = Project(snap.StartYardLine + motionStartAlignment.X);
+                y = motionStartAlignment.Y;
             }
             if (!preSnapPreview && snap.PreSnap is { HasAlignmentAction: true, Type: PreSnapType.Shift } preSnapAlignment &&
                 player?.PlayerId == preSnapShiftPrimary?.PlayerId)
@@ -286,8 +296,11 @@ public static class GameCastAnimation
             }
             else if (snap.Outcome == SnapOutcome.Punt)
             {
-                endX = Math.Clamp(x + (destination - x) * .68, .025, .96);
-                endY = Math.Clamp(y + (.50 - y) * .45, .07, .93);
+                var puntEnd = LiveFootballChoreography.Punt(
+                    false, player?.PlayerId == snap.KickerId, index, snap.KickLandingYardLine,
+                    snap.BallEndYardLine, direction, snap.StartYardLine);
+                endX = puntEnd.To.X;
+                endY = puntEnd.To.Y;
             }
             if (snap.Outcome == SnapOutcome.Kickoff)
             {
@@ -333,7 +346,25 @@ public static class GameCastAnimation
         Rect CarrierTrack(Rect from, Rect to, double progress)
         {
             var carrier = session.PlayersById.GetValueOrDefault(snap.BallCarrierId ?? snap.ReturnerId ?? Guid.Empty);
-            var point = GameDayAnimationPlanner.CarrierPoint(new(from.X, from.Y), new(to.X, to.Y), progress, carrier?.AgilityRating ?? 65, snap.BrokeTackle);
+            var start = new GameFieldPoint(from.X, from.Y);
+            var end = new GameFieldPoint(to.X, to.Y);
+            if (snap.PreSnap?.MotionKind == PreSnapMotionKind.JetHandoff &&
+                from == runnerFrom && jetHandoffTo is Rect handoff)
+            {
+                var transfer = GameDayAnimationPlanner.BallTransferProgress(snap);
+                if (progress <= transfer)
+                {
+                    var approach = GameDayAnimationPlanner.CarrierPoint(
+                        start, new(handoff.X, handoff.Y), progress / transfer,
+                        carrier?.AgilityRating ?? 65, snap.BrokeTackle);
+                    return new Rect(approach.X, approach.Y, from.Width, from.Height);
+                }
+
+                start = new(handoff.X, handoff.Y);
+                progress = (progress - transfer) / (1 - transfer);
+            }
+            var point = GameDayAnimationPlanner.CarrierPoint(
+                start, end, progress, carrier?.AgilityRating ?? 65, snap.BrokeTackle);
             return new Rect(point.X, point.Y, from.Width, from.Height);
         }
         Rect ReceiverTrack(double progress)
@@ -373,10 +404,13 @@ public static class GameCastAnimation
             var passRusher = player is not null && !isFieldGoalSnap && passRushSnap &&
                 DefensivePursuitService.IsPassRusher(calledDefensivePlay, player.Position, defensiveRole);
             double x, y;
-            if (snap.Outcome == SnapOutcome.Punt && player?.PlayerId == snap.ReturnerId)
+            if (snap.Outcome == SnapOutcome.Punt)
             {
-                x = kickLanding;
-                y = .50;
+                var puntFormation = LiveFootballChoreography.Punt(
+                    true, player?.PlayerId == snap.ReturnerId, index, snap.KickLandingYardLine,
+                    snap.BallEndYardLine, direction, snap.StartYardLine);
+                x = puntFormation.From.X;
+                y = puntFormation.From.Y;
             }
             else switch (player?.Position)
             {
@@ -435,10 +469,13 @@ public static class GameCastAnimation
                     ? line : Math.Clamp(x - direction * .018, .025, .96);
                 endY = snap.IsBlockedKick && player?.PlayerId == snap.PrimaryDefenderId ? .50 : y;
             }
-            if (snap.Outcome == SnapOutcome.Punt && player?.PlayerId == snap.ReturnerId)
+            if (snap.Outcome == SnapOutcome.Punt)
             {
-                endX = destination;
-                endY = .50;
+                var puntFormation = LiveFootballChoreography.Punt(
+                    true, player?.PlayerId == snap.ReturnerId, index, snap.KickLandingYardLine,
+                    snap.BallEndYardLine, direction, snap.StartYardLine);
+                endX = puntFormation.To.X;
+                endY = puntFormation.To.Y;
             }
             if (snap.IsBlockedKick && player?.PlayerId == snap.PrimaryDefenderId)
             {
@@ -756,9 +793,13 @@ public static class GameCastAnimation
                 }
             }
             else if (runnerFrom.HasValue)
-                currentBall = progress < .25
-                    ? Interpolate(BallAt(Track(qbFrom, qbTo, 0)), BallAt(Track(runnerFrom, runnerTo, .25)), (progress - .13) / .12)
+            {
+                var transfer = GameDayAnimationPlanner.BallTransferProgress(snap);
+                currentBall = progress < transfer
+                    ? Interpolate(BallAt(Track(qbFrom, qbTo, 0)), BallAt(Track(runnerFrom, runnerTo, transfer)),
+                        (progress - .13) / Math.Max(.01, transfer - .13))
                     : BallAt(Track(runnerFrom, runnerTo, progress));
+            }
             else currentBall = BallAt(Track(qbFrom, qbTo, progress));
             if (snap.TurnoverYardLine.HasValue && progress >= catchProgress) currentBall = BallAt(TurnoverTrack(progress));
             AbsoluteLayout.SetLayoutBounds(ball, currentBall);

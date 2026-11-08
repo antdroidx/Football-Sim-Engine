@@ -194,6 +194,8 @@ public static class GameDayAnimationPlanner
     public static double DistanceYards(GameFieldPoint from, GameFieldPoint to) =>
         Math.Sqrt(Math.Pow((to.X - from.X) * 120, 2) + Math.Pow((to.Y - from.Y) * 53.333, 2));
 
+    public static double BallTransferProgress(GameSnapEvent snap) => snap.PreSnap?.MotionKind == PreSnapMotionKind.JetHandoff ? .22 : .25;
+
     public static Guid? BallOwner(GameSnapEvent snap, double progress, double release)
     {
         if(snap.ReturnFumbleRecoveredByOffense && progress>=.90)return snap.QuarterbackId;
@@ -207,7 +209,7 @@ public static class GameDayAnimationPlanner
             return progress < release ? snap.QuarterbackId : progress < CatchProgress(release) ? null :
                 snap.Outcome == SnapOutcome.Interception ? snap.PrimaryDefenderId :
                 snap.IsTry && snap.Outcome == SnapOutcome.TwoPointConversion || snap.Outcome is SnapOutcome.Completion or SnapOutcome.Touchdown ? snap.TargetId : null;
-        return progress < .25 ? snap.QuarterbackId : snap.BallCarrierId;
+        return progress < BallTransferProgress(snap) ? snap.QuarterbackId : snap.BallCarrierId;
     }
 
     public static double AlignmentLane(Position position, int roleIndex) => position switch

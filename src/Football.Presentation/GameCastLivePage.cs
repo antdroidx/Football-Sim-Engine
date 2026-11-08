@@ -175,6 +175,7 @@ public class GameCastLivePage : ContentPage
     async Task Snap(bool manual)
     {
         if (!control.TryBegin(manual)) return;
+        ClearHuddles();
         var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); snapFinished = finished.Task;
         var calledOffense = offense;
         var calledDefense = defense;
@@ -737,12 +738,15 @@ public class GameCastLivePage : ContentPage
         async Task MoveAlong(Border marker, GameFieldPoint basePoint, GameFieldPoint snapPoint)
         {
             var path = PreSnapMotionPlan.Path(
-                choice, basePoint, snapPoint, quarterbackPoint, fieldWidth);
+                choice, basePoint, snapPoint, quarterbackPoint, fieldWidth,
+                stopBeforeHandoff: choice.MotionLiveAtSnap);
+            var previous = basePoint;
             foreach (var point in path.Skip(1))
             {
-                var translation = MarkerTranslation(marker, basePoint, point, direction);
+                var translation = MarkerTranslation(marker, previous, point, direction);
                 await marker.TranslateToAsync(
                     translation.X, translation.Y, PreSnapMotionPlan.MotionSegmentMilliseconds, Easing.CubicInOut);
+                previous = point;
             }
         }
 
@@ -836,9 +840,14 @@ public class GameCastLivePage : ContentPage
         ClearMarkers = () => { spritePlayers.Clear(); markerHosts.Clear(); ballOwners.Clear(); }, TeamPrimary = Primary, TeamSecondary = Secondary,
         GameSpeed = speed, ReplaySpeed = replaySpeed, UseSprites = () => true, ShowCarrierNames = () => showNames, CameraMode = () => camera, ReplayAngle = () => replayAngle, FrameCamera = FrameCamera
     }, snap, replay, preSnapPreview);
-    void RenderHuddles()
+    void ClearHuddles()
     {
         players.Clear(); spritePlayers.Clear(); markerHosts.Clear(); ballOwners.Clear();
+    }
+
+    void RenderHuddles()
+    {
+        ClearHuddles();
         if (session.IsComplete) return;
         var direction = (session.PossessionTeamName == session.Game.HomeTeamName ? 1 : -1) * (session.Quarter % 2 == 0 ? -1 : 1);
         art.SpottingBall = !session.KickoffPending; art.Direction = direction; art.YardLine = session.YardLine; art.Distance = session.Distance; turf.Invalidate();

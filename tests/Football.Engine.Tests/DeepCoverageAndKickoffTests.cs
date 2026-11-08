@@ -45,6 +45,49 @@ public sealed class DeepCoverageAndKickoffTests
         }
     }
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(-1)]
+    public void PuntReturnDefenseUsesACompactReturnFormation(int direction)
+    {
+        const int kickStart = 35;
+        const int landing = 72;
+        const int end = 65;
+        var tracks = Enumerable.Range(0, 11)
+            .Select(slot => LiveFootballChoreography.Punt(
+                true, slot == 0, slot, landing, end, direction, kickStart))
+            .ToArray();
+        var line = GameDayAnimationPlanner.ProjectFieldYardLine(kickStart, direction);
+
+        Assert.Equal(GameDayAnimationPlanner.ProjectFieldYardLine(landing, direction), tracks[0].From.X);
+        Assert.Equal(.50, tracks[0].From.Y);
+        Assert.True(tracks[1].From.Y < .10);
+        Assert.True(tracks[2].From.Y > .90);
+        Assert.All(tracks.Skip(1), track =>
+            Assert.True(Math.Abs(track.From.X - line) < .16));
+        Assert.True(tracks.Skip(1).Select(track => track.From.Y).Distinct().Count() >= 8);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(-1)]
+    public void PuntCoverageUsesPunterSnapperGunnersAndALine(int direction)
+    {
+        const int kickStart = 40;
+        var tracks = Enumerable.Range(0, 11)
+            .Select(slot => LiveFootballChoreography.Punt(
+                false, slot == 0, slot, 78, 70, direction, kickStart))
+            .ToArray();
+
+        Assert.Equal(
+            GameDayAnimationPlanner.ProjectFieldYardLine(kickStart - 8, direction),
+            tracks[0].From.X);
+        Assert.Equal(.50, tracks[1].From.Y);
+        Assert.True(tracks[7].From.Y < .10);
+        Assert.True(tracks[8].From.Y > .90);
+        Assert.True(tracks.Skip(2).Take(5).All(track => Math.Abs(track.From.Y - .50) <= .18));
+    }
+
     [Fact]
     public void TouchbackStaysInEndZoneVisuallyAndAwards25WithoutAReturnOrClockRunoff()
     {
