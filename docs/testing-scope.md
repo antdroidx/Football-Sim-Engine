@@ -1,3 +1,11 @@
+## GitHub Actions APK verification - November 8, 2026
+
+Run [42462711585](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585) completed successfully on `74dba82ca44d21cc8ff912e8643abbdc49f3ff39` with all five jobs green.
+
+- College `dynasty-manager-build-9`, artifact [13610775614](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585/artifacts/13610775614): `antdroid.cfbcoach.dev-Signed.apk`, 91,584,562 bytes, version code `1409` / `0.20.1009`, SHA-256 `49EDB218AA800F8E819D188699ED6BC6000672E5803FDBE77912F1DB61510407`.
+- Pro `pro-football-apk-9`, artifact [13610627106](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585/artifacts/13610627106): `antdroid.profootball.franchise-Signed.apk`, 90,305,033 bytes, version code `1009` / `0.1.1009`, SHA-256 `979B879CBBF26456ADCA9838F1B629003BEF6A1F49EFCC26DF0EEAA3E89A9897`.
+
+Both exact downloads pass `apksigner verify` with APK Signature Scheme v2 and v3 and signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`, the same key as the published versions. Device evidence is [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585/artifacts/13610783883), [College launch](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585/artifacts/13610603131), and [College career options](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42462711585/artifacts/13610995507). These are Actions artifacts, not GitHub releases.
 ## Jet Sweep handoff choreography - November 8, 2026
 
 The Jet Sweep's live choreography is now covered headlessly. `JetSweepChoreographyTests` asserts that the motion man starts in his wide receiver alignment, that the handoff point sits at the quarterback's lane rather than behind him, that the pre-snap path only moves toward the quarterback, that the snap continues exactly where the pre-snap motion stopped, that the carrier reaches the mesh before the run starts, and that the ball changes hands from the quarterback to the motion man at that handoff.
