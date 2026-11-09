@@ -1,3 +1,25 @@
+## Two-game pre-release verification - November 9, 2026
+
+The exact release source is `bd085d1f45fa832f1883dabf4639e16ef8dfee64`. The [Pro210 / College483 pre-release](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-09-main-apks) contains both APKs plus `SHA256SUMS.txt` and a machine-readable manifest.
+
+Local focused checks passed: 24 Android UI helper tests, packaged-resource validation, 32 NFLPA report pairs, Python compilation and actionlint 1.7.12. Both Debug APKs were built. College packaging reported zero warnings/errors; Pro reported zero errors and the two documented `CS8625` warnings. The local packages passed `aapt dump badging` and v2/v3 `apksigner verify` before generated build output was cleaned.
+
+GitHub validation:
+
+- College [42656100793](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656100793): 424 Engine Fast, 12 Engine Balance and 629 Core/College tests passed. The full management device flow passed setup, responsive management/profile/recruiting/live GameCast/season and theme checks. The career-options device flow passed branding, both coordinator roles, plan permissions, firing persistence, scoped talks and live controls.
+- Pro [42656101290](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656101290): 486 standard Pro tests and 32 NFLPA pairs passed. The device flow passed launch, franchise creation, watch/replay, landscape, saved final, reload, week advancement and coordinator mode.
+
+APK identity:
+
+- College `dynasty-manager-build-483`, source artifact [13693160858](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656100793/artifacts/13693160858): package `antdroid.cfbcoach.dev`, code `1883` / `0.20.1483`, 91,588,658 bytes, SHA-256 `07FFEA757B2D3560281BA656789A985AA92CCEB7DF039F184CB854F1D9137BDE`.
+- Pro `pro-football-apk-210`, source artifact [13692607563](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656101290/artifacts/13692607563): package `antdroid.profootball.franchise`, code `1210` / `0.1.1210`, 90,309,129 bytes, SHA-256 `04295364D8234A9CC363988E9BBF33DFCEE1F68ABEF40931350B79F8D0CE3379`.
+
+Both exact downloads pass `aapt dump badging` and `apksigner verify` with APK Signature Scheme v2 and v3 and signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`, matching `build/keys/cfdm-dev.keystore`. Device evidence is [College management](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656100793/artifacts/13692444188), [College career options](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656100793/artifacts/13692513181) and [Pro live](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656101290/artifacts/13694411213).
+
+GitHub cleanup removed 108 stale Actions artifacts and six stale caches. Only the five current APK/device artifacts and two current NuGet caches remain. Historical workflow runs and releases were retained. Local cleanup retained only `.artifacts/release-2026-11-09-main-apks`; generated project output, old QA frames and Python caches were removed.
+
+Limits: the long College career/calibration cases and Pro `TwentySeasons` / `SourcedFiveSeasons` cases remain outside the established release scope.
+
 ## GitHub Actions APK verification - November 8, 2026
 
 Run [42525516081](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081) completed successfully on `9695cad` with all five jobs green. It supersedes run [42522040076](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42522040076), whose two device jobs failed on the setup-screen changes described above.
