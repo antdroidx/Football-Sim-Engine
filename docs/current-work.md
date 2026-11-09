@@ -1,8 +1,31 @@
-## Repository trim, main merge and pre-release - November 8, 2026
+## Two-game pre-release and repository cleanup - November 9, 2026
 
-The feature branch is merged into `main` and the apps are published as a pre-release.
+The release source is `bd085d1f45fa832f1883dabf4639e16ef8dfee64` on `main`. The prior feature branch and the release-cleanup branch were merged and deleted. GitHub [Pro210 / College483 - setup screens, live motion and repository cleanup](https://github.com/antdroidx/Football-Sim-Engine/releases/tag/preview-2026-11-09-main-apks) contains the exact CI-built APKs for both games.
 
-The feature-branch wrapper workflow and the per-scope device harnesses were removed. `csharp-ci.yml` and `pro-android.yml` remain, each with one launch harness per app, and `pro-android-branch.yml` stays as a quick Pro APK builder. `build/android-ui-smoke.py` and `build/pro-android-smoke.py` remain the device checks, with `build/test_android_ui_smoke.py` covering the helpers. The College scope list is `parity|fast-forward|full` and the Pro scope list is `parity|fast|full|live`. Both workflows default the version-code offset to `1000`, so every build stays above the installed apps.
+Only `csharp-ci.yml` and `pro-android.yml` are active. `build/android-ui-smoke.py` and `build/pro-android-smoke.py` are the retained device harnesses, with `build/test_android_ui_smoke.py` covering their synchronization helpers. The obsolete scoped/shared-live smoke scripts and duplicate Pro branch workflow were removed.
+
+Validation actually run:
+
+- Local: 24 UI-helper tests, packaged-resource validation, 32 NFLPA source pairs, Python compilation and actionlint 1.7.12 passed. College Debug packaging had zero warnings/errors; Pro Debug packaging had zero errors and the two documented `CS8625` warnings.
+- College [run 42656100793](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656100793): 424 Engine Fast, 12 Engine Balance and 629 Core/College tests passed. APK packaging, the management emulator flow and the career-options emulator flow all passed.
+- Pro [run 42656101290](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42656101290): 486 standard Pro tests and 32 NFLPA source pairs passed. APK packaging and the franchise/GameCast/save-reload/coordinator device flow passed.
+
+Release APKs:
+
+- College `antdroid.cfbcoach.dev-Signed.apk`: package `antdroid.cfbcoach.dev`, version code `1883` / `0.20.1483`, 91,588,658 bytes, SHA-256 `07FFEA757B2D3560281BA656789A985AA92CCEB7DF039F184CB854F1D9137BDE`.
+- Pro `antdroid.profootball.franchise-Signed.apk`: package `antdroid.profootball.franchise`, version code `1210` / `0.1.1210`, 90,309,129 bytes, SHA-256 `04295364D8234A9CC363988E9BBF33DFCEE1F68ABEF40931350B79F8D0CE3379`.
+
+Both exact downloads pass `aapt dump badging` and `apksigner verify` with APK Signature Scheme v2 and v3 and signer certificate SHA-256 `97D88E54DD2835D3622E50D4CE8BB72F1D0A3C7C932FBEFAB6A5B113A4BF8BF7`.
+
+Cleanup actually completed:
+
+- GitHub: 108 stale Actions artifacts and six stale caches were deleted. Five current artifacts remain: both APK artifacts and the three device-evidence artifacts. Two current NuGet caches remain.
+- GitHub workflows: College and Pro are active. The deleted pre-snap workflow record is disabled; the deleted Pro branch workflow disappeared after its stale state was removed.
+- Local: three old QA artifact directories, 18 project `bin`/`obj` directories and the Python cache were removed. `.artifacts/release-2026-11-09-main-apks` retains only the two release APKs, `SHA256SUMS.txt` and the release manifest. The tracked signing key remains at `build/keys/cfdm-dev.keystore` with SHA-256 `2D8E26C6BFC40CB338B4A4F04F9370D4C6D2862F20D699A628BFE787674072EA`.
+- The pre-existing source stash `stash@{0}` and ignored attachment directories were preserved because they contain unrelated user work.
+
+Limits: the established release scope excludes the long College career/calibration cases and Pro `TwentySeasons` / `SourcedFiveSeasons` cases.
+
 ## GitHub Actions APK verification - November 8, 2026
 
 Run [42525516081](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081) completed successfully on `9695cad`; all five jobs are green. It supersedes run [42522040076](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42522040076), which failed because the taller setup screens moved the college team picker below the fold and left a new pro franchise's overview scrolled away from its advance button.
