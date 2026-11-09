@@ -1,3 +1,8 @@
+## Repository trim, main merge and pre-release - November 8, 2026
+
+The feature branch is merged into `main` and the apps are published as a pre-release.
+
+The feature-branch wrapper workflow and the per-scope device harnesses were removed. `csharp-ci.yml` and `pro-android.yml` remain, each with one launch harness per app, and `pro-android-branch.yml` stays as a quick Pro APK builder. `build/android-ui-smoke.py` and `build/pro-android-smoke.py` remain the device checks, with `build/test_android_ui_smoke.py` covering the helpers. The College scope list is `parity|fast-forward|full` and the Pro scope list is `parity|fast|full|live`. Both workflows default the version-code offset to `1000`, so every build stays above the installed apps.
 ## GitHub Actions APK verification - November 8, 2026
 
 Run [42525516081](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42525516081) completed successfully on `9695cad`; all five jobs are green. It supersedes run [42522040076](https://github.com/antdroidx/Football-Sim-Engine/actions/runs/42522040076), which failed because the taller setup screens moved the college team picker below the fold and left a new pro franchise's overview scrolled away from its advance button.

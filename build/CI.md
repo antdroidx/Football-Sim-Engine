@@ -40,3 +40,9 @@ launcher icon.
 
 Local validation: run `python3 build/check-packaged-resources.py`, `actionlint`,
 and `dotnet test tests/DynastyManager.Core.Tests/DynastyManager.Core.Tests.csproj -c Release`.
+
+## Current shape
+
+Three workflows remain. `csharp-ci.yml` builds and validates the College app, `pro-android.yml` builds and validates the Pro app, and `pro-android-branch.yml` is a lightweight Pro APK builder for any branch. The feature-branch wrapper and the per-scope device harnesses were removed once the setup screens moved their controls; one launch harness per app now covers the device checks, and the scope lists were reduced to the flows that harness runs.
+
+Build numbering keeps a `1000` offset by default, so a College build is `400 + run_number + 1000` and a Pro build is `run_number + 1000`. Every published artifact therefore installs over the previous one instead of regressing to a lower version code.
