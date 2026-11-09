@@ -33,15 +33,4 @@ Prepare the session and coin toss before opening the page. The save callback is 
 
 Core cases in `GameDayLiveControlTests` cover all four ownership combinations, real CPU call sources after delegation, nested menu holds, pause during a busy play, reclaiming a unit, coordinator locks, kickoff/conversion automation, both leagues' conversion rules, completion guards and league-correct touchback commentary. `PreSnapTests` covers catalog validation, legal/illegal selection reachability, scrimmage event recording with unchanged deterministic results, and offensive-only delegation.
 
-The same `build/shared-live-smoke.py` is used for every host. Enter a live game in a disposable emulator, put adb on PATH, and run:
-
-```powershell
-python build/shared-live-smoke.py --label college --serial emulator-5556
-python build/shared-live-smoke.py --label pro --serial emulator-5556
-```
-
-Run each command with its corresponding app foregrounded. The script checks selection/clock preservation through menus, playbook return, substitutions and second unit, box score return, Finish/Exit cancellation, snap-to-sheet transition, replay invariants, watch/pause, all four ownership combinations and portrait/landscape tap-target bounds. It writes XML, screenshots, a check summary and logcat to the current directory. Use the newly built APKs; earlier live scripts expect retired app-specific labels and do not certify this interface.
-
-No release or merge is part of this implementation. Exact verification results and artifact identity are recorded in `current-work.md` and `testing-scope.md` after checks complete.
-
-Focused field-first/role-lock check: `python build/shared-live-field-smoke.py --label college --serial emulator-5556 --role head` (or `--role offense` for the coordinator lock explanation). Start in an unfinished live game.
+Device acceptance is kept with the current per-app launch checks: `build/android-ui-smoke.py` for College and `build/pro-android-smoke.py` for Pro. The former shared-live and field-specific harnesses were retired once their useful assertions moved into those checks.

@@ -36,4 +36,4 @@ try {
 }
 finally { Pop-Location }
 # Device acceptance is deliberately separate: install an exact hashed APK and
-# use build/*-smoke.py on a disposable emulator. No synthetic device test count.
+# use build/android-ui-smoke.py or build/pro-android-smoke.py on a disposable emulator. No synthetic device test count.

@@ -297,9 +297,9 @@ complete apart from the items each batch explicitly left open, which are listed 
 - Push the branch when network and credentials allow. Open a pull request only when asked.
 - Dispatch the existing workflows rather than adding new ones:
   `.github/workflows/csharp-ci.yml` (College, `management_scope`) and
-  `.github/workflows/pro-android.yml` (Pro, `validation_scope`). Both already have a `roadmap`
-  scope with emulator smoke scripts (`build/pro-roadmap-smoke.py`,
-  `build/android-ui-smoke.py`, `build/shared-live-smoke.py`, `build/shared-live-field-smoke.py`).
+  `.github/workflows/pro-android.yml` (Pro, `validation_scope`). Device coverage uses only
+  `build/android-ui-smoke.py` and `build/pro-android-smoke.py`; retired per-scope and shared-live
+  smoke scripts are not part of current validation.
 - Wait for any dispatched run to finish and inspect its real status and logs. Distinguish a CI
   artifact from a release.
 - No merge to `main`, no release, and no prerelease publication without explicit instruction.
